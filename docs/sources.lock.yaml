@@ -1,0 +1,8 @@
+sources:
+  pytorch_optimizers:
+    title: PyTorch optimizer API reference
+    url: https://pytorch.org/docs/stable/optim.html
+    accessed: 2026-07-07
+  local_reference_card:
+    path: docs/reference_cards/01_optimizers.md
+    role: implementation_reference
