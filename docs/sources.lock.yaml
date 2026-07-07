@@ -3,6 +3,44 @@ sources:
     title: PyTorch optimizer API reference
     url: https://pytorch.org/docs/stable/optim.html
     accessed: 2026-07-07
-  local_reference_card:
+    role: optimizer_semantics_reference
+  local_optimizer_reference_card:
     path: docs/reference_cards/01_optimizers.md
-    role: implementation_reference
+    role: optimizer_implementation_reference
+  local_architecture_reference_card:
+    path: docs/reference_cards/02_architectures.md
+    role: architecture_implementation_reference
+  vgg16_paper:
+    title: Very Deep Convolutional Networks for Large-Scale Image Recognition
+    authors: Simonyan and Zisserman
+    stable_source: arXiv:1409.1556
+    url: https://arxiv.org/abs/1409.1556
+    role: VGG-16 architecture reference; planned backbone, not currently implemented
+  resnet_paper:
+    title: Deep Residual Learning for Image Recognition
+    authors: He, Zhang, Ren, and Sun
+    stable_source: arXiv:1512.03385
+    url: https://arxiv.org/abs/1512.03385
+    role: ResNet architecture reference; planned ResNet18 backbone, not currently implemented
+  wide_resnet_paper:
+    title: Wide Residual Networks
+    authors: Zagoruyko and Komodakis
+    stable_source: arXiv:1605.07146
+    url: https://arxiv.org/abs/1605.07146
+    role: WRN-28-10 architecture reference; planned backbone, not currently implemented
+  convnext_paper:
+    title: A ConvNet for the 2020s
+    authors: Liu, Mao, Wu, Feichtenhofer, Darrell, and Xie
+    stable_source: arXiv:2201.03545
+    url: https://arxiv.org/abs/2201.03545
+    role: ConvNeXt architecture reference; planned ConvNeXt-Tiny backbone, not currently implemented
+  torchvision_models_docs:
+    title: TorchVision models documentation
+    url: https://pytorch.org/vision/stable/models.html
+    accessed: 2026-07-07
+    role: optional implementation reference only; does not imply project models are implemented
+  torchvision_feature_extraction_docs:
+    title: TorchVision feature extraction documentation
+    url: https://pytorch.org/vision/stable/feature_extraction.html
+    accessed: 2026-07-07
+    role: optional implementation reference for inspection; final project models must directly support return_features=True

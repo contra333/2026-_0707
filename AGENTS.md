@@ -5,5 +5,7 @@ This repository is for optimizer-geometry experiments. Use `docs/reference_cards
 
 ## Safety rules
 - If PyTorch official optimizer semantics, the reference card, and implementation requirements conflict, stop and report instead of resolving silently.
+- Architecture implementations must follow `docs/reference_cards/02_architectures.md` and `docs/reference_cards/03_architecture_implementation_checklist.md`.
+- If the architecture docs, code request, and reference source conflict, stop and report instead of resolving silently.
 - Do not add architecture, dataset, training loop, CIFAR, or GPU training code until optimizer endpoint parity tests pass.
 - All optimizers must use the shared parameter-group builder.
