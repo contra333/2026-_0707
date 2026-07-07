@@ -7,10 +7,10 @@ The repository currently contains:
 - optimizer semantics and factory code;
 - optimizer and parameter-group unit tests;
 - a model API contract for logits and penultimate features;
-- a temporary toy/API model fixture;
+- implemented `toy_cifar_cnn`, `resnet18`, and `wrn28_10` model endpoints;
 - an architecture implementation plan for future research backbones.
 
-The current model fixture is only for API smoke testing. VGG-16, WideResNet-28-10, ResNet18, and ConvNeXt-Tiny are documented as planned research backbones and should not be treated as implemented unless the code and tests actually add them.
+The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and `wrn28_10` are implemented research backbones. VGG-16 and ConvNeXt-Tiny remain documented as planned backbones and should not be treated as implemented until code and tests add them.
 
 This repository intentionally does **not** yet include dataset loaders, training loops, checkpointing, OOD detectors, CIFAR training scripts, or GPU training scripts.
 

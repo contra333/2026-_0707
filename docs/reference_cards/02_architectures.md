@@ -34,23 +34,15 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 
 | Registry name | Intended file path | Intended class name | Role | Status | Reference source |
 | --- | --- | --- | --- | --- | --- |
-| `toy_cifar_cnn` | `src/oge/models/toy_cnn.py` | `ToyCifarCNN` | Toy/API smoke-test fixture only | Planned rename of current `SimpleCNN` fixture | Local API contract |
-| `resnet18` | `src/oge/models/resnet.py` | `ResNet18` | Research backbone | Planned | He et al., Deep Residual Learning for Image Recognition |
-| `wrn28_10` | `src/oge/models/wide_resnet.py` | `WideResNet` | Primary CIFAR research backbone | Planned | Zagoruyko & Komodakis, Wide Residual Networks |
+| `toy_cifar_cnn` | `src/oge/models/toy_cnn.py` | `ToyCifarCNN` | Toy/API smoke-test fixture only | Implemented | Local API contract |
+| `resnet18` | `src/oge/models/resnet.py` | `ResNet18` | Research backbone | Implemented | He et al., Deep Residual Learning for Image Recognition |
+| `wrn28_10` | `src/oge/models/wide_resnet.py` | `WideResNet` | Primary CIFAR research backbone | Implemented | Zagoruyko & Komodakis, Wide Residual Networks |
 | `vgg16` | `src/oge/models/vgg.py` | `VGG16` | Research backbone | Planned | Simonyan & Zisserman, Very Deep Convolutional Networks for Large-Scale Image Recognition |
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
 
 ## Current toy fixture status
 
-The repository currently contains `src/oge/models/simple_cnn.py` with class `SimpleCNN` and factory name `simple_cnn`. Treat it only as a temporary toy/API fixture for testing the model API. It is **not** a research backbone and must not be used as evidence for optimizer-geometry conclusions.
-
-The next implementation PR should rename this fixture without changing its role:
-
-- `src/oge/models/simple_cnn.py` → `src/oge/models/toy_cnn.py`
-- `SimpleCNN` → `ToyCifarCNN`
-- factory name `simple_cnn` → `toy_cifar_cnn`
-
-This documentation PR deliberately does not perform that rename.
+The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and factory name `toy_cifar_cnn`. Treat it only as a toy/API fixture for testing the model API. It is **not** a research backbone and must not be used as evidence for optimizer-geometry conclusions.
 
 ## Per-architecture specifications
 
@@ -59,7 +51,7 @@ This documentation PR deliberately does not perform that rename.
 - **Intended file path:** `src/oge/models/toy_cnn.py`.
 - **Intended class name:** `ToyCifarCNN`.
 - **Role:** toy fixture for API smoke tests only.
-- **Implementation status:** planned rename of the current `SimpleCNN` implementation.
+- **Implementation status:** implemented toy/API fixture.
 - **Reference source:** local model API tests and this reference card.
 - **Allowed variants:** none unless explicitly documented later.
 - **Input assumption:** CIFAR-like `[B, 3, 32, 32]` inputs for smoke testing.
@@ -73,9 +65,9 @@ This documentation PR deliberately does not perform that rename.
 - **Intended file path:** `src/oge/models/resnet.py`.
 - **Intended class name:** `ResNet18`.
 - **Role:** research backbone.
-- **Implementation status:** planned.
+- **Implementation status:** implemented.
 - **Reference source:** He et al., Deep Residual Learning for Image Recognition.
-- **Allowed variants:** explicit `variant` values only, such as `cifar` or `imagenet`, after the implementation PR documents the exact stem and pooling behavior. Dataset name must not choose the variant implicitly.
+- **Allowed variants:** explicit `variant` values only: `cifar` or `imagenet`. Dataset name must not choose the variant implicitly. The `cifar` variant uses a 3x3 stride-1 stem with no max-pool. The `imagenet` variant uses a 7x7 stride-2 stem followed by 3x3 stride-2 max-pool. Both variants use adaptive global average pooling before `model.classifier`.
 - **Penultimate feature definition:** global-average-pooled output after the final residual stage and before the classifier.
 - **Classifier exposure rule:** final `Linear(feature_dim, num_classes)` must be `model.classifier`.
 - **Feature_dim policy:** use the native feature width implied by the selected explicit variant. Do not add projection layers solely to force a shared feature dimension.
@@ -86,7 +78,7 @@ This documentation PR deliberately does not perform that rename.
 - **Intended file path:** `src/oge/models/wide_resnet.py`.
 - **Intended class name:** `WideResNet`.
 - **Role:** primary CIFAR research backbone.
-- **Implementation status:** planned.
+- **Implementation status:** implemented.
 - **Reference source:** Zagoruyko & Komodakis, Wide Residual Networks.
 - **Allowed variants:** exactly WRN depth/widen settings requested in config; the registry endpoint `wrn28_10` means depth 28 and widen factor 10.
 - **Penultimate feature definition:** global-average-pooled output after the final WRN block and final BN/ReLU, immediately before the classifier.

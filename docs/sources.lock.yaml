@@ -21,13 +21,13 @@ sources:
     authors: He, Zhang, Ren, and Sun
     stable_source: arXiv:1512.03385
     url: https://arxiv.org/abs/1512.03385
-    role: ResNet architecture reference; planned ResNet18 backbone, not currently implemented
+    role: ResNet architecture reference; implemented ResNet18 backbone
   wide_resnet_paper:
     title: Wide Residual Networks
     authors: Zagoruyko and Komodakis
     stable_source: arXiv:1605.07146
     url: https://arxiv.org/abs/1605.07146
-    role: WRN-28-10 architecture reference; planned backbone, not currently implemented
+    role: WRN-28-10 architecture reference; implemented backbone
   convnext_paper:
     title: A ConvNet for the 2020s
     authors: Liu, Mao, Wu, Feichtenhofer, Darrell, and Xie

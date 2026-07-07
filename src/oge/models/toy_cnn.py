@@ -1,4 +1,4 @@
-"""Small CNN architectures for optimizer-geometry experiments."""
+"""Toy CNN fixture for CIFAR-like model API smoke tests."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import torch
 from torch import nn
 
 
-class SimpleCNN(nn.Module):
-    """A compact CNN for CIFAR-like ``[B, 3, 32, 32]`` inputs."""
+class ToyCifarCNN(nn.Module):
+    """A compact toy CNN for CIFAR-like ``[B, 3, 32, 32]`` inputs."""
 
     def __init__(self, num_classes: int = 10, feature_dim: int = 128) -> None:
         super().__init__()
