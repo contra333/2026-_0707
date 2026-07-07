@@ -65,7 +65,7 @@ def test_sgdw_momentum_buffer_is_grad_only():
 
 
 def test_adam_parity_and_no_decoupled_weight_decay_kwarg():
-    p1, p2 = param()
+    p1, p2 = param(), param()
     cfg = {"name": "adam", "lr": 1e-3, "beta1": 0.9, "beta2": 0.999, "eps": 1e-8, "weight_decay": 1e-4}
     opt1 = make_optimizer([p1], cfg)
     opt2 = torch.optim.Adam([p2], lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-4, **torch_opt_kwargs(torch.optim.Adam))
@@ -76,7 +76,7 @@ def test_adam_parity_and_no_decoupled_weight_decay_kwarg():
 
 
 def test_adamw_parity():
-    p1, p2 = param()
+    p1, p2 = param(), param()
     opt1 = make_optimizer([p1], {"name": "adamw", "lr": 5e-3, "beta1": 0.9, "beta2": 0.999, "eps": 1e-8, "weight_decay": 1e-4})
     opt2 = torch.optim.AdamW([p2], lr=5e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=1e-4, **torch_opt_kwargs(torch.optim.AdamW))
     step(opt1); step(opt2)
@@ -85,7 +85,7 @@ def test_adamw_parity():
 
 @pytest.mark.parametrize("ratio,cls", [(0.0, torch.optim.AdamW), (1.0, torch.optim.Adam)])
 def test_adam_coupled_decoupled_endpoints(ratio, cls):
-    p1, p2 = param()
+    p1, p2 = param(), param()
     cfg = {"name": "adam_coupled_decoupled", "lr": 1e-3, "beta1": 0.9, "beta2": 0.999, "eps": 1e-8, "total_weight_decay": 5e-4, "coupled_ratio": ratio}
     opt1 = make_optimizer([p1], cfg)
     opt2 = cls([p2], lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=5e-4, **torch_opt_kwargs(cls))
@@ -100,13 +100,13 @@ def test_adam_coupled_decoupled_mixed_internal_check():
     old = p.detach().clone()
     step(opt)
     assert isinstance(opt, AdamCoupledDecoupled)
-    expected_grad = p.grad.detach() + (old * (1 - 1e-3 * 0.1)) * 0.1
+    expected_grad = p.grad.detach() + old * 0.1
     torch.testing.assert_close(opt.state[p]["exp_avg"], expected_grad * 0.1, rtol=1e-12, atol=1e-12)
 
 
 @pytest.mark.parametrize("ratio,ref_name", [(0.0, "sgdw"), (1.0, "sgd")])
 def test_sgd_coupled_decoupled_endpoints(ratio, ref_name):
-    p1, p2 = param()
+    p1, p2 = param(), param()
     cfg = {"name": "sgd_coupled_decoupled", "lr": 0.1, "momentum": 0.9, "nesterov": True, "total_weight_decay": 5e-4, "coupled_ratio": ratio}
     opt1 = make_optimizer([p1], cfg)
     opt2 = make_optimizer([p2], {"name": ref_name, "lr": 0.1, "momentum": 0.9, "nesterov": True, "weight_decay": 5e-4})
@@ -120,5 +120,29 @@ def test_sgd_coupled_decoupled_mixed_internal_check():
     old = p.detach().clone()
     step(opt)
     assert isinstance(opt, SGDCoupledDecoupled)
-    expected_buf = p.grad.detach() + (old * (1 - 0.1 * 0.1)) * 0.1
+    expected_buf = p.grad.detach() + old * 0.1
     torch.testing.assert_close(opt.state[p]["momentum_buffer"], expected_buf, rtol=1e-12, atol=1e-12)
+
+
+@pytest.mark.parametrize(
+    "name,extra,cls,lr",
+    [
+        ("sgd_coupled_decoupled", {"momentum": 0.0, "nesterov": False}, SGDCoupledDecoupled, 0.1),
+        ("adam_coupled_decoupled", {"beta1": 0.9, "beta2": 0.999, "eps": 1e-8}, AdamCoupledDecoupled, 1e-3),
+    ],
+)
+def test_coupled_decoupled_respects_no_decay_param_group(name, extra, cls, lr):
+    decay = param(value=(2.0, -3.0), grad=(0.0, 0.0))
+    no_decay = param(value=(4.0, -5.0), grad=(0.0, 0.0))
+    old_decay = decay.detach().clone()
+    old_no_decay = no_decay.detach().clone()
+    opt = make_optimizer(
+        [{"params": [decay], "weight_decay": 0.2}, {"params": [no_decay], "weight_decay": 0.0}],
+        {"name": name, "lr": lr, "total_weight_decay": 0.2, "coupled_ratio": 0.5, **extra},
+    )
+    assert isinstance(opt, cls)
+    assert opt.param_groups[1]["wd_coupled"] == 0.0
+    assert opt.param_groups[1]["wd_decoupled"] == 0.0
+    step(opt)
+    assert not torch.equal(decay.detach(), old_decay)
+    torch.testing.assert_close(no_decay.detach(), old_no_decay, rtol=1e-12, atol=1e-12)
