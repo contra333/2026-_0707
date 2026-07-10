@@ -1,5 +1,7 @@
 # Reference Card 03: Architecture Implementation Checklist
 
+> **Status: completed historical task checklist.** The first architecture implementation has been merged. Keep this file as provenance for that task and as a record of its validation contract. Do not use its one-time allowed scope as the specification for a new task. New bounded work must be defined in a GitHub Issue following `docs/WORKFLOW.md`.
+
 This checklist is for the Codex CLI implementation PR that will run on a torch/GPU-capable server. It is not permission to add training infrastructure.
 
 ## Allowed scope for the first real implementation PR
