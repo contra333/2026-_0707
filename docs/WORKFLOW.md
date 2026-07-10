@@ -19,6 +19,8 @@ Discuss and decide
 
 Do not rewrite the same task independently for several AI tools. The active GitHub Issue and repository documents are the shared task contract.
 
+The only exception is a trivial documentation correction that satisfies every condition in the **Trivial documentation maintenance** section. That narrow exception may be committed directly to `main` without an Issue, task branch, or Pull Request.
+
 ## Roles
 
 ### Chat
@@ -70,6 +72,8 @@ A GitHub Issue is the authoritative specification for one bounded task. It shoul
 
 Use one Issue per independently reviewable unit of work. Keep it open until the associated change is merged or the task is abandoned.
 
+An Issue is not required for a trivial documentation correction that satisfies every condition in the **Trivial documentation maintenance** section. If the correction changes meaning, status, scope, instructions, commands, or policy, it is not trivial and requires the normal Issue workflow.
+
 ### Desktop Codex
 
 Use desktop Codex for repository-aware work that can be developed or checked locally:
@@ -79,7 +83,7 @@ Use desktop Codex for repository-aware work that can be developed or checked loc
 - static checks and available CPU tests;
 - diff inspection and focused fixes.
 
-Desktop Codex must read `AGENTS.md`, the active Issue, and referenced documents before editing. It must not claim server or GPU validation that it did not run.
+Desktop Codex must read `AGENTS.md`, the active Issue, and referenced documents before editing, unless it is making a trivial documentation correction permitted by `AGENTS.md`. It must not claim server or GPU validation that it did not run.
 
 ### Server Codex CLI
 
@@ -132,6 +136,8 @@ Create an Issue using `.github/ISSUE_TEMPLATE/research_task.md`.
 
 The Issue is the common instruction for all subsequent agents. Avoid creating separate, divergent prompts for desktop Codex and server Codex CLI.
 
+Skip this step only for a trivial documentation correction that meets every condition in the **Trivial documentation maintenance** section.
+
 ### 5. Create a task branch and draft the change
 
 Use a branch named after the Issue, for example:
@@ -144,6 +150,8 @@ analysis/issue-25-geometry-metrics
 
 Desktop Codex or another repository-aware agent implements only the Issue scope, adds tests, and records local validation.
 
+A task branch is not required for a permitted trivial documentation correction.
+
 ### 6. Validate on the department server
 
 Check out the same branch on the server. Run the Issue's required commands in the real environment. Fix environment-dependent problems on the same branch, commit them, and push them.
@@ -155,6 +163,8 @@ Do not run a full experiment when the Issue requests only a smoke test. Do not c
 Use `.github/pull_request_template.md`. Link the Issue with `Closes #<issue-number>` when merge should close it.
 
 Include desktop and server validation separately. State the exact environment and unverified items.
+
+A Pull Request is not required for a permitted trivial documentation correction.
 
 ### 8. Review, merge, and close
 
@@ -175,7 +185,24 @@ Use Work to assemble result artifacts when useful, then use Chat to examine conc
 
 Not every task needs the full nine-stage route.
 
-### Small documentation or test change
+### Trivial documentation maintenance
+
+A documentation-only correction may be committed directly to `main` without an Issue, task branch, or Pull Request only when **all** of the following are true:
+
+- it only fixes an obvious typo, grammar, punctuation, formatting error, or broken documentation link;
+- it does not change research semantics, implementation instructions, project scope, validated status, acceptance criteria, commands, configuration behavior, or experimental policy;
+- it does not modify Python code, tests, configuration files, dependencies, GitHub templates, or generated artifacts;
+- the intended correction is unambiguous and small enough to inspect directly;
+- the commit message clearly identifies it as a documentation correction.
+
+```text
+Direct inspection
+→ direct documentation commit to main
+```
+
+A change to `AGENTS.md`, this workflow, `docs/STATUS.md`, or a reference card is not trivial when it changes a rule, project phase, implementation status, or research meaning. When uncertain, use the normal Issue, branch, and Pull Request path.
+
+### Non-trivial documentation or test change
 
 ```text
 Chat or direct inspection
@@ -242,13 +269,15 @@ commands actually run, failures, skipped checks, and server validation
 still required.
 ```
 
+For a trivial documentation correction permitted by `AGENTS.md`, identify the exact correction, verify that it changes no meaning or policy, and keep the direct `main` commit limited to that correction.
+
 ## Context use in ChatGPT Projects and local folders
 
 Preferred method:
 
 1. clone or connect the repository;
 2. let the AI read the current files from that repository;
-3. identify the active Issue;
+3. identify the active Issue unless the task is a permitted trivial documentation correction;
 4. avoid maintaining separate edited copies.
 
 When a ChatGPT Project cannot read GitHub directly, upload temporary snapshots of the context files listed in `docs/PROJECT_CONTEXT.md`. Refresh them after relevant repository changes. Do not treat the uploaded copy as the master document.
@@ -257,10 +286,12 @@ For a local Codex project, keep these documents inside the cloned repository. Th
 
 ## Completion rule
 
-A cycle is complete when:
+For a standard task, a cycle is complete when:
 
 - the Issue scope has been implemented or explicitly rejected;
 - required validation has been run and reported;
 - the Pull Request is merged or closed;
 - repository status is updated when the project phase changed;
 - new research questions are placed in a new Issue.
+
+For a permitted trivial documentation correction, the maintenance action is complete when the narrow correction is committed to `main` and directly inspected to confirm that no meaning, status, or policy changed.
