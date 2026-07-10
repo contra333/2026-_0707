@@ -11,7 +11,7 @@ Before planning or editing, read:
 5. every reference card listed in that Issue
 6. relevant code and tests
 
-If no active Issue is identified, do not start a repository-changing task. Ask for or locate the bounded task specification first.
+If no active Issue is identified, do not start a repository-changing task unless the change satisfies every condition in the **Trivial documentation exception** below. Otherwise, ask for or locate the bounded task specification first.
 
 ## Project scope
 
@@ -47,6 +47,8 @@ Do not silently resolve a material conflict. Stop the affected work and report t
 - Do not treat toy fixtures, smoke tests, or partial runs as research evidence.
 - Do not add training, dataset, OOD, geometry, or GPU infrastructure unless the active Issue allows it.
 
+The first two rules do not require an Issue for a change that satisfies the **Trivial documentation exception**. Such a change must remain strictly limited to the stated correction.
+
 ## Existing safety rules
 
 - If PyTorch official optimizer semantics, the optimizer reference card, and implementation requirements conflict, stop and report instead of resolving silently.
@@ -54,9 +56,21 @@ Do not silently resolve a material conflict. Stop the affected work and report t
 - If architecture documentation, the active Issue, code, and reference source conflict, stop and report instead of resolving silently.
 - All optimizers must use the shared parameter-group builder.
 
+## Trivial documentation exception
+
+A documentation-only correction may be committed directly to `main` without a GitHub Issue, task branch, or Pull Request only when **all** of the following are true:
+
+- it only fixes an obvious typo, grammar, punctuation, formatting error, or broken documentation link;
+- it does not change research semantics, implementation instructions, project scope, validated status, acceptance criteria, commands, configuration behavior, or experimental policy;
+- it does not modify Python code, tests, configuration files, dependencies, GitHub templates, or generated artifacts;
+- the intended correction is unambiguous and small enough to inspect directly;
+- the commit message clearly identifies it as a documentation correction.
+
+A change to `AGENTS.md`, `docs/WORKFLOW.md`, `docs/STATUS.md`, or a reference card is **not** trivial when it changes a rule, workflow, project phase, implementation status, or research meaning. When uncertain, use an Issue, branch, and Pull Request.
+
 ## Branch and Pull Request policy
 
-- Do not push task work directly to `main`.
+- Do not push task work directly to `main`, except for a change that satisfies every condition in the **Trivial documentation exception**.
 - Use one bounded branch and Pull Request per Issue when practical.
 - Server fixes and validation changes should be committed to the same task branch.
 - Link the Pull Request to the Issue with `Closes #<issue-number>` when merge should close it.
