@@ -95,6 +95,39 @@ All ten manifests had zero missing images and zero duplicate sample IDs. The ID
 label ranges were within `[0, 9]`; every released OOD list used label `-1`. The
 validator reported an empty `errors` list.
 
+## All-split real-data loader smoke
+
+Every configured loader was instantiated through the repository
+`load_dataset_config` and `build_openood_cifar10_loaders` APIs and iterated for
+one real-data batch with both ID and OOD sample limits set to 8:
+
+```bash
+conda run -n oge-issue6 python /tmp/issue6_all_loader_smoke_3a9f301.py
+```
+
+| group | loader key | batch | image shape | dtype | finite | labels | `is_id` | deterministic item check |
+| --- | --- | ---: | --- | --- | --- | --- | --- | --- |
+| ID | `id_train` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | within 0–9 | true | not applicable: stochastic training augmentation |
+| ID | `id_validation` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | within 0–9 | true | passed |
+| ID | `id_test` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | within 0–9 | true | passed |
+| OOD validation | `ood_validation_tin` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| near-OOD | `cifar100` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| near-OOD | `tin` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| far-OOD | `mnist` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| far-OOD | `svhn` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| far-OOD | `texture` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+| far-OOD | `places365` | 8 | `[8, 3, 32, 32]` | `torch.float32` | yes | -1 | false | passed |
+
+All batches had matching metadata lengths, non-empty `dataset_name` and `split`
+metadata, and unique sample IDs. For every evaluation loader, reading dataset
+item 0 twice produced an identical image tensor and identical `sample_id`.
+The machine-readable report is retained outside Git at
+`/home/ghjin/0707_exp/issue6_artifacts/68e6eaf/all_loader_smoke_report.json`.
+
+This bounded one-batch smoke establishes real-data loader compatibility and
+evaluation-transform determinism. It is not a throughput benchmark, a
+full-dataset or full-epoch traversal, or training validation.
+
 ## CUDA MSP vertical slice
 
 The actual-data CUDA smoke command was:
