@@ -1,0 +1,5 @@
+name: wrn28_10
+num_classes: 10
+depth: 28
+widen_factor: 10
+dropout_rate: 0.0

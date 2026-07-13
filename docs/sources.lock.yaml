@@ -28,6 +28,15 @@ sources:
     stable_source: arXiv:1605.07146
     url: https://arxiv.org/abs/1605.07146
     role: WRN-28-10 architecture reference; implemented backbone
+  wide_resnet_official_repository:
+    repository: szagoruyko/wide-residual-networks
+    url: https://github.com/szagoruyko/wide-residual-networks
+    commit: ae6d0d0561484172790c7a63c8ce6ade5a5a2914
+    files:
+      - pytorch/resnet.py
+      - models/wide-resnet.lua
+    accessed: 2026-07-13
+    role: pinned projection-shortcut and dropout-placement implementation reference
   convnext_paper:
     title: A ConvNet for the 2020s
     authors: Liu, Mao, Wu, Feichtenhofer, Darrell, and Xie
