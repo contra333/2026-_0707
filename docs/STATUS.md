@@ -1,10 +1,10 @@
 # Project Status
 
-Last updated: 2026-07-10
+Last updated: 2026-07-13
 
 ## Current phase
 
-Foundation implementation is in progress. Optimizer semantics and the first research backbones are implemented. Training, experiment orchestration, geometry analysis, and OOD evaluation are not yet part of the validated foundation.
+Foundation implementation is in progress. Optimizer semantics, the first research backbones, and the OpenOOD v1.5-aligned CIFAR-10 dataset and OOD-evaluation vertical slice are validated. Training, experiment orchestration, feature extraction, and geometry analysis are not yet part of the validated foundation.
 
 ## Validated or implemented
 
@@ -15,18 +15,19 @@ Foundation implementation is in progress. Optimizer semantics and the first rese
 - `toy_cifar_cnn` is implemented as an API smoke-test fixture only.
 - `resnet18` is implemented as a research backbone.
 - `wrn28_10` is implemented as a research backbone.
+- The OpenOOD v1.5-aligned CIFAR-10 dataset and evaluation contract is documented and implemented.
+- Official released OpenOOD imglists and all eight required archives were validated on the department server.
+- Actual-data manifest validation confirmed fixed split counts, image-path existence, sample-ID uniqueness, and label ranges.
+- A bounded CUDA WRN-28-10 MSP vertical slice completed with random-model output marked as infrastructure-only.
 
-## Not yet validated as project infrastructure
+## Still missing
 
-- Dataset loaders
-- Training and evaluation loops
-- Checkpoint and run-metadata policy
-- Reproducible experiment configuration
-- Penultimate feature dump pipeline
-- Geometry metrics
-- OOD datasets, detectors, and evaluation
+- Training loop
+- Checkpoint and resume support
+- Penultimate feature extraction pipeline
+- Geometry and Neural Collapse metrics
+- Feature-based OOD detectors
 - Multi-seed experiment orchestration
-- GPU training scripts
 
 ## Active next phase
 
@@ -49,9 +50,8 @@ A future training-protocol task should decide at least:
 
 ## Blockers and unknowns
 
-- Exact department-server Python, PyTorch, TorchVision, CUDA, and GPU versions are not recorded in the repository.
-- No standard experiment run directory or metadata schema is defined yet.
-- No active GitHub Issue is identified in this document. Agents must obtain the current Issue from the user or GitHub before editing for a task.
+- No standard training run directory, checkpoint policy, or resume schema is defined yet.
+- Training seed, determinism, scheduler, and epoch semantics remain to be specified.
 
 ## Update rule
 

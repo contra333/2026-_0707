@@ -44,15 +44,36 @@ Official released imglists define membership. Never regenerate these splits.
 | far-OOD | Textures | `benchmark_imglist/cifar10/test_texture.txt` |
 | far-OOD | Places365 | `benchmark_imglist/cifar10/test_places365.txt` |
 
-Expected ID counts are 50,000 train, 1,000 validation, and 9,000 test,
-pending verification of the downloaded artifact. Exact OOD counts, checksums,
-and the released TinyImageNet/Places365 filtering contents remain unvalidated
-until department-server inspection. Paper-reported removal counts are not the
-same as verified observations of the downloaded artifact.
-
 Use released lists unchanged. Do not perform runtime overlap filtering or
 hidden deduplication. OOD validation has role `compatibility_only` and is not
 used for model, detector, or hyperparameter selection in the main protocol.
+
+## Validated department-server observations
+
+The pinned released archives and imglists were validated on 2026-07-13 at
+repository commit `68e6eaf408124468384c5f5df118a5dc8426462e`. The assembled
+data root was `/home/ghjin/datasets/openood-v1.5-3c35632e`.
+
+Observed released-imglist counts were:
+
+| role | dataset | count |
+| --- | --- | ---: |
+| ID train | CIFAR-10 | 50,000 |
+| ID validation | CIFAR-10 | 1,000 |
+| ID test | CIFAR-10 | 9,000 |
+| compatibility-only OOD validation | TinyImageNet | 1,000 |
+| near-OOD | CIFAR-100 | 9,000 |
+| near-OOD | TinyImageNet | 7,793 |
+| far-OOD | MNIST | 70,000 |
+| far-OOD | SVHN | 26,032 |
+| far-OOD | Textures | 5,640 |
+| far-OOD | Places365 | 35,195 |
+
+Every referenced path existed, no duplicate sample IDs were found, ID labels
+were within `[0, 9]`, and every OOD label was `-1`. A bounded random WRN-28-10
+CUDA MSP vertical slice completed successfully. Exact archive and imglist
+checksums, runtime versions, commands, and artifact locations are recorded in
+the [Issue 6 department-server validation report](../validation/issue6_openood_cifar10_server_validation.md).
 
 ## Preprocessing
 
@@ -169,8 +190,20 @@ validation. Its metrics are not research evidence.
 
 ## Manifest and real-environment validation
 
-For every imglist record path, SHA256, line count, missing image count,
+For every imglist, record path, SHA256, line count, missing image count,
 duplicate sample-ID count, label range, and class histogram where applicable.
-Official artifact checksums/counts, overlap-filtering observations, real-data
-loaders, server environment, and CUDA end-to-end behavior remain unvalidated
-until the department-server report is produced.
+The Issue 6 server validation established these observations for the pinned
+artifact and also exercised real-data loaders and bounded CUDA evaluation.
+
+## Remaining limitations
+
+- No independently published upstream checksum was available for the pinned
+  Google Drive archives; local SHA256 values establish immutability after
+  download but not independent upstream authentication.
+- ZIP integrity was checked for every entry, but only representative images
+  were decoded rather than every image in the release.
+- Released TinyImageNet and Places365 list membership was used unchanged. The
+  semantic-overlap-removal generation process and exact removed-image set were
+  not reconstructed.
+- The random-model CUDA smoke did not fix an initialization seed and is
+  infrastructure validation only, not research evidence.
