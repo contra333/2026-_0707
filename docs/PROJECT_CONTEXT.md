@@ -32,17 +32,21 @@ Implemented foundation:
 - optimizer semantics and shared parameter-group policy;
 - optimizer and parameter-group tests;
 - model API for logits and penultimate features;
-- `toy_cifar_cnn`, `resnet18`, and `wrn28_10` model endpoints.
+- `toy_cifar_cnn`, `resnet18`, and `wrn28_10` model endpoints;
+- OpenOOD v1.5-aligned CIFAR-10 ID/OOD loaders, fixed split manifests, and preprocessing;
+- bounded MSP OOD inference and metric infrastructure;
+- reproducible classifier training, scheduling, checkpoint/reload, epoch-boundary resume, and run artifacts;
+- bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths.
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- dataset loaders;
-- training loops and checkpointing;
+- completed 200-epoch baselines and optimizer-comparison results;
 - experiment orchestration;
+- HPO and multi-seed execution;
 - feature extraction pipelines;
 - geometry metrics;
-- OOD detectors and evaluation;
-- GPU training scripts.
+- feature-based OOD detectors such as Mahalanobis, kNN, GMM, CTM, and NeCo;
+- research-result OOD evaluation beyond the bounded MSP infrastructure smoke.
 
 ## Document roles
 

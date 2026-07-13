@@ -8,11 +8,20 @@ The repository currently contains:
 - optimizer and parameter-group unit tests;
 - a model API contract for logits and penultimate features;
 - implemented `toy_cifar_cnn`, `resnet18`, and `wrn28_10` model endpoints;
+- an OpenOOD v1.5-aligned CIFAR-10 loader, fixed split manifests, and
+  preprocessing contract;
+- bounded MSP OOD inference and metric infrastructure;
+- reproducible CIFAR-10 classifier training with scheduling, atomic
+  checkpoints, strict reload, epoch-boundary resume, and stable run artifacts;
+- a CIFAR-10 training CLI validated with bounded actual-data CUDA runs;
 - an AI-assisted research and implementation workflow.
 
 The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and `wrn28_10` are implemented research backbones. VGG-16 and ConvNeXt-Tiny remain documented as planned backbones and should not be treated as implemented until code and tests add them.
 
-This repository intentionally does **not** yet include dataset loaders, training loops, checkpointing, OOD detectors, CIFAR training scripts, or GPU training scripts.
+This repository does **not** yet include learned-feature extraction, geometry
+or Neural Collapse metrics, feature-based OOD detectors, multi-seed or HPO
+orchestration, or completed long-running research baselines. The current MSP
+and CUDA runs validate infrastructure only; they are not research results.
 
 ## Start here
 
@@ -35,11 +44,15 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - Optimizer semantics: `docs/reference_cards/01_optimizers.md`
 - Architecture API and planning: `docs/reference_cards/02_architectures.md`
 - Historical first architecture checklist: `docs/reference_cards/03_architecture_implementation_checklist.md`
+- OpenOOD v1.5-aligned CIFAR-10 protocol: `docs/reference_cards/04_openood_v1_5_protocol.md`
+- Classifier training, checkpoint, and resume protocol: `docs/reference_cards/05_training_protocol.md`
+- OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
+- CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`
 - New task template: `.github/ISSUE_TEMPLATE/research_task.md`
 - Pull Request template: `.github/pull_request_template.md`
 
 ## Test
 
 ```bash
-pytest tests/test_model_api.py tests/test_optimizers.py tests/test_param_groups.py -q
+pytest -q
 ```

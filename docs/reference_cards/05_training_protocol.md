@@ -322,11 +322,18 @@ checkpoint save/reload, best-validation tie handling, deterministic CPU resume
 equivalence, invalid resume rejection, artifact schemas, `git diff --check`,
 and the complete regression suite.
 
-Department-server validation remains required with actual OpenOOD CIFAR-10
-data and CUDA: WRN-28-10 with dropout 0.0 and SGD must complete a bounded batch,
-one epoch, last/best save, reload, validation, and one resumed epoch. One actual
-training batch each with Adam and AdamW must exercise the same common engine.
+Department-server validation for the Issue #10 implementation completed with
+actual OpenOOD CIFAR-10 data and CUDA. WRN-28-10 with dropout 0.0 and SGD
+completed the required bounded batch, one epoch, last/best save, strict reload,
+validation, and one resumed epoch; Adam and AdamW each exercised one actual-data
+training batch through the same common engine. The environment, commands, and
+artifacts are recorded in
+[`issue10_cifar_training_server_validation.md`](../validation/issue10_cifar_training_server_validation.md).
 These smokes validate infrastructure only; they are not research evidence.
+
+Future changes to training, checkpoint, resume, loader-state, or device
+semantics require the local and environment-dependent validation specified by
+their own Issue before those changes join the validated foundation.
 
 This protocol does not authorize a 200-epoch run, HPO, multi-seed
 orchestration, feature extraction, geometry or Neural Collapse metrics, OOD
