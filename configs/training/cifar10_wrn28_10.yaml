@@ -1,0 +1,47 @@
+schema_version: "1.0"
+
+dataset:
+  protocol: openood_v1_5_aligned_cifar10
+  config_path: configs/datasets/openood_cifar10_v1_5.yaml
+  train_split: id_train
+  validation_split: id_validation
+  test_split: id_test
+
+model:
+  name: wrn28_10
+  num_classes: 10
+  depth: 28
+  widen_factor: 10
+  dropout_rate: 0.0
+
+loss:
+  name: cross_entropy
+  label_smoothing: 0.0
+
+optimizer:
+  name: sgd
+  lr: 0.1
+  momentum: 0.9
+  nesterov: true
+  weight_decay: 0.0005
+  weight_decay_policy: weights_only_no_bias_norm
+
+scheduler:
+  name: multistep
+  milestones: [60, 120, 160]
+  gamma: 0.2
+  step_timing: end_of_epoch
+
+training:
+  max_epochs: 200
+  batch_size: 128
+  seed: 0
+  num_workers: 0
+  pin_memory: false
+  drop_last: false
+  persistent_workers: false
+  precision: fp32
+  deterministic: false
+
+checkpoint:
+  snapshot_epochs: [0, 60, 61, 120, 121, 160, 161, 200]
