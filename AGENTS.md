@@ -21,7 +21,11 @@ Use:
 
 - `docs/reference_cards/01_optimizers.md` for optimizer semantics;
 - `docs/reference_cards/02_architectures.md` for model and penultimate-feature semantics;
-- future reference cards for other durable experiment protocols.
+- `docs/reference_cards/04_openood_v1_5_protocol.md` for the OpenOOD v1.5-aligned
+  CIFAR-10 data and OOD-evaluation protocol;
+- `docs/reference_cards/05_training_protocol.md` for classifier training,
+  checkpoint, resume, and run-artifact semantics;
+- future task-specific reference cards for other durable experiment protocols.
 
 `docs/reference_cards/03_architecture_implementation_checklist.md` is historical context for the first architecture implementation. Its one-time task scope is not the current active task.
 
