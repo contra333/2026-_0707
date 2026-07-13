@@ -1,0 +1,11 @@
+schema_version: "1.0"
+protocol_name: openood_v1_5_aligned_cifar10
+score_name: msp
+model_is_random_or_untrained: true
+smoke_only: true
+metric_names:
+  - auroc
+  - aupr_in_ap
+  - aupr_in_openood_auc
+  - fpr95_id_tpr
+  - fpr95_openood_ood_tpr

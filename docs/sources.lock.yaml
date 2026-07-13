@@ -44,3 +44,13 @@ sources:
     url: https://pytorch.org/vision/stable/feature_extraction.html
     accessed: 2026-07-07
     role: optional implementation reference for inspection; final project models must directly support return_features=True
+  openood_v1_5_paper:
+    title: "OpenOOD v1.5: Enhanced Benchmark for Out-of-Distribution Detection"
+    stable_source: arXiv:2306.09301v5
+    url: https://arxiv.org/abs/2306.09301v5
+    role: CIFAR-10 OOD benchmark protocol reference; not optimizer or geometry authority
+  openood_v1_5_repository:
+    repository: Jingkang50/OpenOOD
+    url: https://github.com/Jingkang50/OpenOOD
+    commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
+    role: pinned dataset, preprocessing, grouping, and metric compatibility source
