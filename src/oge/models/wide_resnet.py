@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from numbers import Real
+
 import torch
 from torch import nn
 
@@ -47,11 +49,13 @@ class WideBasicBlock(nn.Module):
             )
         else:
             self.shortcut = nn.Identity()
+        self._uses_projection = not isinstance(self.shortcut, nn.Identity)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = self.relu1(self.bn1(x))
-        identity = self.shortcut(x)
-        out = self.conv1(out)
+        preactivated = self.relu1(self.bn1(x))
+        shortcut_input = preactivated if self._uses_projection else x
+        identity = self.shortcut(shortcut_input)
+        out = self.conv1(preactivated)
         out = self.relu2(self.bn2(out))
         out = self.dropout(out)
         out = self.conv2(out)
@@ -95,6 +99,9 @@ class WideResNet(nn.Module):
             raise ValueError("WideResNet depth must satisfy depth = 6n + 4")
         if widen_factor <= 0:
             raise ValueError("widen_factor must be positive")
+        if isinstance(dropout_rate, bool) or not isinstance(dropout_rate, Real):
+            raise ValueError("dropout_rate must be a real number in [0, 1)")
+        dropout_rate = float(dropout_rate)
         if not 0.0 <= dropout_rate < 1.0:
             raise ValueError("dropout_rate must be in [0, 1)")
 
@@ -104,6 +111,7 @@ class WideResNet(nn.Module):
         self.num_classes = num_classes
         self.depth = depth
         self.widen_factor = widen_factor
+        self.dropout_rate = dropout_rate
         self.feature_dim = widths[3]
 
         self.conv1 = nn.Conv2d(3, widths[0], kernel_size=3, stride=1, padding=1, bias=False)

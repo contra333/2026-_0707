@@ -48,6 +48,13 @@ def make_model(config: dict) -> nn.Module:
         widen_factor = config.get("widen_factor", 10)
         if depth != 28 or widen_factor != 10:
             raise ValueError("wrn28_10 requires depth=28 and widen_factor=10")
-        return WideResNet(num_classes=num_classes, depth=28, widen_factor=10)
+        if "dropout_rate" not in config:
+            raise ValueError("wrn28_10 requires explicit 'dropout_rate'")
+        return WideResNet(
+            num_classes=num_classes,
+            depth=28,
+            widen_factor=10,
+            dropout_rate=config["dropout_rate"],
+        )
 
     raise ValueError(f"Unknown model name: {name}")

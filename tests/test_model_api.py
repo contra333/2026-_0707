@@ -9,7 +9,7 @@ from oge.train_utils import make_weight_decay_param_groups
 MODEL_CASES = [
     ("toy_cifar_cnn", {"feature_dim": 32}, ToyCifarCNN, 32),
     ("resnet18", {"variant": "cifar"}, ResNet18, 512),
-    ("wrn28_10", {}, WideResNet, 640),
+    ("wrn28_10", {"dropout_rate": 0.0}, WideResNet, 640),
 ]
 
 
@@ -90,7 +90,7 @@ def test_research_backbones_reject_configured_feature_dim(config):
     "config,expected_bn_name",
     [
         ({"name": "resnet18", "variant": "cifar", "num_classes": 5}, "bn1.weight"),
-        ({"name": "wrn28_10", "num_classes": 5}, "bn.weight"),
+        ({"name": "wrn28_10", "num_classes": 5, "dropout_rate": 0.0}, "bn.weight"),
     ],
 )
 def test_model_param_groups_exclude_bias_and_batchnorm(config, expected_bn_name):

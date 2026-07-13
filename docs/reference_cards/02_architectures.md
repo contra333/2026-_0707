@@ -79,12 +79,35 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
 - **Intended class name:** `WideResNet`.
 - **Role:** primary CIFAR research backbone.
 - **Implementation status:** implemented.
-- **Reference source:** Zagoruyko & Komodakis, Wide Residual Networks.
-- **Allowed variants:** exactly WRN depth/widen settings requested in config; the registry endpoint `wrn28_10` means depth 28 and widen factor 10.
+- **Reference source:** Zagoruyko & Komodakis, *Wide Residual Networks*, and the
+  authors' official `szagoruyko/wide-residual-networks` code at commit
+  `ae6d0d0561484172790c7a63c8ce6ade5a5a2914`. The projection-shortcut
+  comparison uses `pytorch/resnet.py`; the dropout placement and option use
+  `models/wide-resnet.lua`.
+- **Block semantics:** use the pre-activation basic block with two 3x3
+  convolutions and ReLU activations. Compute
+  `preactivated = relu1(bn1(x))`. A same-shape identity shortcut carries the
+  original `x`; a channel- or stride-changing 1x1 projection consumes
+  `preactivated`. The residual branch is
+  `conv1(preactivated) -> bn2 -> relu2 -> dropout -> conv2`.
+- **Allowed variants:** exactly WRN depth/widen settings requested in config;
+  the registry endpoint `wrn28_10` means depth 28 and widen factor 10.
+  `dropout_rate` is a required explicit model-config value in
+  `[0.0, 1.0)`; it does not select a different registry endpoint.
+- **Dropout presets:** the main preset `configs/models/wrn28_10.yaml` uses
+  `dropout_rate: 0.0`. The appendix ablation
+  `configs/models/wrn28_10_dropout.yaml` uses `dropout_rate: 0.3`. Dropout
+  is applied after the second BN/ReLU and before the second 3x3 convolution in
+  every basic block; a zero rate is represented by an identity operation.
 - **Penultimate feature definition:** global-average-pooled output after the final WRN block and final BN/ReLU, immediately before the classifier.
 - **Classifier exposure rule:** final `Linear(feature_dim, num_classes)` must be `model.classifier`.
 - **Feature_dim policy:** native `feature_dim = 64 * widen_factor`, so `wrn28_10` has `feature_dim = 640` unless a future reference-card update explicitly changes this.
-- **Common pitfalls:** omitting the final BN/ReLU before pooling; returning flattened spatial maps; using a projection to match ResNet dimensions; accepting ambiguous WRN names without explicit depth and widen factor.
+- **Common pitfalls:** projecting the raw block input instead of the
+  preactivated tensor; applying dropout outside the documented residual-branch
+  position; omitting explicit `dropout_rate`; omitting the final BN/ReLU
+  before pooling; returning flattened spatial maps; using a projection to
+  match ResNet dimensions; accepting ambiguous WRN names without explicit
+  depth and widen factor.
 
 ### `vgg16`
 
