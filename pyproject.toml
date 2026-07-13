@@ -7,7 +7,15 @@ name = "oge"
 version = "0.1.0"
 description = "Optimizer geometry experiment utilities"
 requires-python = ">=3.10"
-dependencies = ["torch", "pytest", "pyyaml"]
+dependencies = [
+    "numpy",
+    "pillow",
+    "pyyaml",
+    "scikit-learn",
+    "torch",
+    "torchvision",
+    "pytest",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
