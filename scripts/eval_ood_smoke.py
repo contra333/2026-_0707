@@ -20,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--model", choices=["toy_cifar_cnn", "resnet18", "wrn28_10"], required=True)
+    parser.add_argument("--dropout-rate", type=float)
     parser.add_argument("--device", required=True)
     parser.add_argument("--id-max-samples", type=int, default=128)
     parser.add_argument("--ood-max-samples", type=int, default=128)
@@ -34,7 +35,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=root / "configs/evaluation/msp_smoke.yaml",
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.model == "wrn28_10" and args.dropout_rate is None:
+        parser.error("--dropout-rate is required when --model=wrn28_10")
+    if args.model != "wrn28_10" and args.dropout_rate is not None:
+        parser.error("--dropout-rate is only valid when --model=wrn28_10")
+    return args
 
 
 def _git_sha() -> str:
@@ -62,6 +68,8 @@ def main() -> int:
     model_config = {"name": args.model, "num_classes": 10}
     if args.model == "resnet18":
         model_config["variant"] = "cifar"
+    if args.model == "wrn28_10":
+        model_config["dropout_rate"] = args.dropout_rate
     model = make_model(model_config)
     resolved_config = {
         "dataset": dataset_config,
