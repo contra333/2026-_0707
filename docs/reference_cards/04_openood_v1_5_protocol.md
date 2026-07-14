@@ -11,7 +11,9 @@ It does not adopt OpenOOD trainer or optimizer behavior, all-parameter weight
 decay, model implementations, APS hyperparameter search, string `eval()`
 dataset construction, or the complete Config/Pipeline framework. OGE remains
 authoritative for optimizer semantics, parameter groups, model and feature API,
-geometry definitions, score naming, and artifact policy.
+geometry definitions, score naming, and artifact policy. Durable feature-based
+detector fitting and score semantics are defined separately in
+[`06_feature_ood_detectors.md`](06_feature_ood_detectors.md).
 
 ## Pinned external sources
 
@@ -132,6 +134,10 @@ tokens and non-integer labels are malformed. Binary OOD evaluation uses
 selection uses an explicit registry or factory.
 
 ## Score and metric definitions
+
+Detector-specific fitting and raw-score formulas belong to
+[`06_feature_ood_detectors.md`](06_feature_ood_detectors.md). This card fixes
+the common project-facing orientation and evaluation metrics.
 
 All project-facing detector scores are ID-like: higher means more ID-like,
 ID binary label is `1`, and OOD binary label is `0`.
