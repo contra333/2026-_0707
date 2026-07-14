@@ -32,12 +32,23 @@ independently validated at pinned training commit
   WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
   snapshots and full ID validation/test recomputation.
 
+## Documented but not implemented
+
+- `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
+  name, class-wise full unbiased covariance, official adaptive-jitter ladder,
+  `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
+  boundaries.
+- SN on/off is documented as a training ablation and does not rename DDU.
+- These decisions are documentation only. No DDU detector code, test, config,
+  checkpoint evaluation, or OOD result has been implemented or validated.
+
 ## Still missing
 
 - Hyperparameter optimization
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
-- Feature-based OOD detectors
+- Feature-based OOD detector implementations, including DDU and its planned
+  PCA/Diag/L2/Shrinkage variants
 - Multi-seed experiment orchestration
 
 ## Active next phase
@@ -46,6 +57,9 @@ Create a separate bounded Issue to design the optimizer-comparison and HPO
 protocol. The Issue #10 CUDA runs remain infrastructure validation; the Issue
 #14 run is the single-seed SGD baseline. Neither is optimizer-comparison,
 geometry, Neural Collapse, or OOD-detector evidence.
+
+The DDU reference-card decision does not replace that next-phase Issue and does
+not authorize detector implementation without a separately bounded task.
 
 ## Known workflow maintenance
 
@@ -58,6 +72,8 @@ geometry, Neural Collapse, or OOD-detector evidence.
   optimizer-comparison or multi-seed conclusion is currently supported.
 - Optimizer-comparison and HPO design require a separate Issue before further
   long-running experiments.
+- The canonical DDU shrinkage estimator and PCA component-selection rule remain
+  literature-backed decisions for a later implementation Issue.
 
 ## Update rule
 
