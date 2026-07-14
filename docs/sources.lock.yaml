@@ -25,6 +25,9 @@ sources:
   local_architecture_reference_card:
     path: docs/reference_cards/02_architectures.md
     role: architecture_implementation_reference
+  local_feature_ood_detector_reference_card:
+    path: docs/reference_cards/06_feature_ood_detectors.md
+    role: feature_detector_semantics_reference; documentation only until a later implementation PR
   vgg16_paper:
     title: Very Deep Convolutional Networks for Large-Scale Image Recognition
     authors: Simonyan and Zisserman
@@ -72,9 +75,27 @@ sources:
     title: "OpenOOD v1.5: Enhanced Benchmark for Out-of-Distribution Detection"
     stable_source: arXiv:2306.09301v5
     url: https://arxiv.org/abs/2306.09301v5
-    role: CIFAR-10 OOD benchmark protocol reference; not optimizer or geometry authority
+    role: CIFAR-10 OOD benchmark protocol reference; not optimizer, geometry, or DDU estimator authority
   openood_v1_5_repository:
     repository: Jingkang50/OpenOOD
     url: https://github.com/Jingkang50/OpenOOD
     commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
     role: pinned dataset, preprocessing, grouping, and metric compatibility source
+  ddu_paper:
+    title: "Deep Deterministic Uncertainty: A New Simple Baseline"
+    authors: Mukhoti, Kirsch, van Amersfoort, Torr, and Gal
+    stable_source: arXiv:2102.11582
+    url: https://arxiv.org/abs/2102.11582
+    role: original DDU method reference; class-wise GDA feature density and marginal likelihood
+  ddu_official_repository:
+    repository: omegafragger/DDU
+    url: https://github.com/omegafragger/DDU
+    commit: f597744c65df4ff51615ace5e86e82ffefe1cd0f
+    files:
+      - utils/gmm_utils.py
+      - evaluate.py
+      - metrics/uncertainty_confidence.py
+      - metrics/ood_metrics.py
+      - net/wide_resnet.py
+    accessed: 2026-07-14
+    role: pinned DDU implementation reference for class-wise unbiased covariance, adaptive shared jitter, MultivariateNormal log density, and logsumexp scoring

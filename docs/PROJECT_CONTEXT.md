@@ -38,14 +38,23 @@ Implemented foundation:
 - reproducible classifier training, scheduling, checkpoint/reload, epoch-boundary resume, and run artifacts;
 - bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths.
 
+Documented for later implementation, but not yet implemented or validated:
+
+- DDU as a class-wise full-covariance GDA density detector using the pinned
+  official adaptive jitter and `logsumexp` score convention;
+- explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
+  features, and statistical covariance shrinkage;
+- SN on/off as a training ablation that does not rename the detector.
+
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- completed 200-epoch baselines and optimizer-comparison results;
+- completed optimizer-comparison and multi-seed research results;
 - experiment orchestration;
 - HPO and multi-seed execution;
 - feature extraction pipelines;
 - geometry metrics;
-- feature-based OOD detectors such as Mahalanobis, kNN, GMM, CTM, and NeCo;
+- feature-based OOD detector implementations such as Mahalanobis, kNN, generic
+  GMM baselines, DDU and its variants, CTM, ViM, and NeCo;
 - research-result OOD evaluation beyond the bounded MSP infrastructure smoke.
 
 ## Document roles
@@ -55,6 +64,8 @@ Not yet part of the validated foundation unless added by a later merged pull req
 - `docs/WORKFLOW.md`: end-to-end human/AI work process.
 - `docs/STATUS.md`: current validated state, active phase, and blockers.
 - `docs/reference_cards/`: durable implementation and experiment semantics.
+- `docs/reference_cards/06_feature_ood_detectors.md`: durable feature-based
+  detector naming, fitting, score, numerical-stability, and variant semantics.
 - GitHub Issues: one-time task scope and acceptance criteria.
 - Pull Requests: actual changes, validation evidence, and unresolved limitations.
 
