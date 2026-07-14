@@ -1,13 +1,15 @@
 # Project Status
 
-Last updated: 2026-07-13
+Last updated: 2026-07-14
 
 ## Current phase
 
 The first optimizer, model, OpenOOD v1.5-aligned CIFAR-10 data/MSP, and
-reproducible classifier-training foundations are merged and validated. Pull
-Request #11 merged the Issue #10 training, checkpoint, reload, and
-epoch-boundary resume vertical slice after bounded actual-data CUDA validation.
+reproducible classifier-training foundations are merged and validated. The
+first completed WRN-28-10 SGD seed-0 200-epoch baseline has also been run and
+independently validated at pinned training commit
+`d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
+[Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 
 ## Validated or implemented
 
@@ -26,10 +28,12 @@ epoch-boundary resume vertical slice after bounded actual-data CUDA validation.
   deterministic loader state, scheduler boundaries, checkpoints, resume, and
   run artifacts. Complete tests and bounded actual-data CUDA SGD, resume,
   Adam, and AdamW validation passed on the department server.
+- Issue #14 produced and independently revalidated the first complete
+  WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
+  snapshots and full ID validation/test recomputation.
 
 ## Still missing
 
-- A 200-epoch WRN-28-10 SGD seed-0 baseline
 - Hyperparameter optimization
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
@@ -38,10 +42,10 @@ epoch-boundary resume vertical slice after bounded actual-data CUDA validation.
 
 ## Active next phase
 
-Create a new bounded Issue for the 200-epoch WRN-28-10 SGD seed-0 baseline,
-then run it with its own configuration, environment, artifact, and validation
-evidence. The bounded Issue #10 CUDA runs remain infrastructure validation and
-must not be interpreted as the baseline research result.
+Create a separate bounded Issue to design the optimizer-comparison and HPO
+protocol. The Issue #10 CUDA runs remain infrastructure validation; the Issue
+#14 run is the single-seed SGD baseline. Neither is optimizer-comparison,
+geometry, Neural Collapse, or OOD-detector evidence.
 
 ## Known workflow maintenance
 
@@ -50,10 +54,10 @@ must not be interpreted as the baseline research result.
 
 ## Blockers and unknowns
 
-- No 200-epoch baseline has been run. That long run requires a separate Issue
-  and is not evidence from the bounded Issue #10 infrastructure smoke.
-- No active GitHub Issue currently authorizes that baseline or another
-  long-running research experiment.
+- Only one optimizer and one seed have a completed long-run baseline. No
+  optimizer-comparison or multi-seed conclusion is currently supported.
+- Optimizer-comparison and HPO design require a separate Issue before further
+  long-running experiments.
 
 ## Update rule
 
