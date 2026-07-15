@@ -29,9 +29,11 @@ The relevant merged evidence is bounded as follows:
   an optimizer comparison, HPO result, or multi-seed scientific conclusion.
 - Issue #16 and PR #17 document DDU semantics. No DDU or other feature-based
   detector implementation or detector result exists at this boundary.
-- Merged PRs #7, #9, #11, and #13 provide the optimizer, model, data/MSP,
-  training, checkpoint, resume, and artifact foundations on which this protocol
-  depends. Their bounded validation does not constitute this study.
+- The merged optimizer implementation (PR #1) provides the optimizer factory,
+  shared parameter groups, and coupled/decoupled endpoints. Merged PRs #7, #9,
+  #11, and #13 provide the model, data/MSP, training, checkpoint, resume, and
+  artifact foundations on which this protocol depends. Their bounded validation
+  does not constitute this study.
 
 The adjacent durable authorities remain:
 
@@ -200,10 +202,15 @@ the tuned winner and is frozen before final seeds. If none is eligible, report
 the optimizer as having no v1 tuned winner and do not improvise a final choice.
 Final-seed results describe the frozen choice and never trigger reselection.
 
-Canonical config hashes are lowercase SHA-256 over the UTF-8 bytes of the fully
-resolved configuration serialized as canonical JSON with recursively sorted
-keys and compact separators `(',', ':')`. Runtime paths, timestamps, and device
-assignment are provenance, not config-hash inputs.
+Canonical config hashes are lowercase SHA-256 over the UTF-8 bytes of the
+resolved configuration serialized as canonical JSON with recursively sorted keys
+and compact separators `(',', ':')`. The hash covers only the scientific
+configuration: the optimizer family and its numeric fields, model, loss, data
+contract, and scheduler. Phase- and run-varying fields are excluded so that one
+configuration keeps a single identity across discovery, confirmation, matching,
+pair control, and final phases. `training.seed`, `checkpoint.snapshot_epochs`,
+runtime paths, timestamps, and device assignment are provenance, not config-hash
+inputs.
 
 ## Protocol v1 search budget and generation
 
@@ -251,8 +258,8 @@ the fixed CIFAR-10 data contract, and `weights_only_no_bias_norm`.
 | --- | --- | --- | --- |
 | `SGD` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 1e-3]` | `momentum=0.9`, `nesterov=true`, coupled |
 | `SGDW` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 1e-3]` | `momentum=0.9`, `nesterov=true`, decoupled |
-| `Adam` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-6, 1e-3]` | `beta1=0.9`, `beta2=0.999`, `epsilon=1e-8`, coupled |
-| `AdamW` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-5, 1e-2]` | `beta1=0.9`, `beta2=0.999`, `epsilon=1e-8`, decoupled |
+| `Adam` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-6, 1e-3]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, coupled |
+| `AdamW` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-5, 1e-2]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
 
 The two explicit anchors are:
 
@@ -286,7 +293,8 @@ runs. The v1 result remains preserved and separately identifiable.
 Every discovery, confirmation, matching, pairwise, and final run uses:
 
 ```yaml
-epochs: 200
+training:
+  max_epochs: 200
 scheduler:
   name: multistep
   milestones: [60, 120, 160]
@@ -307,7 +315,7 @@ The roles and exact seeds are disjoint:
 | --- | --- | --- |
 | sampler | `1800` | generate and freeze discovery tables only |
 | discovery training | `1801` | every one of the 64 discovery configurations |
-| confirmation | `1802`, `1803`, `1804` | every frozen top-3 configuration |
+| confirmation | `1802`, `1803`, `1804` | every frozen top-3 configuration; also the pair-control and shared-number anchor seeds |
 | final comparison | `1805`, `1806`, `1807`, `1808`, `1809` | every selected tuned, matched, or pairwise configuration |
 | downstream | same `1805`-`1809` classifiers | geometry/OOD work uses frozen final checkpoints; it does not retrain replacement seeds |
 
@@ -351,8 +359,11 @@ Freeze matching only after confirmation finishes and before final-seed runs.
 
 1. For each tuned optimizer winner, compute mean `last.pt` epoch-200
    ID-validation accuracy across confirmation seeds `1802`-`1804`.
-2. Define the target as the minimum of those four means. This is a functional
-   rule, not a post-hoc hand-selected number.
+2. Define the target as the minimum of the available tuned-winner means. This is
+   a functional rule, not a post-hoc hand-selected number. If one or more
+   optimizers have no tuned winner, the target remains the minimum of the winners
+   that exist; if no optimizer has a tuned winner, accuracy matching is
+   unresolved in v1.
 3. Use an absolute tolerance of `0.002` accuracy (0.2 percentage points).
 4. Each optimizer's candidate pool is exactly its already confirmed top-3
    configurations. Thus the equal matching search budget is three candidates
