@@ -2,12 +2,17 @@
 
 ## Purpose, authority, and evidence boundary
 
-This card fixes protocol version `wrn28_10_optimizer_hpo_v1` for comparing
-`SGD`, `SGDW`, `Adam`, and `AdamW` with WRN-28-10 on the repository's OpenOOD
-v1.5-aligned CIFAR-10 membership. The primary result is the tuned optimizer
-comparison. Accuracy matching, coupled-vs-decoupled pair controls, and the
-shared-number appendix are separate controls and must never be pooled with the
-primary result.
+This card fixes active protocol version `wrn28_10_optimizer_hpo_v1.1` for
+comparing `SGD`, `SGDW`, `Adam`, and `AdamW` with WRN-28-10 on the repository's
+OpenOOD v1.5-aligned CIFAR-10 membership. The primary result is the tuned
+optimizer comparison. Accuracy matching, coupled-vs-decoupled pair controls,
+and the shared-number appendix are separate controls and must never be pooled
+with the primary result.
+
+Protocol v1.1 supersedes the unexecuted v1 plan from Issue #18 and PR #19. The
+v1 plan remains historical Git and Pull Request provenance, but it was never
+executed and supplies no study results. All future study IDs, manifests, frozen
+tables, and orchestration tests for this protocol must identify v1.1.
 
 This is a protocol decision, not experimental evidence. No HPO, additional
 training, feature extraction, geometry/Neural Collapse analysis, detector
@@ -20,6 +25,12 @@ The repository audit for Issue #18 used `main` at:
 
 ```text
 c95f33f33cd4c0b96afc187577eefc0427e9d473
+```
+
+The pre-amendment repository audit for Issue #20 used `main` at:
+
+```text
+16e4f7b83964ff84bdda9e52b733726ca469c5cb
 ```
 
 The relevant merged evidence is bounded as follows:
@@ -61,6 +72,9 @@ These are observations of the repository, not new decisions introduced here.
   with decoupled weight decay, `Adam` with coupled L2 weight decay, and `AdamW`
   with decoupled weight decay. It also implements
   `SGDCoupledDecoupled` and `AdamCoupledDecoupled` endpoints.
+- The custom `SGDW` applies configured decay directly as parameter shrinkage
+  using the optimizer group's current learning rate. `AdamW` delegates directly
+  to `torch.optim.AdamW`; it is not a repository reimplementation.
 - Every optimizer uses the shared `weights_only_no_bias_norm` parameter-group
   builder: convolution and linear weights are decayed while bias and
   normalization parameters are excluded.
@@ -136,7 +150,7 @@ comparison.
 
 ### Later study: coupling interpolation
 
-`SGDCoupledDecoupled` and `AdamCoupledDecoupled` are excluded from protocol v1
+`SGDCoupledDecoupled` and `AdamCoupledDecoupled` are excluded from protocol v1.1
 discovery, confirmation, and final core comparison. A later Issue may define a
 coupling-ratio study with fixed numeric `total_weight_decay`, but it must not
 silently add that variable to the four-optimizer study.
@@ -183,7 +197,7 @@ A complete discovery trial is ranked within its optimizer by:
 The top `K = 3` discovery configurations per optimizer are frozen before any
 confirmation run is inspected. If fewer than three discovery configurations
 complete, freeze all completed configurations, report the shortfall, and do not
-add replacement trials. If none complete, that optimizer has no v1 winner.
+add replacement trials. If none complete, that optimizer has no v1.1 winner.
 
 ### Confirmation ranking
 
@@ -199,7 +213,7 @@ configurations within an optimizer by:
 Only configurations with all three valid confirmation outcomes are eligible;
 an incomplete configuration is not replaced. The first ranked configuration is
 the tuned winner and is frozen before final seeds. If none is eligible, report
-the optimizer as having no v1 tuned winner and do not improvise a final choice.
+the optimizer as having no v1.1 tuned winner and do not improvise a final choice.
 Final-seed results describe the frozen choice and never trigger reselection.
 
 Canonical config hashes are lowercase SHA-256 over the UTF-8 bytes of the
@@ -212,7 +226,7 @@ pair control, and final phases. `training.seed`, `checkpoint.snapshot_epochs`,
 runtime paths, timestamps, and device assignment are provenance, not config-hash
 inputs.
 
-## Protocol v1 search budget and generation
+## Protocol v1.1 search budget and generation
 
 ### Primary budget and resource accounting
 
@@ -228,10 +242,11 @@ inputs.
 
 ### Sampler and frozen tables
 
-Use NumPy `Generator(PCG64(1800))` to generate log-uniform draws. Before the
+Use NumPy `Generator(PCG64(0))` with `sampler_seed=0` to generate log-uniform
+draws. Before the
 first training run, materialize and hash all four ordered 16-row tables. No
 adaptive sampler, Bayesian optimizer, pruning, or result-dependent proposal is
-allowed in v1.
+allowed in v1.1.
 
 For the 14 random rows, use common uniform quantiles within the `SGD`/`SGDW`
 pair and separately within the `Adam`/`AdamW` pair. Map those quantiles through
@@ -257,9 +272,9 @@ the fixed CIFAR-10 data contract, and `weights_only_no_bias_norm`.
 | Optimizer | Learning rate | Weight decay | Fixed optimizer fields |
 | --- | --- | --- | --- |
 | `SGD` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 1e-3]` | `momentum=0.9`, `nesterov=true`, coupled |
-| `SGDW` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 1e-3]` | `momentum=0.9`, `nesterov=true`, decoupled |
+| `SGDW` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 2e-3]` | `momentum=0.9`, `nesterov=true`, decoupled |
 | `Adam` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-6, 1e-3]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, coupled |
-| `AdamW` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-5, 1e-2]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
+| `AdamW` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-4, 1e-1]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
 
 The two explicit anchors are:
 
@@ -268,25 +283,44 @@ The two explicit anchors are:
 | `SGD` | `lr=0.1`, `weight_decay=5e-4` | `lr=0.1`, `weight_decay=0` |
 | `SGDW` | `lr=0.1`, `weight_decay=5e-4` | `lr=0.1`, `weight_decay=0` |
 | `Adam` | `lr=1e-3`, `weight_decay=1e-4` | `lr=1e-3`, `weight_decay=0` |
-| `AdamW` | `lr=1e-3`, `weight_decay=1e-4` | `lr=1e-3`, `weight_decay=0` |
+| `AdamW` | `lr=1e-3`, `weight_decay=1e-2` | `lr=1e-3`, `weight_decay=0` |
 
 For each of the remaining 14 rows, both learning rate and strictly positive
 weight decay are drawn from the table ranges. Zero is represented only by the
 explicit no-decay anchor; a log distribution never samples zero.
 
-These ranges are protocol-v1 proposals informed by the current SGD baseline,
+The search ranges use the units accepted by the actual OGE optimizer config.
+For custom `SGDW`, each step applies:
+
+```text
+parameter_new = parameter_old * (1 - current_lr * configured_weight_decay)
+                - current_lr * gradient_update
+```
+
+PyTorch `AdamW` likewise applies decoupled shrinkage proportional to the current
+learning rate and configured `weight_decay`; OGE uses `torch.optim.AdamW`
+directly. Coupled `SGD` and `Adam` retain their existing L2 semantics. Identical
+numeric decay values across coupled and decoupled methods do not imply equal
+effective regularization because their momentum and adaptive-state interactions
+differ. In particular, v1.1 does not rescale the entire SGDW range downward by
+a blanket paper-symbol factor.
+
+These ranges are protocol-v1.1 proposals informed by the current SGD baseline,
 standard optimizer parameterization, broad log-scale coverage, and the need to
 bound numerical risk. They have not been demonstrated to contain every
 optimizer's competitive region. Coupled and decoupled numeric decay are not
-assumed to have equal effects.
+assumed to have equal effects. The extended SGDW and AdamW upper bounds and the
+AdamW `weight_decay=1e-2` positive anchor are pre-execution project decisions,
+not claims that those values or boundaries are optimal.
 
 ### Versioning and boundary hits
 
 If the selected configuration lies on a numeric search boundary, report the
 boundary hit. Do not append trials, widen only one optimizer's table, or revise
-v1 after seeing results. A follow-up `v1.1` study may declare new ranges, a new
-search-space hash, and equal assigned budgets for all four optimizers before it
-runs. The v1 result remains preserved and separately identifiable.
+v1.1 after seeing results. A later protocol version may declare new ranges, a
+new search-space hash, and equal assigned budgets for all four optimizers before
+it runs. The unexecuted v1 plan remains separately identifiable as historical
+provenance, not as a result.
 
 ## Scheduler and training horizon
 
@@ -302,26 +336,53 @@ scheduler:
   step_timing: end_of_epoch
 ```
 
-The scheduler is a common control and is not tuned. There is no early stopping,
-pruning, lower-budget screening, successive halving, or other multi-fidelity
-selection. Every valid trial receives the same 200-epoch opportunity so that
-convergence speed and terminal-phase geometry are not selectively truncated.
+Every phase also fixes batch size `128`, WRN-28-10 with `dropout_rate: 0.0`,
+unsmoothed cross entropy, FP32, and no warmup. The scheduler is a common control
+and is not tuned. There is no early stopping, pruning, lower-budget screening,
+successive halving, or other multi-fidelity selection. Every valid trial
+receives the same 200-epoch opportunity so that convergence speed and
+terminal-phase geometry are not selectively truncated.
+
+`MultiStepLR` changes the optimizer's current learning rate, which already
+changes decoupled per-step shrinkage for SGDW and AdamW. Protocol v1.1 therefore
+forbids a second weight-decay scheduler.
+
+The supported research claim is strictly:
+
+```text
+optimizer comparison under one matched WRN-standard schedule
+```
+
+This protocol does not compare every optimizer under an individually optimal
+training recipe. Optimizer-specific scheduler tuning or a common-cosine
+sensitivity study requires a later separately bounded protocol.
 
 ## Seed policy
 
-The roles and exact seeds are disjoint:
+The sampler stream and all training phases use distinct metadata roles. The
+discovery, confirmation, and final training seed sets are disjoint:
 
 | Role | Seed(s) | Use |
 | --- | --- | --- |
-| sampler | `1800` | generate and freeze discovery tables only |
-| discovery training | `1801` | every one of the 64 discovery configurations |
-| confirmation | `1802`, `1803`, `1804` | every frozen top-3 configuration; also the pair-control and shared-number anchor seeds |
-| final comparison | `1805`, `1806`, `1807`, `1808`, `1809` | every selected tuned, matched, or pairwise configuration |
-| downstream | same `1805`-`1809` classifiers | geometry/OOD work uses frozen final checkpoints; it does not retrain replacement seeds |
+| discovery-table sampler | `0` | `sampler_seed=0`; generate and freeze discovery tables only |
+| discovery training | `0` | `training_seed=0`; every one of the 64 discovery configurations |
+| confirmation training | `1`, `2`, `3` | every frozen top-3 configuration; also the pair-control and shared-number anchor seeds |
+| final training | `4`, `5`, `6`, `7`, `8` | every selected tuned, matched, or pairwise configuration |
+| downstream geometry/OOD | same `4`-`8` classifiers | use the frozen final checkpoints; do not retrain replacement seeds |
 
-This is single-seed discovery followed by top-3, three-seed confirmation. The
-Issue #14 seed-0 run is a historical anchor only and is excluded from discovery
-ranking, confirmation, accuracy matching, and final aggregation.
+`sampler_seed` and `training_seed` are distinct fields and distinct RNG streams,
+even though both use the integer `0`. This is single-seed discovery followed by
+top-3, three-seed confirmation. A discovery outcome is not counted again as
+confirmation evidence, and neither discovery nor confirmation outcomes are
+counted in the final five-seed estimate. Configurations may advance according to
+the frozen selection rules, but individual run results are never reused as a
+later phase's observations.
+
+The Issue #14 seed-0 run is a historical anchor only and is not imported into
+the v1.1 discovery study, even when its numeric seed and anchor configuration
+coincide. Its Git SHA, study identity, artifact boundary, and ID-test exposure
+differ. It remains excluded from discovery ranking, confirmation, accuracy
+matching, and final aggregation.
 
 All seed lists, `K`, and table hashes must be frozen before results are viewed.
 An unfavorable but valid seed outcome is retained. Seeds are never dropped,
@@ -358,12 +419,12 @@ feature, geometry, Neural Collapse, detector, ID-test, or OOD inspection.
 Freeze matching only after confirmation finishes and before final-seed runs.
 
 1. For each tuned optimizer winner, compute mean `last.pt` epoch-200
-   ID-validation accuracy across confirmation seeds `1802`-`1804`.
+   ID-validation accuracy across confirmation seeds `1`, `2`, and `3`.
 2. Define the target as the minimum of the available tuned-winner means. This is
    a functional rule, not a post-hoc hand-selected number. If one or more
    optimizers have no tuned winner, the target remains the minimum of the winners
    that exist; if no optimizer has a tuned winner, accuracy matching is
-   unresolved in v1.
+   unresolved in v1.1.
 3. Use an absolute tolerance of `0.002` accuracy (0.2 percentage points).
 4. Each optimizer's candidate pool is exactly its already confirmed top-3
    configurations. Thus the equal matching search budget is three candidates
@@ -390,11 +451,11 @@ Use the following four predeclared numeric anchors per pair:
 | `SGD` / `SGDW` | `0.03`, `0.1` | `1e-4`, `5e-4` | 4 configs per endpoint |
 | `Adam` / `AdamW` | `3e-4`, `1e-3` | `1e-5`, `1e-4` | 4 configs per endpoint |
 
-Run every endpoint/configuration on confirmation seeds `1802`-`1804`: 24 runs
+Run every endpoint/configuration on confirmation seeds `1`, `2`, and `3`: 24 runs
 per pair and 48 runs total. This budget is fixed independently of tuned HPO.
 An anchor is eligible for pair selection only when both endpoints have all
 three valid outcomes. Failed or incomplete anchors are reported and are not
-replaced; if no anchor remains, report the pair as unresolved in v1.
+replaced; if no anchor remains, report the pair as unresolved in v1.1.
 
 Select one shared-number configuration per pair symmetrically by:
 
@@ -405,9 +466,9 @@ Select one shared-number configuration per pair symmetrically by:
 5. ascending shared config hash.
 
 Freeze the selected pair configuration, then run both endpoints on final seeds
-`1805`-`1809`. Report the entire four-anchor table as the shared-number appendix
-even when only one anchor advances. Same numeric decay is a controlled input,
-not proof of equal effective regularization.
+`4`, `5`, `6`, `7`, and `8`. Report the entire four-anchor table as the
+shared-number appendix even when only one anchor advances. Same numeric decay is
+a controlled input, not proof of equal effective regularization.
 
 ## ID-test defer contract
 
@@ -482,7 +543,7 @@ Classify every non-success before deciding whether retry is permitted.
 | --- | --- |
 | OOM caused by assigned config/optimizer | consumes the slot; no replacement |
 | non-finite loss or model state | consumes the slot; preserve evidence; no replacement |
-| invalid resolved config | consumes the slot; no result-driven repair in v1 |
+| invalid resolved config | consumes the slot; no result-driven repair in v1.1 |
 | OOM from unrelated GPU contention | infrastructure failure; retry same trial |
 | external interruption or preemption | retry/resume same trial |
 | data or mount failure | infrastructure failure if external; retry same trial after repair |
@@ -542,7 +603,7 @@ The next bounded code Issue must, at minimum:
     execution scope.
 
 The implementation Issue must not select or install an HPO framework, add a
-dependency, or revise protocol v1 implicitly. Any such choice must be explicit
+dependency, or revise protocol v1.1 implicitly. Any such choice must be explicit
 in that Issue and preserve the frozen semantics here.
 
 ## Unverified assumptions and decision log
