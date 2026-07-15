@@ -141,8 +141,10 @@ def _components(config):
     }
 
 
-def _run(config, run_dir, *, resume_from=None):
+def _run(config, run_dir, *, resume_from=None, defer_id_test=False, test_loader=None):
     components = _components(config)
+    if test_loader is not None:
+        components["test_loader"] = test_loader
     summary = fit_classifier(
         **components,
         resolved_config=config,
@@ -150,6 +152,7 @@ def _run(config, run_dir, *, resume_from=None):
         device="cpu",
         oge_git_sha="fixture-sha",
         resume_from=resume_from,
+        defer_id_test=defer_id_test,
     )
     return components["model"], summary
 
@@ -304,6 +307,46 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
     environment = json.loads((run_dir / "environment.json").read_text())
     assert environment["schema_version"] == "1.0"
     assert environment["executions"][0]["device"] == "cpu"
+
+
+class ExplodingIDTestLoader:
+    def __iter__(self):
+        raise AssertionError("deferred ID-test loader was iterated")
+
+
+def test_study_deferred_id_test_skips_evaluator_loader_and_artifacts(tmp_path, monkeypatch):
+    run_dir = tmp_path / "deferred"
+    sentinel = ExplodingIDTestLoader()
+    original_evaluator = training_runner.evaluate_classifier
+
+    def guarded_evaluator(model, loader, criterion, *, device):
+        if loader is sentinel:
+            raise AssertionError("deferred ID-test evaluator was called")
+        return original_evaluator(model, loader, criterion, device=device)
+
+    monkeypatch.setattr(training_runner, "evaluate_classifier", guarded_evaluator)
+    _, summary = _run(
+        _resolved_fixture_config(1, snapshots=[]),
+        run_dir,
+        defer_id_test=True,
+        test_loader=sentinel,
+    )
+
+    assert summary["id_test"] == {
+        "status": "deferred",
+        "metrics_available": False,
+        "artifacts_created": False,
+    }
+    assert "final_id_test" not in summary
+    assert "best_val_id_test" not in summary
+    assert "final_id_test" not in summary["artifact_paths"]
+    assert "best_val_id_test" not in summary["artifact_paths"]
+    assert not (run_dir / "evaluation/final_id_test.json").exists()
+    assert not (run_dir / "evaluation/best_val_id_test.json").exists()
+    persisted = json.loads((run_dir / "summary.json").read_text())
+    assert persisted == summary
+    metadata = json.loads((run_dir / "run_metadata.json").read_text())
+    assert metadata["id_test_evaluation"] == "deferred"
 
 
 @pytest.mark.parametrize(

@@ -1,0 +1,57 @@
+schema_version: "1.0"
+protocol_version: wrn28_10_optimizer_hpo_v1.1
+study_id: wrn28_10_optimizer_hpo_v1_1
+search_space_version: wrn28_10_optimizer_search_v1.1
+sampler:
+  name: numpy_generator_pcg64
+  seed: 0
+seeds:
+  discovery_training: 0
+  confirmation_training: [1, 2, 3]
+  final_training: [4, 5, 6, 7, 8]
+optimizer_order: [sgd, sgdw, adam, adamw]
+assigned_discovery_rows_per_optimizer: 16
+base_training_config: configs/training/cifar10_wrn28_10.yaml
+frozen_discovery_dir: configs/studies/wrn28_10_optimizer_hpo_v1_1/discovery
+search_spaces:
+  sgd:
+    lr: [0.01, 0.3]
+    weight_decay: [0.00001, 0.001]
+    positive_anchor: {lr: 0.1, weight_decay: 0.0005}
+    no_decay_anchor: {lr: 0.1, weight_decay: 0.0}
+    fixed: {momentum: 0.9, nesterov: true}
+  sgdw:
+    lr: [0.01, 0.3]
+    weight_decay: [0.00001, 0.002]
+    positive_anchor: {lr: 0.1, weight_decay: 0.0005}
+    no_decay_anchor: {lr: 0.1, weight_decay: 0.0}
+    fixed: {momentum: 0.9, nesterov: true}
+  adam:
+    lr: [0.0001, 0.003]
+    weight_decay: [0.000001, 0.001]
+    positive_anchor: {lr: 0.001, weight_decay: 0.0001}
+    no_decay_anchor: {lr: 0.001, weight_decay: 0.0}
+    fixed: {beta1: 0.9, beta2: 0.999, eps: 0.00000001}
+  adamw:
+    lr: [0.0001, 0.003]
+    weight_decay: [0.0001, 0.1]
+    positive_anchor: {lr: 0.001, weight_decay: 0.01}
+    no_decay_anchor: {lr: 0.001, weight_decay: 0.0}
+    fixed: {beta1: 0.9, beta2: 0.999, eps: 0.00000001}
+objective:
+  primary: highest_best_id_validation_accuracy
+  tie_breaks:
+    - lowest_corresponding_id_validation_nll
+    - earliest_best_validation_epoch
+    - ascending_trial_id
+    - ascending_canonical_config_hash
+checkpoint_policy:
+  hpo_selection: best_val.pt
+  scientific_endpoint: last.pt
+  selection_snapshot_epochs: []
+  final_snapshot_epochs: [0, 60, 61, 120, 121, 160, 161, 200]
+selection_declarations:
+  id_test: forbidden
+  ood: forbidden
+  geometry_nc: forbidden
+  detector_metrics: forbidden

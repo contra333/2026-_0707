@@ -406,6 +406,13 @@ def _optimizer_parameter_names(
 
 def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
     cuda_available = torch.cuda.is_available()
+    actual_visible_gpu_uuid = None
+    if cuda_available and device.startswith("cuda"):
+        raw_uuid = getattr(torch.cuda.get_device_properties(torch.device(device)), "uuid", None)
+        if raw_uuid is not None:
+            actual_visible_gpu_uuid = str(raw_uuid)
+            if not actual_visible_gpu_uuid.startswith("GPU-"):
+                actual_visible_gpu_uuid = f"GPU-{actual_visible_gpu_uuid}"
     return {
         "recorded_at": _utc_now(),
         "python": sys.version,
@@ -424,6 +431,10 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
             if cuda_available
             else []
         ),
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+        "expected_physical_gpu_uuid": os.environ.get("OGE_PHYSICAL_GPU_UUID"),
+        "actual_visible_gpu_uuid": actual_visible_gpu_uuid,
+        "orchestrator_child_device": os.environ.get("OGE_CHILD_DEVICE"),
     }
 
 
@@ -573,6 +584,7 @@ def _prepare_artifacts(
     git_dirty: bool,
     resume_payload: dict[str, object] | None,
     resume_from: Path | None,
+    defer_id_test: bool,
 ) -> tuple[dict[str, Path], str]:
     paths = _artifact_paths(run_dir)
     if resume_payload is None:
@@ -586,6 +598,7 @@ def _prepare_artifacts(
             "protocol_name": resolved_config["dataset"]["protocol"],
             "model_name": resolved_config["model"]["name"],
             "artifact_role": "classifier_training_run",
+            "id_test_evaluation": "deferred" if defer_id_test else "enabled",
             "oge_git_sha": oge_git_sha,
             "git_dirty": git_dirty,
             "created_at": _utc_now(),
@@ -604,6 +617,7 @@ def _prepare_artifacts(
                 "protocol_name": resolved_config["dataset"]["protocol"],
                 "model_name": resolved_config["model"]["name"],
                 "artifact_role": "classifier_training_run",
+                "id_test_evaluation": "deferred" if defer_id_test else "enabled",
                 "oge_git_sha": oge_git_sha,
                 "git_dirty": git_dirty,
                 "created_at": _utc_now(),
@@ -612,6 +626,9 @@ def _prepare_artifacts(
         )
         if metadata.get("run_id") != run_id:
             raise ValueError("run metadata and checkpoint run_id do not match")
+        expected_id_test_mode = "deferred" if defer_id_test else "enabled"
+        if metadata.get("id_test_evaluation", "enabled") != expected_id_test_mode:
+            raise ValueError("resume cannot change the ID-test evaluation mode")
         environments = (
             _read_json(paths["environment"])
             if paths["environment"].is_file()
@@ -734,6 +751,7 @@ def fit_classifier(
     oge_git_sha: str,
     git_dirty: bool = False,
     resume_from: str | Path | None = None,
+    defer_id_test: bool = False,
 ) -> dict[str, object]:
     """Run or resume the configured classifier training job."""
     target_device = _target_device(device)
@@ -770,6 +788,7 @@ def fit_classifier(
         git_dirty=git_dirty,
         resume_payload=resume_payload,
         resume_from=resume_path,
+        defer_id_test=defer_id_test,
     )
     snapshot_epochs = set(int(value) for value in resolved_config["checkpoint"]["snapshot_epochs"])
 
@@ -891,25 +910,26 @@ def fit_classifier(
                 paths["snapshots"] / f"epoch_{epoch:04d}.pt",
             )
 
-    final_checkpoint = load_torch_artifact(paths["last"], map_location="cpu")
-    best_checkpoint = load_torch_artifact(paths["best"], map_location="cpu")
     evaluation_results: dict[str, dict[str, object]] = {}
-    for role, checkpoint_path, checkpoint in (
-        ("final", paths["last"], final_checkpoint),
-        ("best_val", paths["best"], best_checkpoint),
-    ):
-        model.load_state_dict(checkpoint["model_state"], strict=True)
-        metrics = evaluate_classifier(model, test_loader, criterion, device=target_device)
-        payload = _evaluation_payload(
-            role=role,
-            checkpoint_path=checkpoint_path,
-            checkpoint=checkpoint,
-            metrics=metrics,
-            split=resolved_config["dataset"]["test_split"],
-        )
-        filename = "final_id_test.json" if role == "final" else "best_val_id_test.json"
-        _write_json(paths["evaluation"] / filename, payload)
-        evaluation_results[role] = payload
+    if not defer_id_test:
+        final_checkpoint = load_torch_artifact(paths["last"], map_location="cpu")
+        best_checkpoint = load_torch_artifact(paths["best"], map_location="cpu")
+        for role, checkpoint_path, checkpoint in (
+            ("final", paths["last"], final_checkpoint),
+            ("best_val", paths["best"], best_checkpoint),
+        ):
+            model.load_state_dict(checkpoint["model_state"], strict=True)
+            metrics = evaluate_classifier(model, test_loader, criterion, device=target_device)
+            payload = _evaluation_payload(
+                role=role,
+                checkpoint_path=checkpoint_path,
+                checkpoint=checkpoint,
+                metrics=metrics,
+                split=resolved_config["dataset"]["test_split"],
+            )
+            filename = "final_id_test.json" if role == "final" else "best_val_id_test.json"
+            _write_json(paths["evaluation"] / filename, payload)
+            evaluation_results[role] = payload
 
     assert best_validation is not None
     final_history = history[-1]
@@ -925,8 +945,6 @@ def fit_classifier(
             "nll": float(final_history["validation_nll"]),
         },
         "best_validation": best_validation,
-        "final_id_test": evaluation_results["final"],
-        "best_val_id_test": evaluation_results["best_val"],
         "checkpoint_paths": {
             "last": str(paths["last"]),
             "best_val": str(paths["best"]),
@@ -938,10 +956,23 @@ def fit_classifier(
             "environment": str(paths["environment"]),
             "history": str(paths["history"]),
             "summary": str(paths["summary"]),
-            "final_id_test": str(paths["evaluation"] / "final_id_test.json"),
-            "best_val_id_test": str(paths["evaluation"] / "best_val_id_test.json"),
         },
     }
+    if defer_id_test:
+        summary["id_test"] = {
+            "status": "deferred",
+            "metrics_available": False,
+            "artifacts_created": False,
+        }
+    else:
+        summary["final_id_test"] = evaluation_results["final"]
+        summary["best_val_id_test"] = evaluation_results["best_val"]
+        summary["artifact_paths"]["final_id_test"] = str(
+            paths["evaluation"] / "final_id_test.json"
+        )
+        summary["artifact_paths"]["best_val_id_test"] = str(
+            paths["evaluation"] / "best_val_id_test.json"
+        )
     _write_json(paths["summary"], summary)
     return summary
 
@@ -954,6 +985,7 @@ def run_training_from_config(
     device: str,
     resume_from: str | Path | None = None,
     max_epochs: int | None = None,
+    defer_id_test: bool = False,
 ) -> dict[str, object]:
     """Resolve real protocol inputs, construct shared factories, and run training."""
     raw_config = load_training_config(config_path)
@@ -1004,4 +1036,5 @@ def run_training_from_config(
         oge_git_sha=git_sha,
         git_dirty=git_dirty,
         resume_from=resume_from,
+        defer_id_test=defer_id_test,
     )

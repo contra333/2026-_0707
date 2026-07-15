@@ -22,6 +22,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", required=True)
     parser.add_argument("--resume", type=Path)
     parser.add_argument(
+        "--defer-id-test",
+        action="store_true",
+        help="Do not evaluate or materialize ID-test results for study-selection runs.",
+    )
+    parser.add_argument(
         "--max-epochs",
         type=int,
         help="Explicit resolved-config override for bounded validation or extension.",
@@ -38,6 +43,7 @@ def main() -> int:
         device=args.device,
         resume_from=args.resume,
         max_epochs=args.max_epochs,
+        defer_id_test=args.defer_id_test,
     )
     print(
         f"Completed epoch {summary['completed_epoch']} with artifacts in {args.run_dir}"
