@@ -34,6 +34,9 @@ independently validated at pinned training commit
 
 ## Documented but not implemented
 
+- `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
+  four-optimizer tuned comparison, accuracy matching, pairwise coupling
+  controls, search budget, seeds, checkpoints, provenance, and rerun rules.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
   name, class-wise full unbiased covariance, official adaptive-jitter ladder,
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
@@ -53,10 +56,12 @@ independently validated at pinned training commit
 
 ## Active next phase
 
-Create a separate bounded Issue to design the optimizer-comparison and HPO
-protocol. The Issue #10 CUDA runs remain infrastructure validation; the Issue
-#14 run is the single-seed SGD baseline. Neither is optimizer-comparison,
-geometry, Neural Collapse, or OOD-detector evidence.
+Implement the documented optimizer-comparison orchestration in a separate
+bounded Issue, including deterministic frozen trial tables, deferred ID-test
+evaluation, independent-GPU scheduling, provenance, and failure accounting.
+The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
+the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
+Neural Collapse, or OOD-detector evidence.
 
 The DDU reference-card decision does not replace that next-phase Issue and does
 not authorize detector implementation without a separately bounded task.
@@ -70,8 +75,8 @@ not authorize detector implementation without a separately bounded task.
 
 - Only one optimizer and one seed have a completed long-run baseline. No
   optimizer-comparison or multi-seed conclusion is currently supported.
-- Optimizer-comparison and HPO design require a separate Issue before further
-  long-running experiments.
+- Optimizer-comparison orchestration and execution require separately bounded
+  Issues before further long-running experiments.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 
