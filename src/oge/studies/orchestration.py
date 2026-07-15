@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -15,7 +16,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .artifacts import atomic_write_json, create_preserved_attempt_directory
+from oge.training import load_torch_artifact
+
+from .artifacts import atomic_write_json, create_preserved_attempt_directory, sha256_file
 from .protocol import PROTOCOL_VERSION
 from .schemas import ATTEMPT_SCHEMA_VERSION, validate_attempt_record, validate_trial_record
 
@@ -108,6 +111,128 @@ def _default_spawn(command: Sequence[str], *, env: Mapping[str, str], cwd: Path)
             stderr=subprocess.STDOUT,
             check=False,
         ).returncode
+
+
+def _validated_metrics(value: Any, *, label: str) -> dict[str, float | int]:
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{label} must be a mapping")
+    required = {"epoch", "accuracy", "nll"}
+    if not required.issubset(value):
+        raise ValueError(f"{label} is missing required metrics")
+    epoch = int(value["epoch"])
+    accuracy = float(value["accuracy"])
+    nll = float(value["nll"])
+    if epoch < 1 or not math.isfinite(accuracy) or not math.isfinite(nll):
+        raise ValueError(f"{label} contains an invalid epoch or non-finite metric")
+    if not 0.0 <= accuracy <= 1.0:
+        raise ValueError(f"{label} accuracy must be in [0, 1]")
+    return {"epoch": epoch, "accuracy": accuracy, "nll": nll}
+
+
+def collect_completed_attempt_result(
+    attempt_dir: str | Path,
+    trial: Mapping[str, Any],
+    expected_gpu: PhysicalGPU,
+) -> dict[str, Any]:
+    """Validate a successful child run before publishing completed study state."""
+    run_dir = Path(attempt_dir) / "run"
+    paths = {
+        "summary": run_dir / "summary.json",
+        "history": run_dir / "history.jsonl",
+        "resolved_config": run_dir / "resolved_config.yaml",
+        "run_metadata": run_dir / "run_metadata.json",
+        "environment": run_dir / "environment.json",
+        "last": run_dir / "checkpoints/last.pt",
+        "best_val": run_dir / "checkpoints/best_val.pt",
+    }
+    missing = [name for name, path in paths.items() if not path.is_file()]
+    if missing:
+        raise ValueError(f"completed child run is missing artifacts: {missing}")
+
+    summary = json.loads(paths["summary"].read_text(encoding="utf-8"))
+    if summary.get("status") != "completed":
+        raise ValueError("child summary is not completed")
+    completed_epoch = int(summary["completed_epoch"])
+    expected_epoch = int(trial["scientific_config"]["training"]["max_epochs"])
+    if completed_epoch != expected_epoch:
+        raise ValueError("child completed_epoch does not match the assigned scientific config")
+    best_validation = _validated_metrics(summary.get("best_validation"), label="best_validation")
+    final_validation = _validated_metrics(summary.get("final_validation"), label="final_validation")
+    if final_validation["epoch"] != completed_epoch:
+        raise ValueError("final validation epoch does not match completed_epoch")
+    if summary.get("id_test") != {
+        "status": "deferred",
+        "metrics_available": False,
+        "artifacts_created": False,
+    }:
+        raise ValueError("study child summary must record deferred ID test")
+    if "final_id_test" in summary or "best_val_id_test" in summary:
+        raise ValueError("study child summary contains forbidden ID-test metrics")
+    artifact_paths = summary.get("artifact_paths")
+    if not isinstance(artifact_paths, Mapping) or any(
+        key in artifact_paths for key in ("final_id_test", "best_val_id_test")
+    ):
+        raise ValueError("study child summary contains forbidden ID-test artifacts")
+    if (run_dir / "evaluation/final_id_test.json").exists() or (
+        run_dir / "evaluation/best_val_id_test.json"
+    ).exists():
+        raise ValueError("study child materialized forbidden ID-test artifacts")
+
+    metadata = json.loads(paths["run_metadata"].read_text(encoding="utf-8"))
+    if metadata.get("oge_git_sha") != trial["git_sha"] or metadata.get("git_dirty") is not False:
+        raise ValueError("child run Git identity differs from the trial")
+    if metadata.get("id_test_evaluation") != "deferred":
+        raise ValueError("child run metadata does not record deferred ID test")
+    environment = json.loads(paths["environment"].read_text(encoding="utf-8"))
+    executions = environment.get("executions")
+    if not isinstance(executions, list) or not executions:
+        raise ValueError("child environment is missing execution metadata")
+    execution = executions[-1]
+    if execution.get("device") != "cuda:0" or int(execution.get("cuda_device_count", 0)) != 1:
+        raise ValueError("child did not run as cuda:0 with exactly one visible GPU")
+    if execution.get("cuda_visible_devices") != str(expected_gpu.parent_visible_index):
+        raise ValueError("child CUDA_VISIBLE_DEVICES differs from the assigned physical GPU")
+    if execution.get("expected_physical_gpu_uuid") != expected_gpu.uuid:
+        raise ValueError("child expected physical GPU UUID differs from the attempt assignment")
+    if execution.get("actual_visible_gpu_uuid") != expected_gpu.uuid:
+        raise ValueError("child-visible GPU UUID differs from the attempt assignment")
+
+    last = load_torch_artifact(paths["last"], map_location="cpu")
+    best = load_torch_artifact(paths["best_val"], map_location="cpu")
+    if last.get("checkpoint_type") != "last" or best.get("checkpoint_type") != "best_val":
+        raise ValueError("child checkpoint roles are invalid")
+    if int(last.get("completed_epoch", -1)) != completed_epoch:
+        raise ValueError("last.pt completed_epoch differs from the summary")
+    if int(best.get("completed_epoch", -1)) != best_validation["epoch"]:
+        raise ValueError("best_val.pt epoch differs from the summary")
+    run_id = summary.get("run_id")
+    if not run_id or any(item.get("run_id") != run_id for item in (last, best)):
+        raise ValueError("child summary and checkpoint run IDs differ")
+    if any(item.get("oge_git_sha") != trial["git_sha"] for item in (last, best)):
+        raise ValueError("child checkpoint Git identity differs from the trial")
+    if last.get("best_validation") != summary["best_validation"]:
+        raise ValueError("last.pt best-validation record differs from the summary")
+
+    checkpoints = {
+        role: {
+            "path": str(paths[role]),
+            "sha256": sha256_file(paths[role]),
+            "completed_epoch": int(checkpoint["completed_epoch"]),
+        }
+        for role, checkpoint in (("last", last), ("best_val", best))
+    }
+    artifact_references = {
+        name: {"path": str(paths[name]), "sha256": sha256_file(paths[name])}
+        for name in ("summary", "history", "resolved_config", "run_metadata", "environment")
+    }
+    return {
+        "completed_epoch": completed_epoch,
+        "best_validation": best_validation,
+        "final_validation": final_validation,
+        "id_test": copy.deepcopy(summary["id_test"]),
+        "checkpoints": checkpoints,
+        "artifact_references": artifact_references,
+    }
 
 
 def run_independent_trials(
@@ -205,6 +330,7 @@ def run_independent_trials(
                     "CUDA_VISIBLE_DEVICES": str(gpu.parent_visible_index),
                     "OGE_PHYSICAL_GPU_UUID": gpu.uuid,
                     "OGE_CHILD_DEVICE": "cuda:0",
+                    "OGE_ATTEMPT_DIR": str(attempt_dir),
                 },
                 "started_at": _utc_now(),
                 "finished_at": None,
@@ -213,6 +339,7 @@ def run_independent_trials(
                 "checkpoint_decision": checkpoint_decision,
                 "logs": {"console": str(attempt_dir / "console.log")},
                 "output_paths": {"attempt_dir": str(attempt_dir), "run": str(attempt_dir / "run")},
+                "result": None,
                 "status": "running",
                 "failure": None,
             }
@@ -221,12 +348,29 @@ def run_independent_trials(
             started = time.perf_counter()
             child_environment = child_gpu_environment(gpu)
             child_environment["OGE_ATTEMPT_CONSOLE"] = str(attempt_dir / "console.log")
+            child_environment["OGE_ATTEMPT_DIR"] = str(attempt_dir)
             exit_status = int(spawn(command, env=child_environment, cwd=Path(repository_root)))
             attempt["elapsed_seconds"] = time.perf_counter() - started
             attempt["finished_at"] = _utc_now()
             attempt["exit_status"] = exit_status
-            attempt["status"] = "completed" if exit_status == 0 else "failed_unclassified"
-            if exit_status != 0:
+            if exit_status == 0:
+                try:
+                    attempt["result"] = collect_completed_attempt_result(
+                        attempt_dir,
+                        trial,
+                        gpu,
+                    )
+                except (OSError, RuntimeError, TypeError, ValueError, KeyError, json.JSONDecodeError) as exc:
+                    attempt["status"] = "failed_unclassified"
+                    attempt["failure"] = {
+                        "class": "implementation",
+                        "reason_code": "child_artifact_validation_failed",
+                        "detail": str(exc),
+                    }
+                else:
+                    attempt["status"] = "completed"
+            else:
+                attempt["status"] = "failed_unclassified"
                 attempt["failure"] = {
                     "class": "unclassified",
                     "reason_code": "requires_classification_before_retry",
@@ -236,10 +380,17 @@ def run_independent_trials(
             persisted_trial = json.loads(trial_path.read_text(encoding="utf-8"))
             persisted_trial["attempt_ids"].append(attempt_id)
             persisted_trial["status"] = (
-                "completed" if exit_status == 0 else "failed_pending_classification"
+                "completed" if attempt["status"] == "completed" else "failed_pending_classification"
             )
             persisted_trial["failure"] = attempt["failure"]
             persisted_trial["artifact_references"]["latest_attempt"] = str(attempt_dir)
+            if attempt["status"] == "completed":
+                result = attempt["result"]
+                persisted_trial["completed_epoch"] = result["completed_epoch"]
+                persisted_trial["best_validation"] = result["best_validation"]
+                persisted_trial["final_validation"] = result["final_validation"]
+                persisted_trial["checkpoints"] = result["checkpoints"]
+                persisted_trial["artifact_references"].update(result["artifact_references"])
             validate_trial_record(persisted_trial)
             atomic_write_json(trial_path, persisted_trial)
             results.append(attempt)

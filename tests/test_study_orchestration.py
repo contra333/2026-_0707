@@ -37,7 +37,10 @@ def _trial(index):
         "phase": "discovery",
         "optimizer_family": "sgd",
         "assigned_slot": index,
-        "scientific_config": {"optimizer": {"name": "sgd", "lr": 0.1}},
+        "scientific_config": {
+            "optimizer": {"name": "sgd", "lr": 0.1},
+            "training": {"max_epochs": 1},
+        },
         "config_hash": f"hash-{index}",
         "training_seed": 0,
         "git_sha": "git-sha",
@@ -46,7 +49,9 @@ def _trial(index):
         "status": "assigned",
         "failure": None,
         "attempt_ids": [],
+        "completed_epoch": None,
         "best_validation": None,
+        "final_validation": None,
         "ranking": None,
         "checkpoints": {},
         "artifact_references": {},
@@ -57,6 +62,71 @@ def _trial(index):
 
 def _gpus(count=3):
     return [PhysicalGPU(index, f"GPU-{index}", "Fake A5000") for index in range(count)]
+
+
+def _successful_spawn(command, *, env, cwd):
+    attempt_dir = Path(env["OGE_ATTEMPT_DIR"])
+    run_dir = attempt_dir / "run"
+    checkpoints = run_dir / "checkpoints"
+    checkpoints.mkdir(parents=True)
+    run_id = attempt_dir.name
+    best_validation = {"epoch": 1, "accuracy": 0.75, "nll": 0.5}
+    final_validation = {"epoch": 1, "accuracy": 0.75, "nll": 0.5}
+    summary = {
+        "status": "completed",
+        "run_id": run_id,
+        "completed_epoch": 1,
+        "best_validation": best_validation,
+        "final_validation": final_validation,
+        "artifact_paths": {},
+        "id_test": {
+            "status": "deferred",
+            "metrics_available": False,
+            "artifacts_created": False,
+        },
+    }
+    (run_dir / "summary.json").write_text(json.dumps(summary), encoding="utf-8")
+    (run_dir / "history.jsonl").write_text('{"epoch":1}\n', encoding="utf-8")
+    (run_dir / "resolved_config.yaml").write_text("training:\n  max_epochs: 1\n", encoding="utf-8")
+    (run_dir / "run_metadata.json").write_text(
+        json.dumps(
+            {
+                "run_id": run_id,
+                "oge_git_sha": "git-sha",
+                "git_dirty": False,
+                "id_test_evaluation": "deferred",
+            }
+        ),
+        encoding="utf-8",
+    )
+    (run_dir / "environment.json").write_text(
+        json.dumps(
+            {
+                "executions": [
+                    {
+                        "device": "cuda:0",
+                        "cuda_device_count": 1,
+                        "cuda_visible_devices": env["CUDA_VISIBLE_DEVICES"],
+                        "expected_physical_gpu_uuid": env["OGE_PHYSICAL_GPU_UUID"],
+                        "actual_visible_gpu_uuid": env["OGE_PHYSICAL_GPU_UUID"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    common = {
+        "completed_epoch": 1,
+        "best_validation": best_validation,
+        "oge_git_sha": "git-sha",
+        "run_id": run_id,
+    }
+    atomic_torch_save({**common, "checkpoint_type": "last"}, checkpoints / "last.pt")
+    atomic_torch_save(
+        {**common, "checkpoint_type": "best_val"},
+        checkpoints / "best_val.pt",
+    )
+    return 0
 
 
 def test_versioned_schema_validators_reject_wrong_versions_and_require_identity():
@@ -143,6 +213,7 @@ def test_fake_subprocess_uses_one_visible_gpu_and_never_overlaps_same_gpu(tmp_pa
             maximum_by_gpu[gpu] = max(maximum_by_gpu.get(gpu, 0), active_by_gpu[gpu])
             observed.append((tuple(command), gpu, env["OGE_CHILD_DEVICE"], Path(cwd)))
         time.sleep(0.01)
+        _successful_spawn(command, env=env, cwd=cwd)
         with lock:
             active_by_gpu[gpu] -= 1
         return 0
@@ -169,6 +240,33 @@ def test_fake_subprocess_uses_one_visible_gpu_and_never_overlaps_same_gpu(tmp_pa
     assert len(list(tmp_path.glob("study/trials/*/attempts/*/attempt.json"))) == 6
     assert len(list(tmp_path.glob("study/trials/*/attempts/*/attempt.json.sha256"))) == 6
     assert (tmp_path / "study/study_summary.json.sha256").is_file()
+    for trial_path in tmp_path.glob("study/trials/*/trial.json"):
+        persisted = json.loads(trial_path.read_text())
+        assert persisted["completed_epoch"] == 1
+        assert persisted["best_validation"] == {"epoch": 1, "accuracy": 0.75, "nll": 0.5}
+        assert persisted["final_validation"] == {"epoch": 1, "accuracy": 0.75, "nll": 0.5}
+        assert set(persisted["checkpoints"]) == {"last", "best_val"}
+        assert persisted["checkpoints"]["last"]["sha256"]
+        assert persisted["artifact_references"]["summary"]["sha256"]
+
+
+def test_exit_zero_without_child_artifacts_is_not_completed(tmp_path):
+    result = run_independent_trials(
+        study_id="study",
+        trials=[_trial(0)],
+        gpus=_gpus(1),
+        artifact_root=tmp_path,
+        repository_root=tmp_path,
+        command_builder=lambda trial, attempt_dir, decision: ["train"],
+        spawn=lambda *args, **kwargs: 0,
+    )
+    attempt = result["attempts"][0]
+    assert attempt["status"] == "failed_unclassified"
+    assert attempt["failure"]["class"] == "implementation"
+    assert attempt["failure"]["reason_code"] == "child_artifact_validation_failed"
+    persisted = json.loads(next(tmp_path.glob("study/trials/*/trial.json")).read_text())
+    assert persisted["status"] == "failed_pending_classification"
+    assert persisted["completed_epoch"] is None
 
 
 @pytest.mark.parametrize(
@@ -228,6 +326,7 @@ def _failed_attempt(trial):
         "checkpoint_decision": {"action": "fresh"},
         "logs": {"console": "console.log"},
         "output_paths": {"run": "run"},
+        "result": None,
         "status": "failed",
         "failure": {"class": "infrastructure", "reason_code": "external_interruption"},
     }
@@ -296,7 +395,7 @@ def test_atomic_json_checksum_and_attempt_preservation(tmp_path):
         artifact_root=tmp_path,
         repository_root=tmp_path,
         command_builder=lambda trial, attempt_dir, decision: ["train"],
-        spawn=lambda *args, **kwargs: 0,
+        spawn=_successful_spawn,
     )
     run_independent_trials(**kwargs)
     with pytest.raises(ValueError, match="existing trial record differs"):
@@ -327,7 +426,7 @@ def test_retry_execution_preserves_first_attempt_and_appends_second_attempt(tmp_
         artifact_root=tmp_path,
         repository_root=tmp_path,
         command_builder=lambda trial, attempt_dir, decision: ["train"],
-        spawn=lambda *args, **kwargs: 0,
+        spawn=_successful_spawn,
         attempt_templates={trial["trial_id"]: retry},
     )
     assert result["attempts"][0]["attempt_id"].endswith("attempt-002")

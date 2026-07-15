@@ -7,6 +7,7 @@ import argparse
 import copy
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,10 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STUDY_CONFIG = (
     REPOSITORY_ROOT / "configs/studies/wrn28_10_optimizer_hpo_v1_1/study.yaml"
 )
+
+
+def _utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def parse_args() -> argparse.Namespace:
@@ -114,7 +119,9 @@ def _trial_record(
         "status": "assigned",
         "failure": None,
         "attempt_ids": [],
+        "completed_epoch": None,
         "best_validation": None,
+        "final_validation": None,
         "ranking": None,
         "checkpoints": {},
         "artifact_references": {},
@@ -337,23 +344,81 @@ def main() -> int:
         artifact_root=args.artifact_root,
         smoke_only=args.smoke_only,
     )
-    atomic_write_json(args.artifact_root / study_id / "study_manifest.json", study_record)
+    study_manifest_path = args.artifact_root / study_id / "study_manifest.json"
+    study_summary_path = args.artifact_root / study_id / "study_summary.json"
+    study_record["created_at"] = _utc_now()
+    study_record["status"] = "smoke_only_running" if args.smoke_only else "running"
+    validate_study_record(study_record)
+    atomic_write_json(study_manifest_path, study_record)
 
     inventory = discover_nvidia_gpus()
     gpus = _select_gpus(inventory, args.gpus)
-    result = run_independent_trials(
-        study_id=study_id,
-        trials=trials,
-        gpus=gpus,
-        artifact_root=args.artifact_root,
-        repository_root=REPOSITORY_ROOT,
-        command_builder=_command_builder(args.data_root),
-        concurrency=args.concurrency,
-        dry_run=args.dry_run,
-        attempt_templates=attempt_templates,
+    try:
+        result = run_independent_trials(
+            study_id=study_id,
+            trials=trials,
+            gpus=gpus,
+            artifact_root=args.artifact_root,
+            repository_root=REPOSITORY_ROOT,
+            command_builder=_command_builder(args.data_root),
+            concurrency=args.concurrency,
+            dry_run=args.dry_run,
+            attempt_templates=attempt_templates,
+        )
+    except BaseException as exc:
+        study_record["finished_at"] = _utc_now()
+        study_record["status"] = "smoke_only_failed" if args.smoke_only else "failed"
+        study_record["failure"] = {
+            "class": "implementation_or_infrastructure",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+        validate_study_record(study_record)
+        atomic_write_json(study_manifest_path, study_record)
+        raise
+
+    study_record["finished_at"] = _utc_now()
+    if args.dry_run:
+        study_record["status"] = (
+            "smoke_only_dry_run_completed" if args.smoke_only else "dry_run_completed"
+        )
+        study_record["terminal_slot_accounting"] = {
+            "assigned": 0 if args.smoke_only else 64,
+            "planned": len(trials),
+            "terminal": 0,
+            "completed": 0,
+            "failed_pending_classification": 0,
+            "smoke_only": args.smoke_only,
+        }
+        exit_code = 0
+    else:
+        accounting = result["terminal_slot_accounting"]
+        all_completed = accounting["completed"] == accounting["planned"]
+        if all_completed:
+            study_record["status"] = "smoke_only_completed" if args.smoke_only else "completed"
+        else:
+            study_record["status"] = "smoke_only_failed" if args.smoke_only else "failed"
+        study_record["gpu_hours"] = result["gpu_hours"]
+        study_record["terminal_slot_accounting"] = {
+            "assigned": 0 if args.smoke_only else 64,
+            "planned": accounting["planned"],
+            "terminal": accounting["completed"] + accounting["failed_pending_classification"],
+            "completed": accounting["completed"],
+            "failed_pending_classification": accounting["failed_pending_classification"],
+            "smoke_only": args.smoke_only,
+        }
+        exit_code = 0 if all_completed else 1
+    validate_study_record(study_record)
+    atomic_write_json(study_manifest_path, study_record)
+    result.update(
+        created_at=study_record["created_at"],
+        finished_at=study_record["finished_at"],
+        status=study_record["status"],
+        terminal_slot_accounting=study_record["terminal_slot_accounting"],
+        gpu_hours=study_record["gpu_hours"],
     )
+    atomic_write_json(study_summary_path, result)
     print(json.dumps(result, indent=2, sort_keys=True))
-    return 0
+    return exit_code
 
 
 if __name__ == "__main__":

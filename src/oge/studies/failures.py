@@ -140,6 +140,7 @@ def make_retry_attempt(
         "checkpoint_decision": checkpoint_resume_decision(checkpoint_path),
         "logs": {},
         "output_paths": {},
+        "result": None,
         "status": "planned",
         "failure": {"class": "infrastructure", "reason_code": reason_code},
     }

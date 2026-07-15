@@ -55,7 +55,9 @@ TRIAL_REQUIRED = {
     "status",
     "failure",
     "attempt_ids",
+    "completed_epoch",
     "best_validation",
+    "final_validation",
     "ranking",
     "checkpoints",
     "artifact_references",
@@ -79,6 +81,7 @@ ATTEMPT_REQUIRED = {
     "checkpoint_decision",
     "logs",
     "output_paths",
+    "result",
     "status",
     "failure",
 }
@@ -114,6 +117,16 @@ def validate_trial_record(record: Mapping[str, Any]) -> None:
         raise ValueError("trial protocol_version mismatch")
     if not isinstance(record["attempt_ids"], list) or len(record["attempt_ids"]) != len(set(record["attempt_ids"])):
         raise ValueError("trial attempt_ids must be an ordered unique list")
+    if record["status"] == "completed":
+        if record["completed_epoch"] is None:
+            raise ValueError("completed trial is missing completed_epoch")
+        if not isinstance(record["best_validation"], Mapping):
+            raise ValueError("completed trial is missing best_validation")
+        if not isinstance(record["final_validation"], Mapping):
+            raise ValueError("completed trial is missing final_validation")
+        checkpoints = record["checkpoints"]
+        if not isinstance(checkpoints, Mapping) or set(checkpoints) != {"last", "best_val"}:
+            raise ValueError("completed trial must record last and best_val checkpoints")
 
 
 def validate_attempt_record(record: Mapping[str, Any]) -> None:
@@ -140,6 +153,8 @@ def validate_attempt_record(record: Mapping[str, Any]) -> None:
             raise ValueError(f"attempt identity is missing {key!r}")
     if "concurrent_study_trial_cap" not in gpu:
         raise ValueError("attempt GPU mapping is missing the concurrency cap")
+    if record["status"] == "completed" and not isinstance(record["result"], Mapping):
+        raise ValueError("completed attempt is missing validated child results")
 
 
 def seal_freeze(kind: str, payload: Mapping[str, Any]) -> dict[str, Any]:

@@ -406,6 +406,13 @@ def _optimizer_parameter_names(
 
 def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
     cuda_available = torch.cuda.is_available()
+    actual_visible_gpu_uuid = None
+    if cuda_available and device.startswith("cuda"):
+        raw_uuid = getattr(torch.cuda.get_device_properties(torch.device(device)), "uuid", None)
+        if raw_uuid is not None:
+            actual_visible_gpu_uuid = str(raw_uuid)
+            if not actual_visible_gpu_uuid.startswith("GPU-"):
+                actual_visible_gpu_uuid = f"GPU-{actual_visible_gpu_uuid}"
     return {
         "recorded_at": _utc_now(),
         "python": sys.version,
@@ -424,6 +431,10 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
             if cuda_available
             else []
         ),
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+        "expected_physical_gpu_uuid": os.environ.get("OGE_PHYSICAL_GPU_UUID"),
+        "actual_visible_gpu_uuid": actual_visible_gpu_uuid,
+        "orchestrator_child_device": os.environ.get("OGE_CHILD_DEVICE"),
     }
 
 
