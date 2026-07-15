@@ -28,6 +28,30 @@ sources:
   local_feature_ood_detector_reference_card:
     path: docs/reference_cards/06_feature_ood_detectors.md
     role: feature_detector_semantics_reference; documentation only until a later implementation PR
+  local_optimizer_hpo_protocol_reference_card:
+    path: docs/reference_cards/07_optimizer_comparison_hpo_protocol.md
+    role: WRN-28-10 four-optimizer HPO and comparison protocol; documentation only until a later implementation PR
+  adam_paper:
+    title: "Adam: A Method for Stochastic Optimization"
+    authors: Kingma and Ba
+    stable_source: arXiv:1412.6980
+    url: https://arxiv.org/abs/1412.6980
+    accessed: 2026-07-14
+    role: primary Adam update reference; does not validate this project's HPO ranges or budgets
+  decoupled_weight_decay_paper:
+    title: Decoupled Weight Decay Regularization
+    authors: Loshchilov and Hutter
+    stable_source: arXiv:1711.05101
+    url: https://arxiv.org/abs/1711.05101
+    accessed: 2026-07-14
+    role: primary decoupled weight decay reference; does not imply equal effective regularization at shared numeric weight decay
+  random_search_hpo_paper:
+    title: Random Search for Hyper-Parameter Optimization
+    authors: Bergstra and Bengio
+    stable_source: JMLR 13 (2012), 281-305
+    url: https://www.jmlr.org/papers/v13/bergstra12a.html
+    accessed: 2026-07-14
+    role: general random-search HPO rationale; does not validate this project's numeric ranges, trial budget, or seeds
   vgg16_paper:
     title: Very Deep Convolutional Networks for Large-Scale Image Recognition
     authors: Simonyan and Zisserman

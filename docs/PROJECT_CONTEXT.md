@@ -40,6 +40,8 @@ Implemented foundation:
 
 Documented for later implementation, but not yet implemented or validated:
 
+- the WRN-28-10 `SGD`/`SGDW`/`Adam`/`AdamW` tuned, accuracy-matched,
+  coupled-vs-decoupled, and shared-number comparison protocol;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
@@ -66,6 +68,8 @@ Not yet part of the validated foundation unless added by a later merged pull req
 - `docs/reference_cards/`: durable implementation and experiment semantics.
 - `docs/reference_cards/06_feature_ood_detectors.md`: durable feature-based
   detector naming, fitting, score, numerical-stability, and variant semantics.
+- `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md`: durable
+  four-optimizer HPO, comparison, seed, checkpoint, and provenance semantics.
 - GitHub Issues: one-time task scope and acceptance criteria.
 - Pull Requests: actual changes, validation evidence, and unresolved limitations.
 
