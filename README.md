@@ -16,7 +16,9 @@ The repository currently contains:
 - a CIFAR-10 training CLI validated with bounded actual-data CUDA runs;
 - an AI-assisted research and implementation workflow;
 - durable DDU fitting, adaptive-jitter, score, naming, and post-hoc variant
-  semantics documented for a later implementation task.
+  semantics documented for a later implementation task;
+- durable raw-feature artifact and frozen core representation-metric contracts
+  documented for later bounded implementation tasks;
 - a documented WRN-28-10 four-optimizer HPO and comparison protocol for a later
   orchestration implementation task.
 
@@ -54,6 +56,8 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - Classifier training, checkpoint, and resume protocol: `docs/reference_cards/05_training_protocol.md`
 - Feature-based OOD detector and DDU semantics: `docs/reference_cards/06_feature_ood_detectors.md`
 - WRN-28-10 optimizer-comparison and HPO protocol: `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md`
+- Raw checkpoint-feature artifact contract: `docs/reference_cards/08_raw_feature_artifact_contract.md`
+- Frozen core representation metrics: `docs/reference_cards/09_core_representation_metrics.md`
 - OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
 - CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`
 - New task template: `.github/ISSUE_TEMPLATE/research_task.md`
