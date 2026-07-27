@@ -1,0 +1,29 @@
+schema_version: "1.0"
+status: awaiting_server_measurement
+hosts:
+  - host_id: curie
+    display_name: curie
+    expected_hostname: curie
+    expected_gpu_name: NVIDIA RTX A5000
+    expected_gpu_count: 4
+  - host_id: lise
+    display_name: lise
+    expected_hostname: lise
+    expected_gpu_name: NVIDIA RTX A5000
+    expected_gpu_count: 2
+  - host_id: precision_medicine
+    display_name: 맞춤의약
+    expected_hostname: UNSPECIFIED
+    expected_gpu_name: NVIDIA RTX A6000
+    expected_gpu_count: 4
+forbidden_gpu_name_substrings:
+  - RTX PRO 6000
+  - Blackwell
+throughput:
+  worker_candidates: [0, 4, 8]
+  minimum_improvement: 0.15
+  require_full_gpu_concurrency: true
+parity:
+  atol: 0.00001
+  rtol: 0.0001
+  initialization_seed: 2027

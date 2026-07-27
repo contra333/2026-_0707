@@ -1,0 +1,14 @@
+schema_version: "1.0"
+status: pending_server_measurement
+note: >-
+  This file is intentionally not an installable lock yet. Freeze exact
+  Python, PyTorch, TorchVision, CUDA-wheel, and dependency versions only
+  after all three approved hosts can install and report the same environment.
+python: UNSPECIFIED
+packages:
+  torch: UNSPECIFIED
+  torchvision: UNSPECIFIED
+  numpy: UNSPECIFIED
+  pillow: UNSPECIFIED
+  pyyaml: UNSPECIFIED
+  scikit-learn: UNSPECIFIED

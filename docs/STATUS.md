@@ -18,6 +18,10 @@ current-tree v1.1 random-search path with the v1.2 deterministic grid,
 gate. The active classifier data configuration uses
 `oge_cifar10_holdout_v1`; its department-server path/loader smoke and the
 common-server numerical preflight are still required before production.
+Issue #37 now provides fail-closed capture/comparison, throughput-decision,
+parity, and host-shard tooling, but desktop WSL cannot resolve the department
+hosts. The common dependency lock, `precision_medicine` hostname, server
+measurements, parity, and smokes therefore remain explicitly unresolved.
 
 ## Validated or implemented
 
@@ -76,6 +80,13 @@ common-server numerical preflight are still required before production.
   or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
   justification. Its executable config, tables, sampler, default path, and
   golden hashes are absent from the current tree.
+- Issue #37 locally implements versioned server-preflight records, exact
+  environment/numerical comparison, legacy and PyTorch 2.9+ TF32 API capture,
+  the common 15% DataLoader worker gate, deterministic 5/2/5-capable balanced
+  host shards, synthetic A5000/A6000 parity comparison, and study-runner gates
+  for frozen dependency/preflight/throughput/shard/GPU identities. The
+  dependency lock is intentionally pending and no server result is claimed;
+  see `docs/validation/issue37_server_preflight_blocked.md`.
 
 ## Documented but not executed
 
@@ -115,6 +126,9 @@ common-server numerical preflight are still required before production.
   loader smoke
 - Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
   replication, and the pair controls
+- Common environment installation and three-host preflight completion,
+  DataLoader measurements, parity, current-UUID shard generation, and
+  per-host one-epoch smoke
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned

@@ -32,6 +32,7 @@ from oge.data import (
 from oge.models import make_model
 from oge.models.wide_resnet import DEFAULT_INIT_POLICY
 from oge.optimizers import make_optimizer
+from oge.studies.preflight import capture_numerical_policy
 from oge.train_utils.param_groups import DEFAULT_WEIGHT_DECAY_POLICY
 
 from .checkpoint import (
@@ -541,6 +542,7 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
         "expected_physical_gpu_uuid": os.environ.get("OGE_PHYSICAL_GPU_UUID"),
         "actual_visible_gpu_uuid": actual_visible_gpu_uuid,
         "orchestrator_child_device": os.environ.get("OGE_CHILD_DEVICE"),
+        "numerical_policy": capture_numerical_policy(),
     }
 
 
