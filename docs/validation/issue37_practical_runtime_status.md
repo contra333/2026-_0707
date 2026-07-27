@@ -38,9 +38,9 @@ persistent_workers=false
 
 ## Current observations
 
-- `curie`: preliminary runtime candidate PASS at Git
-  `300783d820df318380f2a84c6ebdba939fbf724b`; actual-data one-epoch smoke
-  remains NOT_RUN.
+- `curie`: runtime, complete-suite, CUDA/cuDNN, committed-holdout path/loader,
+  and actual-data one-epoch smoke PASS at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`.
 - `precision_medicine`: runtime candidate PASS, committed holdout verification
   PASS, bounded actual-data loader PASS, and actual-data one-epoch smoke PASS.
   The data/smoke checks ran from clean execution Git SHA
@@ -53,8 +53,7 @@ The detailed external attempt logs and wheel bundles remain outside Git.
 
 ## Consolidated three-host result
 
-The server reports support two complete host-level practical validations, not
-a completed three-host gate:
+The server reports support a completed three-host practical gate:
 
 The chronology matters when interpreting that result. `curie` was validated
 first under the earlier benchmark-grade environment plan and produced the
@@ -66,48 +65,48 @@ portable scientific minimum: the hash-locked runtime/test distributions,
 effective numerical policy, clean code/data identity, bounded CUDA/cuDNN
 behavior, actual-data loaders, and one existing-runner epoch.
 
-`precision_medicine` and `lise` were made equivalent only on that required
-surface. They are not claimed to be exact replicas of the `curie` system
-environment. Python patch, driver, GPU model and UUID, installation prefix,
+The three current validations align only on that required surface. They are
+not claimed to be exact replicas of one another at the full system-environment
+level. Python patch, driver, GPU model and UUID, installation prefix,
 installer/bootstrap mechanism, Conda/cache state, and filesystem layout may
 differ as recorded metadata or excluded infrastructure.
 
 | host | runtime, full suite, CUDA/cuDNN | committed holdout and bounded loader | actual-data one-epoch smoke | execution Git SHA | current verdict |
 | --- | --- | --- | --- | --- | --- |
-| `curie` | preliminary PASS on the earlier branch state (`182 passed`; bounded CUDA probes passed) | preliminary regeneration/hash and loader PASS on the earlier branch state; current-scope rerun required | NOT_RUN | `300783d820df318380f2a84c6ebdba939fbf724b` | INCOMPLETE |
+| `curie` | PASS (`175 passed`; bounded CUDA/cuDNN probes passed on idle GPU 0) | PASS | PASS (`smoke_only_completed`, 1/1) | `e9bfde43bb40f3ea2a6a11da9da86178049ecc40` | PASS |
 | `precision_medicine` | PASS (`175 passed` after the preserved fixture correction; bounded CUDA/cuDNN probes passed) | PASS | PASS (`smoke_only_completed`, 1/1) | `e9bfde43bb40f3ea2a6a11da9da86178049ecc40` | PASS |
 | `lise` | PASS (`175 passed`; bounded CUDA/cuDNN probes passed on idle GPU 0) | PASS | PASS (`smoke_only_completed`, 1/1) | `e9bfde43bb40f3ea2a6a11da9da86178049ecc40` | PASS |
 
-Within the deliberately narrow required surface, the observed
-`precision_medicine` and `lise` runtime distributions and effective numerical
-policies agree: Python `3.11.9`, PyTorch
+Within the deliberately narrow required surface, the observed `curie`,
+`precision_medicine`, and `lise` runtime distributions and effective
+numerical policies agree: Python `3.11.9`, PyTorch
 `2.5.1+cu121`, TorchVision `0.20.1+cu121`, CUDA runtime `12.1`, cuDNN
 `90100`, FP32 with AMP/BF16 disabled, float32 matmul precision `highest`, CUDA
 matmul TF32 disabled, cuDNN TF32 enabled, cuDNN benchmark/deterministic
 disabled, and deterministic algorithms disabled. Driver versions, GPU models,
 GPU UUIDs, and installation prefixes differ only in record-only fields.
 
-The `curie` report used the same Python, PyTorch, TorchVision, CUDA-runtime, and
-cuDNN versions, but it predates the clean execution SHA used by the other two
-hosts and does not contain the current-scope one-epoch smoke. Therefore the
-three-host common-SHA and effective-policy gate is not yet established.
+All three current-scope data and smoke validations used clean execution SHA
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Later commits on the task branch
+change only this status report and `docs/STATUS.md`; they do not change the
+executed code, configuration, or tests.
 
 ### Acceptance-criteria ledger
 
 | Issue #37 acceptance criterion | status | evidence or remaining work |
 | --- | --- | --- |
-| all three hosts report runtime PASS or an explicit blocker | PARTIAL | `precision_medicine` and `lise` PASS; `curie` has only a preliminary earlier-SHA PASS |
-| exact runtime/test distributions and effective numerical policy agree | PARTIAL | agreement is confirmed for `precision_medicine` and `lise`; current-scope `curie` reconciliation remains |
-| complete regression suite and bounded CUDA/cuDNN probes pass on every host | PARTIAL | current-scope PASS on two hosts; the `curie` result is from the earlier branch state |
-| committed CIFAR-10 holdout paths and loaders pass on every training host | PARTIAL | PASS on two hosts; current-scope `curie` path/loader validation remains |
-| one actual-data epoch completes on every approved host | PARTIAL | PASS on two hosts; `curie` is NOT_RUN |
-| repository records commands, outcomes, NOT_RUN work, and external artifact locations | PARTIAL | recorded for completed reports; the final `curie` commands and artifacts remain |
+| all three hosts report runtime PASS or an explicit blocker | PASS | `curie`, `precision_medicine`, and `lise` current-scope runtime checks PASS |
+| exact runtime/test distributions and effective numerical policy agree | PASS | all three hosts use the same 35-entry runtime/test lock surface and the same effective numerical policy |
+| complete regression suite and bounded CUDA/cuDNN probes pass on every host | PASS | all three hosts report `175 passed` and finite bounded probes |
+| committed CIFAR-10 holdout paths and loaders pass on every training host | PASS | byte-identical 45k/5k/10k membership and bounded loaders pass on all three hosts |
+| one actual-data epoch completes on every approved host | PASS | all three existing-runner smokes report `smoke_only_completed`, 1/1 |
+| repository records commands, outcomes, NOT_RUN work, and external artifact locations | PASS | each host report records the required evidence and external artifact root |
 | no 200-epoch production cell or protected-evidence access | PASS | no such run or access was reported on any host |
 
-Overall Issue #37 status is **INCOMPLETE**. Production execution remains
-unauthorized until the `curie` current-scope runtime, numerical-policy,
-actual-data loader, and one-epoch smoke report is added and the three-host
-comparison is rerun.
+Overall Issue #37 practical runtime status is **PASS**. This completes the
+three-host runtime/data/smoke acceptance ledger but does not authorize
+production execution. A separate Issue must still authorize the 200-epoch SGD
+canary and production grid.
 
 ## `curie` preliminary runtime observation
 
@@ -135,9 +134,121 @@ the corrected evidence were preserved.
 The external export root was
 `/home/ghjin/0707_exp/issue37_artifacts/300783d/exports/`. No benchmark,
 cross-GPU parity run, model smoke, one-epoch training smoke, 200-epoch run, or
-protected-evidence access was reported. Because this preliminary evidence is
-not the current common-SHA practical run, it does not replace the remaining
-`curie` validation.
+protected-evidence access was reported. This preliminary evidence is retained
+as chronology only; the current-scope run below supersedes it for the Issue
+#37 acceptance ledger.
+
+## `curie` current-scope runtime and actual-data observation
+
+The approved host resolved as `curie` with four NVIDIA RTX A5000 GPUs. The
+current-scope validation used a clean detached worktree at exact execution Git
+SHA `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. The later task-branch delta was
+confirmed to contain only `docs/STATUS.md` and this report. The existing Curie
+Python candidate was reused rather than rebuilt; only its dependency-free
+editable repository pointer was moved to the detached worktree.
+
+The required 30-entry runtime lock and 5-entry test lock matched the installed
+distributions without a missing or mismatched version. The observed runtime
+was:
+
+- Python `3.11.9`, executable
+  `/home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python`;
+- PyTorch `2.5.1+cu121` and TorchVision `0.20.1+cu121`;
+- CUDA runtime `12.1`, cuDNN `90100`, and NVIDIA driver `580.119.02`;
+- NumPy `1.26.4`, Pillow `10.4.0`, PyYAML `6.0.2`, and scikit-learn `1.5.2`;
+- FP32 parameters, activations, and storage with AMP and BF16 disabled;
+- float32 matmul precision `highest`;
+- CUDA matmul TF32 disabled and cuDNN TF32 enabled;
+- cuDNN benchmark and deterministic modes disabled and deterministic
+  algorithms disabled.
+
+The parent shell had a host-local `LD_LIBRARY_PATH`, so every candidate Python,
+pip, pytest, loader, probe, verifier, and smoke command explicitly unset both
+`LD_LIBRARY_PATH` and `PYTHONPATH`, set `PYTHONNOUSERSITE=1`, and verified user
+site disablement where applicable. `pip check` passed. The complete suite
+reported `175 passed in 9.98s` with only physical GPU 0 visible.
+
+Immediately before both bounded CUDA work and the smoke, all four GPUs had no
+reported compute process. Physical GPU 0 was selected:
+
+- parent-visible index `0`;
+- UUID `GPU-b7682b36-2ce0-802b-8bb1-e7668087ecde`;
+- NVIDIA RTX A5000 with driver `580.119.02`;
+- bounded 32-by-32 FP32 matrix multiplication: PASS with finite output;
+- bounded cuDNN convolution: PASS with finite FP32 `[2,4,16,16]` output.
+
+The existing OpenOOD root
+`/home/ghjin/datasets/openood-v1.5-3c35632e` passed deterministic regeneration
+and byte identity for the committed 45k/5k/10k lists and 60,001-row manifest.
+All three splits had zero missing paths, zero duplicate sample IDs, and labels
+in `[0,9]`. The bounded loader used `id_max_samples=8`, `ood_max_samples=8`,
+`batch_size=8`, `num_workers=0`, `pin_memory=false`, `drop_last=false`,
+`persistent_workers=false`, and a seed-0 generator. All three ID roles produced
+finite FP32 `[8,3,32,32]` batches with eight unique sample IDs; validation and
+test item 0 were deterministic.
+
+The existing study runner completed one actual-data SGD seed-0 epoch on GPU 0:
+
+- study status `smoke_only_completed`;
+- planned/completed `1/1` and no production slot assigned;
+- completed epoch `1` and expected/observed optimizer steps `352/352`;
+- `last.pt` and `best_val.pt` both strict-reloaded with finite parameters;
+- clean execution Git SHA, dataset hashes, host, GPU UUID, runtime, and
+  numerical policy were recorded in the artifacts;
+- ID-test remained `deferred`, no ID-test metric was present, and the
+  evaluation directory was empty.
+
+Epoch-1 train accuracy `0.5181333333333333`, train loss
+`1.3203771799299453`, validation accuracy `0.598`, and validation NLL
+`1.142156031847` are infrastructure-smoke observations only. They are not
+research results and were not used for selection.
+
+The principal exact commands were:
+
+```bash
+git diff --name-status e9bfde43bb40f3ea2a6a11da9da86178049ecc40..origin/codex/issue-37-server-preflight
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PIP_NO_INDEX=1 PIP_NO_CACHE_DIR=1 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python -m pip install --no-index --no-deps --no-build-isolation --report /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/evidence/editable_install_report.json -e /home/ghjin/0707_exp/issue37_worktrees/e9bfde43_curie_20260728
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/evidence/runtime_inventory_corrected.py --runtime-lock /home/ghjin/0707_exp/issue37_artifacts/300783d/curie_candidate_a2/locks/requirements-runtime.lock --test-lock /home/ghjin/0707_exp/issue37_artifacts/300783d/curie_candidate_a2/locks/requirements-test.lock
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python -m pip check
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python -m pytest -q -p no:cacheprovider
+
+nvidia-smi --query-gpu=index,uuid,name,driver_version,memory.total,memory.used,utilization.gpu --format=csv,noheader,nounits
+nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_gpu_memory --format=csv,noheader,nounits
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/evidence/issue37_cuda_probe.py --physical-index 0 --physical-uuid GPU-b7682b36-2ce0-802b-8bb1-e7668087ecde
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python scripts/verify_cifar10_holdout.py --data-root /home/ghjin/datasets/openood-v1.5-3c35632e
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/evidence/issue37_loader_check.py --repository-root /home/ghjin/0707_exp/issue37_worktrees/e9bfde43_curie_20260728 --data-root /home/ghjin/datasets/openood-v1.5-3c35632e
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python scripts/run_optimizer_study.py --study-config configs/studies/wrn28_10_optimizer_hpo_v1_2/study.yaml --phase grid --data-root /home/ghjin/datasets/openood-v1.5-3c35632e --artifact-root /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/study --gpus 0 --concurrency 1 --smoke-only --smoke-trials 1
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/evidence/smoke_artifact_verify.py --study-root /home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/study/wrn28_10_optimizer_hpo_v1_2__smoke_only__e9bfde43bb40
+```
+
+The first inventory harness treated setuptools internal vendored metadata for
+`wheel==0.46.3` as a second installed distribution alongside the actual locked
+`wheel==0.47.0`. `pip list`, `pip inspect`, and a direct path inspection showed
+that only `wheel==0.47.0` was installed at the candidate site root. The
+corrected harness excludes nested vendored metadata from the installed set,
+records it separately, and then passes all 35 lock entries. The original
+failure output and both harness versions are preserved; no package changed
+between the failed and passing inventory runs.
+
+External evidence remains outside Git under
+`/home/ghjin/0707_exp/issue37_artifacts/e9bfde43/curie_runtime_smoke_20260728/`.
+It contains package inventories, locks, `pip check`, the complete-suite log,
+GPU/process snapshots, CUDA/cuDNN and loader reports, the preserved inventory
+harness failure and correction, and the one-epoch attempt/checkpoint artifacts.
+
+No throughput benchmark, cross-GPU or cross-model parity, immutable shard,
+Conda/cache/repodata/URL/ownership/inode identity check, 200-epoch training,
+protected ID-test evaluation, OOD, geometry, Neural Collapse, or detector work
+was run.
 
 ## `precision_medicine` runtime observation
 
@@ -458,8 +569,13 @@ is a recoverable setup error in the same attempt. Preserve a short note, fix
 the command, and continue. A new preserved attempt is required only after a
 material environment installation or scientific run has begun.
 
+The preserved host histories include the `precision_medicine` fixture failure
+and clean correction, the `lise` post-install `jq` summary-expression error and
+correction, and the `curie` vendored-metadata inventory-harness failure and
+correction. None was hidden or reclassified as a scientific result.
+
 ## Remaining authorization boundary
 
-After all three runtime candidates, dataset loaders, and one-epoch smokes pass,
-record the observed values in this report and the Pull Request. A separate
-execution Issue must still authorize the 200-epoch canary and production grid.
+All three runtime candidates, dataset loaders, and one-epoch smokes have
+passed and are recorded in this report and Pull Request. A separate execution
+Issue must still authorize the 200-epoch canary and production grid.
