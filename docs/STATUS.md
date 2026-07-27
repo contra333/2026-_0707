@@ -13,7 +13,9 @@ independently validated at pinned training commit
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
 foundation and completed its bounded department-server smoke. No
 protocol-v1.2 36-cell production grid has started, and the orchestration code
-still implements protocol v1.1.
+still implements protocol v1.1. The active local classifier data configuration
+now uses `oge_cifar10_holdout_v1`; its department-server path/loader smoke is
+still required before production execution.
 
 ## Validated or implemented
 
@@ -25,6 +27,14 @@ still implements protocol v1.1.
 - `resnet18` is implemented as a research backbone.
 - `wrn28_10` is implemented as a research backbone.
 - The OpenOOD v1.5-aligned CIFAR-10 dataset and evaluation contract is documented and implemented.
+- Issue #33 locally implements the deterministic project CIFAR-10 ID
+  membership: official train is split into class-balanced 45k/5k using the
+  frozen SHA-256 rule, official test is reconstructed as the verified
+  OpenOOD 1k/9k union, and all three imglists plus a 60,000-row provenance
+  manifest are committed. The active training config uses
+  `oge_cifar10_holdout_v1`, WRN `msr_fan_in`, and train-only reflection
+  padding. Local deterministic/hash tests are not a substitute for the pending
+  department-server image-path and loader smoke.
 - Official released OpenOOD imglists and all eight required archives were validated on the department server.
 - Actual-data manifest validation confirmed fixed split counts, image-path existence, sample-ID uniqueness, and label ranges.
 - A bounded CUDA WRN-28-10 MSP vertical slice completed with random-model output marked as infrastructure-only.
@@ -100,6 +110,9 @@ still implements protocol v1.1.
 
 - Protocol v1.2 grid migration in code; `src/oge/studies/` and the frozen study
   configs still implement v1.1
+- Department-server verification of the committed
+  `oge_cifar10_holdout_v1` lists against the assembled image root and a bounded
+  loader smoke
 - Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
   replication, and the pair controls
 - Penultimate feature extraction pipeline

@@ -24,7 +24,11 @@ import yaml
 from torch import nn
 from torch.utils.data import DataLoader
 
-from oge.data import build_openood_cifar10_loaders, load_dataset_config
+from oge.data import (
+    build_openood_cifar10_loaders,
+    load_dataset_config,
+    resolve_imglist_path,
+)
 from oge.models import make_model
 from oge.models.wide_resnet import DEFAULT_INIT_POLICY
 from oge.optimizers import make_optimizer
@@ -47,7 +51,9 @@ from .engine import (
 )
 
 RUN_SCHEMA_VERSION = "1.0"
-PROTOCOL_NAME = "openood_v1_5_aligned_cifar10"
+PROTOCOL_NAME = "oge_cifar10_holdout_v1"
+LEGACY_PROTOCOL_NAME = "openood_v1_5_aligned_cifar10"
+SUPPORTED_PROTOCOL_NAMES = {PROTOCOL_NAME, LEGACY_PROTOCOL_NAME}
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -167,8 +173,10 @@ def _validate_training_config(config: dict[str, Any]) -> None:
     training = _require_mapping(config, "training")
     checkpoint = _require_mapping(config, "checkpoint")
 
-    if dataset.get("protocol") != PROTOCOL_NAME:
-        raise ValueError(f"dataset.protocol must be {PROTOCOL_NAME!r}")
+    if dataset.get("protocol") not in SUPPORTED_PROTOCOL_NAMES:
+        raise ValueError(
+            f"dataset.protocol must be one of {sorted(SUPPORTED_PROTOCOL_NAMES)!r}"
+        )
     for key in ("config_path", "train_split", "validation_split", "test_split"):
         if not dataset.get(key):
             raise ValueError(f"dataset.{key} is required")
@@ -256,6 +264,7 @@ def _selected_membership(
     dataset_selection: dict[str, Any],
     *,
     data_root: Path,
+    config_root: Path,
 ) -> dict[str, dict[str, object]]:
     membership: dict[str, dict[str, object]] = {}
     datasets = dataset_config["datasets"]
@@ -280,14 +289,99 @@ def _selected_membership(
         ):
             raise ValueError(f"selected {role} split does not match the CIFAR-10 ID role")
         imglist = Path(item["imglist"])
-        content = (data_root / imglist).read_bytes()
+        imglist_path = resolve_imglist_path(
+            item,
+            data_root=data_root,
+            config_root=config_root,
+        )
+        content = imglist_path.read_bytes()
+        digest = hashlib.sha256(content).hexdigest()
+        line_count = len(content.decode("utf-8").splitlines())
+        expected_count = item.get("expected_count")
+        if expected_count is not None and line_count != int(expected_count):
+            raise ValueError(
+                f"selected {role} split expected {expected_count} rows, got {line_count}"
+            )
+        expected_sha256 = item.get("expected_sha256")
+        if expected_sha256 is not None and digest != expected_sha256:
+            raise ValueError(
+                f"selected {role} split SHA-256 does not match dataset definition"
+            )
         membership[role] = {
             "selection_key": selection_key,
             "imglist": imglist.as_posix(),
-            "sha256": hashlib.sha256(content).hexdigest(),
-            "line_count": len(content.decode("utf-8").splitlines()),
+            "sha256": digest,
+            "line_count": line_count,
         }
     return membership
+
+
+def _membership_manifest(
+    dataset_config: dict[str, Any],
+    *,
+    data_root: Path,
+    config_root: Path,
+    selected_membership: dict[str, dict[str, object]],
+) -> dict[str, object] | None:
+    specification = dataset_config.get("membership_manifest")
+    if specification is None:
+        return None
+    if not isinstance(specification, dict):
+        raise ValueError("dataset membership_manifest must be a mapping")
+    manifest_path = specification.get("path")
+    if not manifest_path:
+        raise ValueError("dataset membership_manifest.path is required")
+    path = resolve_imglist_path(
+        {
+            "imglist": manifest_path,
+            "imglist_location": specification.get("location", "data_root"),
+        },
+        data_root=data_root,
+        config_root=config_root,
+    )
+    content = path.read_bytes()
+    digest = hashlib.sha256(content).hexdigest()
+    expected_sha256 = specification.get("sha256")
+    if expected_sha256 is not None and digest != expected_sha256:
+        raise ValueError("dataset membership manifest SHA-256 mismatch")
+    row_count = len(content.decode("utf-8").splitlines())
+    expected_rows = specification.get("row_count")
+    if expected_rows is not None and row_count != int(expected_rows):
+        raise ValueError(
+            f"dataset membership manifest expected {expected_rows} rows, got {row_count}"
+        )
+    try:
+        header = json.loads(content.decode("utf-8").splitlines()[0])
+    except (IndexError, json.JSONDecodeError) as exc:
+        raise ValueError("dataset membership manifest has an invalid header") from exc
+    if (
+        header.get("record_type") != "header"
+        or header.get("protocol_name") != dataset_config.get("protocol_name")
+    ):
+        raise ValueError("dataset membership manifest header does not match protocol")
+    outputs = header.get("outputs")
+    if not isinstance(outputs, dict):
+        raise ValueError("dataset membership manifest header is missing outputs")
+    for selected_role, manifest_role in (
+        ("train", "id_train"),
+        ("validation", "id_validation"),
+        ("test", "id_test"),
+    ):
+        output = outputs.get(manifest_role)
+        selected = selected_membership[selected_role]
+        if not isinstance(output, dict) or (
+            output.get("sha256") != selected["sha256"]
+            or output.get("row_count") != selected["line_count"]
+        ):
+            raise ValueError(
+                f"dataset membership manifest output {manifest_role!r} "
+                "does not match the selected imglist"
+            )
+    return {
+        "path": Path(manifest_path).as_posix(),
+        "sha256": digest,
+        "row_count": row_count,
+    }
 
 
 def resolve_training_config(
@@ -314,12 +408,23 @@ def resolve_training_config(
         raise ValueError("training and dataset protocol names do not match")
     dataset["config_path"] = str(dataset_config_path.resolve())
     dataset["data_root"] = str(actual_data_root)
+    dataset["imglist_config_root"] = str(dataset_config_path.parent.resolve())
     dataset["definition"] = dataset_definition
     dataset["membership"] = _selected_membership(
         dataset_definition,
         dataset,
         data_root=actual_data_root,
+        config_root=dataset_config_path.parent,
     )
+    manifest = _membership_manifest(
+        dataset_definition,
+        data_root=actual_data_root,
+        config_root=dataset_config_path.parent,
+        selected_membership=dataset["membership"],
+    )
+    if dataset["protocol"] == PROTOCOL_NAME and manifest is None:
+        raise ValueError(f"{PROTOCOL_NAME} requires a membership manifest")
+    dataset["membership_manifest"] = manifest
     resolved["runtime"] = {"device": str(_target_device(device))}
     return resolved
 
@@ -1015,6 +1120,7 @@ def run_training_from_config(
         drop_last=bool(training["drop_last"]),
         persistent_workers=bool(training["persistent_workers"]),
         train_generator=train_generator,
+        config_root=resolved_config["dataset"].get("imglist_config_root"),
     )
     target_device = _target_device(device)
     model = make_model(resolved_config["model"]).to(target_device)

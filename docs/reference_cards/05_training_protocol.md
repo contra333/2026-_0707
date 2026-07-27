@@ -3,9 +3,10 @@
 ## Purpose and authority boundary
 
 This card defines the durable training, checkpoint, resume, and artifact
-contract for the first classifier-training vertical slice. The reference path
-is OpenOOD v1.5-aligned CIFAR-10 with WRN-28-10, but the training loop must use
-the common model and optimizer factories rather than optimizer-specific loops.
+contract for the first classifier-training vertical slice. The active reference
+path is `oge_cifar10_holdout_v1` with WRN-28-10, while OOD evaluation retains
+the separately named OpenOOD-compatible roles. The training loop must use the
+common model and optimizer factories rather than optimizer-specific loops.
 
 The following cards remain authoritative for the inputs to this protocol:
 
@@ -13,22 +14,24 @@ The following cards remain authoritative for the inputs to this protocol:
   shared `weights_only_no_bias_norm` parameter-group policy.
 - [`02_architectures.md`](02_architectures.md) defines WRN-28-10 and its
   penultimate-feature and dropout semantics.
-- [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md) defines CIFAR-10
-  split membership and preprocessing.
+- [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md) defines the
+  project CIFAR-10 holdout membership, OpenOOD OOD compatibility roles, and
+  preprocessing.
 
-Training must not regenerate OpenOOD splits, alter preprocessing, modify WRN
-architecture behavior, or bypass `make_model()` or `make_optimizer()`.
+Training must not regenerate the frozen project holdout, alter preprocessing,
+modify WRN architecture behavior, or bypass `make_model()` or
+`make_optimizer()`.
 
 ## Reference configuration
 
-[`configs/training/cifar10_wrn28_10.yaml`](../../configs/training/cifar10_wrn28_10.yaml)
+[`configs/training/cifar10_wrn28_10_holdout_v1.yaml`](../../configs/training/cifar10_wrn28_10_holdout_v1.yaml)
 is the first supported reference configuration. It selects:
 
-- OpenOOD CIFAR-10 `id_train`, `id_validation`, and `id_test`;
+- `oge_cifar10_holdout_v1` CIFAR-10 `id_train` 45k, `id_validation` 5k,
+  and full official `id_test` 10k;
 - WRN-28-10 with `dropout_rate: 0.0` and initialization policy `msr_fan_in`,
-  materialized into the resolved config rather than spelled in the config file
-  (see the note in the config and the initialization semantics in
-  [`02_architectures.md`](02_architectures.md));
+  explicitly spelled in the active config and retained in resolved provenance
+  (see [`02_architectures.md`](02_architectures.md));
 - unsmoothed cross entropy;
 - SGD with learning rate `0.1`, momentum `0.9`, Nesterov enabled, and weight
   decay `0.0005` under the shared parameter-group policy;
@@ -38,8 +41,9 @@ is the first supported reference configuration. It selects:
 - fixed snapshots at epochs 0, 60, 61, 120, 121, 160, 161, and 200.
 
 These values are configuration, not training-engine constants. The resolved
-configuration records all applied defaults, the actual data root, and the
-loaded dataset definition rather than only the source config path.
+configuration records all applied defaults, the actual data root, the loaded
+dataset definition, the three selected imglist hashes, and the split-manifest
+hash rather than only the source config path.
 
 The repository entry point is:
 
@@ -58,9 +62,11 @@ override value and every other effective setting are written to
 
 ## DataLoader contract
 
-The existing OpenOOD CIFAR-10 loader and transforms are reused. The train
-loader shuffles with an explicit, seeded `torch.Generator`. The validation and
-test loaders do not shuffle.
+The existing imglist loader is reused with committed project ID lists. Only
+the exact `id_train` role receives the stochastic reflect-padding transform
+and shuffling with an explicit, seeded `torch.Generator`. Validation, both test
+roles, and OOD loaders use the deterministic evaluation transform and do not
+shuffle.
 
 The first protocol uses these explicit settings:
 
@@ -95,15 +101,19 @@ optimizer-independent training loop performs the following for every batch:
 6. backpropagate and take one optimizer step;
 7. increment `global_step` once.
 
-The first protocol is FP32 only. It does not use autocast, `GradScaler`, AMP,
-or distributed training.
+The first protocol uses FP32 parameter, activation, and storage values. It does
+not use autocast, `GradScaler`, AMP, BF16, or distributed training. TF32
+eligibility is an environment policy that must be measured and pinned
+uniformly by the production-execution Issue; this data migration does not
+claim a server value.
 
-Validation runs after every completed training epoch with `model.eval()` and
-without gradient creation. Validation NLL is the sample-weighted mean cross
-entropy and accuracy is the number of correct predictions divided by the full
-validation-split size. Final ID-test evaluation is performed for both the
-final (`last.pt`) state and the selected `best_val.pt` state. Test data never
-selects a checkpoint or changes training.
+Validation on the fixed 5,000-image holdout runs after every completed training
+epoch with `model.eval()` and without gradient creation. Validation NLL is the
+sample-weighted mean cross entropy and accuracy is the number of correct
+predictions divided by the full validation-split size. Final classification
+evaluation uses the full official 10,000-image `id_test` for both the final
+(`last.pt`) state and the selected `best_val.pt` state. Test data never selects
+a checkpoint or changes training.
 
 ## Epoch, global-step, and scheduler semantics
 

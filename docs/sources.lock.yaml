@@ -40,6 +40,16 @@ sources:
   local_optimizer_grid_literature_anchors_reference_card:
     path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
     role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
+  cifar10_official_dataset_page:
+    title: CIFAR-10 and CIFAR-100 datasets
+    authors: Krizhevsky, Nair, and Hinton
+    url: https://cave.cs.toronto.edu/kriz/cifar.html
+    accessed: 2026-07-27
+    role: >-
+      official dataset-size and class-balance reference: CIFAR-10 has 50,000
+      training images and 10,000 test images; training contains 5,000 images
+      per class in total and test contains exactly 1,000 per class. It does not
+      define an official validation split.
   adam_paper:
     title: "Adam: A Method for Stochastic Optimization"
     authors: Kingma and Ba
@@ -135,6 +145,28 @@ sources:
     url: https://github.com/Jingkang50/OpenOOD
     commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
     role: pinned dataset, preprocessing, grouping, and metric compatibility source
+  openood_v1_5_benchmark_imglist_release:
+    source_repository: Jingkang50/OpenOOD
+    source_commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
+    download_script: scripts/download/download.py
+    google_drive_file_id: 1lI1j0_fDDvjIt9JlWAw09X8ks-yrR_H1
+    archive_sha256: 647b8646327906c33e9d41294789984b9625a021968aec76e34fd521109d138e
+    accessed: 2026-07-27
+    files:
+      benchmark_imglist/cifar10/train_cifar10.txt:
+        rows: 50000
+        sha256: 9317e18980f1b11df74bba9d64223e57e69bd08c2943adbc75aec393a4976d1b
+      benchmark_imglist/cifar10/val_cifar10.txt:
+        rows: 1000
+        sha256: 6f64c4370bf3c61dab3308f7e8c5c94938b112b20d38cca77c1dfa0bcc5c1d89
+      benchmark_imglist/cifar10/test_cifar10.txt:
+        rows: 9000
+        sha256: 84559ec5225425e7f7363058d5f9442ed21a39c7c66b63c3f1bb8b1ddb935e13
+    role: >-
+      frozen source membership for `oge_cifar10_holdout_v1`; the 50k list
+      enumerates official CIFAR-10 train, and the disjoint 1k/9k lists compose
+      official CIFAR-10 test 10k. The project-derived membership and hashes are
+      committed under configs/datasets/oge_cifar10_holdout_v1.
   ddu_paper:
     title: "Deep Deterministic Uncertainty: A New Simple Baseline"
     authors: Mukhoti, Kirsch, van Amersfoort, Torr, and Gal

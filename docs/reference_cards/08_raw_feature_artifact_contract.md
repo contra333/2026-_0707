@@ -58,10 +58,12 @@ model.eval()
 torch.inference_mode()
 ```
 
-The released OpenOOD imglist order and stable `sample_id` are preserved. No
-sample may be silently skipped, duplicated, re-ordered, or augmented. A later
-implementation must reject a mismatch between the observed sample sequence and
-the configured manifest.
+The frozen project imglist order and stable `sample_id` are preserved for
+`id_train`, `id_validation`, and full `id_test`. The released OpenOOD order is
+preserved for `id_test_openood` and every OOD dataset. No sample may be
+silently skipped, duplicated, re-ordered, or augmented. A later implementation
+must reject a mismatch between the observed sample sequence and the configured
+manifest.
 
 The permitted roles are:
 
@@ -69,16 +71,17 @@ The permitted roles are:
 | --- | --- |
 | `id_train` | fit detector and representation statistics |
 | `id_validation` | ID-only validation when a later reference card explicitly permits it |
-| `id_test` | protected final ID evaluation after authorization |
+| `id_test` | protected final classification evaluation on official test 10k after authorization |
+| `id_test_openood` | protected OpenOOD-aligned OOD-metric ID side on released 9k after authorization |
 | near/far OOD test | protected detector evaluation after authorization |
 | OOD validation | compatibility only; never metric or detector selection in the main protocol |
 
 ## Protected-split authorization
 
-`id_test` and OOD-test extraction is allowed only after the evaluated
-configuration, training seed, checkpoint role, and checkpoint identity are
-frozen by the active experiment Issue. Discovery and confirmation HPO trials
-must not extract or traverse protected splits.
+`id_test`, `id_test_openood`, and OOD-test extraction is allowed only after the
+evaluated configuration, training seed, checkpoint role, and checkpoint
+identity are frozen by the active experiment Issue. Discovery and confirmation
+HPO trials must not extract or traverse protected splits.
 
 A fixed random/untrained checkpoint or the historical SGD seed-0 checkpoint may
 be authorized by a bounded validation Issue to test the pipeline. Such output

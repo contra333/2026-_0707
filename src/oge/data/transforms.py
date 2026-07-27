@@ -22,7 +22,7 @@ def make_cifar10_train_transform() -> transforms.Compose:
             transforms.Resize(32, interpolation=InterpolationMode.BILINEAR),
             transforms.CenterCrop(32),
             transforms.RandomHorizontalFlip(),
-            transforms.RandomCrop(32, padding=4),
+            transforms.RandomCrop(32, padding=4, padding_mode="reflect"),
             transforms.ToTensor(),
             transforms.Normalize(CIFAR10_MEAN, CIFAR10_STD),
         ]

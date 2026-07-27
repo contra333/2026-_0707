@@ -1,4 +1,4 @@
-"""Explicit loader factory for the OpenOOD-aligned CIFAR-10 protocol."""
+"""Explicit loader factory for OGE CIFAR-10 and OpenOOD-compatible roles."""
 
 from __future__ import annotations
 
@@ -24,6 +24,27 @@ def load_dataset_config(path: str | Path) -> dict:
     return config
 
 
+def resolve_imglist_path(
+    item: dict,
+    *,
+    data_root: str | Path,
+    config_root: str | Path | None = None,
+) -> Path:
+    """Resolve an imglist from the external data root or dataset-config root."""
+    location = item.get("imglist_location", "data_root")
+    if location == "data_root":
+        root = Path(data_root)
+    elif location == "dataset_config":
+        if config_root is None:
+            raise ValueError(
+                "imglist_location='dataset_config' requires an explicit config_root"
+            )
+        root = Path(config_root)
+    else:
+        raise ValueError(f"unknown imglist_location: {location!r}")
+    return root / item["imglist"]
+
+
 def build_openood_cifar10_loaders(
     config: dict,
     *,
@@ -36,6 +57,7 @@ def build_openood_cifar10_loaders(
     drop_last: bool | None = None,
     persistent_workers: bool | None = None,
     train_generator: Generator | None = None,
+    config_root: str | Path | None = None,
 ) -> dict[str, object]:
     dataset_class_name = config.get("dataset_class", "imglist")
     try:
@@ -73,7 +95,13 @@ def build_openood_cifar10_loaders(
         group = item["group"]
         if group not in loaders:
             raise ValueError(f"dataset {key!r} has unknown group: {group}")
-        is_train = bool(item["is_id"] and item["split"] == "train")
+        is_train = key == "id_train"
+        if is_train and (
+            not bool(item["is_id"])
+            or item["group"] != "id"
+            or item["split"] != "train"
+        ):
+            raise ValueError("id_train must be an ID training split")
         transform = (
             make_cifar10_train_transform()
             if is_train
@@ -83,7 +111,11 @@ def build_openood_cifar10_loaders(
             dataset_name=item["dataset_name"],
             split=item["split"],
             is_id=bool(item["is_id"]),
-            imglist_path=root / item["imglist"],
+            imglist_path=resolve_imglist_path(
+                item,
+                data_root=root,
+                config_root=config_root,
+            ),
             data_root=image_root,
             transform=transform,
         )

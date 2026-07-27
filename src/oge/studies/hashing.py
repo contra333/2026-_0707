@@ -58,6 +58,13 @@ def scientific_config(config: Mapping[str, Any]) -> dict[str, Any]:
         "test_split",
     )
     logical_dataset = {key: copy.deepcopy(dataset[key]) for key in logical_dataset_keys}
+    if dataset["protocol"] == "oge_cifar10_holdout_v1":
+        for key in ("membership", "membership_manifest"):
+            if key not in dataset:
+                raise ValueError(
+                    f"oge_cifar10_holdout_v1 scientific identity requires dataset.{key}"
+                )
+            logical_dataset[key] = copy.deepcopy(dataset[key])
 
     training = config["training"]
     if not isinstance(training, Mapping):

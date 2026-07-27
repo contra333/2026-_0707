@@ -27,7 +27,8 @@ def test_eval_transform_is_deterministic_and_uses_cifar10_normalization():
 
 
 def test_train_and_eval_transform_component_order_matches_contract():
-    train_types = [type(item) for item in make_cifar10_train_transform().transforms]
+    train_transform = make_cifar10_train_transform()
+    train_types = [type(item) for item in train_transform.transforms]
     eval_types = [type(item) for item in make_cifar10_eval_transform().transforms]
 
     assert train_types == [
@@ -46,3 +47,8 @@ def test_train_and_eval_transform_component_order_matches_contract():
         transforms.ToTensor,
         transforms.Normalize,
     ]
+    crop = next(
+        item for item in train_transform.transforms if isinstance(item, transforms.RandomCrop)
+    )
+    assert crop.padding == 4
+    assert crop.padding_mode == "reflect"

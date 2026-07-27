@@ -1,11 +1,12 @@
-# Reference Card 04: OpenOOD v1.5-Aligned CIFAR-10 Protocol
+# Reference Card 04: CIFAR-10 ID Holdout and OpenOOD v1.5 OOD Protocol
 
 ## Purpose and authority boundary
 
 This card defines the reusable CIFAR-10 data and OOD-evaluation protocol for
-optimizer-geometry experiments in this repository. It adopts OpenOOD v1.5
-dataset identities, released imglist membership, preprocessing, near/far
-grouping, and per-dataset evaluation structure.
+optimizer-geometry experiments in this repository. Classifier training and
+selection use the project-owned `oge_cifar10_holdout_v1` membership. OOD
+evaluation retains OpenOOD v1.5 dataset identities, released OOD membership,
+near/far grouping, and per-dataset evaluation structure.
 
 It does not adopt OpenOOD trainer or optimizer behavior, all-parameter weight
 decay, model implementations, APS hyperparameter search, string `eval()`
@@ -31,13 +32,56 @@ detector fitting and score semantics are defined separately in
 
 ## Split and dataset contract
 
-Official released imglists define membership. Never regenerate these splits.
+### Project ID membership
+
+Official CIFAR-10 supplies 50,000 train and 10,000 test images, with no
+official validation split. The project deterministically partitions the
+official train set once and commits the resulting membership:
+
+| role | membership | committed imglist |
+| --- | ---: | --- |
+| `id_train` | official train 45,000; 4,500 per class | `configs/datasets/oge_cifar10_holdout_v1/train_cifar10_45k.txt` |
+| `id_validation` | official train 5,000; 500 per class | `configs/datasets/oge_cifar10_holdout_v1/val_cifar10_5k.txt` |
+| `id_test` | official test 10,000; 1,000 per class | `configs/datasets/oge_cifar10_holdout_v1/test_cifar10_10k.txt` |
+| `id_test_openood` | OpenOOD's released test subset, 9,000 | `benchmark_imglist/cifar10/test_cifar10.txt` |
+
+`id_validation` is the only split permitted for LR/WD selection, checkpoint
+selection, and protocol-v1.2 `C1`-`C4` role selection. `id_test` is the
+protected final classification split. `id_test_openood` exists only as the ID
+side of OpenOOD-aligned OOD metrics, so those metrics remain directly aligned
+with the released 9,000-image evaluation membership.
+
+The source for the 45k/5k partition is OpenOOD's released 50,000-row
+`train_cifar10.txt`, which enumerates the official training set. For each row,
+canonicalize the relative path with the project imglist parser and define:
+
+```text
+sample_id = "cifar10:" + canonical_relative_path
+digest = SHA256("oge-cifar10-holdout-v1\0" + "2027\0" + sample_id)
+```
+
+Within each class, sort by `(digest, sample_id)`. The first 500 samples are
+`id_validation`; the remaining 4,500 are `id_train`. Output rows retain their
+order in the 50,000-row source list. This rule does not depend on NumPy,
+PyTorch, or standard-library RNG implementation details.
+
+The 10,000-image `id_test` list is the disjoint union of OpenOOD's released
+1,000-row ID-validation list and 9,000-row ID-test list, concatenated in that
+source order. The generator verifies zero overlap, union size 10,000, and
+exactly 1,000 samples per class.
+
+The committed `split_manifest.jsonl` records every source row, relative path,
+sample ID, label, assigned role, input SHA-256, output SHA-256, and class count.
+`scripts/generate_cifar10_holdout.py` is the only generation path. Production
+code reads the committed lists and verifies their frozen hashes; it never
+regenerates or revises membership at runtime.
+
+### OpenOOD OOD membership
+
+The following released OpenOOD lists remain unchanged:
 
 | role | dataset | imglist |
 | --- | --- | --- |
-| ID train | CIFAR-10 | `benchmark_imglist/cifar10/train_cifar10.txt` |
-| ID validation | CIFAR-10 | `benchmark_imglist/cifar10/val_cifar10.txt` |
-| ID test | CIFAR-10 | `benchmark_imglist/cifar10/test_cifar10.txt` |
 | compatibility-only OOD validation | TinyImageNet | `benchmark_imglist/cifar10/val_tin.txt` |
 | near-OOD | CIFAR-100 | `benchmark_imglist/cifar10/test_cifar100.txt` |
 | near-OOD | TinyImageNet | `benchmark_imglist/cifar10/test_tin.txt` |
@@ -46,9 +90,9 @@ Official released imglists define membership. Never regenerate these splits.
 | far-OOD | Textures | `benchmark_imglist/cifar10/test_texture.txt` |
 | far-OOD | Places365 | `benchmark_imglist/cifar10/test_places365.txt` |
 
-Use released lists unchanged. Do not perform runtime overlap filtering or
-hidden deduplication. OOD validation has role `compatibility_only` and is not
-used for model, detector, or hyperparameter selection in the main protocol.
+Do not perform runtime overlap filtering or hidden deduplication. OOD
+validation has role `compatibility_only` and is not used for model, detector,
+or hyperparameter selection in the main protocol.
 
 ## Validated department-server observations
 
@@ -56,7 +100,7 @@ The pinned released archives and imglists were validated on 2026-07-13 at
 repository commit `68e6eaf408124468384c5f5df118a5dc8426462e`. The assembled
 data root was `/home/ghjin/datasets/openood-v1.5-3c35632e`.
 
-Observed released-imglist counts were:
+Observed released-imglist counts for the upstream OpenOOD source protocol were:
 
 | role | dataset | count |
 | --- | --- | ---: |
@@ -86,19 +130,20 @@ mean = [0.4914, 0.4822, 0.4465]
 std  = [0.2470, 0.2435, 0.2616]
 ```
 
-Training transform:
+Training transform, used only for `id_train`:
 
 ```text
 Convert RGB
 Resize(32, bilinear)
 CenterCrop(32)
 RandomHorizontalFlip
-RandomCrop(32, padding=4)
+RandomCrop(32, padding=4, padding_mode="reflect")
 ToTensor
 Normalize(CIFAR-10 mean, std)
 ```
 
-ID validation/test and all OOD evaluation transforms are deterministic:
+`id_validation`, both ID-test roles, and all OOD evaluation transforms are
+deterministic:
 
 ```text
 Convert RGB
@@ -171,8 +216,10 @@ OpenOOD parity tests target only the explicitly OpenOOD-compatible metrics.
 
 ## Evaluation, aggregation, and artifacts
 
-Evaluate each OOD dataset against the same ID-test scores. Compute near/far
-summaries as arithmetic means of per-dataset metrics; never pool group samples.
+Evaluate each OOD dataset against the same `id_test_openood` scores. Compute
+near/far summaries as arithmetic means of per-dataset metrics; never pool group
+samples. The full 10,000-image `id_test` remains the classification-metric
+split and is not silently substituted into OpenOOD-compatible OOD results.
 
 An output directory contains at least:
 
@@ -198,8 +245,11 @@ validation. Its metrics are not research evidence.
 
 For every imglist, record path, SHA256, line count, missing image count,
 duplicate sample-ID count, label range, and class histogram where applicable.
-The Issue 6 server validation established these observations for the pinned
-artifact and also exercised real-data loaders and bounded CUDA evaluation.
+The Issue 6 server validation established these observations for the upstream
+OpenOOD artifact and exercised real-data loaders and bounded CUDA evaluation.
+The committed project holdout has deterministic local membership/hash tests;
+its image-path and loader validation in the department-server data root remains
+required before production execution.
 
 ## Remaining limitations
 
