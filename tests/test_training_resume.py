@@ -311,7 +311,10 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
     execution_environment = environment["executions"][0]
     assert execution_environment["python_executable"]
     assert execution_environment["hostname"]
-    assert execution_environment["nvidia_driver"] is None
+    if torch.cuda.is_available():
+        assert execution_environment["nvidia_driver"]
+    else:
+        assert execution_environment["nvidia_driver"] is None
     assert execution_environment["numerical_policy"]["precision_contract"] == {
         "parameters": "fp32",
         "activations": "fp32",
