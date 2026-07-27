@@ -16,8 +16,8 @@ model:
   # init_policy is intentionally omitted here. It is materialized as
   # `msr_fan_in` into the resolved config and the scientific config hash at run
   # time. Adding it to this file would change the frozen protocol-v1.1
-  # discovery bundle, which embeds this file verbatim and is retained as
-  # never-executed historical provenance. See configs/models/wrn28_10.yaml.
+  # discovery bundle, whose generator loads this parsed config without
+  # materializing model defaults. See configs/models/wrn28_10.yaml.
 
 loss:
   name: cross_entropy

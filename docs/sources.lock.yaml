@@ -85,10 +85,10 @@ sources:
       2026-07-27 re-audit: SGD with Nesterov momentum 0.9, learning rate 0.1,
       weight decay 0.0005, batch size 128, 200 CIFAR epochs, "learning rate
       dropped by 0.2 at 60, 120 and 160 epochs". The paper describes CIFAR as
-      "50,000 train and 10,000 test images" and states no validation split, so
-      it is not a reference for the project's 45k/5k ID split. Its augmentation
-      uses reflection padding and ZCA whitening; the project's deviations from
-      both are recorded in reference card 02.
+      "50,000 train and 10,000 test images" and states no validation split. Its
+      augmentation uses reflection padding and discusses ZCA and mean/std
+      variants. Dataset, split, and augmentation semantics remain governed by
+      reference cards 04 and 05 and are not changed by this source-audit Issue.
   wide_resnet_official_repository:
     repository: szagoruyko/wide-residual-networks
     url: https://github.com/szagoruyko/wide-residual-networks

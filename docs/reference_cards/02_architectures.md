@@ -169,18 +169,22 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
 
   `fan_in` and `fan_out` coincide for every convolution inside a WRN group and
   differ only at the stem and the three channel-expanding blocks, where the
-  standard deviations differ by up to a factor of `sqrt(10)`. BatchNorm makes
-  the forward function invariant to convolution weight scale, so the visible
-  effect is on effective learning rate and feature-norm growth rather than on
-  accuracy. Because those are mechanism variables for this project,
+  standard deviations differ by up to a factor of `sqrt(10)`. BatchNorm
+  provides substantial scale invariance in individual normalized paths, but
+  epsilon terms, residual/projection additions, and training dynamics mean
+  that the initialization change can affect optimization, effective learning
+  rate, feature-norm growth, penultimate geometry, and final accuracy. This
+  reference-parity change does not measure the size or direction of those
+  effects. Because they include mechanism variables for this project,
   `init_policy` is materialized into the resolved config and therefore enters
   the canonical scientific config hash; two runs differing only in
   initialization can never share a config identity.
 
-  History: runs before 2026-07-27, including the Issue #14 SGD seed-0 baseline,
-  used `mode="fan_out"`, which matched neither official implementation. Those
-  checkpoints and their validation report are retained unchanged as historical
-  provenance and are excluded from protocol v1.2 results.
+  History: runs before 2026-07-27, including the historical single-seed
+  baseline documented in Issue #14, used `mode="fan_out"`, which matched
+  neither official implementation. Those checkpoints and their validation
+  report are retained unchanged as historical provenance and are excluded from
+  protocol-v1.2 aggregation.
 - **Block semantics:** use the pre-activation basic block with two 3x3
   convolutions and ReLU activations. Compute
   `preactivated = relu1(bn1(x))`. A same-shape identity shortcut carries the

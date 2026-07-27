@@ -11,9 +11,9 @@ independently validated at pinned training commit
 `d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
-foundation and completed its bounded department-server smoke. No production
-optimizer study has started, and the orchestration code still implements
-protocol v1.1.
+foundation and completed its bounded department-server smoke. No
+protocol-v1.2 36-cell production grid has started, and the orchestration code
+still implements protocol v1.1.
 
 ## Validated or implemented
 
@@ -36,8 +36,8 @@ protocol v1.1.
   WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
   snapshots and full ID validation/test recomputation. That run predates the
   2026-07-27 initialization correction and used `fan_out`; its checkpoints and
-  report are retained unchanged as historical provenance and are excluded from
-  protocol v1.2 results.
+  report are retained unchanged as a historical single-seed baseline under the
+  prior protocol and are excluded from protocol-v1.2 aggregation.
 - WRN-28-10 convolution initialization was audited against the pinned official
   repository on 2026-07-27 and corrected from `fan_out` to `fan_in`, matching
   both `models/utils.lua` `MSRinit` and `pytorch/utils.py`. The policy is now
