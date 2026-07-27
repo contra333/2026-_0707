@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-14
+Last updated: 2026-07-23
 
 ## Current phase
 
@@ -49,6 +49,22 @@ independently validated at pinned training commit
   confirmatory geometry, logit-control, and low-complexity distance/angle
   panel. Covariance effective rank remains explicitly `UNSPECIFIED` rather
   than receiving an unaudited formula.
+- Protocol v1.2 (2026-07-23) in
+  `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` supersedes
+  the unexecuted v1.1 design: three primary optimizers (`SGD`, `Adam`,
+  `AdamW`) on deterministic literature-anchored `3 LR x 4 WD` grids, `SGDW`
+  demoted to the pair control, `C1`-`C4` role selection, and a three-seed
+  evidence unit. The code and frozen study configs still implement v1.1
+  until a separately bounded migration Issue lands.
+- `docs/reference_cards/02_architectures.md` now fixes the research lineup
+  (2026-07-23): WRN-28-10/CIFAR-10 main (full protocol), ResNet-18 on
+  CIFAR-10 and CIFAR-100 plus VGG-16-BN/CIFAR-10 (reduced protocol), and a
+  pilot-gated from-scratch `vit_small`/CIFAR-10 arm with recorded fallbacks.
+  `vgg16` and `vit_small` remain unimplemented.
+- `docs/reference_cards/10_optimizer_grid_literature_anchors.md` maps every
+  v1.2 grid value and lineup row to pinned sources or labeled project
+  judgment, and records prior-work positioning found in the 2026-07-23
+  literature pass.
 - These decisions are documentation only. No DDU detector code, test, config,
   checkpoint evaluation, or OOD result has been implemented or validated.
 
@@ -63,9 +79,11 @@ independently validated at pinned training commit
 
 ## Active next phase
 
-Implement the documented optimizer-comparison orchestration in a separate
-bounded Issue, including deterministic frozen trial tables, deferred ID-test
-evaluation, independent-GPU scheduling, provenance, and failure accounting.
+Migrate the optimizer-study code from protocol v1.1 to the recorded v1.2
+grid design and implement the remaining orchestration in a separate bounded
+Issue, including deterministic frozen trial tables, `C1`-`C4` role-selection
+freezing, deferred ID-test evaluation, independent-GPU scheduling,
+provenance, and failure accounting.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.

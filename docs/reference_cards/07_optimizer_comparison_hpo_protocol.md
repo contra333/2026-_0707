@@ -1,5 +1,18 @@
 # Reference Card 07: WRN-28-10 Optimizer Comparison and HPO Protocol
 
+## Protocol version status (updated 2026-07-23)
+
+Protocol v1.2 is the latest recorded decision for this study. It is specified
+in the section "Protocol v1.2: deterministic grid revision" at the end of this
+card and supersedes the v1.1 optimizer set, search budget, sampler, seed plan,
+and selection taxonomy. Like v1.1 at its own decision time, v1.2 is a
+pre-execution protocol decision: v1.1 was never executed, no v1.1 or v1.2
+study result exists, and the code in `src/oge/studies/` plus
+`configs/studies/wrn28_10_optimizer_hpo_v1_1/` still implements v1.1 until a
+separately bounded migration Issue lands. The v1.1 sections below are retained
+unchanged as historical provenance and as the authoritative text for every
+mechanism that v1.2 explicitly retains.
+
 ## Purpose, authority, and evidence boundary
 
 This card fixes active protocol version `wrn28_10_optimizer_hpo_v1.1` for
@@ -640,3 +653,249 @@ in that Issue and preserve the frozen semantics here.
 - Failures and retries follow assigned-slot and attempt-preservation rules; no
   result-driven replacement is allowed.
 - Interpolation is a later study, not part of the initial four-optimizer HPO.
+
+---
+
+## Protocol v1.2: deterministic grid revision (decision recorded 2026-07-23)
+
+### Purpose and supersession boundary
+
+This section fixes protocol version `wrn28_10_optimizer_hpo_v1.2`. It
+supersedes the unexecuted v1.1 design above in the five respects listed below
+and retains every other v1.1 mechanism unchanged. v1.1 remains historical
+provenance with its Git and Issue lineage; it supplies no results. No
+discovery, confirmation, matching, pair, final, or downstream run has been
+executed under either version.
+
+v1.2 exists because the 2026-07-23 planning decision restructured the study
+around:
+
+1. a deterministic, literature-anchored `3 LR x 4 WD` grid per optimizer
+   instead of two anchors plus fourteen log-uniform random draws;
+2. a three-optimizer primary study (`SGD`, `Adam`, `AdamW`) with `SGDW`
+   demoted to the coupled-vs-decoupled pair control only;
+3. a lighter three-seed evidence unit: the full seed-0 grid, plus seeds 1 and
+   2 for the selected role configurations only, with no separate five-seed
+   final phase;
+4. a role taxonomy `C1`-`C4` that merges the v1.1 "tuned winner" and
+   "accuracy matching" concepts into one selection stage;
+5. explicit descriptive reuse of the full seed-0 grid as landscape evidence.
+
+Numeric literature anchors for every grid value are recorded in
+[`10_optimizer_grid_literature_anchors.md`](10_optimizer_grid_literature_anchors.md).
+That card is evidence mapping; this section is the normative protocol. The
+architecture lineup that reuses this grid outside WRN-28-10 is fixed in
+[`02_architectures.md`](02_architectures.md).
+
+### Changed versus retained
+
+| Aspect | v1.1 | v1.2 |
+| --- | --- | --- |
+| Primary optimizers | `SGD`, `SGDW`, `Adam`, `AdamW` | `SGD`, `Adam`, `AdamW`; `SGDW` pair-control only |
+| Discovery proposal | 16 rows per optimizer: 2 anchors + 14 log-uniform draws (64 slots) | fixed 12-cell `3 LR x 4 WD` grid per optimizer (36 slots) |
+| Sampler | `PCG64(0)` shared-quantile log-uniform | none; grids are fully enumerated |
+| Seed plan | discovery `0`; confirmation `1`-`3`; final `4`-`8` | grid seed `0`; every unique role configuration adds seeds `1`, `2` |
+| Selection taxonomy | tuned winner via top-3 confirmation; separate matching phase | roles `C1`-`C4` selected from seed-0 grid, then three-seed replication |
+| Pair control | predeclared 2x2 anchor product per pair on confirmation seeds | two predeclared shared grid cells (`Adam`/`AdamW`) and two SGD-derived cells (`SGD`/`SGDW`), seeds 0-2 |
+| Seed-0 reuse | discovery outcomes never re-counted | seed-0 grid run is counted as one of the three role seeds (bias caveat below) |
+| Full-grid reuse | not defined | retained as descriptive landscape evidence |
+
+Retained unchanged, with the v1.1 sections above staying authoritative: the
+ID-only selection boundary and forbidden downstream signals; the run-level
+checkpoint rule; canonical config hashing; `last.pt` as primary scientific
+state and `best_val.pt` as validation-selected control; the deferred ID-test
+contract; the 200-epoch `multistep [60, 120, 160] gamma=0.2` schedule with no
+warmup; batch size 128; FP32; unsmoothed cross entropy;
+`weights_only_no_bias_norm`; the fixed CIFAR-10 data contract; GPU allocation
+and study/trial/attempt provenance schemas; the failure, resume, retry, and
+rerun policy; the prohibition on result-driven revision; and Git/external
+artifact storage rules.
+
+### Primary grid
+
+Every cell trains WRN-28-10 with `dropout_rate: 0.0` under the retained fixed
+recipe, seed 0. Twelve cells per optimizer, 36 assigned discovery slots.
+
+| Optimizer | Learning rates (3) | Weight decays (4) | Fixed optimizer fields |
+| --- | --- | --- | --- |
+| `SGD` | `0.03`, `0.1`, `0.3` | `0`, `1e-4`, `5e-4`, `1e-3` | `momentum=0.9`, `nesterov=true`, coupled |
+| `Adam` | `3e-4`, `1e-3`, `3e-3` | `0`, `1e-4`, `5e-4`, `1e-3` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, coupled |
+| `AdamW` | `3e-4`, `1e-3`, `3e-3` | `1e-4`, `1e-3`, `1e-2`, `1e-1` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
+
+Grid notes:
+
+- Anchor continuity: the v1.1 anchors `SGD (0.1, 5e-4)`, `SGD (0.1, 0)`,
+  `Adam (1e-3, 1e-4)`, `Adam (1e-3, 0)`, and `AdamW (1e-3, 1e-2)` are all
+  grid cells. The v1.1 zero-decay anchors become full zero-decay columns for
+  `SGD` and `Adam`.
+- `AdamW` has no zero-decay column because `AdamW` at `weight_decay=0` is
+  algorithmically identical to `Adam` at `weight_decay=0`; the `Adam` zero
+  column covers that endpoint for both update rules, and duplicate cells are
+  forbidden budget waste.
+- The two `Adam`/`AdamW` shared weight-decay values `1e-4` and `1e-3` exist
+  so that the pair control below uses cells inside both grids.
+- Boundary rule: if a selected role lands on a grid-edge value, report the
+  boundary hit; do not extend or re-run the grid mid-study. The v1.1
+  boundary-hit language applies with "range" read as "grid edge".
+- Failed cells (divergence, non-finite state, config-induced OOM) consume
+  their slot under the retained failure taxonomy, remain in landscape plots
+  labeled as failures, and are excluded from role candidacy by the validity
+  floor below.
+
+### Role taxonomy and deterministic selection
+
+All role selection uses only seed-0 `last.pt` epoch-200 ID-validation
+accuracy, with ID-validation NLL at the same checkpoint as first tie-break.
+`last.pt` is chosen over `best_val.pt` because `last.pt` is the retained
+primary scientific state for downstream geometry; the planning note said
+"validation accuracy" without fixing a checkpoint role, and this card freezes
+the choice. The remaining tie-breaks are: earlier best-validation epoch,
+ascending cell order (ascending learning rate, then ascending weight decay),
+ascending canonical config hash.
+
+Frozen selection constants, fixed before any grid result exists:
+
+- validity floor for role candidacy: seed-0 ID-validation accuracy `>= 0.90`
+  on CIFAR-10 (`>= 0.60` on CIFAR-100 for lineup variations);
+- accuracy closeness band: `0.002` absolute accuracy, widened once to
+  `0.005` when a rule below says so;
+- `C4` separation offset: `0.005` below the `C3` mean;
+- zero-decay log-distance constant: `2.0` decades (used only in the `C2`
+  distance rule when exactly one of two compared cells has zero decay).
+
+Role definitions:
+
+- **C1 (tuned best, per optimizer):** the highest-ranked valid cell of that
+  optimizer under the ranking chain above.
+- **C2 (near-optimal alternative, per optimizer):** among that optimizer's
+  valid cells within the closeness band of `C1` and differing from `C1` in
+  learning rate or weight decay, the cell with the largest hyperparameter
+  distance `d = |log10(lr / lr_C1)| + dwd`, where `dwd` is
+  `|log10(wd / wd_C1)|` when both decays are positive, the zero-decay
+  constant when exactly one is zero, and `0` when both are zero. Ties break
+  by the standard chain. If the band is empty, widen once to `0.005`; if
+  still empty, record `C2` as absent for that optimizer.
+- **C3 (primary matched triple):** among all `(SGD, Adam, AdamW)` triples of
+  valid cells whose max-min seed-0 accuracy spread is within the closeness
+  band, the triple with the highest mean accuracy; ties break by lowest mean
+  NLL, then ascending concatenated config hashes. If no triple qualifies,
+  widen once to `0.005`; if still none, record `C3` as unresolved and carry
+  the matched-comparison claim on `C1`/`C2` and landscape evidence only.
+- **C4 (secondary matched triple):** among qualifying triples whose mean
+  accuracy is at most `C3 mean - 0.005`, the highest-mean triple under the
+  same tie-breaks. No widening step. If none qualifies or `C3` is
+  unresolved, `C4` is omitted; a forced `C4` is prohibited.
+
+Roles may coincide on the same cell. A cell is trained once per seed and
+carries every role label it earned; duplicate training of an identical
+resolved configuration is forbidden.
+
+### Seed policy and the seed-0 reuse caveat
+
+Every unique cell selected into any role (at most 12 across `C1`-`C4`)
+receives training seeds `1` and `2` in addition to its existing seed-0 grid
+run, for a three-seed evidence unit reported as mean and standard deviation.
+Unlike v1.1, v1.2 deliberately counts the seed-0 discovery run inside the
+three-seed unit. Because roles are selected on seed-0 results, role bundles
+carry a known mild selection bias toward seed 0; this is an accepted budget
+decision, it must be disclosed wherever bundle statistics are reported, and
+per-seed values must remain separately available in artifacts. Seeds are
+never dropped, replaced, or rerun to improve a mean. Downstream geometry,
+Neural Collapse, detector, and OOD analyses use exactly these frozen
+seed-0/1/2 checkpoints for role configurations.
+
+### Pair controls (diagnostic, separately labeled)
+
+- **`Adam` versus `AdamW`:** the two predeclared shared cells
+  `(lr=1e-3, wd=1e-4)` and `(lr=3e-3, wd=1e-3)`. Both are cells of both
+  grids, so seed 0 comes from the grid itself; seeds `1` and `2` are added
+  for both optimizers at both cells unless already covered by a role. This
+  replaces the v1.1 `{3e-4, 1e-3} x {1e-5, 1e-4}` anchor product: `1e-5` is
+  not a v1.2 grid value, and v1.2 requires shared cells to live inside both
+  grids. The two cells span a x3 learning-rate step and a x10 decay step.
+- **`SGD` versus `SGDW`:** cell A is the anchor `(lr=0.1, wd=5e-4)`; cell B
+  is the highest-ranked `SGD` cell under the standard chain that differs
+  from cell A (this makes cell B equal to `SGD C1` whenever `C1` is not the
+  anchor). `SGDW`, which has no grid, trains both cells on seeds `0`, `1`,
+  `2` (six new runs); the `SGD` side reuses grid and role runs where they
+  exist and adds only missing seeds.
+
+The v1.1 shared-number caveat is retained verbatim in force: equal numeric
+`lr` and `weight_decay` are a controlled input and do not imply equal
+effective regularization. Expected pair-control budget including reuse is
+approximately 14-18 runs.
+
+### Assigned budget accounting
+
+- Discovery grid: exactly 36 slots (12 per optimizer), seed 0.
+- Role replication: at most 24 runs (at most 12 unique role cells, seeds 1-2).
+- Pair controls: approximately 14-18 runs after reuse.
+- Slot consumption, infrastructure retries, and attempt records follow the
+  retained v1.1 rules. GPU-hours are recorded per optimizer and never
+  equalized or used as a selection signal.
+
+### Landscape use of the full grid
+
+All 36 seed-0 outcomes, including failures, boundary cells, and cells never
+selected into roles, feed descriptive landscape analyses downstream
+(accuracy versus detector scores, raw-versus-normalized readout gaps,
+feature-norm statistics). Landscape evidence is descriptive only: it is
+never pooled into mean-and-deviation claims, never treated as repeated
+measurements, and never used to revise selection after the fact.
+
+### Architecture scope
+
+- This section is normative for WRN-28-10 on CIFAR-10: full protocol with
+  `C1`-`C4` and both pair controls.
+- The lineup decision in `02_architectures.md` reuses the same grids and
+  role rules for the reduced-protocol variations (`resnet18` CIFAR-10,
+  `resnet18` CIFAR-100, `vgg16` CIFAR-10): grid 36, roles `C1` and `C3`
+  only, seeds 0-2, no pair controls, CIFAR-100 validity floor `0.60`.
+  Variation study identifiers are fixed in their execution Issues.
+- The ViT variation has no authorized grid in this section; its grid is
+  provisional pending a bounded pilot (cards 02 and 10).
+
+### Migration requirements (separate bounded Issue; code still implements v1.1)
+
+1. Replace the `SEARCH_SPACES` random-draw design in
+   `src/oge/studies/protocol.py` with the three enumerated v1.2 grids and
+   remove or bypass sampler machinery for grid studies while preserving
+   provenance fields.
+2. Mirror the grids in a new
+   `configs/studies/wrn28_10_optimizer_hpo_v1_2/study.yaml` and keep the
+   byte-equality validation between Python and YAML.
+3. Materialize, hash, and freeze the three 12-row trial tables plus
+   manifest before any training run.
+4. Implement deterministic `C1`-`C4` selection with the frozen constants
+   above and an immutable role-freeze record written before seeds 1-2 run.
+5. Implement the revised seed plan and the pair-control reuse accounting.
+6. Update protocol-version strings to `wrn28_10_optimizer_hpo_v1.2`
+   everywhere a study artifact records its protocol.
+7. Extend tests: grid-table determinism and hashes, role-selection
+   tie-breaks and absence rules, budget accounting, seed handling, and the
+   unchanged deferred ID-test contract.
+8. The migration Issue must not execute the study; execution requires its
+   own separately authorized Issue with a fresh GPU and storage preflight.
+
+### v1.2 decision log and unverified assumptions
+
+- The grids are literature-anchored proposals (card 10); they are not
+  demonstrated to contain every optimizer's competitive region. Boundary
+  hits are reported, never repaired mid-study.
+- The constants `0.002`, `0.005`, `0.90`, `0.60`, and the zero-decay
+  distance `2.0` are feasibility decisions frozen before execution, not
+  statistical-power results.
+- Counting the seed-0 run inside role bundles trades unbiasedness for
+  budget; the bias is disclosed at reporting time.
+- The `AdamW` upper decay cell `1e-1` may become a boundary hit; the
+  normalized-weight-decay derivation in card 10 anticipates the competitive
+  region near `1e-2`-`1e-1` for this horizon.
+- `SGD` at `lr=0.3` with no warmup may diverge on some cells; a diverged
+  cell consumes its slot and is reported as a failure, which is itself
+  landscape information.
+- The planning note's same-hyperparameter example pair `(3e-3, 5e-4)` was
+  replaced by `(3e-3, 1e-3)` so that shared cells are grid cells of both
+  optimizers; the substitution is recorded here and in card 10.
+- Role selection on `last.pt` epoch-200 accuracy (not `best_val.pt`) is a
+  v1.2 freeze consistent with `last.pt` primacy; the planning note did not
+  specify a checkpoint role.
