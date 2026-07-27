@@ -40,18 +40,21 @@ Implemented foundation:
 - reproducible classifier training, scheduling, checkpoint/reload, epoch-boundary resume, and run artifacts;
 - bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths;
 - deterministic study/trial/attempt orchestration for the WRN-28-10 optimizer
-  HPO protocol, currently implementing protocol v1.1;
+  HPO protocol v1.2;
 - code-enforced deferred ID-test selection mode, deterministic ranking/freeze
   logic, independent single-GPU trial scheduling, and attempt-preserving
   failure/retry accounting;
+- deterministic 36-cell grid generation and hashing, C1-C4 role freezing,
+  deduplicated role/pair-control reuse planning, and protected-evidence
+  authorization by frozen config/seed identity;
 - bounded actual-data, two-GPU orchestration smoke validation with checkpoint,
   checksum, GPU-identity, and artifact-provenance verification.
 
 Documented for later implementation, but not yet implemented or validated:
 
-- protocol v1.2, which supersedes the v1.1 design the orchestration code still
-  implements: deterministic `3 LR x 4 WD` grids, `C1`-`C4` role selection, and
-  a three-seed evidence unit;
+- common-server environment and measured numerical-policy pinning,
+  DataLoader throughput hardening, mixed-GPU immutable shards, and production
+  execution;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
@@ -79,7 +82,8 @@ Not yet part of the validated foundation unless added by a later merged pull req
   detector naming, fitting, score, numerical-stability, and variant semantics.
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md`: durable
   optimizer HPO, comparison, seed, checkpoint, and provenance semantics.
-  Protocol v1.2 is authoritative; v1.1 remains historical provenance.
+  Protocol v1.2 is authoritative; the earlier random-search execution is only
+  a one-sentence excluded-study decision record.
 - `docs/reference_cards/10_optimizer_grid_literature_anchors.md`: literature
   anchor mapping for the v1.2 grids and the research lineup.
 - GitHub Issues: one-time task scope and acceptance criteria.

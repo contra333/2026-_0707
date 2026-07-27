@@ -16,6 +16,7 @@ import yaml
 from oge.studies.artifacts import atomic_write_json
 from oge.studies.failures import classify_failure, make_retry_attempt
 from oge.studies.hashing import provenance_identity_hash, scientific_config_hash
+from oge.studies.hashing import canonical_sha256
 from oge.studies.orchestration import (
     DEFAULT_MAX_CONCURRENCY,
     PhysicalGPU,
@@ -25,10 +26,10 @@ from oge.studies.orchestration import (
 )
 from oge.studies.protocol import (
     PROTOCOL_VERSION,
-    generate_discovery_bundle,
-    load_materialized_discovery_bundle,
+    generate_grid_bundle,
+    load_materialized_grid_bundle,
     load_study_config,
-    verify_materialized_discovery_bundle,
+    verify_materialized_grid_bundle,
 )
 from oge.studies.schemas import (
     STUDY_SCHEMA_VERSION,
@@ -41,7 +42,7 @@ from oge.training import load_training_config, repository_git_state, resolve_tra
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STUDY_CONFIG = (
-    REPOSITORY_ROOT / "configs/studies/wrn28_10_optimizer_hpo_v1_1/study.yaml"
+    REPOSITORY_ROOT / "configs/studies/wrn28_10_optimizer_hpo_v1_2/study.yaml"
 )
 
 
@@ -54,10 +55,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--study-config", type=Path, default=DEFAULT_STUDY_CONFIG)
     parser.add_argument(
         "--phase",
-        choices=["discovery", "confirmation", "matching", "pair_selection", "final"],
-        default="discovery",
+        choices=["grid", "followup"],
+        default="grid",
     )
-    parser.add_argument("--trial-plan", type=Path, help="Required frozen plan for non-discovery phases.")
+    parser.add_argument("--trial-plan", type=Path, help="Required frozen plan for follow-up runs.")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument(
@@ -107,6 +108,8 @@ def _trial_record(
         "phase": phase,
         "optimizer_family": row["optimizer_family"],
         "assigned_slot": row["assigned_slot"],
+        "lr_rank": row.get("lr_rank"),
+        "weight_decay_rank": row.get("weight_decay_rank"),
         "scientific_config": copy.deepcopy(row["scientific_config"]),
         "config_hash": row["config_hash"],
         "training_seed": row["training_seed"],
@@ -130,14 +133,18 @@ def _trial_record(
     return record
 
 
-def _load_non_discovery_plan(path: Path, expected_phase: str) -> list[dict[str, Any]]:
+def _load_followup_plan(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, list):
-        raise ValueError("frozen non-discovery trial plan must be a JSON list")
-    for trial in payload:
-        validate_trial_record(trial)
-        if trial["phase"] != expected_phase:
-            raise ValueError("trial-plan phase mismatch")
+    if not isinstance(payload, dict):
+        raise ValueError("frozen follow-up plan must be a JSON mapping")
+    expected_hash = canonical_sha256(
+        {key: value for key, value in payload.items() if key != "plan_hash"}
+    )
+    if payload.get("plan_hash") != expected_hash:
+        raise ValueError("frozen follow-up plan hash mismatch")
+    scheduled = payload.get("scheduled")
+    if not isinstance(scheduled, list):
+        raise ValueError("frozen follow-up plan is missing scheduled rows")
     return payload
 
 
@@ -151,17 +158,18 @@ def _study_record(
     dataset_membership_hashes: dict[str, str],
     artifact_root: Path,
     smoke_only: bool,
+    assigned_execution_slots: int,
 ) -> dict[str, Any]:
     record = {
         "schema_version": STUDY_SCHEMA_VERSION,
         "protocol_version": PROTOCOL_VERSION,
         "study_id": study_id,
-        "search_space_version": manifest["search_space_version"],
-        "search_space_hash": manifest["search_space_hash"],
-        "sampler": manifest["sampler"],
+        "grid_version": manifest["grid_version"],
+        "grid_hash": manifest["grid_hash"],
+        "grid_manifest_hash": manifest["manifest_hash"],
         "ordered_table_hashes": manifest["table_hashes"],
         "optimizer_families": study_config["optimizer_order"],
-        "assigned_budget": {"per_optimizer": 16, "total": 64},
+        "assigned_budget": {"per_optimizer": 12, "total": 36},
         "seed_roles": manifest["seed_roles"],
         "objective": study_config["objective"],
         "checkpoint_policy": study_config["checkpoint_policy"],
@@ -175,7 +183,7 @@ def _study_record(
         "status": "smoke_only_planned" if smoke_only else "planned",
         "gpu_hours": {"total": 0.0, "per_optimizer": {}},
         "terminal_slot_accounting": {
-            "assigned": 0 if smoke_only else 64,
+            "assigned": 0 if smoke_only else assigned_execution_slots,
             "terminal": 0,
             "smoke_only": smoke_only,
         },
@@ -224,30 +232,28 @@ def main() -> int:
     study_config = load_study_config(args.study_config)
     base_config_path = REPOSITORY_ROOT / study_config["base_training_config"]
     base_config = load_training_config(base_config_path)
-    generated = generate_discovery_bundle(study_config, base_config)
-    frozen_dir = REPOSITORY_ROOT / study_config["frozen_discovery_dir"]
-    verify_materialized_discovery_bundle(frozen_dir, generated)
-    frozen = load_materialized_discovery_bundle(frozen_dir)
-
-    git_sha, git_dirty = repository_git_state()
-    if git_dirty:
-        raise ValueError("study execution requires a clean Git checkout")
     resolved = resolve_training_config(
         base_config,
         data_root=args.data_root,
         device="cuda:0",
     )
+    generated = generate_grid_bundle(study_config, resolved)
+    frozen_dir = REPOSITORY_ROOT / study_config["frozen_grid_dir"]
+    verify_materialized_grid_bundle(frozen_dir, generated)
+    frozen = load_materialized_grid_bundle(frozen_dir)
+
+    git_sha, git_dirty = repository_git_state()
+    if git_dirty:
+        raise ValueError("study execution requires a clean Git checkout")
     dataset_hashes = {
         role: str(value["sha256"])
         for role, value in resolved["dataset"]["membership"].items()
     }
+    dataset_hashes["membership_manifest"] = str(
+        resolved["dataset"]["membership_manifest"]["sha256"]
+    )
     study_id = str(study_config["study_id"])
-    if args.smoke_only:
-        if args.smoke_trials != 2:
-            raise ValueError("Issue #22 bounded smoke requires exactly two trial attempts")
-        study_id = f"{study_id}__smoke_only__{git_sha[:12]}"
-
-    if args.phase == "discovery":
+    if args.phase == "grid":
         rows = [
             row
             for name in study_config["optimizer_order"]
@@ -257,7 +263,7 @@ def main() -> int:
             _trial_record(
                 row,
                 study_id=study_id,
-                phase="discovery",
+                phase="grid",
                 git_sha=git_sha,
                 dataset_membership_hashes=dataset_hashes,
             )
@@ -265,11 +271,30 @@ def main() -> int:
         ]
     else:
         if args.trial_plan is None:
-            raise ValueError("non-discovery phases require a pre-frozen --trial-plan")
-        trials = _load_non_discovery_plan(args.trial_plan, args.phase)
+            raise ValueError("follow-up phase requires a pre-frozen --trial-plan")
+        followup_plan = _load_followup_plan(args.trial_plan)
+        study_id = (
+            f"{study_id}__followup__"
+            f"{str(followup_plan['role_freeze_hash'])[:12]}"
+        )
+        rows = followup_plan["scheduled"]
+        trials = [
+            _trial_record(
+                row,
+                study_id=study_id,
+                phase="followup",
+                git_sha=git_sha,
+                dataset_membership_hashes=dataset_hashes,
+            )
+            for row in rows
+        ]
 
+    assigned_execution_slots = len(trials)
     if args.smoke_only:
-        trials = copy.deepcopy(trials[:2])
+        if args.smoke_trials <= 0:
+            raise ValueError("--smoke-trials must be positive")
+        study_id = f"{study_id}__smoke_only__{git_sha[:12]}"
+        trials = copy.deepcopy(trials[: args.smoke_trials])
         for index, trial in enumerate(trials):
             trial["trial_id"] = f"smoke-{index:02d}-{trial['optimizer_family']}"
             trial["study_id"] = study_id
@@ -343,6 +368,7 @@ def main() -> int:
         dataset_membership_hashes=dataset_hashes,
         artifact_root=args.artifact_root,
         smoke_only=args.smoke_only,
+        assigned_execution_slots=assigned_execution_slots,
     )
     study_manifest_path = args.artifact_root / study_id / "study_manifest.json"
     study_summary_path = args.artifact_root / study_id / "study_summary.json"
@@ -382,7 +408,7 @@ def main() -> int:
             "smoke_only_dry_run_completed" if args.smoke_only else "dry_run_completed"
         )
         study_record["terminal_slot_accounting"] = {
-            "assigned": 0 if args.smoke_only else 64,
+            "assigned": 0 if args.smoke_only else assigned_execution_slots,
             "planned": len(trials),
             "terminal": 0,
             "completed": 0,
@@ -399,7 +425,7 @@ def main() -> int:
             study_record["status"] = "smoke_only_failed" if args.smoke_only else "failed"
         study_record["gpu_hours"] = result["gpu_hours"]
         study_record["terminal_slot_accounting"] = {
-            "assigned": 0 if args.smoke_only else 64,
+            "assigned": 0 if args.smoke_only else assigned_execution_slots,
             "planned": accounting["planned"],
             "terminal": accounting["completed"] + accounting["failed_pending_classification"],
             "completed": accounting["completed"],

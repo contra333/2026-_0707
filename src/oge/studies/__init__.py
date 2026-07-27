@@ -8,18 +8,18 @@ from .hashing import (
 )
 from .protocol import (
     PROTOCOL_VERSION,
-    generate_discovery_bundle,
+    generate_grid_bundle,
     load_study_config,
-    validate_discovery_bundle,
+    validate_grid_bundle,
 )
 
 __all__ = [
     "PROTOCOL_VERSION",
     "canonical_json_bytes",
     "canonical_sha256",
-    "generate_discovery_bundle",
+    "generate_grid_bundle",
     "load_study_config",
     "provenance_identity_hash",
     "scientific_config_hash",
-    "validate_discovery_bundle",
+    "validate_grid_bundle",
 ]

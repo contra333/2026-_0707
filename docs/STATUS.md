@@ -12,10 +12,12 @@ independently validated at pinned training commit
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
 foundation and completed its bounded department-server smoke. No
-protocol-v1.2 36-cell production grid has started, and the orchestration code
-still implements protocol v1.1. The active local classifier data configuration
-now uses `oge_cifar10_holdout_v1`; its department-server path/loader smoke is
-still required before production execution.
+protocol-v1.2 36-cell production grid has started. Issue #35 replaces the
+current-tree v1.1 random-search path with the v1.2 deterministic grid,
+`C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
+gate. The active classifier data configuration uses
+`oge_cifar10_holdout_v1`; its department-server path/loader smoke and the
+common-server numerical preflight are still required before production.
 
 ## Validated or implemented
 
@@ -62,19 +64,26 @@ still required before production execution.
   actual OpenOOD membership verification, and a bounded two-GPU/two-trial,
   one-epoch smoke with checkpoint, checksum, GPU-identity, and deferred-ID-test
   validation. The smoke consumed no production study slot.
-- Historical provenance: the superseded protocol-v1.1 discovery bundle was
-  frozen at 16 rows per optimizer and 64 rows total, with manifest hash
-  `5b2f915d2337924cbb67077216bbcc4a49835f7927cea96c45004f0b76576b54`. It was
-  never executed. Protocol v1.2 replaces it with 12 grid cells per optimizer
-  and 36 cells total.
+- Issue #35 implements protocol v1.2 as three deterministic 12-cell tables,
+  with no sampler. The frozen manifest binds row/table/grid hashes to the
+  45k/5k/10k membership and split-manifest hashes. Selection requires all 36
+  seed-0 cells to be terminal, implements C1-C4 including widening and
+  absent/unresolved states, freezes the result identity, deduplicates role and
+  pair-control follow-ups, and gates protected evidence to frozen role
+  config/seed identities.
+- Historical decision log: an earlier 64-run random-search study exists only
+  on the department server, used the old 50k/1k/9k split, and is not imported
+  or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
+  justification. Its executable config, tables, sampler, default path, and
+  golden hashes are absent from the current tree.
 
-## Documented but not executed or implemented
+## Documented but not executed
 
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
-  tuned comparison, accuracy matching, pairwise coupling controls, search
-  budget, seeds, checkpoints, provenance, and rerun rules. Its orchestration
-  foundation is implemented, but no grid, role-replication, pair-control, or
-  downstream run has been executed under either protocol version.
+  deterministic grid, C1-C4 selection, pairwise coupling controls, budget,
+  seeds, checkpoints, provenance, and rerun rules. The v1.2 definition and
+  selection implementation exist, but no v1.2 grid, role-replication,
+  pair-control, or downstream run has been executed.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
   name, class-wise full unbiased covariance, official adaptive-jitter ladder,
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
@@ -87,13 +96,6 @@ still required before production execution.
   confirmatory geometry, logit-control, and low-complexity distance/angle
   panel. Covariance effective rank remains explicitly `UNSPECIFIED` rather
   than receiving an unaudited formula.
-- Protocol v1.2 (2026-07-23) in
-  `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` supersedes
-  the unexecuted v1.1 design: three primary optimizers (`SGD`, `Adam`,
-  `AdamW`) on deterministic literature-anchored `3 LR x 4 WD` grids, `SGDW`
-  demoted to the pair control, `C1`-`C4` role selection, and a three-seed
-  evidence unit. The code and frozen study configs still implement v1.1
-  until a separately bounded migration Issue lands.
 - `docs/reference_cards/02_architectures.md` now fixes the research lineup
   (2026-07-23): WRN-28-10/CIFAR-10 main (full protocol), ResNet-18 on
   CIFAR-10 and CIFAR-100 plus VGG-16-BN/CIFAR-10 (reduced protocol), and a
@@ -108,8 +110,6 @@ still required before production execution.
 
 ## Still missing
 
-- Protocol v1.2 grid migration in code; `src/oge/studies/` and the frozen study
-  configs still implement v1.1
 - Department-server verification of the committed
   `oge_cifar10_holdout_v1` lists against the assembled image root and a bounded
   loader smoke
@@ -122,11 +122,11 @@ still required before production execution.
 
 ## Active next phase
 
-Migrate the optimizer-study code from protocol v1.1 to the recorded v1.2
-grid design and implement the remaining orchestration in a separate bounded
-Issue, including deterministic frozen trial tables, `C1`-`C4` role-selection
-freezing, deferred ID-test evaluation, independent-GPU scheduling,
-provenance, and failure accounting.
+Complete separate bounded Issues for the three-server common environment and
+measured TF32 policy, DataLoader throughput decision, A5000/A6000 parity,
+immutable mixed-GPU host shards, and production preflight. Only after those
+gates pass may the execution Issue start the 200-epoch SGD canary and the
+remaining frozen grid.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -143,8 +143,8 @@ not authorize detector implementation without a separately bounded task.
 
 - Only one optimizer and one seed have a completed long-run baseline. No
   optimizer-comparison or multi-seed conclusion is currently supported.
-- Optimizer-comparison orchestration and execution require separately bounded
-  Issues before further long-running experiments.
+- Optimizer-comparison server hardening and execution require separately
+  bounded Issues before long-running experiments.
 - Production GPU availability and identity, storage and inode capacity,
   artifact retention and backup behavior, and optimizer-specific 200-epoch wall
   time remain unverified until a fresh server preflight.

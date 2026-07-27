@@ -1,0 +1,56 @@
+schema_version: "1.0"
+protocol_version: wrn28_10_optimizer_hpo_v1.2
+study_id: wrn28_10_optimizer_hpo_v1_2
+grid_version: wrn28_10_optimizer_grid_v1.2
+seeds:
+  grid_training: 0
+  role_replication: [1, 2]
+optimizer_order: [sgd, adam, adamw]
+assigned_grid_rows_per_optimizer: 12
+base_training_config: configs/training/cifar10_wrn28_10_holdout_v1.yaml
+frozen_grid_dir: configs/studies/wrn28_10_optimizer_hpo_v1_2/grid
+grids:
+  sgd:
+    lr: [0.03, 0.1, 0.3]
+    weight_decay: [0.0, 0.0001, 0.0005, 0.001]
+    fixed: {momentum: 0.9, nesterov: true}
+  adam:
+    lr: [0.0003, 0.001, 0.003]
+    weight_decay: [0.0, 0.0001, 0.0005, 0.001]
+    fixed: {beta1: 0.9, beta2: 0.999, eps: 0.00000001}
+  adamw:
+    lr: [0.0003, 0.001, 0.003]
+    weight_decay: [0.0001, 0.001, 0.01, 0.1]
+    fixed: {beta1: 0.9, beta2: 0.999, eps: 0.00000001}
+selection_policy:
+  valid_accuracy_floor: 0.90
+  primary_band: 0.002
+  widened_band: 0.005
+  c4_mean_gap: 0.005
+  checkpoint: last.pt
+  checkpoint_epoch: 200
+  bands_are: predeclared_operational_not_statistical_significance
+pair_controls:
+  adam_adamw:
+    - {lr: 0.001, weight_decay: 0.0001}
+    - {lr: 0.003, weight_decay: 0.001}
+  sgd_sgdw:
+    anchor_a: {lr: 0.1, weight_decay: 0.0005}
+    anchor_b: highest_ranked_sgd_cell_other_than_anchor_a
+objective:
+  primary: highest_last_epoch_200_id_validation_accuracy
+  tie_breaks:
+    - lowest_same_checkpoint_id_validation_nll
+    - earliest_best_validation_epoch
+    - ascending_lr_rank
+    - ascending_weight_decay_rank
+    - ascending_canonical_config_hash
+checkpoint_policy:
+  selection: last.pt_epoch_200
+  best_validation_epoch: best_val.pt_metadata_only
+  snapshot_epochs: [0, 60, 61, 120, 121, 160, 161, 200]
+selection_declarations:
+  id_test: forbidden_until_role_freeze
+  ood: forbidden_until_role_freeze
+  geometry_nc: forbidden_until_role_freeze
+  detector_metrics: forbidden_until_role_freeze

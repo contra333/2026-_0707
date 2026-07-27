@@ -30,9 +30,9 @@ The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and `wrn28_1
 This repository does **not** yet include learned-feature extraction, geometry
 or Neural Collapse metrics, feature-based OOD detector implementations,
 executed grid or multi-seed optimizer studies, or completed
-optimizer-comparison research runs. The orchestration code still implements
-protocol v1.1 while the reference cards record v1.2. The current MSP, training,
-and orchestration CUDA runs validate infrastructure only; they are not
+optimizer-comparison research runs. The orchestration code and frozen trial
+tables implement protocol v1.2, but no v1.2 production cell has run. The
+current MSP, training, and orchestration CUDA runs validate infrastructure only; they are not
 optimizer-comparison research results. The DDU reference card fixes future
 semantics but does not mean DDU or any DDU variant is implemented or validated.
 

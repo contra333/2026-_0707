@@ -16,18 +16,23 @@ def _config():
         "model": {"name": "wrn28_10", "dropout_rate": 0.0, "init_policy": "msr_fan_in"},
         "loss": {"name": "cross_entropy", "label_smoothing": 0.0},
         "dataset": {
-            "protocol": "openood_v1_5_aligned_cifar10",
+            "protocol": "oge_cifar10_holdout_v1",
             "train_split": "id_train",
             "validation_split": "id_validation",
             "test_split": "id_test",
             "data_root": "/runtime/a",
-            "membership": {"train": "separate-provenance"},
+            "membership": {
+                "train": {"sha256": "train"},
+                "validation": {"sha256": "validation"},
+                "test": {"sha256": "test"},
+            },
+            "membership_manifest": {"sha256": "manifest"},
         },
         "scheduler": {"name": "multistep", "milestones": [60, 120, 160], "gamma": 0.2},
         "training": {"max_epochs": 200, "batch_size": 128, "seed": 0, "precision": "fp32"},
         "checkpoint": {"snapshot_epochs": []},
         "runtime": {"device": "cuda:0"},
-        "study_phase": "discovery",
+        "study_phase": "grid",
     }
 
 
@@ -72,14 +77,23 @@ def test_scientific_hash_covers_model_initialization_policy():
         lambda value: value["runtime"].update(device="cuda:3"),
         lambda value: value.update(study_phase="confirmation"),
         lambda value: value["dataset"].update(data_root="/runtime/b"),
-        lambda value: value["dataset"].update(membership={"train": "other"}),
     ],
 )
-def test_scientific_hash_excludes_phase_seed_runtime_snapshot_and_membership(mutate):
+def test_scientific_hash_excludes_phase_seed_runtime_and_snapshot(mutate):
     config = _config()
     changed = copy.deepcopy(config)
     mutate(changed)
     assert scientific_config_hash(config) == scientific_config_hash(changed)
+
+
+def test_holdout_membership_and_manifest_are_part_of_scientific_identity():
+    config = _config()
+    changed_membership = copy.deepcopy(config)
+    changed_membership["dataset"]["membership"]["train"]["sha256"] = "other"
+    changed_manifest = copy.deepcopy(config)
+    changed_manifest["dataset"]["membership_manifest"]["sha256"] = "other"
+    assert scientific_config_hash(config) != scientific_config_hash(changed_membership)
+    assert scientific_config_hash(config) != scientific_config_hash(changed_manifest)
 
 
 def test_provenance_hash_is_separate_and_changes_with_git_or_dataset_identity():
