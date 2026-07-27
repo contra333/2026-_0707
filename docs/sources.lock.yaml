@@ -78,16 +78,37 @@ sources:
     authors: Zagoruyko and Komodakis
     stable_source: arXiv:1605.07146
     url: https://arxiv.org/abs/1605.07146
-    role: WRN-28-10 architecture reference; implemented backbone
+    accessed: 2026-07-27
+    role: >-
+      WRN-28-10 architecture reference for the implemented backbone, and the
+      training-recipe anchor for the repository schedule. Verbatim at the
+      2026-07-27 re-audit: SGD with Nesterov momentum 0.9, learning rate 0.1,
+      weight decay 0.0005, batch size 128, 200 CIFAR epochs, "learning rate
+      dropped by 0.2 at 60, 120 and 160 epochs". The paper describes CIFAR as
+      "50,000 train and 10,000 test images" and states no validation split. Its
+      augmentation uses reflection padding and discusses ZCA and mean/std
+      variants. Dataset, split, and augmentation semantics remain governed by
+      reference cards 04 and 05 and are not changed by this source-audit Issue.
   wide_resnet_official_repository:
     repository: szagoruyko/wide-residual-networks
     url: https://github.com/szagoruyko/wide-residual-networks
     commit: ae6d0d0561484172790c7a63c8ce6ade5a5a2914
     files:
       - pytorch/resnet.py
+      - pytorch/utils.py
       - models/wide-resnet.lua
-    accessed: 2026-07-13
-    role: pinned projection-shortcut and dropout-placement implementation reference
+      - models/utils.lua
+    accessed: 2026-07-27
+    role: >-
+      pinned projection-shortcut, dropout-placement, and weight-initialization
+      implementation reference. Verbatim at the 2026-07-27 audit:
+      `models/utils.lua` MSRinit uses `local n = v.kW*v.kH*v.nInputPlane` with
+      `v.weight:normal(0, math.sqrt(2/n))` and `v.bias:zero()`, and FCinit
+      zeroes only the fully connected bias; `pytorch/utils.py` calls
+      `kaiming_normal_(torch.Tensor(no, ni, k, k))` with no mode argument, whose
+      PyTorch default is fan_in. Both implementations therefore agree on fan_in.
+      `pytorch/resnet.py` applies the projection shortcut to the pre-activated
+      tensor `o1`, not to the raw block input.
   convnext_paper:
     title: A ConvNet for the 2020s
     authors: Liu, Mao, Wu, Feichtenhofer, Darrell, and Xie

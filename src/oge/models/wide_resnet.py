@@ -7,6 +7,14 @@ from numbers import Real
 import torch
 from torch import nn
 
+# Initialization policies. `msr_fan_in` reproduces the pinned official Wide
+# ResNet initialization: `models/utils.lua` MSRinit draws convolution weights
+# from `normal(0, sqrt(2 / (kW * kH * nInputPlane)))`, and `pytorch/utils.py`
+# calls `kaiming_normal_` without a mode argument, whose PyTorch default is
+# `fan_in`. Both official implementations therefore agree on fan_in.
+DEFAULT_INIT_POLICY = "msr_fan_in"
+SUPPORTED_INIT_POLICIES = (DEFAULT_INIT_POLICY,)
+
 
 class WideBasicBlock(nn.Module):
     def __init__(
@@ -93,12 +101,18 @@ class WideResNet(nn.Module):
         depth: int = 28,
         widen_factor: int = 10,
         dropout_rate: float = 0.0,
+        init_policy: str = DEFAULT_INIT_POLICY,
     ) -> None:
         super().__init__()
         if (depth - 4) % 6 != 0:
             raise ValueError("WideResNet depth must satisfy depth = 6n + 4")
         if widen_factor <= 0:
             raise ValueError("widen_factor must be positive")
+        if init_policy not in SUPPORTED_INIT_POLICIES:
+            raise ValueError(
+                f"unsupported init_policy: {init_policy!r}; "
+                f"supported policies are {list(SUPPORTED_INIT_POLICIES)}"
+            )
         if isinstance(dropout_rate, bool) or not isinstance(dropout_rate, Real):
             raise ValueError("dropout_rate must be a real number in [0, 1)")
         dropout_rate = float(dropout_rate)
@@ -112,6 +126,7 @@ class WideResNet(nn.Module):
         self.depth = depth
         self.widen_factor = widen_factor
         self.dropout_rate = dropout_rate
+        self.init_policy = init_policy
         self.feature_dim = widths[3]
 
         self.conv1 = nn.Conv2d(3, widths[0], kernel_size=3, stride=1, padding=1, bias=False)
@@ -144,9 +159,15 @@ class WideResNet(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self) -> None:
+        # `msr_fan_in` matches the pinned official implementations: every
+        # convolution weight is drawn from `normal(0, sqrt(2 / fan_in))`, which
+        # `kaiming_normal_(mode="fan_in", nonlinearity="relu")` reproduces
+        # because the ReLU gain is `sqrt(2)`. BatchNorm is unit scale and zero
+        # shift. The Linear weight keeps the framework default and only its bias
+        # is zeroed, matching `FCinit` in the official `models/utils.lua`.
         for module in self.modules():
             if isinstance(module, nn.Conv2d):
-                nn.init.kaiming_normal_(module.weight, mode="fan_out", nonlinearity="relu")
+                nn.init.kaiming_normal_(module.weight, mode="fan_in", nonlinearity="relu")
             elif isinstance(module, nn.BatchNorm2d):
                 nn.init.ones_(module.weight)
                 nn.init.zeros_(module.bias)

@@ -580,6 +580,7 @@ def test_resolved_config_fingerprints_selected_imglist_membership(tmp_path):
     assert resolved_defaults["model"]["num_classes"] == 10
     assert resolved_defaults["model"]["depth"] == 28
     assert resolved_defaults["model"]["widen_factor"] == 10
+    assert resolved_defaults["model"]["init_policy"] == "msr_fan_in"
     assert resolved_defaults["loss"]["label_smoothing"] == 0.0
     assert resolved_defaults["optimizer"] == {
         "name": "adam",

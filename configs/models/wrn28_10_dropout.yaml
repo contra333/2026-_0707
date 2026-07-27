@@ -3,3 +3,4 @@ num_classes: 10
 depth: 28
 widen_factor: 10
 dropout_rate: 0.3
+init_policy: msr_fan_in

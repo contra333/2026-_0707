@@ -149,7 +149,42 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
   authors' official `szagoruyko/wide-residual-networks` code at commit
   `ae6d0d0561484172790c7a63c8ce6ade5a5a2914`. The projection-shortcut
   comparison uses `pytorch/resnet.py`; the dropout placement and option use
-  `models/wide-resnet.lua`.
+  `models/wide-resnet.lua`; the weight initialization uses `models/utils.lua`
+  and `pytorch/utils.py`.
+- **Initialization semantics (frozen 2026-07-27):** the model config field
+  `init_policy` selects the policy and its only supported value is
+  `msr_fan_in`. Under that policy:
+  - every `Conv2d` weight is drawn from `normal(0, sqrt(2 / fan_in))` with
+    `fan_in = kernel_height * kernel_width * in_channels`, implemented as
+    `kaiming_normal_(mode="fan_in", nonlinearity="relu")` because the ReLU gain
+    is `sqrt(2)`. This includes the 1x1 projection shortcuts;
+  - every `BatchNorm2d` weight is `1` and bias is `0`;
+  - the `classifier` bias is `0` and its weight keeps the framework default.
+
+  This reproduces both pinned official implementations, which agree:
+  `models/utils.lua` `MSRinit` computes `n = kW*kH*nInputPlane` and draws
+  `normal(0, sqrt(2/n))`, and `pytorch/utils.py` calls `kaiming_normal_` with no
+  mode argument, whose PyTorch default is `fan_in`. `FCinit` in
+  `models/utils.lua` likewise zeroes only the fully connected bias.
+
+  `fan_in` and `fan_out` coincide for every convolution inside a WRN group and
+  differ only at the stem and the three channel-expanding blocks, where the
+  standard deviations differ by up to a factor of `sqrt(10)`. BatchNorm
+  provides substantial scale invariance in individual normalized paths, but
+  epsilon terms, residual/projection additions, and training dynamics mean
+  that the initialization change can affect optimization, effective learning
+  rate, feature-norm growth, penultimate geometry, and final accuracy. This
+  reference-parity change does not measure the size or direction of those
+  effects. Because they include mechanism variables for this project,
+  `init_policy` is materialized into the resolved config and therefore enters
+  the canonical scientific config hash; two runs differing only in
+  initialization can never share a config identity.
+
+  History: runs before 2026-07-27, including the historical single-seed
+  baseline documented in Issue #14, used `mode="fan_out"`, which matched
+  neither official implementation. Those checkpoints and their validation
+  report are retained unchanged as historical provenance and are excluded from
+  protocol-v1.2 aggregation.
 - **Block semantics:** use the pre-activation basic block with two 3x3
   convolutions and ReLU activations. Compute
   `preactivated = relu1(bn1(x))`. A same-shape identity shortcut carries the
@@ -173,7 +208,27 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
   position; omitting explicit `dropout_rate`; omitting the final BN/ReLU
   before pooling; returning flattened spatial maps; using a projection to
   match ResNet dimensions; accepting ambiguous WRN names without explicit
-  depth and widen factor.
+  depth and widen factor; changing `init_policy` without expecting a new
+  scientific config identity.
+
+#### Audited deviations from the official WRN implementation (2026-07-27)
+
+Architecture-side audit of `src/oge/models/wide_resnet.py` against the pinned
+paper and repository. Data, augmentation, and split deviations are out of scope
+here and belong to [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md)
+and [`05_training_protocol.md`](05_training_protocol.md).
+
+| Item | Verdict |
+| --- | --- |
+| Fixed 8x8 average pooling vs `AdaptiveAvgPool2d((1, 1))` | **Identical.** The CIFAR path reaches an 8x8 final feature map, so the two are the same operation. The adaptive form is the more general spelling. |
+| `return_features=True` and `model.classifier` | **Pure API addition.** The computation graph is unchanged and `tests/test_model_api.py` asserts logits parity between the two call forms. |
+| `dropout_rate` presets `0.0` and `0.3` | **Identical.** Both are conditions reported in the paper. |
+| Projection shortcut consumes the pre-activated tensor | **Identical.** `pytorch/resnet.py` computes `F.conv2d(o1, ...)` on the pre-activated tensor. |
+| Dropout after the second BN/ReLU, before the second 3x3 convolution | **Identical.** Matches `models/wide-resnet.lua`. |
+| Convolution initialization | **Corrected 2026-07-27** from `fan_out` to `fan_in`. Both official implementations use fan_in; the previous value matched neither. See the initialization semantics above. |
+| BatchNorm unit scale and zero shift; classifier bias zeroed, weight at framework default | **Identical** to `MSRinit` and `FCinit`. |
+| Weight decay applied to Conv/Linear weights only, excluding bias and BatchNorm | **Deliberate deviation, and part of the experimental design.** The paper and OpenOOD decay all parameters. Decaying BatchNorm `gamma` suppresses channels, which would contaminate the coupled-versus-decoupled comparison this project runs. Fixed by `weights_only_no_bias_norm` in [`01_optimizers.md`](01_optimizers.md). Accuracy is therefore not expected to match published OpenOOD numbers exactly. |
+| Checkpoint, resume, and provenance contracts | **Pure addition.** No effect on the training computation. |
 
 ### `vgg16`
 
@@ -248,6 +303,7 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
 - Dataset names must not implicitly change architecture.
 - CIFAR/ImageNet-style architectural variants must be selected explicitly through `variant`.
 - Real research backbones must not add arbitrary projection layers just to force a common `feature_dim`.
-- Any architecture-side change that changes penultimate geometry must be explicit in config and documentation.
+- Any architecture-side change that changes penultimate geometry must be explicit in config and documentation. Weight initialization is such a change: it is carried by the `init_policy` model-config field, is materialized into the resolved config, and enters the canonical scientific config hash.
+- Initialization must not be silently retuned to a framework or TorchVision default. `wrn28_10` follows the pinned official `fan_in` policy; `resnet18` keeps `fan_out`, which matches the TorchVision reference implementation rather than a pinned author repository, and that difference between the two backbones is intentional and recorded.
 - ConvNeXt uses LayerNorm. The current parameter-group policy excludes LayerNorm from weight decay, and that behavior must be preserved unless a later optimizer reference card changes it.
 - TorchVision `create_feature_extractor` may be used as a reference during implementation, but final project models must directly support `return_features=True`.

@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 
 import pytest
@@ -74,6 +75,79 @@ def test_wrn_presets_configure_every_dropout_location(
     assert all(isinstance(dropout, expected_type) for dropout in dropouts)
     if dropout_rate > 0:
         assert all(dropout.p == pytest.approx(dropout_rate) for dropout in dropouts)
+
+
+def test_conv_initialization_matches_official_msr_fan_in():
+    """Pin the official `sqrt(2 / fan_in)` convolution initialization.
+
+    The pinned Wide ResNet repository initializes convolutions from
+    `normal(0, sqrt(2 / (kW * kH * nInputPlane)))` in `models/utils.lua`, and
+    `pytorch/utils.py` calls `kaiming_normal_` without a mode argument, whose
+    PyTorch default is `fan_in`. This test uses the channel-expanding
+    convolutions, where `fan_in` and `fan_out` differ enough that the wrong
+    mode cannot pass.
+    """
+    torch.manual_seed(0)
+    model = make_model(_load_model_config("wrn28_10.yaml"))
+
+    # 16 -> 160 with a 3x3 kernel: fan_in 144, fan_out 1440, so the two modes
+    # differ by a factor of sqrt(10). The 1x1 projection differs by the same
+    # factor with fan_in 16 and fan_out 160.
+    expanding_convs = [
+        model.block1.layers[0].conv1,
+        model.block1.layers[0].shortcut,
+    ]
+
+    for conv in expanding_convs:
+        out_channels, in_channels, kh, kw = conv.weight.shape
+        fan_in = in_channels * kh * kw
+        fan_out = out_channels * kh * kw
+        assert fan_in != fan_out, "this test needs a layer where the modes differ"
+
+        observed = conv.weight.detach().std().item()
+        expected_fan_in = math.sqrt(2.0 / fan_in)
+        expected_fan_out = math.sqrt(2.0 / fan_out)
+
+        assert observed == pytest.approx(expected_fan_in, rel=0.05)
+        assert observed != pytest.approx(expected_fan_out, rel=0.05)
+
+
+def test_batchnorm_and_classifier_initialization_match_official_semantics():
+    """BatchNorm is unit scale/zero shift; only the Linear bias is zeroed.
+
+    `FCinit` in the official `models/utils.lua` zeroes the fully connected bias
+    and leaves the weight at the framework default, which is what this project
+    reproduces. The classifier weight must therefore not be all zeros.
+    """
+    torch.manual_seed(0)
+    model = make_model(_load_model_config("wrn28_10.yaml"))
+
+    for module in model.modules():
+        if isinstance(module, nn.BatchNorm2d):
+            torch.testing.assert_close(module.weight, torch.ones_like(module.weight))
+            torch.testing.assert_close(module.bias, torch.zeros_like(module.bias))
+
+    torch.testing.assert_close(
+        model.classifier.bias, torch.zeros_like(model.classifier.bias)
+    )
+    assert model.classifier.weight.abs().sum().item() > 0.0
+
+
+def test_init_policy_is_recorded_and_unknown_values_are_rejected():
+    model = make_model(_load_model_config("wrn28_10.yaml"))
+    assert model.init_policy == "msr_fan_in"
+
+    with pytest.raises(ValueError, match="unsupported init_policy"):
+        make_model(
+            {
+                "name": "wrn28_10",
+                "num_classes": 10,
+                "depth": 28,
+                "widen_factor": 10,
+                "dropout_rate": 0.0,
+                "init_policy": "kaiming_fan_out",
+            }
+        )
 
 
 def test_wrn28_10_requires_explicit_dropout_rate():

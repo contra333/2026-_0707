@@ -25,7 +25,10 @@ architecture behavior, or bypass `make_model()` or `make_optimizer()`.
 is the first supported reference configuration. It selects:
 
 - OpenOOD CIFAR-10 `id_train`, `id_validation`, and `id_test`;
-- WRN-28-10 with `dropout_rate: 0.0`;
+- WRN-28-10 with `dropout_rate: 0.0` and initialization policy `msr_fan_in`,
+  materialized into the resolved config rather than spelled in the config file
+  (see the note in the config and the initialization semantics in
+  [`02_architectures.md`](02_architectures.md));
 - unsmoothed cross entropy;
 - SGD with learning rate `0.1`, momentum `0.9`, Nesterov enabled, and weight
   decay `0.0005` under the shared parameter-group policy;
