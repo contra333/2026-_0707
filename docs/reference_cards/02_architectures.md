@@ -39,6 +39,72 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 | `wrn28_10` | `src/oge/models/wide_resnet.py` | `WideResNet` | Primary CIFAR research backbone | Implemented | Zagoruyko & Komodakis, Wide Residual Networks |
 | `vgg16` | `src/oge/models/vgg.py` | `VGG16` | Research backbone | Planned | Simonyan & Zisserman, Very Deep Convolutional Networks for Large-Scale Image Recognition |
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
+| `vit_small` | `src/oge/models/vit.py` | `ViTSmall` | Modern transformer research backbone | Planned | Dosovitskiy et al., An Image is Worth 16x16 Words; Lee, Lee, and Song, Vision Transformer for Small-Size Datasets |
+
+## Research lineup decision (2026-07-23)
+
+This section fixes which backbones and datasets form the optimizer-geometry
+study lineup, at which protocol level, and in which execution order. Grid
+values, role rules, and seed policy are normative in
+[`07_optimizer_comparison_hpo_protocol.md`](07_optimizer_comparison_hpo_protocol.md)
+protocol v1.2; literature anchors are in
+[`10_optimizer_grid_literature_anchors.md`](10_optimizer_grid_literature_anchors.md).
+This is a planning decision: rows marked "planned" have no implementation,
+and no lineup run has been executed.
+
+| Priority | Backbone | Dataset | Variation axis covered | Protocol level | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1 (main) | `wrn28_10` | CIFAR-10 | main setting: BN + residual + wide CNN, OOD-literature standard | Full v1.2: grid 36 + `C1`-`C4` seeds 0-2 + both pair controls | implemented |
+| 2 | `resnet18` (`cifar` variant) | CIFAR-10 | depth/width regime; direct OpenOOD v1.5 comparability | Reduced: grid 36 + `C1`/`C3` seeds 0-2 | implemented |
+| 3a | `vgg16` (`cifar` variant, BatchNorm) | CIFAR-10 | no residual connections (plain CNN), Neural-Collapse-literature lineage | Reduced | planned |
+| 3b | `resnet18` (`cifar` variant) | CIFAR-100 | class-count/dataset axis at fixed architecture | Reduced, CIFAR-100 validity floor `0.60` | implemented (dataset contract pending) |
+| 4 | `vit_small` | CIFAR-10 | LayerNorm + attention + no convolutional prior; strongest documented optimizer sensitivity | Reduced; grid provisional pending a bounded pilot | planned |
+
+Lineup rationale and constraints:
+
+- WRN-28-10 stays the main setting: it is the CIFAR OOD-literature standard
+  backbone, has the repository's only completed long-run baseline, and its
+  640-dimensional penultimate feature is the geometry reference point.
+- `resnet18` on CIFAR-10 is the cheapest replication and aligns with the
+  OpenOOD v1.5 training recipe family, enabling sanity comparison against
+  published benchmark numbers.
+- `vgg16` isolates the residual-connection axis while keeping BatchNorm and
+  the convolutional prior fixed; the lineup uses the BatchNorm variant so
+  that normalization is not confounded with the residual axis.
+- `vit_small` isolates normalization (LayerNorm), token mixing (attention),
+  and recipe era simultaneously; it is deliberately last because ViT
+  from-scratch training on CIFAR is the highest-risk recipe (see the pilot
+  requirements below).
+- Execution order is 1 -> 2 -> 3a/3b -> 4. Later rows must not block
+  earlier rows; each variation runs under its own bounded execution Issue.
+
+ViT pilot requirements (before any ViT grid is frozen):
+
+- The current training schema hard-pins `multistep` scheduling with no
+  warmup; from-scratch ViT training is expected to need warmup plus cosine
+  decay and possibly gradient clipping. Any such change is a versioned
+  training-schema extension for the ViT arm only, decided in the ViT
+  implementation Issue — it must not silently alter the CNN arms.
+- The pinned small-dataset ViT recipe (card 10) also uses label smoothing
+  and heavy augmentation, both of which conflict with this project's fixed
+  unsmoothed-cross-entropy and flip/crop-only contract and are known to
+  change penultimate geometry. The pilot must decide, and record, which
+  recipe elements are adopted, with the default being the project contract
+  (accepting lower ViT accuracy) rather than the reference recipe.
+- Fallbacks if the from-scratch pilot fails to reach the CIFAR-10 validity
+  floor: (a) ViT/DeiT fine-tuned from a pretrained checkpoint, reported as
+  a separately labeled regime because pretraining changes initial geometry;
+  or (b) `convnext_tiny` adapted to CIFAR as the modern-architecture axis.
+
+Deferred, unchanged by this decision: `convnext_tiny` from scratch on
+ImageNet-200 remains the later modern-extension option from the planning
+discussion; the held-out `Muon` optimizer arm remains out of scope. This
+lineup differs from the 2026-07-23 offline planning note (kept outside
+version control) in two recorded ways: `vgg16`/CIFAR-10 is added as the
+residual-axis control, and ViT from scratch is preferred over ViT
+fine-tuning for the modern axis — with the fine-tuning fallback retained —
+because from-scratch training keeps optimizer identity as the only
+representation-shaping training rule.
 
 ## Current toy fixture status
 
@@ -121,6 +187,7 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
 - **Classifier exposure rule:** the final linear layer that maps penultimate features to logits must be `model.classifier`.
 - **Feature_dim policy:** use the native explicit-variant feature width. Do not insert arbitrary projection layers to force a common width.
 - **Common pitfalls:** using the original ImageNet multi-layer classifier without documenting which activation is penultimate; making `features` refer to the convolutional module instead of the penultimate vector; implicit dataset-based variant selection.
+- **Lineup note (2026-07-23):** the research lineup uses the CIFAR variant with BatchNorm (VGG-16-BN-style layout) so that the residual-connection axis is isolated while normalization stays fixed across the CNN arms. The implementation PR must document the classifier structure it adopts.
 
 ### `convnext_tiny`
 
@@ -134,6 +201,46 @@ The repository contains `src/oge/models/toy_cnn.py` with class `ToyCifarCNN` and
 - **Classifier exposure rule:** final classifier head must be exposed as `model.classifier`; if a reference implementation uses `head`, wrap or alias the final classifier without changing logits.
 - **Feature_dim policy:** use the native ConvNeXt-Tiny feature width for the selected explicit variant. Do not add arbitrary projections to match other backbones.
 - **Common pitfalls:** losing the LayerNorm before the head; applying weight decay to LayerNorm parameters; relying on a TorchVision feature extractor instead of supporting `return_features=True` directly; making resolution or stem changes implicit.
+
+### `vit_small`
+
+- **Intended file path:** `src/oge/models/vit.py`.
+- **Intended class name:** `ViTSmall`.
+- **Role:** modern transformer research backbone (LayerNorm + attention axis
+  of the research lineup).
+- **Implementation status:** planned; additionally gated on the ViT pilot
+  requirements in the lineup section above.
+- **Reference source:** Dosovitskiy et al., *An Image is Worth 16x16 Words*,
+  for the architecture; Lee, Lee, and Song, *Vision Transformer for
+  Small-Size Datasets*, and its pinned official repository (see
+  `docs/sources.lock.yaml`) for the CIFAR from-scratch recipe anchor.
+- **Allowed variants:** explicit config only. The registry endpoint must
+  require explicit `patch_size`, `embed_dim`, `depth`, `num_heads`, and
+  `mlp_ratio`; a CIFAR configuration is expected to use `patch_size=4` on
+  32x32 inputs. Exact dimensions are frozen in the implementation Issue and
+  recorded here when decided. Dataset names must not select dimensions
+  implicitly.
+- **Penultimate feature definition:** the token representation after the
+  final transformer block and final LayerNorm that directly feeds
+  `model.classifier`. Whether that vector is the class token or mean-pooled
+  patch tokens must be chosen explicitly in the implementation Issue,
+  recorded here, and exposed identically through `return_features=True`.
+- **Classifier exposure rule:** the final `Linear(feature_dim, num_classes)`
+  head must be `model.classifier`.
+- **Feature_dim policy:** native `embed_dim` of the configured variant; no
+  projection layers to match CNN widths.
+- **Weight-decay grouping:** LayerNorm parameters and biases are already
+  excluded by `weights_only_no_bias_norm`. Positional embeddings and the
+  class token are not `Conv/Linear` weights, so the current conservative
+  default assigns them no decay; the implementation Issue must verify and
+  test this rather than assume it.
+- **Common pitfalls:** taking features before the final LayerNorm; letting
+  the class-token-versus-pooling choice differ between `model(x)` and
+  `return_features=True`; applying weight decay to positional embeddings or
+  the class token; silently importing the reference recipe's label
+  smoothing or augmentation, which the project contract excludes; training
+  from scratch without warmup and concluding architecture instability from
+  what is a schedule artifact.
 
 ## Anti-footgun rules
 

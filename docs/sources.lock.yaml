@@ -37,6 +37,9 @@ sources:
   local_core_representation_metrics_reference_card:
     path: docs/reference_cards/09_core_representation_metrics.md
     role: frozen confirmatory representation-metric and low-complexity detector reference; documentation only until later implementation PRs
+  local_optimizer_grid_literature_anchors_reference_card:
+    path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
+    role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
   adam_paper:
     title: "Adam: A Method for Stochastic Optimization"
     authors: Kingma and Ba
@@ -224,3 +227,67 @@ sources:
       - core/detection/methods/post_hoc/ctm.py
     accessed: 2026-07-15
     role: audited author implementation reference; project explicitly normalizes query features to realize pure cosine scoring
+  optimizer_comparison_protocol_paper:
+    title: On Empirical Comparisons of Optimizers for Deep Learning
+    authors: Choi, Shallue, Nado, Lee, Maddison, and Dahl
+    stable_source: arXiv:1910.05446
+    url: https://arxiv.org/abs/1910.05446
+    accessed: 2026-07-23
+    role: evidence that optimizer rankings depend on the hyperparameter tuning protocol; motivates equal-budget equal-shape grids; does not validate this project's numeric grids
+  optimizer_neural_collapse_2026_paper:
+    title: Optimizer choice matters for the emergence of Neural Collapse
+    authors: Zhao, Cheng, Masarczyk, and Lucchi
+    stable_source: arXiv:2602.16642
+    url: https://arxiv.org/abs/2602.16642
+    accessed: 2026-07-23
+    role: closest known prior work on optimizer and weight-decay-coupling effects on Neural Collapse; no OOD detection; abstract-level audit only, re-audit required before related-work writing
+  optimization_ood_detection_sensitivity_paper:
+    title: The Effect of Optimization Methods on the Robustness of Out-of-Distribution Detection Approaches
+    authors: Abdelzad, Czarnecki, and Salay
+    stable_source: arXiv:2006.14584
+    url: https://arxiv.org/abs/2006.14584
+    accessed: 2026-07-23
+    role: early evidence that OOD-detector performance and rankings are optimizer-sensitive; motivation only; abstract-level audit, full-text audit pending
+  optimizer_ood_generalization_paper:
+    title: Empirical Study on Optimizer Selection for Out-of-Distribution Generalization
+    authors: Naganuma, Ahuja, Takagi, Motokawa, Yokota, Ishikawa, Sato, and Mitliagkas
+    stable_source: arXiv:2211.08583 (TMLR 2023)
+    url: https://arxiv.org/abs/2211.08583
+    accessed: 2026-07-23
+    role: adaptive-versus-non-adaptive evidence for OOD generalization (accuracy under distribution shift); distinct task from OOD detection; claim-boundary reference only
+  outlier_features_paper:
+    title: Understanding and Minimising Outlier Features in Neural Network Training
+    authors: He, Noci, Paliotta, Schlag, and Hofmann
+    stable_source: arXiv:2405.19279
+    url: https://arxiv.org/abs/2405.19279
+    accessed: 2026-07-23
+    role: optimizer-dependent outlier-feature and kurtosis evidence; mechanism-adjacent reference for feature-norm statistics; not an OOD-detection source
+  vit_paper:
+    title: "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale"
+    authors: Dosovitskiy et al.
+    stable_source: arXiv:2010.11929
+    url: https://arxiv.org/abs/2010.11929
+    accessed: 2026-07-23
+    role: ViT architecture reference; planned vit_small backbone, not currently implemented
+  vit_early_convolutions_paper:
+    title: Early Convolutions Help Transformers See Better
+    authors: Xiao, Singh, Mintun, Darrell, Dollar, and Girshick
+    stable_source: arXiv:2106.14881
+    url: https://arxiv.org/abs/2106.14881
+    accessed: 2026-07-23
+    role: documents ViT sensitivity to optimizer choice (AdamW versus SGD); motivates the ViT lineup arm; not a CIFAR recipe source
+  small_dataset_vit_paper:
+    title: Vision Transformer for Small-Size Datasets
+    authors: Lee, Lee, and Song
+    stable_source: arXiv:2112.13492
+    url: https://arxiv.org/abs/2112.13492
+    accessed: 2026-07-23
+    role: ViT from-scratch small-dataset recipe anchor (SPT and LSA); recipe conflicts with the project training contract are recorded in reference card 10
+  small_dataset_vit_repository:
+    repository: aanna0701/SPT_LSA_ViT
+    url: https://github.com/aanna0701/SPT_LSA_ViT
+    commit: 54bd796acd28fa11deac21a97b14b154379b34e7
+    files:
+      - main.py
+    accessed: 2026-07-23
+    role: pinned recipe defaults (AdamW lr 1e-3, weight decay 5e-2, 100 epochs, batch 128, warmup 10, cosine, label smoothing 0.1, heavy augmentation); reported SL-ViT accuracy CIFAR-10 94.53 and CIFAR-100 76.92
