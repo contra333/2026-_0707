@@ -51,6 +51,94 @@ persistent_workers=false
 
 The detailed external attempt logs and wheel bundles remain outside Git.
 
+## Consolidated three-host result
+
+The server reports support two complete host-level practical validations, not
+a completed three-host gate:
+
+The chronology matters when interpreting that result. `curie` was validated
+first under the earlier benchmark-grade environment plan and produced the
+candidate runtime and offline bundle. Repeated transfer and recovery failures
+on `precision_medicine` showed that matching Conda prefixes, cache and
+repodata state, installation ownership, paths, and other host-local details
+was unnecessary and brittle. Issue #37 and PR #38 were then narrowed to the
+portable scientific minimum: the hash-locked runtime/test distributions,
+effective numerical policy, clean code/data identity, bounded CUDA/cuDNN
+behavior, actual-data loaders, and one existing-runner epoch.
+
+`precision_medicine` and `lise` were made equivalent only on that required
+surface. They are not claimed to be exact replicas of the `curie` system
+environment. Python patch, driver, GPU model and UUID, installation prefix,
+installer/bootstrap mechanism, Conda/cache state, and filesystem layout may
+differ as recorded metadata or excluded infrastructure.
+
+| host | runtime, full suite, CUDA/cuDNN | committed holdout and bounded loader | actual-data one-epoch smoke | execution Git SHA | current verdict |
+| --- | --- | --- | --- | --- | --- |
+| `curie` | preliminary PASS on the earlier branch state (`182 passed`; bounded CUDA probes passed) | preliminary regeneration/hash and loader PASS on the earlier branch state; current-scope rerun required | NOT_RUN | `300783d820df318380f2a84c6ebdba939fbf724b` | INCOMPLETE |
+| `precision_medicine` | PASS (`175 passed` after the preserved fixture correction; bounded CUDA/cuDNN probes passed) | PASS | PASS (`smoke_only_completed`, 1/1) | `e9bfde43bb40f3ea2a6a11da9da86178049ecc40` | PASS |
+| `lise` | PASS (`175 passed`; bounded CUDA/cuDNN probes passed on idle GPU 0) | PASS | PASS (`smoke_only_completed`, 1/1) | `e9bfde43bb40f3ea2a6a11da9da86178049ecc40` | PASS |
+
+Within the deliberately narrow required surface, the observed
+`precision_medicine` and `lise` runtime distributions and effective numerical
+policies agree: Python `3.11.9`, PyTorch
+`2.5.1+cu121`, TorchVision `0.20.1+cu121`, CUDA runtime `12.1`, cuDNN
+`90100`, FP32 with AMP/BF16 disabled, float32 matmul precision `highest`, CUDA
+matmul TF32 disabled, cuDNN TF32 enabled, cuDNN benchmark/deterministic
+disabled, and deterministic algorithms disabled. Driver versions, GPU models,
+GPU UUIDs, and installation prefixes differ only in record-only fields.
+
+The `curie` report used the same Python, PyTorch, TorchVision, CUDA-runtime, and
+cuDNN versions, but it predates the clean execution SHA used by the other two
+hosts and does not contain the current-scope one-epoch smoke. Therefore the
+three-host common-SHA and effective-policy gate is not yet established.
+
+### Acceptance-criteria ledger
+
+| Issue #37 acceptance criterion | status | evidence or remaining work |
+| --- | --- | --- |
+| all three hosts report runtime PASS or an explicit blocker | PARTIAL | `precision_medicine` and `lise` PASS; `curie` has only a preliminary earlier-SHA PASS |
+| exact runtime/test distributions and effective numerical policy agree | PARTIAL | agreement is confirmed for `precision_medicine` and `lise`; current-scope `curie` reconciliation remains |
+| complete regression suite and bounded CUDA/cuDNN probes pass on every host | PARTIAL | current-scope PASS on two hosts; the `curie` result is from the earlier branch state |
+| committed CIFAR-10 holdout paths and loaders pass on every training host | PARTIAL | PASS on two hosts; current-scope `curie` path/loader validation remains |
+| one actual-data epoch completes on every approved host | PARTIAL | PASS on two hosts; `curie` is NOT_RUN |
+| repository records commands, outcomes, NOT_RUN work, and external artifact locations | PARTIAL | recorded for completed reports; the final `curie` commands and artifacts remain |
+| no 200-epoch production cell or protected-evidence access | PASS | no such run or access was reported on any host |
+
+Overall Issue #37 status is **INCOMPLETE**. Production execution remains
+unauthorized until the `curie` current-scope runtime, numerical-policy,
+actual-data loader, and one-epoch smoke report is added and the three-host
+comparison is rerun.
+
+## `curie` preliminary runtime observation
+
+The Issue comment for `curie` records a preliminary candidate at clean Git
+`300783d820df318380f2a84c6ebdba939fbf724b`, before the later
+`precision_medicine` fixture correction and documentation commits. The
+observed candidate was:
+
+- Python `3.11.9`;
+- PyTorch `2.5.1+cu121` and TorchVision `0.20.1+cu121`;
+- CUDA runtime `12.1` and cuDNN `90100`;
+- four NVIDIA RTX A5000 GPUs;
+- `pip check` PASS;
+- bounded FP32 matmul probes PASS on all four GPUs and a bounded cuDNN
+  convolution PASS on GPU 0;
+- the then-current complete suite PASS with `182 passed in 11.45s`;
+- deterministic committed-holdout regeneration/hash and bounded-loader checks
+  reported PASS.
+
+The first external inventory invocation expected `torch==2.5.1` instead of
+the approved local version string `torch==2.5.1+cu121`. The expectation was
+corrected and the inventory was rerun; both the original harness failure and
+the corrected evidence were preserved.
+
+The external export root was
+`/home/ghjin/0707_exp/issue37_artifacts/300783d/exports/`. No benchmark,
+cross-GPU parity run, model smoke, one-epoch training smoke, 200-epoch run, or
+protected-evidence access was reported. Because this preliminary evidence is
+not the current common-SHA practical run, it does not replace the remaining
+`curie` validation.
+
 ## `precision_medicine` runtime observation
 
 The approved host resolved as `math-SYS-740GP-TNRT` with four NVIDIA RTX A6000
