@@ -14,22 +14,27 @@ The repository currently contains:
 - reproducible CIFAR-10 classifier training with scheduling, atomic
   checkpoints, strict reload, epoch-boundary resume, and stable run artifacts;
 - a CIFAR-10 training CLI validated with bounded actual-data CUDA runs;
+- deterministic optimizer-study orchestration with versioned provenance,
+  frozen trial tables, deferred ID-test selection mode, failure/retry
+  accounting, and independent single-GPU trial scheduling;
 - an AI-assisted research and implementation workflow;
 - durable DDU fitting, adaptive-jitter, score, naming, and post-hoc variant
   semantics documented for a later implementation task;
 - durable raw-feature artifact and frozen core representation-metric contracts
   documented for later bounded implementation tasks;
-- a documented WRN-28-10 four-optimizer HPO and comparison protocol for a later
-  orchestration implementation task.
+- a documented WRN-28-10 optimizer HPO and comparison protocol whose
+  orchestration foundation has passed bounded department-server validation.
 
 The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and `wrn28_10` are implemented research backbones. VGG-16 and ConvNeXt-Tiny remain documented as planned backbones and should not be treated as implemented until code and tests add them.
 
 This repository does **not** yet include learned-feature extraction, geometry
 or Neural Collapse metrics, feature-based OOD detector implementations,
-multi-seed or HPO orchestration, or completed optimizer-comparison research
-runs. The current MSP and CUDA runs validate infrastructure only; they are not
-research results. The DDU reference card fixes future semantics but does not
-mean DDU or any DDU variant is implemented or validated.
+executed grid or multi-seed optimizer studies, or completed
+optimizer-comparison research runs. The orchestration code still implements
+protocol v1.1 while the reference cards record v1.2. The current MSP, training,
+and orchestration CUDA runs validate infrastructure only; they are not
+optimizer-comparison research results. The DDU reference card fixes future
+semantics but does not mean DDU or any DDU variant is implemented or validated.
 
 ## Start here
 
@@ -58,8 +63,10 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - WRN-28-10 optimizer-comparison and HPO protocol: `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md`
 - Raw checkpoint-feature artifact contract: `docs/reference_cards/08_raw_feature_artifact_contract.md`
 - Frozen core representation metrics: `docs/reference_cards/09_core_representation_metrics.md`
+- Optimizer grid literature anchors: `docs/reference_cards/10_optimizer_grid_literature_anchors.md`
 - OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
 - CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`
+- Optimizer-HPO orchestration server validation: `docs/validation/issue22_optimizer_hpo_orchestration_server_validation.md`
 - New task template: `.github/ISSUE_TEMPLATE/research_task.md`
 - Pull Request template: `.github/pull_request_template.md`
 

@@ -36,12 +36,20 @@ Implemented foundation:
 - OpenOOD v1.5-aligned CIFAR-10 ID/OOD loaders, fixed split manifests, and preprocessing;
 - bounded MSP OOD inference and metric infrastructure;
 - reproducible classifier training, scheduling, checkpoint/reload, epoch-boundary resume, and run artifacts;
-- bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths.
+- bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths;
+- deterministic study/trial/attempt orchestration for the WRN-28-10 optimizer
+  HPO protocol, currently implementing protocol v1.1;
+- code-enforced deferred ID-test selection mode, deterministic ranking/freeze
+  logic, independent single-GPU trial scheduling, and attempt-preserving
+  failure/retry accounting;
+- bounded actual-data, two-GPU orchestration smoke validation with checkpoint,
+  checksum, GPU-identity, and artifact-provenance verification.
 
 Documented for later implementation, but not yet implemented or validated:
 
-- the WRN-28-10 `SGD`/`SGDW`/`Adam`/`AdamW` tuned, accuracy-matched,
-  coupled-vs-decoupled, and shared-number comparison protocol;
+- protocol v1.2, which supersedes the v1.1 design the orchestration code still
+  implements: deterministic `3 LR x 4 WD` grids, `C1`-`C4` role selection, and
+  a three-seed evidence unit;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
@@ -51,8 +59,7 @@ Documented for later implementation, but not yet implemented or validated:
 Not yet part of the validated foundation unless added by a later merged pull request:
 
 - completed optimizer-comparison and multi-seed research results;
-- experiment orchestration;
-- HPO and multi-seed execution;
+- executed grid, role-replication, and pair-control study runs;
 - feature extraction pipelines;
 - geometry metrics;
 - feature-based OOD detector implementations such as Mahalanobis, kNN, generic
@@ -69,7 +76,10 @@ Not yet part of the validated foundation unless added by a later merged pull req
 - `docs/reference_cards/06_feature_ood_detectors.md`: durable feature-based
   detector naming, fitting, score, numerical-stability, and variant semantics.
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md`: durable
-  four-optimizer HPO, comparison, seed, checkpoint, and provenance semantics.
+  optimizer HPO, comparison, seed, checkpoint, and provenance semantics.
+  Protocol v1.2 is authoritative; v1.1 remains historical provenance.
+- `docs/reference_cards/10_optimizer_grid_literature_anchors.md`: literature
+  anchor mapping for the v1.2 grids and the research lineup.
 - GitHub Issues: one-time task scope and acceptance criteria.
 - Pull Requests: actual changes, validation evidence, and unresolved limitations.
 

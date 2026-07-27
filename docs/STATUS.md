@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-23
+Last updated: 2026-07-27
 
 ## Current phase
 
@@ -10,6 +10,10 @@ first completed WRN-28-10 SGD seed-0 200-epoch baseline has also been run and
 independently validated at pinned training commit
 `d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
+Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
+foundation and completed its bounded department-server smoke. No production
+optimizer study has started, and the orchestration code still implements
+protocol v1.1.
 
 ## Validated or implemented
 
@@ -31,12 +35,27 @@ independently validated at pinned training commit
 - Issue #14 produced and independently revalidated the first complete
   WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
   snapshots and full ID validation/test recomputation.
+- Issue #22 and PR #23 implemented versioned study/trial/attempt records,
+  canonical configuration hashing, deterministic ranking and freeze records,
+  code-enforced deferred ID-test selection mode, independent single-GPU trial
+  scheduling, and attempt-preserving failure/retry accounting.
+- The Issue #22 department-server validation passed the complete 167-test suite,
+  actual OpenOOD membership verification, and a bounded two-GPU/two-trial,
+  one-epoch smoke with checkpoint, checksum, GPU-identity, and deferred-ID-test
+  validation. The smoke consumed no production study slot.
+- Historical provenance: the superseded protocol-v1.1 discovery bundle was
+  frozen at 16 rows per optimizer and 64 rows total, with manifest hash
+  `5b2f915d2337924cbb67077216bbcc4a49835f7927cea96c45004f0b76576b54`. It was
+  never executed. Protocol v1.2 replaces it with 12 grid cells per optimizer
+  and 36 cells total.
 
-## Documented but not implemented
+## Documented but not executed or implemented
 
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
-  four-optimizer tuned comparison, accuracy matching, pairwise coupling
-  controls, search budget, seeds, checkpoints, provenance, and rerun rules.
+  tuned comparison, accuracy matching, pairwise coupling controls, search
+  budget, seeds, checkpoints, provenance, and rerun rules. Its orchestration
+  foundation is implemented, but no grid, role-replication, pair-control, or
+  downstream run has been executed under either protocol version.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
   name, class-wise full unbiased covariance, official adaptive-jitter ladder,
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
@@ -70,12 +89,14 @@ independently validated at pinned training commit
 
 ## Still missing
 
-- Hyperparameter optimization
+- Protocol v1.2 grid migration in code; `src/oge/studies/` and the frozen study
+  configs still implement v1.1
+- Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
+  replication, and the pair controls
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
   PCA/Diag/L2/Shrinkage variants
-- Multi-seed experiment orchestration
 
 ## Active next phase
 
@@ -102,6 +123,9 @@ not authorize detector implementation without a separately bounded task.
   optimizer-comparison or multi-seed conclusion is currently supported.
 - Optimizer-comparison orchestration and execution require separately bounded
   Issues before further long-running experiments.
+- Production GPU availability and identity, storage and inode capacity,
+  artifact retention and backup behavior, and optimizer-specific 200-epoch wall
+  time remain unverified until a fresh server preflight.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 
