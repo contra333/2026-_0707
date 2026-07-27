@@ -26,6 +26,7 @@ from torch.utils.data import DataLoader
 
 from oge.data import build_openood_cifar10_loaders, load_dataset_config
 from oge.models import make_model
+from oge.models.wide_resnet import DEFAULT_INIT_POLICY
 from oge.optimizers import make_optimizer
 from oge.train_utils.param_groups import DEFAULT_WEIGHT_DECAY_POLICY
 
@@ -110,6 +111,10 @@ def _materialize_config_defaults(config: dict[str, Any]) -> None:
     model.setdefault("num_classes", 10)
     model.setdefault("depth", 28)
     model.setdefault("widen_factor", 10)
+    # Initialization changes penultimate geometry through effective learning
+    # rate, so it belongs in the resolved config and the canonical scientific
+    # config hash rather than staying an implicit code constant.
+    model.setdefault("init_policy", DEFAULT_INIT_POLICY)
 
     loss = _require_mapping(config, "loss")
     loss.setdefault("label_smoothing", 0.0)

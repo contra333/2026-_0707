@@ -13,7 +13,7 @@ from oge.studies.hashing import (
 def _config():
     return {
         "optimizer": {"name": "sgd", "lr": 0.1, "weight_decay": 0.0005},
-        "model": {"name": "wrn28_10", "dropout_rate": 0.0},
+        "model": {"name": "wrn28_10", "dropout_rate": 0.0, "init_policy": "msr_fan_in"},
         "loss": {"name": "cross_entropy", "label_smoothing": 0.0},
         "dataset": {
             "protocol": "openood_v1_5_aligned_cifar10",
@@ -48,6 +48,19 @@ def test_scientific_hash_included_fields_change_identity():
     config = _config()
     changed = copy.deepcopy(config)
     changed["optimizer"]["lr"] = 0.2
+    assert scientific_config_hash(config) != scientific_config_hash(changed)
+
+
+def test_scientific_hash_covers_model_initialization_policy():
+    """Initialization changes penultimate geometry, so it must change identity.
+
+    Weight initialization shifts effective learning rate under BatchNorm, which
+    is a mechanism variable for this project. Two runs that differ only in
+    initialization must not share a scientific config hash.
+    """
+    config = _config()
+    changed = copy.deepcopy(config)
+    changed["model"]["init_policy"] = "some_other_policy"
     assert scientific_config_hash(config) != scientific_config_hash(changed)
 
 

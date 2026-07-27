@@ -34,7 +34,16 @@ protocol v1.1.
   Adam, and AdamW validation passed on the department server.
 - Issue #14 produced and independently revalidated the first complete
   WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
-  snapshots and full ID validation/test recomputation.
+  snapshots and full ID validation/test recomputation. That run predates the
+  2026-07-27 initialization correction and used `fan_out`; its checkpoints and
+  report are retained unchanged as historical provenance and are excluded from
+  protocol v1.2 results.
+- WRN-28-10 convolution initialization was audited against the pinned official
+  repository on 2026-07-27 and corrected from `fan_out` to `fan_in`, matching
+  both `models/utils.lua` `MSRinit` and `pytorch/utils.py`. The policy is now
+  carried by the `init_policy` model-config field, materialized into the
+  resolved config, and included in the canonical scientific config hash.
+  Reference card 02 records the full architecture-side deviation audit.
 - Issue #22 and PR #23 implemented versioned study/trial/attempt records,
   canonical configuration hashing, deterministic ranking and freeze records,
   code-enforced deferred ID-test selection mode, independent single-GPU trial

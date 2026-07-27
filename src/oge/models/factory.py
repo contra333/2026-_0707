@@ -6,7 +6,7 @@ from torch import nn
 
 from .resnet import ResNet18
 from .toy_cnn import ToyCifarCNN
-from .wide_resnet import WideResNet
+from .wide_resnet import DEFAULT_INIT_POLICY, WideResNet
 
 
 def _model_name(config: dict) -> str:
@@ -55,6 +55,7 @@ def make_model(config: dict) -> nn.Module:
             depth=28,
             widen_factor=10,
             dropout_rate=config["dropout_rate"],
+            init_policy=config.get("init_policy", DEFAULT_INIT_POLICY),
         )
 
     raise ValueError(f"Unknown model name: {name}")
