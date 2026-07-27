@@ -52,8 +52,6 @@ from .engine import (
 
 RUN_SCHEMA_VERSION = "1.0"
 PROTOCOL_NAME = "oge_cifar10_holdout_v1"
-LEGACY_PROTOCOL_NAME = "openood_v1_5_aligned_cifar10"
-SUPPORTED_PROTOCOL_NAMES = {PROTOCOL_NAME, LEGACY_PROTOCOL_NAME}
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -173,10 +171,8 @@ def _validate_training_config(config: dict[str, Any]) -> None:
     training = _require_mapping(config, "training")
     checkpoint = _require_mapping(config, "checkpoint")
 
-    if dataset.get("protocol") not in SUPPORTED_PROTOCOL_NAMES:
-        raise ValueError(
-            f"dataset.protocol must be one of {sorted(SUPPORTED_PROTOCOL_NAMES)!r}"
-        )
+    if dataset.get("protocol") != PROTOCOL_NAME:
+        raise ValueError(f"dataset.protocol must be {PROTOCOL_NAME!r}")
     for key in ("config_path", "train_split", "validation_split", "test_split"):
         if not dataset.get(key):
             raise ValueError(f"dataset.{key} is required")
@@ -422,7 +418,7 @@ def resolve_training_config(
         config_root=dataset_config_path.parent,
         selected_membership=dataset["membership"],
     )
-    if dataset["protocol"] == PROTOCOL_NAME and manifest is None:
+    if manifest is None:
         raise ValueError(f"{PROTOCOL_NAME} requires a membership manifest")
     dataset["membership_manifest"] = manifest
     resolved["runtime"] = {"device": str(_target_device(device))}

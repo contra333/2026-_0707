@@ -1,4 +1,4 @@
-"""Protocol-v1.1 failure classification and retry identity rules."""
+"""Optimizer-study failure classification and retry identity rules."""
 
 from __future__ import annotations
 

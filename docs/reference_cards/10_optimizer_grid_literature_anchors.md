@@ -52,23 +52,25 @@ implementation).
    budget. v1.2 therefore gives every optimizer the same grid shape
    (`3 LR x 4 WD`), the same budget (12 seed-0 cells), and the same
    selection rules, while letting the numeric ranges be
-   optimizer-appropriate — the same fairness stance v1.1 already took.
+   optimizer-appropriate.
 2. **Log-scale placement around a literature center.** Each learning-rate
    triplet is a x3 log ladder centered on the canonical value for that
-   optimizer family; each weight-decay set spans the v1.1 log range with at
-   most four points, favoring interpretable round values over dense
+   optimizer family; each weight-decay set is a deliberately broad
+   project-judgment bracket with at most four points, favoring interpretable
+   round values over dense
    coverage. A 12-cell grid is a landscape instrument, not a fine
    optimizer: it must produce accuracy spread (for `C3`/`C4` matching and
    the descriptive scatter plots) as well as near-optimal cells.
-3. **Anchor continuity with v1.1.** Every v1.1 explicit anchor appears as a
-   v1.2 grid cell, so the deterministic grid never abandons the previously
-   frozen reference points.
+3. **Historical-design continuity is provenance, not evidence.** Values
+   retained from the earlier random-search design were originally planning
+   anchors; the external 64-run outcomes are not used. Current numeric
+   support comes from the pinned sources below or is labeled project
+   judgment.
 4. **Zero-decay endpoints are scientific, not tuning, cells.** The `SGD`
    and `Adam` zero columns exist because unchecked feature/parameter norm
    growth is a central mechanism variable for this project's geometry and
    raw-versus-normalized detector questions (`outlier_features_paper`,
-   `optimizer_neural_collapse_2026_paper`), extending the v1.1 zero
-   anchors.
+   `optimizer_neural_collapse_2026_paper`).
 
 ## SGD grid anchors
 
@@ -78,11 +80,11 @@ Grid: `lr in {0.03, 0.1, 0.3}`, `wd in {0, 1e-4, 5e-4, 1e-3}`, momentum
 | Value | Justification | Sources |
 | --- | --- | --- |
 | `lr=0.1` | Canonical WRN CIFAR recipe and OpenOOD v1.5 CIFAR recipe; identical to the repository's completed Issue #14 baseline | `wide_resnet_paper`, `openood_v1_5_paper` |
-| `lr=0.03`, `lr=0.3` | Symmetric x3 log steps around the center; `0.3` equals the v1.1 upper bound and probes the high-LR regime; `0.03` moves toward the accuracy region where adaptive methods are expected to overlap, which `C3` matching needs | v1.1 range (this card series); project judgment |
+| `lr=0.03`, `lr=0.3` | Approximate x3 log steps around the center; `0.3` probes the high-LR regime and `0.03` moves toward the accuracy region where adaptive methods may overlap for C3 | project judgment |
 | `wd=5e-4` | Canonical WRN and OpenOOD v1.5 CIFAR weight decay | `wide_resnet_paper`, `openood_v1_5_paper` |
 | `wd=1e-4` | Common lighter CNN decay; interior log point between the zero endpoint and the canonical value | project judgment (community practice) |
-| `wd=1e-3` | v1.1 upper bound; strong-decay side of the canonical value | v1.1 range |
-| `wd=0` | No-explicit-decay mechanism endpoint; v1.1 zero anchor extended to a full column | v1.1 anchors; `optimizer_neural_collapse_2026_paper` (weight decay's role in collapse), `outlier_features_paper` |
+| `wd=1e-3` | Strong-decay side of the canonical value | project judgment |
+| `wd=0` | No-explicit-decay mechanism endpoint | `optimizer_neural_collapse_2026_paper` (weight decay's role in collapse), `outlier_features_paper` |
 
 The repository's fixed schedule (200 epochs, `multistep [60, 120, 160]`,
 `gamma=0.2`, batch 128) is itself the WRN paper training protocol, which is
@@ -96,19 +98,19 @@ via `torch.optim.Adam`), `beta1=0.9`, `beta2=0.999`, `eps=1e-8`.
 | Value | Justification | Sources |
 | --- | --- | --- |
 | `lr=1e-3` | Adam's canonical default step size | `adam_paper` |
-| `lr=3e-4`, `lr=3e-3` | Symmetric x3 log ladder; `3e-3` equals the v1.1 upper bound (stability edge is accepted landscape information) | v1.1 range; project judgment |
-| `wd=1e-4` | v1.1 positive anchor; scale of the L2 values reported competitive for Adam-with-L2 in the decoupled-weight-decay paper's CIFAR study | v1.1 anchors; `decoupled_weight_decay_paper` |
+| `lr=3e-4`, `lr=3e-3` | Approximate x3 log ladder around the canonical default; `3e-3` deliberately probes a possible stability edge | project judgment |
+| `wd=1e-4` | Scale-level reading of L2 values reported competitive for Adam-with-L2 in the decoupled-weight-decay paper's CIFAR study | `decoupled_weight_decay_paper`; project judgment |
 | `wd=5e-4` | Canonical CNN L2 magnitude, shared numerically with the SGD column for cross-optimizer readability | project judgment (community practice) |
-| `wd=1e-3` | v1.1 upper bound; strong coupled-L2 endpoint | v1.1 range |
-| `wd=0` | Pure-adaptive endpoint (very common deployed practice); v1.1 zero anchor; primary norm-growth mechanism cell | v1.1 anchors; `outlier_features_paper` |
+| `wd=1e-3` | Strong coupled-L2 endpoint | project judgment |
+| `wd=0` | Pure-adaptive endpoint and primary norm-growth mechanism cell | `outlier_features_paper`; project judgment |
 
 Honesty note: the decoupled-weight-decay paper reports its Adam/AdamW
 CIFAR-10 hyperparameter studies as heatmap figures (26 2x64d ResNet, 100
 epochs for the sensitivity figures), and the exact grid points were not
 numerically extractable in this pass; only the normalized-weight-decay
 statement below was extracted as a number. The Adam L2 column is therefore
-anchored by the v1.1 range plus scale-level reading of that paper, not by an
-exact published grid.
+anchored by a scale-level reading of that paper plus explicit project
+judgment, not by an exact published grid.
 
 ## AdamW grid anchors
 
@@ -119,9 +121,9 @@ comparability), `wd in {1e-4, 1e-3, 1e-2, 1e-1}` (decoupled, PyTorch
 | Value | Justification | Sources |
 | --- | --- | --- |
 | `lr` triplet | Same as Adam: shared-cell requirement plus matched step-size scale across the coupling pair | card 07 v1.2 pair-control design |
-| `wd=1e-2` | v1.1 positive anchor; interior of the derived competitive region below | v1.1 anchors; derivation below |
-| `wd=1e-1` | v1.1 upper bound; upper bracket of the derived competitive region for this 200-epoch horizon | v1.1 range; derivation below |
-| `wd=1e-3`, `wd=1e-4` | Weak-decay tail: v1.1 lower bound (`1e-4`) and one decade above it; both double as the Adam-shared pair-control cells | v1.1 range; card 07 v1.2 |
+| `wd=1e-2` | Interior point below the derived competitive region | derivation below; project judgment |
+| `wd=1e-1` | Upper bracket of the derived competitive region for this 200-epoch horizon | derivation below |
+| `wd=1e-3`, `wd=1e-4` | Weak-decay tail; both double as Adam-shared pair-control cells | card 07 v1.2; project judgment |
 | no `wd=0` cell | `AdamW(wd=0)` is algorithmically identical to `Adam(wd=0)`; the Adam zero column covers the endpoint for both | card 07 v1.2 |
 
 ### Normalized weight decay derivation (AdamW upper-region bracket)
@@ -132,11 +134,11 @@ batch size `b`, training-set size `B`, and epochs `T`, and reports
 `lambda_norm` around `0.025`-`0.05` as the observed optimal scale for its
 CIFAR-10 experiments.
 
-For this project's fixed recipe (`b=128`, `B=50000` CIFAR train, `T=200`):
+For this project's fixed recipe (`b=128`, `B=45000` ID train, `T=200`):
 
 ```text
-sqrt(128 / (50000 * 200)) = sqrt(1.28e-5) ≈ 3.58e-3
-lambda ≈ 0.025..0.05 * 3.58e-3 ≈ 8.9e-5 .. 1.8e-4
+sqrt(128 / (45000 * 200)) ≈ 3.77e-3
+lambda ≈ 0.025..0.05 * 3.77e-3 ≈ 9.4e-5 .. 1.9e-4
 ```
 
 That `lambda` multiplies the schedule multiplier directly in the paper's
@@ -145,12 +147,12 @@ formulation, whereas PyTorch `AdamW` applies per-step decay
 PyTorch-unit conversion `weight_decay ≈ lambda / lr_0`:
 
 ```text
-lr_0 = 1e-3  ->  weight_decay ≈ 0.09 .. 0.18
-lr_0 = 3e-3  ->  weight_decay ≈ 0.03 .. 0.06
+lr_0 = 1e-3  ->  weight_decay ≈ 0.094 .. 0.189
+lr_0 = 3e-3  ->  weight_decay ≈ 0.031 .. 0.063
 ```
 
 So the derived competitive region for this horizon is roughly
-`weight_decay in [0.03, 0.18]` depending on learning rate, which the grid
+`weight_decay in [0.031, 0.189]` depending on learning rate, which the grid
 brackets with `1e-2` and `1e-1`. Caveats, recorded deliberately: the paper's
 experiments used a Shake-Shake-regularized ResNet with cosine/restart
 schedules, not WRN-28-10 with multistep; the `lambda_norm` optimum is
@@ -174,7 +176,7 @@ The two canonical recipes coincide in per-step decay, which is a useful
 sanity signal that the SGD and AdamW grids are centered on comparable
 regularization scales. Grid coverage in these units: SGD spans `0` to
 `3e-4` per step (`0.3 x 1e-3`), AdamW spans `3e-8` to `3e-4` per step. As
-card 07 states (retained v1.1 language), equal per-step numeric decay never
+card 07 states, equal per-step numeric decay never
 implies equal effective regularization across update rules — momentum and
 adaptive preconditioning interact with decay differently
 (`decoupled_weight_decay_paper`, `optimizer_neural_collapse_2026_paper`).
@@ -185,12 +187,10 @@ The Adam/AdamW pair cells `(lr=1e-3, wd=1e-4)` and `(lr=3e-3, wd=1e-3)`
 were chosen because: both are cells of both v1.2 grids (no extra seed-0
 budget); together they span a x3 learning-rate step and a x10 decay step, so
 the coupling comparison is observed at two distinct regularization scales;
-and `(1e-3, 1e-4)` preserves the v1.1 Adam positive anchor. The planning
-note's illustrative pair `(3e-3, 5e-4)` was not adopted because `5e-4` is
+and `(1e-3, 1e-4)` is a weak coupled/decoupled comparison point. The
+planning note's illustrative pair `(3e-3, 5e-4)` was not adopted because `5e-4` is
 not an AdamW grid value; forcing it in would have broken the AdamW decade
-ladder or cost a 13th cell. The v1.1 pair product `{3e-4, 1e-3} x {1e-5,
-1e-4}` was superseded for the same reason (`1e-5` is outside the v1.2
-grids).
+ladder or cost a 13th cell.
 
 ## Architecture lineup anchors
 

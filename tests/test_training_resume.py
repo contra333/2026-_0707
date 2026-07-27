@@ -67,7 +67,7 @@ def _resolved_fixture_config(max_epochs, *, snapshots=None):
     return {
         "schema_version": "1.0",
         "dataset": {
-            "protocol": "openood_v1_5_aligned_cifar10",
+            "protocol": "oge_cifar10_holdout_v1",
             "config_path": "/fixture/dataset.yaml",
             "data_root": "/fixture/data",
             "train_split": "id_train",
@@ -79,6 +79,7 @@ def _resolved_fixture_config(max_epochs, *, snapshots=None):
                 "validation": {"sha256": "validation", "line_count": 4},
                 "test": {"sha256": "test", "line_count": 4},
             },
+            "membership_manifest": {"sha256": "manifest", "row_count": 1},
         },
         "model": {"name": "wrn28_10", "num_classes": 10, "dropout_rate": 0.0},
         "loss": {"name": "cross_entropy", "label_smoothing": 0.0},
@@ -504,7 +505,10 @@ def test_exact_validation_tie_does_not_replace_earliest_best_checkpoint(tmp_path
 
 
 def _protocol_config(dataset_config_path):
-    config_path = Path(__file__).parents[1] / "configs/training/cifar10_wrn28_10.yaml"
+    config_path = (
+        Path(__file__).parents[1]
+        / "configs/training/cifar10_wrn28_10_holdout_v1.yaml"
+    )
     config = load_training_config(config_path)
     config["dataset"]["config_path"] = str(dataset_config_path)
     config["training"]["max_epochs"] = 1
@@ -520,7 +524,7 @@ def test_resolved_config_fingerprints_selected_imglist_membership(tmp_path):
     for name, content in list_contents.items():
         (tmp_path / name).write_text(content, encoding="utf-8")
     dataset_config = {
-        "protocol_name": "openood_v1_5_aligned_cifar10",
+        "protocol_name": "oge_cifar10_holdout_v1",
         "datasets": {
             "id_train": {
                 "dataset_name": "cifar10",
@@ -545,6 +549,31 @@ def test_resolved_config_fingerprints_selected_imglist_membership(tmp_path):
             },
         },
     }
+    manifest_header = {
+        "record_type": "header",
+        "protocol_name": "oge_cifar10_holdout_v1",
+        "outputs": {
+            "id_train": {
+                "sha256": hashlib.sha256(list_contents["train.txt"].encode()).hexdigest(),
+                "row_count": 2,
+            },
+            "id_validation": {
+                "sha256": hashlib.sha256(
+                    list_contents["validation.txt"].encode()
+                ).hexdigest(),
+                "row_count": 1,
+            },
+            "id_test": {
+                "sha256": hashlib.sha256(list_contents["test.txt"].encode()).hexdigest(),
+                "row_count": 1,
+            },
+        },
+    }
+    (tmp_path / "manifest.jsonl").write_text(
+        json.dumps(manifest_header, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    dataset_config["membership_manifest"] = {"path": "manifest.jsonl"}
     dataset_path = tmp_path / "dataset.yaml"
     dataset_path.write_text(yaml.safe_dump(dataset_config), encoding="utf-8")
 
@@ -596,7 +625,8 @@ def test_resolved_config_fingerprints_selected_imglist_membership(tmp_path):
 
 def test_first_protocol_rejects_workers_and_non_fp32(tmp_path):
     config = load_training_config(
-        Path(__file__).parents[1] / "configs/training/cifar10_wrn28_10.yaml"
+        Path(__file__).parents[1]
+        / "configs/training/cifar10_wrn28_10_holdout_v1.yaml"
     )
     config["training"]["num_workers"] = 1
     with pytest.raises(ValueError, match="num_workers=0"):
@@ -618,7 +648,8 @@ def test_first_protocol_rejects_workers_and_non_fp32(tmp_path):
 )
 def test_first_protocol_rejects_noncanonical_split_roles(tmp_path, field, value, match):
     config = load_training_config(
-        Path(__file__).parents[1] / "configs/training/cifar10_wrn28_10.yaml"
+        Path(__file__).parents[1]
+        / "configs/training/cifar10_wrn28_10_holdout_v1.yaml"
     )
     config["dataset"][field] = value
     with pytest.raises(ValueError, match=match):
@@ -636,7 +667,8 @@ def test_epoch_configuration_rejects_non_integer_values(
     tmp_path, section, key, value, match
 ):
     config = load_training_config(
-        Path(__file__).parents[1] / "configs/training/cifar10_wrn28_10.yaml"
+        Path(__file__).parents[1]
+        / "configs/training/cifar10_wrn28_10_holdout_v1.yaml"
     )
     config[section][key] = value
     with pytest.raises(ValueError, match=match):

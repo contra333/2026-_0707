@@ -18,9 +18,9 @@ STUDY_REQUIRED = {
     "schema_version",
     "protocol_version",
     "study_id",
-    "search_space_version",
-    "search_space_hash",
-    "sampler",
+    "grid_version",
+    "grid_hash",
+    "grid_manifest_hash",
     "ordered_table_hashes",
     "optimizer_families",
     "assigned_budget",
@@ -46,6 +46,8 @@ TRIAL_REQUIRED = {
     "phase",
     "optimizer_family",
     "assigned_slot",
+    "lr_rank",
+    "weight_decay_rank",
     "scientific_config",
     "config_hash",
     "training_seed",
@@ -101,12 +103,12 @@ def validate_study_record(record: Mapping[str, Any]) -> None:
         raise ValueError("study protocol_version mismatch")
     declarations = record["selection_declarations"]
     if not isinstance(declarations, Mapping) or any(
-        declarations.get(key) != "forbidden"
+        declarations.get(key) != "forbidden_until_role_freeze"
         for key in ("id_test", "ood", "geometry_nc", "detector_metrics")
     ):
         raise ValueError("study selection declarations are incomplete")
-    if record["assigned_budget"] != {"per_optimizer": 16, "total": 64}:
-        raise ValueError("study assigned budget must be 16 per optimizer and 64 total")
+    if record["assigned_budget"] != {"per_optimizer": 12, "total": 36}:
+        raise ValueError("study assigned budget must be 12 per optimizer and 36 total")
 
 
 def validate_trial_record(record: Mapping[str, Any]) -> None:

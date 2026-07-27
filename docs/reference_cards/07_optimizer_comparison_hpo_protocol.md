@@ -1,904 +1,222 @@
-# Reference Card 07: WRN-28-10 Optimizer Comparison and HPO Protocol
+# Reference Card 07: WRN-28-10 Optimizer Comparison Protocol
 
-## Protocol version status (updated 2026-07-23)
+## Status and authority
 
-Protocol v1.2 is the latest recorded decision for this study. It is specified
-in the section "Protocol v1.2: deterministic grid revision" at the end of this
-card and supersedes the v1.1 optimizer set, search budget, sampler, seed plan,
-and selection taxonomy. Like v1.1 at its own decision time, v1.2 is a
-pre-execution protocol decision: v1.1 was never executed, no v1.1 or v1.2
-study result exists, and the code in `src/oge/studies/` plus
-`configs/studies/wrn28_10_optimizer_hpo_v1_1/` still implements v1.1 until a
-separately bounded migration Issue lands. The v1.1 sections below are retained
-unchanged as historical provenance and as the authoritative text for every
-mechanism that v1.2 explicitly retains.
+This card fixes the active protocol
+`wrn28_10_optimizer_hpo_v1.2` for WRN-28-10 on CIFAR-10. It is normative
+for the 36-cell grid, validation-only selection, `C1`-`C4` roles, seed
+reuse, pair controls, checkpoints, and protected-evidence boundary.
 
-## Purpose, authority, and evidence boundary
+The executable protocol and frozen tables live under
+`configs/studies/wrn28_10_optimizer_hpo_v1_2/`. The grid manifest records
+the exact row, table, grid, dataset-membership, dataset-manifest, and
+whole-manifest hashes.
 
-This card fixes active protocol version `wrn28_10_optimizer_hpo_v1.1` for
-comparing `SGD`, `SGDW`, `Adam`, and `AdamW` with WRN-28-10. Historical v1.1
-used the OpenOOD v1.5-aligned ID membership; active v1.2 uses
-`oge_cifar10_holdout_v1` with 45k train, 5k ID validation, and protected full
-10k ID test. The primary result is the tuned optimizer comparison. Accuracy
-matching, coupled-vs-decoupled pair controls, and the shared-number appendix
-are separate controls and must never be pooled with the primary result.
+No v1.2 production run has started. Local tests and server smoke runs are
+not research results.
 
-Protocol v1.1 supersedes the unexecuted v1 plan from Issue #18 and PR #19. The
-v1 plan remains historical Git and Pull Request provenance, but it was never
-executed and supplies no study results. All future study IDs, manifests, frozen
-tables, and orchestration tests for this protocol must identify v1.1.
+## Superseded-study decision log
 
-This is a protocol decision, not experimental evidence. No HPO, additional
-training, feature extraction, geometry/Neural Collapse analysis, detector
-fitting, or OOD evaluation was run to write this card. In particular, the
-search ranges, trial count, and seed count below are versioned project choices
-made before execution; they are not known-optimal ranges or empirically
-validated compute requirements.
+An earlier random-search study was executed outside this repository on the
+department server using the old 50k/1k/9k ID split. Its 64 runs are not
+imported and must not be used as v1.2 quantitative evidence, HPO selection,
+baseline, table, ranking, or analysis. Its external physical deletion is
+outside this repository task. The current Git tree contains no v1.1 study
+config, 64-row table, sampler, generator, default execution path, or golden
+hash.
 
-The repository audit for Issue #18 used `main` at:
+The old design remains visible only through GitHub Issue/Pull Request and Git
+history. It motivated the deterministic-grid redesign but supplies no current
+numeric result or grid justification.
 
-```text
-c95f33f33cd4c0b96afc187577eefc0427e9d473
-```
+Issue #14 is a `historical single-seed baseline, excluded from v1.2
+aggregation`. Its validation report remains an accurate historical record;
+its accuracy is not used to choose the v1.2 grid or report v1.2 results.
 
-The pre-amendment repository audit for Issue #20 used `main` at:
+## Fixed training and data contract
 
-```text
-16e4f7b83964ff84bdda9e52b733726ca469c5cb
-```
+Every primary grid cell uses:
 
-The relevant merged evidence is bounded as follows:
+- dataset protocol `oge_cifar10_holdout_v1`;
+- `id_train`: official CIFAR-10 train membership 45,000;
+- `id_validation`: disjoint official-train holdout membership 5,000;
+- `id_test`: untouched official CIFAR-10 test membership 10,000;
+- WRN-28-10, `dropout_rate=0.0`, `init_policy=msr_fan_in`;
+- batch size 128, 200 epochs, unsmoothed cross entropy;
+- multistep schedule `[60, 120, 160]`, `gamma=0.2`, stepped at epoch end;
+- train-only flip and reflection-padded crop augmentation;
+- `weights_only_no_bias_norm`;
+- FP32 parameter/activation/storage. TF32 eligibility is not yet frozen and
+  must be measured and pinned uniformly in the execution Issue;
+- no AMP or BF16;
+- `cudnn.benchmark=false`, `training.deterministic=false`;
+- `last.pt` as the scientific endpoint and `best_val.pt` as a
+  validation-selected control.
 
-- Issue #14 and PR #15 provide one completed WRN-28-10, `SGD`, seed-0,
-  200-epoch baseline and its independent validation record. They do not provide
-  an optimizer comparison, HPO result, or multi-seed scientific conclusion.
-- Issue #16 and PR #17 document DDU semantics. No DDU or other feature-based
-  detector implementation or detector result exists at this boundary.
-- The merged optimizer implementation (PR #1) provides the optimizer factory,
-  shared parameter groups, and coupled/decoupled endpoints. Merged PRs #7, #9,
-  #11, and #13 provide the model, data/MSP, training, checkpoint, resume, and
-  artifact foundations on which this protocol depends. Their bounded validation
-  does not constitute this study.
+The generated grid rows contain the resolved logical dataset membership and
+manifest hashes but omit host-specific data roots and device paths.
 
-The adjacent durable authorities remain:
+## Primary grid
 
-- [`01_optimizers.md`](01_optimizers.md) for optimizer update semantics and
-  shared parameter grouping;
-- [`02_architectures.md`](02_architectures.md) for WRN-28-10 and its
-  640-dimensional penultimate feature;
-- [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md) for the
-  `oge_cifar10_holdout_v1` ID membership and OpenOOD-compatible OOD evaluation
-  semantics;
-- [`05_training_protocol.md`](05_training_protocol.md) for run-level training,
-  checkpoint, resume, and artifact semantics;
-- [`06_feature_ood_detectors.md`](06_feature_ood_detectors.md) for future
-  feature-detector semantics, not implemented capability.
+The primary study has exactly 36 seed-0 slots: 12 per optimizer.
+Enumeration order is ascending learning rate, then ascending weight decay.
+No random sampler exists.
 
-The Adam and decoupled-weight-decay papers pinned in `docs/sources.lock.yaml`
-support the distinction between adaptive updates and coupled/decoupled decay.
-The pinned random-search paper supports random search as a general HPO design;
-it does not validate this card's numeric ranges, budgets, or expected winners.
+| Optimizer | Learning rate | Weight decay | Fixed fields |
+| --- | --- | --- | --- |
+| SGD | `0.03, 0.1, 0.3` | `0, 1e-4, 5e-4, 1e-3` | momentum `0.9`, Nesterov, coupled |
+| Adam | `3e-4, 1e-3, 3e-3` | `0, 1e-4, 5e-4, 1e-3` | betas `(0.9, 0.999)`, eps `1e-8`, coupled |
+| AdamW | `3e-4, 1e-3, 3e-3` | `1e-4, 1e-3, 1e-2, 1e-1` | betas `(0.9, 0.999)`, eps `1e-8`, decoupled |
 
-## Repository facts at the audited boundary
+Each assigned cell is immutable. A divergence, non-finite model, or
+configuration-induced OOM consumes the scientific slot, is preserved as a
+failure in the landscape, and is excluded from role candidacy. A grid-edge
+selection is reported as a boundary hit; it does not authorize extending the
+grid or rerunning it mid-study.
 
-These are observations of the repository, not new decisions introduced here.
+Card 10 maps these values to pinned literature and explicit project judgment.
+The old random-search results are not a source.
 
-- The optimizer factory implements `SGD` with coupled L2 weight decay, `SGDW`
-  with decoupled weight decay, `Adam` with coupled L2 weight decay, and `AdamW`
-  with decoupled weight decay. It also implements
-  `SGDCoupledDecoupled` and `AdamCoupledDecoupled` endpoints.
-- The custom `SGDW` applies configured decay directly as parameter shrinkage
-  using the optimizer group's current learning rate. `AdamW` delegates directly
-  to `torch.optim.AdamW`; it is not a repository reimplementation.
-- Every optimizer uses the shared `weights_only_no_bias_norm` parameter-group
-  builder: convolution and linear weights are decayed while bias and
-  normalization parameters are excluded.
-- The training engine is an optimizer-independent single-run executor with
-  end-of-epoch `MultiStepLR`, atomic `last.pt`, validation-selected
-  `best_val.pt`, fixed snapshots, strict reload, epoch-boundary resume, and
-  stable run artifacts.
-- Within one run, `best_val.pt` is selected by highest ID-validation accuracy,
-  then lowest ID-validation NLL, then earliest epoch.
-- The ordinary completed-run path automatically evaluates both `last.pt` and
-  `best_val.pt` on ID test and writes test artifacts. That behavior is suitable
-  for an ordinary frozen final run but is a leakage risk during discovery,
-  confirmation, accuracy matching, or pair selection.
-- There is no study runner, multi-seed orchestration, independent-GPU queue,
-  deferred-ID-test mode, feature extraction pipeline, geometry/Neural Collapse
-  implementation, or feature-based detector implementation.
+## Checkpoint and ranking rule
 
-## Fixed comparison taxonomy and order
-
-The execution order is fixed so that later controls cannot change the primary
-study.
-
-1. Freeze this protocol, the complete discovery tables, seed sets, Git SHA,
-   dataset manifest hashes, and output-storage location.
-2. Run the four-optimizer tuned comparison and freeze one tuned configuration
-   per optimizer.
-3. Freeze the accuracy-matching target and candidates from confirmation-only
-   records.
-4. Freeze pairwise coupled-vs-decoupled candidates and the shared-number table.
-5. Run the five-seed final classifier comparison for every selected
-   configuration, reusing an identical selected configuration rather than
-   training it twice.
-6. Only after every configuration, seed, and primary checkpoint role is frozen,
-   permit ID-test evaluation and downstream feature, geometry, Neural Collapse,
-   detector, or OOD work in separately authorized Issues.
-7. Consider coupled/decoupled interpolation only after the four-optimizer core
-   and endpoint controls are stable, in a separate controlled study.
-
-### Primary: tuned optimizer comparison
-
-Each optimizer receives the same assigned discovery-trial count and its own
-predeclared, optimizer-appropriate search space. Selection uses ID train and ID
-validation only. This is the primary comparison.
-
-Optimizer-specific ranges are permitted because a single numeric range can
-grant very different useful resolution to different update rules. Equal trial
-count provides equal selection opportunity; it does not assert equal effective
-regularization or equal elapsed compute.
-
-### Separate control: accuracy-matched comparison
-
-Accuracy matching asks whether downstream differences remain among classifiers
-with similar terminal ID-validation accuracy. It is not a replacement for the
-tuned comparison and does not revise its winners.
-
-### Separate control: coupled-vs-decoupled pairs
-
-Two controlled endpoint comparisons are defined:
-
-- `SGD` versus `SGDW`;
-- `Adam` versus `AdamW`.
-
-They use shared numeric hyperparameters within each pair to isolate the stated
-coupling distinction as far as the implemented optimizer semantics allow. They
-are not substituted for optimizer-appropriate tuning.
-
-### Diagnostic appendix: shared numbers
-
-The complete shared-number endpoint table is reported as an appendix
-diagnostic. Equal numeric `lr` and `weight_decay` do not imply equal effective
-regularization, equal optimization difficulty, or a fairness-preserving tuned
-comparison.
-
-### Later study: coupling interpolation
-
-`SGDCoupledDecoupled` and `AdamCoupledDecoupled` are excluded from protocol v1.1
-discovery, confirmation, and final core comparison. A later Issue may define a
-coupling-ratio study with fixed numeric `total_weight_decay`, but it must not
-silently add that variable to the four-optimizer study.
-
-## Selection boundary and deterministic ranking
-
-### Data permitted for selection
-
-Every discovery and confirmation model is fitted on `id_train`. Configuration
-selection and checkpoint selection may use only `id_validation` accuracy and
-NLL. The following are forbidden as objectives, tie-breaks, pruning signals,
-search-space revision signals, or reasons to add/repeat trials:
-
-- ID-test accuracy, NLL, or any ID-test artifact;
-- OOD validation or OOD test results;
-- geometry or Neural Collapse metrics, including NC0, NC1, NC2, and NC3;
-- feature-detector scores or AUROC, AUPR, and FPR95;
-- any downstream qualitative inspection.
-
-OpenOOD's OOD validation remains `compatibility_only` and is not a selection
-split. The Issue #14 final ID-test accuracy is not an accuracy-matching target.
-
-### Run-level checkpoint selection
-
-The existing run-level rule is unchanged:
+Role selection begins only after all 36 assigned cells are terminal. It uses
+only seed-0 `last.pt` epoch-200 ID-validation metrics:
 
 1. highest ID-validation accuracy;
-2. lowest ID-validation NLL;
-3. earliest epoch.
+2. lowest ID-validation NLL at the same checkpoint;
+3. earliest `best_val.pt` epoch;
+4. ascending learning-rate rank;
+5. ascending weight-decay rank;
+6. ascending canonical config hash.
 
-This rule chooses `best_val.pt` within one training run. It does not rank
-configurations across a study.
-
-### Discovery ranking
-
-A complete discovery trial is ranked within its optimizer by:
-
-1. highest `best_val.pt` ID-validation accuracy;
-2. lowest corresponding ID-validation NLL;
-3. earliest best-validation epoch;
-4. ascending `trial_id`;
-5. ascending canonical config hash.
-
-The top `K = 3` discovery configurations per optimizer are frozen before any
-confirmation run is inspected. If fewer than three discovery configurations
-complete, freeze all completed configurations, report the shortfall, and do not
-add replacement trials. If none complete, that optimizer has no v1.1 winner.
-
-### Confirmation ranking
-
-For each frozen configuration, aggregate the three confirmation runs. Rank
-configurations within an optimizer by:
-
-1. highest arithmetic mean of best-validation accuracy;
-2. lowest arithmetic mean of the corresponding validation NLL;
-3. earliest arithmetic mean best-validation epoch;
-4. ascending discovery `trial_id`;
-5. ascending canonical config hash.
-
-Only configurations with all three valid confirmation outcomes are eligible;
-an incomplete configuration is not replaced. The first ranked configuration is
-the tuned winner and is frozen before final seeds. If none is eligible, report
-the optimizer as having no v1.1 tuned winner and do not improvise a final choice.
-Final-seed results describe the frozen choice and never trigger reselection.
-
-Canonical config hashes are lowercase SHA-256 over the UTF-8 bytes of the
-resolved configuration serialized as canonical JSON with recursively sorted keys
-and compact separators `(',', ':')`. The hash covers only the scientific
-configuration: the optimizer family and its numeric fields, model, loss, data
-contract, and scheduler. Phase- and run-varying fields are excluded so that one
-configuration keeps a single identity across discovery, confirmation, matching,
-pair control, and final phases. `training.seed`, `checkpoint.snapshot_epochs`,
-runtime paths, timestamps, and device assignment are provenance, not config-hash
-inputs.
-
-## Protocol v1.1 search budget and generation
-
-### Primary budget and resource accounting
-
-- Assign exactly 16 discovery trials to each optimizer: 64 total assigned
-  discovery slots.
-- Each table contains two explicit anchors followed by 14 fixed random draws.
-- Equal assigned trial count is the primary fairness budget.
-- Record actual elapsed GPU-hours per optimizer and overall as a resource
-  diagnostic. GPU-hours do not authorize extra trials and are not normalized
-  into the selection objective.
-- Configuration- or optimizer-induced failures consume an assigned slot.
-  Infrastructure retries preserve the same slot and do not become a new trial.
-
-### Sampler and frozen tables
-
-Use NumPy `Generator(PCG64(0))` with `sampler_seed=0` to generate log-uniform
-draws. Before the
-first training run, materialize and hash all four ordered 16-row tables. No
-adaptive sampler, Bayesian optimizer, pruning, or result-dependent proposal is
-allowed in v1.1.
-
-For the 14 random rows, use common uniform quantiles within the `SGD`/`SGDW`
-pair and separately within the `Adam`/`AdamW` pair. Map those quantiles through
-each optimizer's declared log range. This makes proposal randomness comparable
-within a coupling pair without pretending that all four optimizers need the
-same numeric domain.
-
-For `x ~ LogUniform(a, b)`, generate `u ~ Uniform[0, 1)` and set:
-
-```text
-x = exp(log(a) + u * (log(b) - log(a)))
-```
-
-Every table row must include a stable `trial_id`, full resolved config, and
-canonical config hash. Trial execution order or GPU assignment may change for
-availability, but table membership may not.
-
-### Fixed and searched parameters
-
-All trials use WRN-28-10, `dropout_rate: 0.0`, unsmoothed cross entropy, FP32,
-the fixed CIFAR-10 data contract, and `weights_only_no_bias_norm`.
-
-| Optimizer | Learning rate | Weight decay | Fixed optimizer fields |
-| --- | --- | --- | --- |
-| `SGD` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 1e-3]` | `momentum=0.9`, `nesterov=true`, coupled |
-| `SGDW` | log-uniform `[1e-2, 3e-1]` | zero anchor plus log-uniform `[1e-5, 2e-3]` | `momentum=0.9`, `nesterov=true`, decoupled |
-| `Adam` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-6, 1e-3]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, coupled |
-| `AdamW` | log-uniform `[1e-4, 3e-3]` | zero anchor plus log-uniform `[1e-4, 1e-1]` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
-
-The two explicit anchors are:
-
-| Optimizer | Anchor 0: current/default-positive | Anchor 1: no decay |
-| --- | --- | --- |
-| `SGD` | `lr=0.1`, `weight_decay=5e-4` | `lr=0.1`, `weight_decay=0` |
-| `SGDW` | `lr=0.1`, `weight_decay=5e-4` | `lr=0.1`, `weight_decay=0` |
-| `Adam` | `lr=1e-3`, `weight_decay=1e-4` | `lr=1e-3`, `weight_decay=0` |
-| `AdamW` | `lr=1e-3`, `weight_decay=1e-2` | `lr=1e-3`, `weight_decay=0` |
-
-For each of the remaining 14 rows, both learning rate and strictly positive
-weight decay are drawn from the table ranges. Zero is represented only by the
-explicit no-decay anchor; a log distribution never samples zero.
-
-The search ranges use the units accepted by the actual OGE optimizer config.
-For custom `SGDW`, each step applies:
-
-```text
-parameter_new = parameter_old * (1 - current_lr * configured_weight_decay)
-                - current_lr * gradient_update
-```
-
-PyTorch `AdamW` likewise applies decoupled shrinkage proportional to the current
-learning rate and configured `weight_decay`; OGE uses `torch.optim.AdamW`
-directly. Coupled `SGD` and `Adam` retain their existing L2 semantics. Identical
-numeric decay values across coupled and decoupled methods do not imply equal
-effective regularization because their momentum and adaptive-state interactions
-differ. In particular, v1.1 does not rescale the entire SGDW range downward by
-a blanket paper-symbol factor.
-
-These ranges are protocol-v1.1 proposals informed by the current SGD baseline,
-standard optimizer parameterization, broad log-scale coverage, and the need to
-bound numerical risk. They have not been demonstrated to contain every
-optimizer's competitive region. Coupled and decoupled numeric decay are not
-assumed to have equal effects. The extended SGDW and AdamW upper bounds and the
-AdamW `weight_decay=1e-2` positive anchor are pre-execution project decisions,
-not claims that those values or boundaries are optimal.
-
-### Versioning and boundary hits
-
-If the selected configuration lies on a numeric search boundary, report the
-boundary hit. Do not append trials, widen only one optimizer's table, or revise
-v1.1 after seeing results. A later protocol version may declare new ranges, a
-new search-space hash, and equal assigned budgets for all four optimizers before
-it runs. The unexecuted v1 plan remains separately identifiable as historical
-provenance, not as a result.
-
-## Scheduler and training horizon
-
-Every discovery, confirmation, matching, pairwise, and final run uses:
-
-```yaml
-training:
-  max_epochs: 200
-scheduler:
-  name: multistep
-  milestones: [60, 120, 160]
-  gamma: 0.2
-  step_timing: end_of_epoch
-```
-
-Every phase also fixes batch size `128`, WRN-28-10 with `dropout_rate: 0.0`,
-unsmoothed cross entropy, FP32, and no warmup. The scheduler is a common control
-and is not tuned. There is no early stopping, pruning, lower-budget screening,
-successive halving, or other multi-fidelity selection. Every valid trial
-receives the same 200-epoch opportunity so that convergence speed and
-terminal-phase geometry are not selectively truncated.
-
-`MultiStepLR` changes the optimizer's current learning rate, which already
-changes decoupled per-step shrinkage for SGDW and AdamW. Protocol v1.1 therefore
-forbids a second weight-decay scheduler.
-
-The supported research claim is strictly:
-
-```text
-optimizer comparison under one matched WRN-standard schedule
-```
-
-This protocol does not compare every optimizer under an individually optimal
-training recipe. Optimizer-specific scheduler tuning or a common-cosine
-sensitivity study requires a later separately bounded protocol.
-
-## Seed policy
-
-The sampler stream and all training phases use distinct metadata roles. The
-discovery, confirmation, and final training seed sets are disjoint:
-
-| Role | Seed(s) | Use |
-| --- | --- | --- |
-| discovery-table sampler | `0` | `sampler_seed=0`; generate and freeze discovery tables only |
-| discovery training | `0` | `training_seed=0`; every one of the 64 discovery configurations |
-| confirmation training | `1`, `2`, `3` | every frozen top-3 configuration; also the pair-control and shared-number anchor seeds |
-| final training | `4`, `5`, `6`, `7`, `8` | every selected tuned, matched, or pairwise configuration |
-| downstream geometry/OOD | same `4`-`8` classifiers | use the frozen final checkpoints; do not retrain replacement seeds |
-
-`sampler_seed` and `training_seed` are distinct fields and distinct RNG streams,
-even though both use the integer `0`. This is single-seed discovery followed by
-top-3, three-seed confirmation. A discovery outcome is not counted again as
-confirmation evidence, and neither discovery nor confirmation outcomes are
-counted in the final five-seed estimate. Configurations may advance according to
-the frozen selection rules, but individual run results are never reused as a
-later phase's observations.
-
-The Issue #14 seed-0 run is a historical anchor only and is not imported into
-the v1.1 discovery study, even when its numeric seed and anchor configuration
-coincide. Its Git SHA, study identity, artifact boundary, and ID-test exposure
-differ. It remains excluded from discovery ranking, confirmation, accuracy
-matching, and final aggregation.
-
-All seed lists, `K`, and table hashes must be frozen before results are viewed.
-An unfavorable but valid seed outcome is retained. Seeds are never dropped,
-replaced, or rerun to improve a mean. A final classifier seed may be reused
-across later authorized geometry/OOD analyses only through the same frozen
-checkpoint and provenance.
-
-## Checkpoint and artifact roles
-
-- `last.pt` is the primary scientific classifier state: the 200-epoch
-  trajectory endpoint. It is the primary state for accuracy matching and later
-  downstream representation analysis.
-- `best_val.pt` is the validation-selected performance control. It supplies the
-  HPO objective and may be evaluated as a separately labeled downstream
-  control.
-- Fixed snapshots are for training-trajectory analysis only. They never replace
-  `last.pt` or `best_val.pt` after downstream results are seen.
-
-Discovery, confirmation, matching, and pair-selection runs set the snapshot
-epoch list to empty to avoid unnecessary storage while retaining atomic
-`last.pt`, `best_val.pt`, history, and provenance. Frozen final runs retain the
-existing fixed snapshot set:
-
-```text
-0, 60, 61, 120, 121, 160, 161, 200
-```
-
-Results for `last.pt` and `best_val.pt` must remain separately named. They may
-not be silently pooled, and the primary checkpoint role may not change after
-feature, geometry, Neural Collapse, detector, ID-test, or OOD inspection.
-
-## Accuracy-matching control
-
-Freeze matching only after confirmation finishes and before final-seed runs.
-
-1. For each tuned optimizer winner, compute mean `last.pt` epoch-200
-   ID-validation accuracy across confirmation seeds `1`, `2`, and `3`.
-2. Define the target as the minimum of the available tuned-winner means. This is
-   a functional rule, not a post-hoc hand-selected number. If one or more
-   optimizers have no tuned winner, the target remains the minimum of the winners
-   that exist; if no optimizer has a tuned winner, accuracy matching is
-   unresolved in v1.1.
-3. Use an absolute tolerance of `0.002` accuracy (0.2 percentage points).
-4. Each optimizer's candidate pool is exactly its already confirmed top-3
-   configurations. Thus the equal matching search budget is three candidates
-   per optimizer and no new matching HPO trial is allowed.
-5. Among candidates whose mean terminal accuracy is within the band, choose by:
-   smallest absolute target distance, lower mean terminal validation NLL,
-   lower terminal-accuracy standard deviation, then ascending config hash.
-6. If no candidate is in the band, record that optimizer as `unmatched`. Do not
-   change the target, widen the tolerance, match at an earlier epoch, consult ID
-   test, or add replacement candidates.
-7. If the matched candidate equals the tuned winner, reuse its five final runs.
-   Otherwise run the matched candidate on the same final seeds.
-
-Matching uses `last.pt` at exactly epoch 200. Epoch matching and
-`best_val.pt` matching are prohibited. The target, band, candidate hashes, and
-selection record must be stored before any final run or downstream analysis.
-
-## Coupled-vs-decoupled pair control and shared-number appendix
-
-Use the following four predeclared numeric anchors per pair:
-
-| Pair | Learning rates | Weight decays | Cartesian product |
-| --- | --- | --- | --- |
-| `SGD` / `SGDW` | `0.03`, `0.1` | `1e-4`, `5e-4` | 4 configs per endpoint |
-| `Adam` / `AdamW` | `3e-4`, `1e-3` | `1e-5`, `1e-4` | 4 configs per endpoint |
-
-Run every endpoint/configuration on confirmation seeds `1`, `2`, and `3`: 24 runs
-per pair and 48 runs total. This budget is fixed independently of tuned HPO.
-An anchor is eligible for pair selection only when both endpoints have all
-three valid outcomes. Failed or incomplete anchors are reported and are not
-replaced; if no anchor remains, report the pair as unresolved in v1.1.
-
-Select one shared-number configuration per pair symmetrically by:
-
-1. highest minimum of the two endpoints' mean best-validation accuracy;
-2. highest mean of the two endpoint means;
-3. lowest mean validation NLL across both endpoints;
-4. earliest mean best-validation epoch across both endpoints;
-5. ascending shared config hash.
-
-Freeze the selected pair configuration, then run both endpoints on final seeds
-`4`, `5`, `6`, `7`, and `8`. Report the entire four-anchor table as the
-shared-number appendix even when only one anchor advances. Same numeric decay is
-a controlled input, not proof of equal effective regularization.
-
-## ID-test defer contract
-
-The follow-up orchestration implementation must provide a code-enforced mode in
-which discovery, confirmation, accuracy-matching, and pair-selection runs do
-not call ID-test evaluation and do not create ID-test metrics. Merely hiding
-already generated files from a report is insufficient because it permits human
-or automated leakage.
-
-ID-test evaluation becomes eligible only after an immutable freeze record
-contains all selected config hashes, final seeds, checkpoint roles, matching
-target/candidates, and pair-control candidates. Ordinary final-run evaluation
-may then evaluate the frozen `last.pt` and separately labeled `best_val.pt`
-without feeding results back into selection. The implementation must preserve
-the current ordinary-run contract outside deferred study mode.
-
-## GPU allocation and compute recording
-
-Assign one independent, single-device trial to one physical GPU. Do not use
-multiple GPUs or DDP for one trial. Run at most one study trial concurrently on
-each physical GPU.
-
-For every attempt record the physical GPU UUID, GPU model/class,
-`CUDA_VISIBLE_DEVICES`, scheduler-visible/local device mapping, assigned
-`trial_id`, concurrent study-trial count, and start/end timestamps. The number,
-identity, homogeneity, and availability of server GPUs are unverified until the
-execution Issue performs a fresh preflight.
-
-## Study, trial, and attempt provenance
-
-### Study record
-
-Store at least:
-
-- `study_id`, protocol version, search-space version and hash;
-- sampler name and seed, optimizer families, assigned trial count;
-- ordered discovery-table hashes and discovery/confirmation/final seed lists;
-- objective, every tie-break, checkpoint policy, and accuracy-matching policy;
-- explicit no-ID-test-selection, no-OOD-selection, and
-  no-geometry/detector-selection declarations;
-- Git SHA and clean/dirty state, dataset manifest and membership hashes;
-- created/finished timestamps, status, and total/per-optimizer GPU-hours.
-
-### Trial record
-
-Store at least:
-
-- `trial_id`, `study_id`, optimizer family, full resolved config, canonical
-  config hash, training seed, and study phase;
-- Git SHA and dirty state, dataset hashes, environment/package inventory;
-- GPU name/UUID and visible-device mapping, start/end time and elapsed time;
-- status, failure class/reason, history path, best-validation record;
-- checkpoint paths and hashes, selection rank or exclusion reason;
-- ordered attempt IDs.
-
-### Attempt record
-
-Store at least:
-
-- `attempt_id`, parent `trial_id`, attempt number, and resume/retry origin;
-- failure/retry reason and links to preserved prior attempts;
-- verification that config hash, seed, Git SHA, dataset hashes, and study phase
-  match the parent trial;
-- checkpoint used for resume and its integrity result;
-- environment, GPU, timing, terminal status, logs, and output paths.
-
-## Failure, resume, retry, and rerun policy
-
-Classify every non-success before deciding whether retry is permitted.
-
-| Failure class | Budget and retry rule |
-| --- | --- |
-| OOM caused by assigned config/optimizer | consumes the slot; no replacement |
-| non-finite loss or model state | consumes the slot; preserve evidence; no replacement |
-| invalid resolved config | consumes the slot; no result-driven repair in v1.1 |
-| OOM from unrelated GPU contention | infrastructure failure; retry same trial |
-| external interruption or preemption | retry/resume same trial |
-| data or mount failure | infrastructure failure if external; retry same trial after repair |
-| dataset manifest mismatch | stop affected study; retry only after restoring the frozen membership |
-| checkpoint corruption | preserve corrupt artifact; retry same trial from last earlier valid boundary or start |
-| GPU reset | infrastructure failure; retry same trial |
-| driver or other infrastructure failure | retry same trial |
-
-An infrastructure retry keeps the same `trial_id`, config hash, training seed,
-Git SHA, dataset hashes, and assigned slot. It creates a new `attempt_id`. If a
-valid atomic `last.pt` exists, epoch-boundary resume is preferred; otherwise the
-same trial restarts from epoch 0. All attempts, partial logs, checkpoint
-integrity decisions, and reasons are retained.
-
-Low validation accuracy, an unfavorable scientific result, or a result that
-changes a ranking never permits retry. No optimizer receives a selective
-replacement trial. A code/protocol defect that invalidates comparability stops
-the affected study and requires a new version; it is not patched mid-study.
-
-## Git and external artifact storage
-
-Git stores code, protocol/reference cards, frozen small configuration tables,
-schemas, hashes, manifests or manifest references, and compact validation or
-study summaries suitable for review. Every study is tied to an immutable Git
-SHA, and a dirty execution checkout is recorded and normally rejected.
-
-Large checkpoints, snapshots, histories, per-attempt logs, predictions,
-features, geometry arrays, and detector scores remain outside Git in durable
-artifact storage. Git records stable relative artifact identifiers, checksums,
-storage root/version, retention class, and provenance sufficient to locate and
-verify them. No execution may begin until storage capacity, atomic publication,
-retention, and backup expectations are confirmed.
-
-## Requirements for the orchestration implementation Issue
-
-The next bounded code Issue must, at minimum:
-
-1. implement versioned study/trial/attempt schemas and canonical config hashing;
-2. materialize, validate, freeze, and hash all trial tables before execution;
-3. enforce exact assigned budgets, phase/seed separation, deterministic ranking,
-   top-3 freeze, matching freeze, and pair-control freeze;
-4. add code-enforced deferred ID-test evaluation while preserving ordinary
-   final-run behavior;
-5. schedule at most one independent single-device trial per physical GPU and
-   record device identity, concurrency, timing, and GPU-hours;
-6. reuse the existing single-run engine, optimizer factory, shared parameter
-   groups, scheduler, checkpoint, atomic save, and epoch-boundary resume
-   contracts rather than duplicating them;
-7. implement the failure taxonomy, attempt-preserving retry rules, checkpoint
-   integrity checks, and prohibition on result-driven reruns;
-8. keep large artifacts outside Git and write auditable checksums/references;
-9. provide focused tests for table determinism, hashes, ranking tie-breaks,
-   budget accounting, seed separation, deferred ID test, matching, failure
-   classification, and retry identity;
-10. perform only a bounded orchestration smoke after code review; actual HPO,
-    GPU inventory validation, and long training require separately authorized
-    execution scope.
-
-The implementation Issue must not select or install an HPO framework, add a
-dependency, or revise protocol v1.1 implicitly. Any such choice must be explicit
-in that Issue and preserve the frozen semantics here.
-
-## Unverified assumptions and decision log
-
-### Unverified before execution
-
-- The declared search ranges may not contain every optimizer's competitive
-  region; boundary handling is therefore versioned rather than adaptive.
-- Sixteen discovery trials, top-3 confirmation, and five final seeds are a
-  feasibility/fairness decision, not a demonstrated statistical-power result.
-- Future server GPU count, UUIDs, homogeneity, availability, driver state, and
-  per-optimizer wall time require fresh preflight.
-- External artifact capacity, atomic publication, retention, and backup policy
-  are not yet verified.
-- The deferred-ID-test mode must be shown not to break the existing ordinary
-  final-run evaluation contract.
-- Snapshot omission for non-final phases is supported by the present artifact
-  schema but still requires orchestration regression coverage.
-
-### Decisions frozen by Issue #18
-
-- Tuned comparison is primary; matching, pairwise, and shared-number results
-  remain separately labeled.
-- Equal assigned trial count is primary; GPU-hours are reported, not equalized.
-- Fixed-seed random search uses two anchors plus 14 draws per optimizer.
-- All valid trials train 200 epochs with one common fixed scheduler; early
-  stopping and multi-fidelity are prohibited.
-- Discovery uses one seed, top-3 confirmation uses three disjoint seeds, and
-  frozen final comparison uses five further disjoint seeds.
-- `last.pt` is the scientific endpoint, `best_val.pt` is the
-  validation-selected control, and fixed snapshots are trajectory artifacts.
-- Selection is ID-only and automatic ID-test evaluation must be deferred in
-  study phases.
-- Failures and retries follow assigned-slot and attempt-preservation rules; no
-  result-driven replacement is allowed.
-- Interpolation is a later study, not part of the initial four-optimizer HPO.
-
----
-
-## Protocol v1.2: deterministic grid revision (decision recorded 2026-07-23)
-
-### Purpose and supersession boundary
-
-This section fixes protocol version `wrn28_10_optimizer_hpo_v1.2`. It
-supersedes the unexecuted v1.1 design above in the five respects listed below
-and retains every other v1.1 mechanism unchanged. v1.1 remains historical
-provenance with its Git and Issue lineage; it supplies no results. No
-discovery, confirmation, matching, pair, final, or downstream run has been
-executed under either version.
-
-v1.2 exists because the 2026-07-23 planning decision restructured the study
-around:
-
-1. a deterministic, literature-anchored `3 LR x 4 WD` grid per optimizer
-   instead of two anchors plus fourteen log-uniform random draws;
-2. a three-optimizer primary study (`SGD`, `Adam`, `AdamW`) with `SGDW`
-   demoted to the coupled-vs-decoupled pair control only;
-3. a lighter three-seed evidence unit: the full seed-0 grid, plus seeds 1 and
-   2 for the selected role configurations only, with no separate five-seed
-   final phase;
-4. a role taxonomy `C1`-`C4` that merges the v1.1 "tuned winner" and
-   "accuracy matching" concepts into one selection stage;
-5. explicit descriptive reuse of the full seed-0 grid as landscape evidence.
-
-Numeric literature anchors for every grid value are recorded in
-[`10_optimizer_grid_literature_anchors.md`](10_optimizer_grid_literature_anchors.md).
-That card is evidence mapping; this section is the normative protocol. The
-architecture lineup that reuses this grid outside WRN-28-10 is fixed in
-[`02_architectures.md`](02_architectures.md).
-
-### Changed versus retained
-
-| Aspect | v1.1 | v1.2 |
-| --- | --- | --- |
-| Primary optimizers | `SGD`, `SGDW`, `Adam`, `AdamW` | `SGD`, `Adam`, `AdamW`; `SGDW` pair-control only |
-| Discovery proposal | 16 rows per optimizer: 2 anchors + 14 log-uniform draws (64 slots) | fixed 12-cell `3 LR x 4 WD` grid per optimizer (36 slots) |
-| Sampler | `PCG64(0)` shared-quantile log-uniform | none; grids are fully enumerated |
-| Seed plan | discovery `0`; confirmation `1`-`3`; final `4`-`8` | grid seed `0`; every unique role configuration adds seeds `1`, `2` |
-| Selection taxonomy | tuned winner via top-3 confirmation; separate matching phase | roles `C1`-`C4` selected from seed-0 grid, then three-seed replication |
-| Pair control | predeclared 2x2 anchor product per pair on confirmation seeds | two predeclared shared grid cells (`Adam`/`AdamW`) and two SGD-derived cells (`SGD`/`SGDW`), seeds 0-2 |
-| Seed-0 reuse | discovery outcomes never re-counted | seed-0 grid run is counted as one of the three role seeds (bias caveat below) |
-| Full-grid reuse | not defined | retained as descriptive landscape evidence |
-
-Retained unchanged, with the v1.1 sections above staying authoritative except
-where the active data protocol is explicitly replaced here: the ID-only
-selection boundary and forbidden downstream signals; the run-level
-checkpoint rule; canonical config hashing; `last.pt` as primary scientific
-state and `best_val.pt` as validation-selected control; the deferred ID-test
-contract; the 200-epoch `multistep [60, 120, 160] gamma=0.2` schedule with no
-warmup; batch size 128; FP32; unsmoothed cross entropy;
-`weights_only_no_bias_norm`; the fixed `oge_cifar10_holdout_v1` CIFAR-10 data
-contract; GPU allocation and study/trial/attempt provenance schemas; the
-failure, resume, retry, and rerun policy; the prohibition on result-driven
-revision; and Git/external artifact storage rules.
-
-### Primary grid
-
-Every cell trains WRN-28-10 with `dropout_rate: 0.0` under the retained fixed
-recipe, seed 0. Twelve cells per optimizer, 36 assigned discovery slots.
-
-| Optimizer | Learning rates (3) | Weight decays (4) | Fixed optimizer fields |
-| --- | --- | --- | --- |
-| `SGD` | `0.03`, `0.1`, `0.3` | `0`, `1e-4`, `5e-4`, `1e-3` | `momentum=0.9`, `nesterov=true`, coupled |
-| `Adam` | `3e-4`, `1e-3`, `3e-3` | `0`, `1e-4`, `5e-4`, `1e-3` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, coupled |
-| `AdamW` | `3e-4`, `1e-3`, `3e-3` | `1e-4`, `1e-3`, `1e-2`, `1e-1` | `beta1=0.9`, `beta2=0.999`, `eps=1e-8`, decoupled |
-
-Grid notes:
-
-- Anchor continuity: the v1.1 anchors `SGD (0.1, 5e-4)`, `SGD (0.1, 0)`,
-  `Adam (1e-3, 1e-4)`, `Adam (1e-3, 0)`, and `AdamW (1e-3, 1e-2)` are all
-  grid cells. The v1.1 zero-decay anchors become full zero-decay columns for
-  `SGD` and `Adam`.
-- `AdamW` has no zero-decay column because `AdamW` at `weight_decay=0` is
-  algorithmically identical to `Adam` at `weight_decay=0`; the `Adam` zero
-  column covers that endpoint for both update rules, and duplicate cells are
-  forbidden budget waste.
-- The two `Adam`/`AdamW` shared weight-decay values `1e-4` and `1e-3` exist
-  so that the pair control below uses cells inside both grids.
-- Boundary rule: if a selected role lands on a grid-edge value, report the
-  boundary hit; do not extend or re-run the grid mid-study. The v1.1
-  boundary-hit language applies with "range" read as "grid edge".
-- Failed cells (divergence, non-finite state, config-induced OOM) consume
-  their slot under the retained failure taxonomy, remain in landscape plots
-  labeled as failures, and are excluded from role candidacy by the validity
-  floor below.
-
-### Role taxonomy and deterministic selection
-
-All role selection uses only seed-0 `last.pt` epoch-200 ID-validation
-accuracy, with ID-validation NLL at the same checkpoint as first tie-break.
-`last.pt` is chosen over `best_val.pt` because `last.pt` is the retained
-primary scientific state for downstream geometry; the planning note said
-"validation accuracy" without fixing a checkpoint role, and this card freezes
-the choice. The remaining tie-breaks are: earlier best-validation epoch,
-ascending cell order (ascending learning rate, then ascending weight decay),
-ascending canonical config hash.
-
-Frozen selection constants, fixed before any grid result exists:
-
-- validity floor for role candidacy: seed-0 ID-validation accuracy `>= 0.90`
-  on CIFAR-10 (`>= 0.60` on CIFAR-100 for lineup variations);
-- accuracy closeness band: `0.002` absolute accuracy, widened once to
-  `0.005` when a rule below says so;
-- `C4` separation offset: `0.005` below the `C3` mean;
-- zero-decay log-distance constant: `2.0` decades (used only in the `C2`
-  distance rule when exactly one of two compared cells has zero decay).
-
-Role definitions:
-
-- **C1 (tuned best, per optimizer):** the highest-ranked valid cell of that
-  optimizer under the ranking chain above.
-- **C2 (near-optimal alternative, per optimizer):** among that optimizer's
-  valid cells within the closeness band of `C1` and differing from `C1` in
-  learning rate or weight decay, the cell with the largest hyperparameter
-  distance `d = |log10(lr / lr_C1)| + dwd`, where `dwd` is
-  `|log10(wd / wd_C1)|` when both decays are positive, the zero-decay
-  constant when exactly one is zero, and `0` when both are zero. Ties break
-  by the standard chain. If the band is empty, widen once to `0.005`; if
-  still empty, record `C2` as absent for that optimizer.
-- **C3 (primary matched triple):** among all `(SGD, Adam, AdamW)` triples of
-  valid cells whose max-min seed-0 accuracy spread is within the closeness
-  band, the triple with the highest mean accuracy; ties break by lowest mean
-  NLL, then ascending concatenated config hashes. If no triple qualifies,
-  widen once to `0.005`; if still none, record `C3` as unresolved and carry
-  the matched-comparison claim on `C1`/`C2` and landscape evidence only.
-- **C4 (secondary matched triple):** among qualifying triples whose mean
-  accuracy is at most `C3 mean - 0.005`, the highest-mean triple under the
-  same tie-breaks. No widening step. If none qualifies or `C3` is
-  unresolved, `C4` is omitted; a forced `C4` is prohibited.
-
-Roles may coincide on the same cell. A cell is trained once per seed and
-carries every role label it earned; duplicate training of an identical
-resolved configuration is forbidden.
-
-### Seed policy and the seed-0 reuse caveat
-
-Every unique cell selected into any role (at most 12 across `C1`-`C4`)
-receives training seeds `1` and `2` in addition to its existing seed-0 grid
-run, for a three-seed evidence unit reported as mean and standard deviation.
-Unlike v1.1, v1.2 deliberately counts the seed-0 discovery run inside the
-three-seed unit. Because roles are selected on seed-0 results, role bundles
-carry a known mild selection bias toward seed 0; this is an accepted budget
-decision, it must be disclosed wherever bundle statistics are reported, and
-per-seed values must remain separately available in artifacts. Seeds are
-never dropped, replaced, or rerun to improve a mean. Downstream geometry,
-Neural Collapse, detector, and OOD analyses use exactly these frozen
-seed-0/1/2 checkpoints for role configurations.
-
-### Pair controls (diagnostic, separately labeled)
-
-- **`Adam` versus `AdamW`:** the two predeclared shared cells
-  `(lr=1e-3, wd=1e-4)` and `(lr=3e-3, wd=1e-3)`. Both are cells of both
-  grids, so seed 0 comes from the grid itself; seeds `1` and `2` are added
-  for both optimizers at both cells unless already covered by a role. This
-  replaces the v1.1 `{3e-4, 1e-3} x {1e-5, 1e-4}` anchor product: `1e-5` is
-  not a v1.2 grid value, and v1.2 requires shared cells to live inside both
-  grids. The two cells span a x3 learning-rate step and a x10 decay step.
-- **`SGD` versus `SGDW`:** cell A is the anchor `(lr=0.1, wd=5e-4)`; cell B
-  is the highest-ranked `SGD` cell under the standard chain that differs
-  from cell A (this makes cell B equal to `SGD C1` whenever `C1` is not the
-  anchor). `SGDW`, which has no grid, trains both cells on seeds `0`, `1`,
-  `2` (six new runs); the `SGD` side reuses grid and role runs where they
-  exist and adds only missing seeds.
-
-The v1.1 shared-number caveat is retained verbatim in force: equal numeric
-`lr` and `weight_decay` are a controlled input and do not imply equal
-effective regularization. Expected pair-control budget including reuse is
-approximately 14-18 runs.
-
-### Assigned budget accounting
-
-- Discovery grid: exactly 36 slots (12 per optimizer), seed 0.
-- Role replication: at most 24 runs (at most 12 unique role cells, seeds 1-2).
-- Pair controls: approximately 14-18 runs after reuse.
-- Slot consumption, infrastructure retries, and attempt records follow the
-  retained v1.1 rules. GPU-hours are recorded per optimizer and never
-  equalized or used as a selection signal.
-
-### Landscape use of the full grid
-
-All 36 seed-0 outcomes, including failures, boundary cells, and cells never
-selected into roles, feed descriptive landscape analyses downstream
-(accuracy versus detector scores, raw-versus-normalized readout gaps,
-feature-norm statistics). Landscape evidence is descriptive only: it is
-never pooled into mean-and-deviation claims, never treated as repeated
-measurements, and never used to revise selection after the fact.
-
-### Architecture scope
-
-- This section is normative for WRN-28-10 on CIFAR-10: full protocol with
-  `C1`-`C4` and both pair controls.
-- The lineup decision in `02_architectures.md` reuses the same grids and
-  role rules for the reduced-protocol variations (`resnet18` CIFAR-10,
-  `resnet18` CIFAR-100, `vgg16` CIFAR-10): grid 36, roles `C1` and `C3`
-  only, seeds 0-2, no pair controls, CIFAR-100 validity floor `0.60`.
-  Variation study identifiers are fixed in their execution Issues.
-- The ViT variation has no authorized grid in this section; its grid is
-  provisional pending a bounded pilot (cards 02 and 10).
-
-### Migration requirements (separate bounded Issue; code still implements v1.1)
-
-1. Replace the `SEARCH_SPACES` random-draw design in
-   `src/oge/studies/protocol.py` with the three enumerated v1.2 grids and
-   remove or bypass sampler machinery for grid studies while preserving
-   provenance fields.
-2. Mirror the grids in a new
-   `configs/studies/wrn28_10_optimizer_hpo_v1_2/study.yaml` and keep the
-   byte-equality validation between Python and YAML.
-3. Materialize, hash, and freeze the three 12-row trial tables plus
-   manifest before any training run.
-4. Implement deterministic `C1`-`C4` selection with the frozen constants
-   above and an immutable role-freeze record written before seeds 1-2 run.
-5. Implement the revised seed plan and the pair-control reuse accounting.
-6. Update protocol-version strings to `wrn28_10_optimizer_hpo_v1.2`
-   everywhere a study artifact records its protocol.
-7. Extend tests: grid-table determinism and hashes, role-selection
-   tie-breaks and absence rules, budget accounting, seed handling, and the
-   unchanged deferred ID-test contract.
-8. The migration Issue must not execute the study; execution requires its
-   own separately authorized Issue with a fresh GPU and storage preflight.
-
-### v1.2 decision log and unverified assumptions
-
-- The grids are literature-anchored proposals (card 10); they are not
-  demonstrated to contain every optimizer's competitive region. Boundary
-  hits are reported, never repaired mid-study.
-- The constants `0.002`, `0.005`, `0.90`, `0.60`, and the zero-decay
-  distance `2.0` are feasibility decisions frozen before execution, not
-  statistical-power results.
-- Counting the seed-0 run inside role bundles trades unbiasedness for
-  budget; the bias is disclosed at reporting time.
-- The `AdamW` upper decay cell `1e-1` may become a boundary hit; the
-  normalized-weight-decay derivation in card 10 anticipates the competitive
-  region near `1e-2`-`1e-1` for this horizon.
-- `SGD` at `lr=0.3` with no warmup may diverge on some cells; a diverged
-  cell consumes its slot and is reported as a failure, which is itself
-  landscape information.
-- The planning note's same-hyperparameter example pair `(3e-3, 5e-4)` was
-  replaced by `(3e-3, 1e-3)` so that shared cells are grid cells of both
-  optimizers; the substitution is recorded here and in card 10.
-- Role selection on `last.pt` epoch-200 accuracy (not `best_val.pt`) is a
-  v1.2 freeze consistent with `last.pt` primacy; the planning note did not
-  specify a checkpoint role.
+Only completed cells with accuracy at least `0.90` are valid role candidates.
+`0.002` and `0.005` are predeclared operational accuracy bands, not
+statistical-significance thresholds.
+
+ID-test, OOD, geometry/Neural Collapse, and detector fields are forbidden in
+the selection input. Their presence makes role freezing fail.
+
+## C1-C4 role definitions
+
+- **C1, tuned best per optimizer:** highest-ranked valid cell.
+- **C2, near-optimal alternative per optimizer:** among valid non-C1 cells
+  within `0.002` of C1 accuracy, choose the largest
+  `|log10(lr/lr_C1)| + d_wd`. For two positive decays,
+  `d_wd=|log10(wd/wd_C1)|`; when exactly one decay is zero, `d_wd=2.0`;
+  when both are zero, `d_wd=0`. Distance ties use the standard ranking
+  chain. If no cell qualifies, widen once to `0.005`; otherwise record C2
+  absent.
+- **C3, primary matched triple:** enumerate valid `(SGD, Adam, AdamW)`
+  triples whose max-minus-min accuracy spread is at most `0.002`. Choose
+  highest mean accuracy, then lowest mean NLL, then ascending concatenated
+  config hashes. If no triple qualifies, widen once to `0.005`; otherwise
+  record C3 unresolved.
+- **C4, secondary matched triple:** among triples qualifying under C3's
+  effective band and whose mean accuracy is at most `C3 mean - 0.005`,
+  choose the same highest-mean/lowest-NLL/hash ranking. There is no widening.
+  If absent or C3 is unresolved, omit C4.
+
+Roles may coincide. An identical resolved configuration is trained once per
+seed and carries all earned labels.
+
+The role-freeze record includes the frozen grid manifest hash, a hash of all
+36 terminal validation records, all selected/absent/unresolved decisions, and
+the complete config-hash-to-role mapping. Mutation invalidates its freeze
+hash.
+
+## Seed replication and reuse
+
+The full grid uses training seed 0. Every unique role configuration adds
+seeds 1 and 2. The three-seed evidence unit therefore reuses seed 0 rather
+than training it again.
+
+Because selection itself uses seed 0, role-bundle statistics have known
+selection bias toward that seed. Reports must disclose this and retain all
+per-seed values. Seeds are never dropped, replaced, or rerun to improve a
+mean.
+
+The full 36-cell seed-0 grid is descriptive landscape evidence only. It is
+not treated as 36 repeated measurements and is not used to revise the frozen
+roles.
+
+## Pair controls
+
+Pair controls are diagnostic and separately labeled.
+
+### Adam versus AdamW
+
+Use both optimizers at both shared cells:
+
+- `(lr=1e-3, wd=1e-4)`;
+- `(lr=3e-3, wd=1e-3)`.
+
+Each endpoint uses seeds 0, 1, and 2. Existing grid and role runs are reused;
+only missing config/seed pairs are scheduled.
+
+### SGD versus SGDW
+
+- Cell A: `(lr=0.1, wd=5e-4)`.
+- Cell B: the highest-ranked valid SGD cell different from A.
+
+SGD reuses its grid/role runs and adds missing seeds. SGDW, which has no
+primary grid, trains A and B at seeds 0, 1, and 2. If no valid non-A SGD cell
+exists, this pair control is unresolved rather than invented.
+
+Equal numeric learning rate and weight decay are controlled inputs; they do
+not imply equal effective regularization across coupled and decoupled
+updates.
+
+The frozen follow-up plan deduplicates by `(scientific_config_hash,
+training_seed)`, lists seed-0 reuse separately from newly scheduled work, and
+has its own plan hash.
+
+## Protected-evidence release
+
+Before the immutable role freeze:
+
+- ID-test evaluation is forbidden;
+- OOD evaluation is forbidden;
+- geometry and Neural Collapse analysis are forbidden;
+- detector fitting/scoring results are forbidden as selection signals;
+- OOD validation is compatibility-only and cannot tune the classifier,
+  roles, or detector per optimizer.
+
+After role freeze, protected evaluation is authorized only for role config
+hashes at seeds 0, 1, and 2. Pair-control-only configurations are not silently
+promoted to primary role evidence.
+
+## Failure, retry, and provenance rules
+
+- Scientific failures consume their assigned slot.
+- Infrastructure failures may resume only from a validated same-trial
+  epoch-boundary checkpoint with identical Git SHA, resolved config,
+  membership identity, and trial identity.
+- Every retry is a new preserved attempt; earlier attempts are never
+  overwritten.
+- Low accuracy, unfavorable ranking, boundary hits, or a changed scientific
+  interpretation never authorize a retry.
+- A host lost permanently does not authorize cross-host checkpoint resume.
+  The trial starts from scratch on the replacement host as a new attempt.
+- Git must be clean for execution.
+- Long-running artifacts live outside Git. Git stores only code, small
+  configs, frozen plans/hashes, and validation reports.
+
+## Execution boundary
+
+This card and Issue #35 authorize study-definition code only. Long training
+requires a separate execution Issue that verifies:
+
+- clean Git SHA;
+- byte-verified 36-row grid and dataset hashes;
+- common Python/PyTorch/TorchVision/CUDA environment;
+- identical measured and explicitly pinned numerical flags on all hosts;
+- frozen host/shard manifest and approved GPU UUIDs;
+- A5000/A6000 forward and one-step parity;
+- storage, inode, and backup readiness;
+- one-epoch smoke on every server;
+- successful 200-epoch SGD canary with train/ID-validation and artifact
+  integrity only.
+
+The canary is included as its normal grid cell only after it completes
+unchanged. No ID-test/OOD/geometry/detector result may be opened during that
+check.
