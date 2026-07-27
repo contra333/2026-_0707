@@ -31,6 +31,12 @@ sources:
   local_optimizer_hpo_protocol_reference_card:
     path: docs/reference_cards/07_optimizer_comparison_hpo_protocol.md
     role: WRN-28-10 four-optimizer HPO and comparison protocol; documentation only until a later implementation PR
+  local_raw_feature_artifact_reference_card:
+    path: docs/reference_cards/08_raw_feature_artifact_contract.md
+    role: raw checkpoint-feature artifact, provenance, checksum, and protected-split reference
+  local_core_representation_metrics_reference_card:
+    path: docs/reference_cards/09_core_representation_metrics.md
+    role: frozen confirmatory representation-metric and low-complexity detector reference; documentation only until later implementation PRs
   adam_paper:
     title: "Adam: A Method for Stochastic Optimization"
     authors: Kingma and Ba
@@ -123,3 +129,98 @@ sources:
       - net/wide_resnet.py
     accessed: 2026-07-14
     role: pinned DDU implementation reference for class-wise unbiased covariance, adaptive shared jitter, MultivariateNormal log density, and logsumexp scoring
+  neural_collapse_paper:
+    title: Prevalence of Neural Collapse during the Terminal Phase of Deep Learning Training
+    authors: Papyan, Han, and Donoho
+    stable_source: arXiv:2008.08186
+    url: https://arxiv.org/abs/2008.08186
+    accessed: 2026-07-15
+    role: canonical NC1-NC4 definition source
+  neural_collapse_optimizer_repository:
+    repository: jydzhao/neural_collapse_optimizer
+    url: https://github.com/jydzhao/neural_collapse_optimizer
+    commit: 7cab4a59bc28da6e356cee1e793ec67a694933b9
+    files:
+      - neural_collapse/measure.py
+      - neural_collapse/accumulate.py
+      - compute_NCmetrics.py
+    accessed: 2026-07-15
+    role: audited community-derived NC measurement reference; not canonical authority for scientific interpretation
+  rankme_paper:
+    title: RankMe - Assessing the Downstream Performance of Pretrained Self-Supervised Representations by Their Rank
+    authors: Garrido, Balestriero, Najman, and LeCun
+    stable_source: arXiv:2210.02885
+    url: https://arxiv.org/abs/2210.02885
+    accessed: 2026-07-15
+    role: paper-verified RankMe definition; no official standalone implementation was found
+  mahalanobis_ood_paper:
+    title: A Simple Unified Framework for Detecting Out-of-Distribution Samples and Adversarial Attacks
+    authors: Lee, Lee, Lee, and Shin
+    stable_source: arXiv:1807.03888
+    url: https://arxiv.org/abs/1807.03888
+    accessed: 2026-07-15
+    role: original Mahalanobis OOD method reference; project uses the pinned OpenOOD single-penultimate-layer simplification
+  mahalanobis_official_repository:
+    repository: pokaxpoka/deep_Mahalanobis_detector
+    url: https://github.com/pokaxpoka/deep_Mahalanobis_detector
+    commit: 90c2105e78c6f76a2801fc4c1cb1b84f4ff9af63
+    accessed: 2026-07-15
+    role: audited author implementation reference; input perturbation, multilayer ensemble, and logistic regression are excluded from the project core panel
+  knn_ood_paper:
+    title: Out-of-Distribution Detection with Deep Nearest Neighbors
+    authors: Sun, Ming, Zhu, and Li
+    stable_source: arXiv:2204.06507
+    url: https://arxiv.org/abs/2204.06507
+    accessed: 2026-07-15
+    role: canonical L2-normalized deep kNN detector reference
+  knn_ood_official_repository:
+    repository: deeplearning-wisc/knn-ood
+    url: https://github.com/deeplearning-wisc/knn-ood
+    commit: 2afb2bbed60a8d69384dc9b28e5637711345222b
+    files:
+      - run_cifar.py
+    accessed: 2026-07-15
+    role: pinned kNN implementation reference for mandatory L2 normalization, exact squared-L2 search, K=50, and negative k-th-distance score
+  msp_paper:
+    title: A Baseline for Detecting Misclassified and Out-of-Distribution Examples in Neural Networks
+    authors: Hendrycks and Gimpel
+    stable_source: arXiv:1610.02136
+    url: https://arxiv.org/abs/1610.02136
+    accessed: 2026-07-15
+    role: original maximum-softmax-probability baseline reference
+  msp_official_repository:
+    repository: hendrycks/error-detection
+    url: https://github.com/hendrycks/error-detection
+    commit: 276d605bfa9a9bd7701bd88937c537c3fcab94cf
+    accessed: 2026-07-15
+    role: audited author implementation reference for maximum softmax confidence
+  energy_ood_paper:
+    title: Energy-based Out-of-distribution Detection
+    authors: Liu, Wang, Owens, and Li
+    stable_source: arXiv:2010.03759
+    url: https://arxiv.org/abs/2010.03759
+    accessed: 2026-07-15
+    role: canonical Energy OOD score reference
+  energy_ood_official_repository:
+    repository: wetliu/energy_ood
+    url: https://github.com/wetliu/energy_ood
+    commit: 77f3c09b788bb5a7bfde6fd3671228320ea0949c
+    files:
+      - CIFAR/test.py
+    accessed: 2026-07-15
+    role: audited author implementation reference for T=1 and effective ID-like negative-energy scoring
+  ctm_paper:
+    title: A Cosine Similarity-based Method for Out-of-Distribution Detection
+    authors: Nguyen Ngoc-Hieu et al.
+    stable_source: arXiv:2306.14920
+    url: https://arxiv.org/abs/2306.14920
+    accessed: 2026-07-15
+    role: CTM class-mean cosine detector reference
+  ctm_official_repository:
+    repository: Fsoft-AIC/CTM-OOD
+    url: https://github.com/Fsoft-AIC/CTM-OOD
+    commit: 3587259bd6a69abd6b4103cb7311ffaa0857d60f
+    files:
+      - core/detection/methods/post_hoc/ctm.py
+    accessed: 2026-07-15
+    role: audited author implementation reference; project explicitly normalizes query features to realize pure cosine scoring

@@ -42,6 +42,13 @@ independently validated at pinned training commit
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
   boundaries.
 - SN on/off is documented as a training ablation and does not rename DDU.
+- `docs/reference_cards/08_raw_feature_artifact_contract.md` fixes the future
+  deterministic checkpoint-feature cache, provenance, checksum, and
+  protected-split authorization contract.
+- `docs/reference_cards/09_core_representation_metrics.md` freezes the future
+  confirmatory geometry, logit-control, and low-complexity distance/angle
+  panel. Covariance effective rank remains explicitly `UNSPECIFIED` rather
+  than receiving an unaudited formula.
 - These decisions are documentation only. No DDU detector code, test, config,
   checkpoint evaluation, or OOD result has been implemented or validated.
 
