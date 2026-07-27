@@ -45,7 +45,9 @@ persistent_workers=false
   PASS, bounded actual-data loader PASS, and actual-data one-epoch smoke PASS.
   The data/smoke checks ran from clean execution Git SHA
   `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`.
-- `lise`: runtime installation and actual-data smoke remain NOT_RUN.
+- `lise`: runtime, complete-suite, CUDA/cuDNN, committed-holdout path/loader,
+  and actual-data one-epoch smoke PASS at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`.
 
 The detailed external attempt logs and wheel bundles remain outside Git.
 
@@ -228,6 +230,138 @@ throughput benchmark, or complete regression-suite rerun was performed during
 this data/smoke validation. The 200-epoch canary and production grid remain
 NOT_RUN. Protected ID-test, OOD, geometry, Neural Collapse, and detector
 evidence remain NOT_RUN.
+
+## `lise` runtime and actual-data observation
+
+The approved host resolved as `lise` with two NVIDIA RTX A5000 GPUs. Validation
+used physical GPU 0 only. Physical GPU 1 had another user's compute processes,
+was not interrupted or probed, and was not required by the host-level practical
+runtime gate.
+
+The run used clean Git
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. The transferred Curie inputs were
+kept outside Git and verified before use:
+
+- Python 3.11.9 conda-pack bootstrap SHA-256
+  `2094a5936a13d2935f8fbed7df07a94c3dbc5d83ffcdd9139433dcab992f4c30`;
+- pip offline bundle SHA-256
+  `315901b8f870b0ff9b6f06520262fdaf9901d9755b06b0afca7e1f688a19abf9`;
+- every bundle-internal lock, validator, metadata file, and wheel matched
+  `PIP_BUNDLE_SHA256SUMS`.
+
+The bootstrap was extracted to a separate prefix, relocated with
+`conda-unpack`, and used to create an internal `candidate-venv`. The bootstrap
+lock was installed offline with `--require-hashes --no-deps`. The runtime and
+test locks were installed together in one offline hash-checked transaction,
+and the repository was installed with
+`--no-deps --no-build-isolation -e`. The nested-venv isolation check passed
+without running Conda identity or ownership-parity validation.
+
+The observed runtime was:
+
+- Python `3.11.9`, executable
+  `/home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python`;
+- PyTorch `2.5.1+cu121` and TorchVision `0.20.1+cu121`;
+- CUDA runtime `12.1`, cuDNN `90100`, and NVIDIA driver `580.159.03`;
+- NumPy `1.26.4`, Pillow `10.4.0`, PyYAML `6.0.2`, and scikit-learn `1.5.2`;
+- FP32 parameters, activations, and storage with AMP and BF16 disabled;
+- float32 matmul precision `highest`;
+- CUDA matmul TF32 disabled and cuDNN TF32 enabled;
+- cuDNN benchmark and deterministic modes disabled and deterministic
+  algorithms disabled.
+
+`pip check` passed and the complete suite reported `175 passed in 7.90s`.
+On idle physical GPU 0, the bounded FP32 matrix multiplication and bounded
+cuDNN convolution both produced finite FP32 outputs. The driver, installation
+prefix, and GPU UUID
+`GPU-65d2f656-103f-0b29-f925-677903576efc` are record-only metadata.
+
+`scripts/verify_cifar10_holdout.py` regenerated the committed holdout
+byte-identically and verified all 45,000 train, 5,000 validation, and 10,000
+test image paths with zero missing images and zero duplicate sample IDs. The
+bounded actual-data loader check passed for all three ID roles with
+`num_workers=0`, `persistent_workers=false`, FP32 finite tensors, and eight
+unique sample IDs per role.
+
+The existing study runner completed one SGD seed-0 actual-data epoch with
+`--smoke-only --smoke-trials 1 --concurrency 1` on GPU 0. The study status was
+`smoke_only_completed`, one of one planned trials completed, and the child
+recorded the expected Git SHA, membership hashes, GPU UUID, runtime, and
+numerical policy. ID-test evaluation remained `deferred`; no ID-test metrics
+or evaluation artifacts were created. The epoch-1 validation accuracy
+`0.522` and NLL `1.4128568719863892` are infrastructure-smoke observations,
+not research evidence.
+
+The principal validation commands were:
+
+```bash
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  PIP_NO_CACHE_DIR=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  -m pip install --no-index \
+  --find-links /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/wheelhouse \
+  --only-binary=:all: --require-hashes --no-deps \
+  -r /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/locks/requirements-bootstrap-tools.lock
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  PIP_NO_CACHE_DIR=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  -m pip install --no-index \
+  --find-links /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/wheelhouse \
+  --only-binary=:all: --require-hashes \
+  -r /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/locks/requirements-runtime.lock \
+  -r /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/locks/requirements-test.lock
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  PIP_NO_CACHE_DIR=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  -m pip install --no-index --no-deps --no-build-isolation \
+  -e /home/ghjin/0727ICLR실험/2026-_0707-issue37
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  -m pip check
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  PYTHONDONTWRITEBYTECODE=1 CUDA_VISIBLE_DEVICES=0 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  -m pytest -q -p no:cacheprovider
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  scripts/verify_cifar10_holdout.py \
+  --data-root /home/ghjin/datasets/openood-v1.5-3c35632e
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/validators/issue37_loader_check.py \
+  --repository-root /home/ghjin/0727ICLR실험/2026-_0707-issue37 \
+  --data-root /home/ghjin/datasets/openood-v1.5-3c35632e
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  CUDA_VISIBLE_DEVICES=0 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/bundle/curie_candidate_a2_pip_offline_bundle/validators/issue37_cuda_probe.py \
+  --physical-index 0 \
+  --physical-uuid GPU-65d2f656-103f-0b29-f925-677903576efc
+
+env -u LD_LIBRARY_PATH -u PYTHONPATH PYTHONNOUSERSITE=1 \
+  CUDA_VISIBLE_DEVICES=0 \
+  /home/ghjin/0727ICLR실험/issue37_lise_runtime/e9bfde43/python3119-bootstrap/candidate-venv/bin/python \
+  scripts/run_optimizer_study.py \
+  --data-root /home/ghjin/datasets/openood-v1.5-3c35632e \
+  --artifact-root /home/ghjin/0727ICLR실험/issue37_lise_artifacts/e9bfde43/lise_runtime_smoke_20260728/study \
+  --gpus 0 --concurrency 1 --smoke-only --smoke-trials 1
+```
+
+The external reports and smoke artifacts are under
+`/home/ghjin/0727ICLR실험/issue37_lise_artifacts/e9bfde43/lise_runtime_smoke_20260728/`.
+They contain the transfer and bundle checksum results, pip install reports,
+package inventory, `pip check`, numerical-policy record, complete-suite log,
+CUDA/cuDNN probe, holdout and loader reports, and the existing runner's
+attempt/checkpoint artifacts. A first install-report-summary `jq` expression
+had a post-install array-scope error; the corrected summary passed and the
+error did not affect installation, tests, data validation, or the smoke.
 
 ## Setup-error boundary
 

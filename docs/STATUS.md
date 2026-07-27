@@ -16,8 +16,10 @@ protocol-v1.2 36-cell production grid has started. Issue #35 replaces the
 current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
-`oge_cifar10_holdout_v1`; its department-server path/loader smoke and the
-three-host runtime/numerical checks are still required before production.
+`oge_cifar10_holdout_v1`; its practical runtime and actual-data checks passed
+on `precision_medicine` and `lise`, with current-SHA data/smoke validation at
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`, while the `curie` actual-data
+loader and one-epoch smoke checks remain required before production.
 Issue #37 has been narrowed to practical runtime compatibility, numerical
 policy recording, actual-data loader validation, and one-epoch smokes on the
 three approved hosts. Benchmark-grade Conda/cache parity, DataLoader throughput
@@ -40,8 +42,8 @@ production prerequisites.
   OpenOOD 1k/9k union, and all three imglists plus a 60,000-row provenance
   manifest are committed. The active training config uses
   `oge_cifar10_holdout_v1`, WRN `msr_fan_in`, and train-only reflection
-  padding. Local deterministic/hash tests are not a substitute for the pending
-  department-server image-path and loader smoke.
+  padding. Local deterministic/hash tests do not substitute for the remaining
+  `curie` image-path and loader validation.
 - Official released OpenOOD imglists and all eight required archives were validated on the department server.
 - Actual-data manifest validation confirmed fixed split counts, image-path existence, sample-ID uniqueness, and label ranges.
 - A bounded CUDA WRN-28-10 MSP vertical slice completed with random-model output marked as infrastructure-only.
@@ -87,6 +89,19 @@ production prerequisites.
   responsible for bounded one-epoch smokes; no new preflight/throughput/shard
   gate is inserted into production execution. See
   `docs/validation/issue37_practical_runtime_status.md`.
+- Issue #37's `precision_medicine` runtime candidate passed `pip check`, the
+  complete 175-test suite, bounded CUDA/cuDNN probes, and the required numerical
+  policy checks. Its committed-holdout, bounded-loader, and actual-data
+  one-epoch smoke then passed at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`, with ID-test deferred and no
+  protected-evidence artifact.
+- Issue #37's `lise` validation passed at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`: the hash-locked Python 3.11.9,
+  PyTorch `2.5.1+cu121`, TorchVision `0.20.1+cu121`, and CUDA 12.1 runtime
+  passed `pip check`, the complete 175-test suite, bounded A5000 CUDA/cuDNN
+  probes, committed 45k/5k/10k holdout path and loader checks, and one
+  existing-runner actual-data epoch on an idle GPU. The smoke deferred ID-test
+  and created no protected-evidence artifact.
 
 ## Documented but not executed
 
@@ -121,13 +136,12 @@ production prerequisites.
 
 ## Still missing
 
-- Department-server verification of the committed
-  `oge_cifar10_holdout_v1` lists against the assembled image root and a bounded
-  loader smoke
+- Remaining `curie` verification of the committed `oge_cifar10_holdout_v1`
+  lists against the assembled image root and bounded loader behavior
 - Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
   replication, and the pair controls
-- Runtime installation, actual-data loader validation, and one-epoch smoke on
-  all three approved hosts
+- Current-SHA runtime, actual-data loader, and one-epoch smoke completion on
+  `curie` after the `precision_medicine` and `lise` passes
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
@@ -135,9 +149,10 @@ production prerequisites.
 
 ## Active next phase
 
-Complete Issue #37's three-host runtime, numerical-policy, loader, and
-one-epoch smoke checks. Only after those practical gates pass may a separate
-execution Issue start the 200-epoch SGD canary and the remaining frozen grid.
+Complete Issue #37's remaining `curie` runtime, numerical-policy, loader, and
+one-epoch smoke checks after the `precision_medicine` and `lise` passes. Only
+after those practical gates pass may a separate execution Issue start the
+200-epoch SGD canary and the remaining frozen grid.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
