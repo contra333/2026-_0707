@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 import torch
 from PIL import Image
+from torchvision import transforms
 
 from oge.data import ImglistDataset, build_openood_cifar10_loaders, parse_imglist_entry
 
@@ -162,6 +163,17 @@ def test_factory_applies_explicit_loader_settings_and_train_generator(tmp_path):
     assert validation_loader.drop_last is False
     assert train_loader.generator is train_generator
     assert validation_loader.generator is None
+    train_transforms = train_loader.dataset.transform.transforms
+    validation_transforms = validation_loader.dataset.transform.transforms
+    assert any(isinstance(item, transforms.RandomHorizontalFlip) for item in train_transforms)
+    train_crop = next(
+        item for item in train_transforms if isinstance(item, transforms.RandomCrop)
+    )
+    assert train_crop.padding_mode == "reflect"
+    assert not any(
+        isinstance(item, (transforms.RandomHorizontalFlip, transforms.RandomCrop))
+        for item in validation_transforms
+    )
 
 
 def test_factory_rejects_persistent_workers_without_workers(tmp_path):

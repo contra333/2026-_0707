@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the reproducible OpenOOD-aligned CIFAR-10 classifier training path."""
+"""Run the reproducible OGE CIFAR-10 holdout classifier training path."""
 
 from __future__ import annotations
 
@@ -15,7 +15,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--config",
         type=Path,
-        default=repository_root / "configs/training/cifar10_wrn28_10.yaml",
+        default=repository_root
+        / "configs/training/cifar10_wrn28_10_holdout_v1.yaml",
     )
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--run-dir", type=Path, required=True)

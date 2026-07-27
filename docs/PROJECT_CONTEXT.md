@@ -33,7 +33,9 @@ Implemented foundation:
 - optimizer and parameter-group tests;
 - model API for logits and penultimate features;
 - `toy_cifar_cnn`, `resnet18`, and `wrn28_10` model endpoints;
-- OpenOOD v1.5-aligned CIFAR-10 ID/OOD loaders, fixed split manifests, and preprocessing;
+- deterministic `oge_cifar10_holdout_v1` 45k/5k/10k CIFAR-10 ID membership,
+  OpenOOD v1.5-compatible OOD roles, imglist loaders, manifests, and
+  preprocessing;
 - bounded MSP OOD inference and metric infrastructure;
 - reproducible classifier training, scheduling, checkpoint/reload, epoch-boundary resume, and run artifacts;
 - bounded actual-data CUDA validation for the OpenOOD data/evaluation and WRN-28-10 training paths;

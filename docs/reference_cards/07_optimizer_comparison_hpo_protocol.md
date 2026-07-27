@@ -16,11 +16,12 @@ mechanism that v1.2 explicitly retains.
 ## Purpose, authority, and evidence boundary
 
 This card fixes active protocol version `wrn28_10_optimizer_hpo_v1.1` for
-comparing `SGD`, `SGDW`, `Adam`, and `AdamW` with WRN-28-10 on the repository's
-OpenOOD v1.5-aligned CIFAR-10 membership. The primary result is the tuned
-optimizer comparison. Accuracy matching, coupled-vs-decoupled pair controls,
-and the shared-number appendix are separate controls and must never be pooled
-with the primary result.
+comparing `SGD`, `SGDW`, `Adam`, and `AdamW` with WRN-28-10. Historical v1.1
+used the OpenOOD v1.5-aligned ID membership; active v1.2 uses
+`oge_cifar10_holdout_v1` with 45k train, 5k ID validation, and protected full
+10k ID test. The primary result is the tuned optimizer comparison. Accuracy
+matching, coupled-vs-decoupled pair controls, and the shared-number appendix
+are separate controls and must never be pooled with the primary result.
 
 Protocol v1.1 supersedes the unexecuted v1 plan from Issue #18 and PR #19. The
 v1 plan remains historical Git and Pull Request provenance, but it was never
@@ -65,8 +66,9 @@ The adjacent durable authorities remain:
   shared parameter grouping;
 - [`02_architectures.md`](02_architectures.md) for WRN-28-10 and its
   640-dimensional penultimate feature;
-- [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md) for fixed ID/OOD
-  membership and evaluation semantics;
+- [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md) for the
+  `oge_cifar10_holdout_v1` ID membership and OpenOOD-compatible OOD evaluation
+  semantics;
 - [`05_training_protocol.md`](05_training_protocol.md) for run-level training,
   checkpoint, resume, and artifact semantics;
 - [`06_feature_ood_detectors.md`](06_feature_ood_detectors.md) for future
@@ -700,16 +702,17 @@ architecture lineup that reuses this grid outside WRN-28-10 is fixed in
 | Seed-0 reuse | discovery outcomes never re-counted | seed-0 grid run is counted as one of the three role seeds (bias caveat below) |
 | Full-grid reuse | not defined | retained as descriptive landscape evidence |
 
-Retained unchanged, with the v1.1 sections above staying authoritative: the
-ID-only selection boundary and forbidden downstream signals; the run-level
+Retained unchanged, with the v1.1 sections above staying authoritative except
+where the active data protocol is explicitly replaced here: the ID-only
+selection boundary and forbidden downstream signals; the run-level
 checkpoint rule; canonical config hashing; `last.pt` as primary scientific
 state and `best_val.pt` as validation-selected control; the deferred ID-test
 contract; the 200-epoch `multistep [60, 120, 160] gamma=0.2` schedule with no
 warmup; batch size 128; FP32; unsmoothed cross entropy;
-`weights_only_no_bias_norm`; the fixed CIFAR-10 data contract; GPU allocation
-and study/trial/attempt provenance schemas; the failure, resume, retry, and
-rerun policy; the prohibition on result-driven revision; and Git/external
-artifact storage rules.
+`weights_only_no_bias_norm`; the fixed `oge_cifar10_holdout_v1` CIFAR-10 data
+contract; GPU allocation and study/trial/attempt provenance schemas; the
+failure, resume, retry, and rerun policy; the prohibition on result-driven
+revision; and Git/external artifact storage rules.
 
 ### Primary grid
 
