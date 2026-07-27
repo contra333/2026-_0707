@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27
+Last updated: 2026-07-28
 
 ## Current phase
 
@@ -17,11 +17,12 @@ current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
 `oge_cifar10_holdout_v1`; its department-server path/loader smoke and the
-common-server numerical preflight are still required before production.
-Issue #37 now provides fail-closed capture/comparison, throughput-decision,
-parity, and host-shard tooling, but desktop WSL cannot resolve the department
-hosts. The common dependency lock, `precision_medicine` hostname, server
-measurements, parity, and smokes therefore remain explicitly unresolved.
+three-host runtime/numerical checks are still required before production.
+Issue #37 has been narrowed to practical runtime compatibility, numerical
+policy recording, actual-data loader validation, and one-epoch smokes on the
+three approved hosts. Benchmark-grade Conda/cache parity, DataLoader throughput
+experiments, cross-GPU parity gates, and immutable UUID shards are no longer
+production prerequisites.
 
 ## Validated or implemented
 
@@ -80,13 +81,12 @@ measurements, parity, and smokes therefore remain explicitly unresolved.
   or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
   justification. Its executable config, tables, sampler, default path, and
   golden hashes are absent from the current tree.
-- Issue #37 locally implements versioned server-preflight records, exact
-  environment/numerical comparison, legacy and PyTorch 2.9+ TF32 API capture,
-  the common 15% DataLoader worker gate, deterministic 5/2/5-capable balanced
-  host shards, synthetic A5000/A6000 parity comparison, and study-runner gates
-  for frozen dependency/preflight/throughput/shard/GPU identities. The
-  dependency lock is intentionally pending and no server result is claimed;
-  see `docs/validation/issue37_server_preflight_blocked.md`.
+- Issue #37 locally records practical runtime targets and adds the effective
+  FP32/TF32/cuDNN policy, Python executable, hostname, driver, and GPU metadata
+  to each training run's `environment.json`. The existing study runner remains
+  responsible for bounded one-epoch smokes; no new preflight/throughput/shard
+  gate is inserted into production execution. See
+  `docs/validation/issue37_practical_runtime_status.md`.
 
 ## Documented but not executed
 
@@ -126,9 +126,8 @@ measurements, parity, and smokes therefore remain explicitly unresolved.
   loader smoke
 - Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
   replication, and the pair controls
-- Common environment installation and three-host preflight completion,
-  DataLoader measurements, parity, current-UUID shard generation, and
-  per-host one-epoch smoke
+- Runtime installation, actual-data loader validation, and one-epoch smoke on
+  all three approved hosts
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
@@ -136,11 +135,9 @@ measurements, parity, and smokes therefore remain explicitly unresolved.
 
 ## Active next phase
 
-Complete separate bounded Issues for the three-server common environment and
-measured TF32 policy, DataLoader throughput decision, A5000/A6000 parity,
-immutable mixed-GPU host shards, and production preflight. Only after those
-gates pass may the execution Issue start the 200-epoch SGD canary and the
-remaining frozen grid.
+Complete Issue #37's three-host runtime, numerical-policy, loader, and
+one-epoch smoke checks. Only after those practical gates pass may a separate
+execution Issue start the 200-epoch SGD canary and the remaining frozen grid.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -159,9 +156,9 @@ not authorize detector implementation without a separately bounded task.
   optimizer-comparison or multi-seed conclusion is currently supported.
 - Optimizer-comparison server hardening and execution require separately
   bounded Issues before long-running experiments.
-- Production GPU availability and identity, storage and inode capacity,
-  artifact retention and backup behavior, and optimizer-specific 200-epoch wall
-  time remain unverified until a fresh server preflight.
+- Production GPU availability, artifact retention and backup behavior, and
+  optimizer-specific 200-epoch wall time remain unverified until the practical
+  server runtime and smoke checks complete.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 

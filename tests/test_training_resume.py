@@ -308,6 +308,21 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
     environment = json.loads((run_dir / "environment.json").read_text())
     assert environment["schema_version"] == "1.0"
     assert environment["executions"][0]["device"] == "cpu"
+    execution_environment = environment["executions"][0]
+    assert execution_environment["python_executable"]
+    assert execution_environment["hostname"]
+    assert execution_environment["nvidia_driver"] is None
+    assert execution_environment["numerical_policy"]["precision_contract"] == {
+        "parameters": "fp32",
+        "activations": "fp32",
+        "storage": "fp32",
+        "amp": False,
+        "bf16": False,
+    }
+    assert set(execution_environment["numerical_policy"]["tf32"]) == {
+        "cuda_matmul_allow_tf32",
+        "cudnn_allow_tf32",
+    }
 
 
 class ExplodingIDTestLoader:

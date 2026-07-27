@@ -24,12 +24,6 @@ from oge.studies.orchestration import (
     prepare_retry_run_directory,
     run_independent_trials,
 )
-from oge.studies.preflight import (
-    apply_numerical_policy,
-    load_infrastructure_config,
-    validate_host_shards,
-    validate_runtime_environment,
-)
 from oge.studies.protocol import (
     PROTOCOL_VERSION,
     generate_grid_bundle,
@@ -50,10 +44,6 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STUDY_CONFIG = (
     REPOSITORY_ROOT / "configs/studies/wrn28_10_optimizer_hpo_v1_2/study.yaml"
 )
-DEFAULT_INFRASTRUCTURE = (
-    REPOSITORY_ROOT
-    / "configs/studies/wrn28_10_optimizer_hpo_v1_2/infrastructure.yaml"
-)
 
 
 def _utc_now() -> str:
@@ -65,19 +55,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--study-config", type=Path, default=DEFAULT_STUDY_CONFIG)
     parser.add_argument(
         "--phase",
-        choices=["grid"],
+        choices=["grid", "followup"],
         default="grid",
     )
-    parser.add_argument(
-        "--host-id",
-        required=True,
-        choices=["curie", "lise", "precision_medicine"],
-    )
-    parser.add_argument("--infrastructure", type=Path, default=DEFAULT_INFRASTRUCTURE)
-    parser.add_argument("--preflight-freeze", type=Path, required=True)
-    parser.add_argument("--host-manifest", type=Path, required=True)
-    parser.add_argument("--dependency-lock", type=Path, required=True)
-    parser.add_argument("--throughput-decision", type=Path, required=True)
+    parser.add_argument("--trial-plan", type=Path, help="Required frozen plan for follow-up runs.")
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument(
@@ -88,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--concurrency", type=int, default=DEFAULT_MAX_CONCURRENCY)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--smoke-only", action="store_true")
-    parser.add_argument("--smoke-trials", type=int, default=1)
+    parser.add_argument("--smoke-trials", type=int, default=2)
     parser.add_argument("--retry-trial-id")
     parser.add_argument("--retry-reason-code")
     return parser.parse_args()
@@ -152,6 +133,21 @@ def _trial_record(
     return record
 
 
+def _load_followup_plan(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("frozen follow-up plan must be a JSON mapping")
+    expected_hash = canonical_sha256(
+        {key: value for key, value in payload.items() if key != "plan_hash"}
+    )
+    if payload.get("plan_hash") != expected_hash:
+        raise ValueError("frozen follow-up plan hash mismatch")
+    scheduled = payload.get("scheduled")
+    if not isinstance(scheduled, list):
+        raise ValueError("frozen follow-up plan is missing scheduled rows")
+    return payload
+
+
 def _study_record(
     *,
     study_id: str,
@@ -163,19 +159,11 @@ def _study_record(
     artifact_root: Path,
     smoke_only: bool,
     assigned_execution_slots: int,
-    host_id: str,
-    preflight_freeze_hash: str,
-    host_manifest_hash: str,
-    throughput_decision_hash: str,
 ) -> dict[str, Any]:
     record = {
         "schema_version": STUDY_SCHEMA_VERSION,
         "protocol_version": PROTOCOL_VERSION,
         "study_id": study_id,
-        "host_id": host_id,
-        "preflight_freeze_hash": preflight_freeze_hash,
-        "host_manifest_hash": host_manifest_hash,
-        "throughput_decision_hash": throughput_decision_hash,
         "grid_version": manifest["grid_version"],
         "grid_hash": manifest["grid_hash"],
         "grid_manifest_hash": manifest["manifest_hash"],
@@ -242,32 +230,6 @@ def _command_builder(data_root: Path):
 def main() -> int:
     args = parse_args()
     study_config = load_study_config(args.study_config)
-    infrastructure = load_infrastructure_config(args.infrastructure)
-    preflight_freeze = json.loads(
-        args.preflight_freeze.read_text(encoding="utf-8")
-    )
-    expected_preflight_hash = canonical_sha256(
-        {
-            key: value
-            for key, value in preflight_freeze.items()
-            if key != "freeze_hash"
-        }
-    )
-    if (
-        preflight_freeze.get("status") != "ready"
-        or preflight_freeze.get("freeze_hash") != expected_preflight_hash
-    ):
-        raise ValueError("study execution requires a valid ready preflight freeze")
-    if args.host_id not in preflight_freeze.get("host_order", []):
-        raise ValueError("host-id is not present in the preflight freeze")
-    apply_numerical_policy(
-        preflight_freeze["common_environment_identity"]["numerical_policy"]
-    )
-    validate_runtime_environment(
-        preflight_freeze,
-        repository_root=REPOSITORY_ROOT,
-        dependency_lock=args.dependency_lock,
-    )
     base_config_path = REPOSITORY_ROOT / study_config["base_training_config"]
     base_config = load_training_config(base_config_path)
     resolved = resolve_training_config(
@@ -279,31 +241,6 @@ def main() -> int:
     frozen_dir = REPOSITORY_ROOT / study_config["frozen_grid_dir"]
     verify_materialized_grid_bundle(frozen_dir, generated)
     frozen = load_materialized_grid_bundle(frozen_dir)
-    throughput_decision = json.loads(
-        args.throughput_decision.read_text(encoding="utf-8")
-    )
-    expected_throughput_hash = canonical_sha256(
-        {
-            key: value
-            for key, value in throughput_decision.items()
-            if key != "decision_hash"
-        }
-    )
-    if (
-        throughput_decision.get("decision_hash") != expected_throughput_hash
-        or throughput_decision.get("status") != "workers_zero_frozen"
-        or throughput_decision.get("selected_num_workers") != 0
-    ):
-        raise ValueError(
-            "current runner requires the frozen num_workers=0 throughput decision"
-        )
-    host_manifest = json.loads(args.host_manifest.read_text(encoding="utf-8"))
-    validate_host_shards(
-        host_manifest,
-        frozen,
-        preflight_freeze,
-        throughput_decision,
-    )
 
     git_sha, git_dirty = repository_git_state()
     if git_dirty:
@@ -316,26 +253,41 @@ def main() -> int:
         resolved["dataset"]["membership_manifest"]["sha256"]
     )
     study_id = str(study_config["study_id"])
-    assigned_trial_ids = {
-        row["trial_id"]
-        for row in host_manifest["shards"][args.host_id]["rows"]
-    }
-    rows = [
-        row
-        for name in study_config["optimizer_order"]
-        for row in frozen["tables"][name]["rows"]
-        if row["trial_id"] in assigned_trial_ids
-    ]
-    trials = [
-        _trial_record(
-            row,
-            study_id=study_id,
-            phase="grid",
-            git_sha=git_sha,
-            dataset_membership_hashes=dataset_hashes,
+    if args.phase == "grid":
+        rows = [
+            row
+            for name in study_config["optimizer_order"]
+            for row in frozen["tables"][name]["rows"]
+        ]
+        trials = [
+            _trial_record(
+                row,
+                study_id=study_id,
+                phase="grid",
+                git_sha=git_sha,
+                dataset_membership_hashes=dataset_hashes,
+            )
+            for row in rows
+        ]
+    else:
+        if args.trial_plan is None:
+            raise ValueError("follow-up phase requires a pre-frozen --trial-plan")
+        followup_plan = _load_followup_plan(args.trial_plan)
+        study_id = (
+            f"{study_id}__followup__"
+            f"{str(followup_plan['role_freeze_hash'])[:12]}"
         )
-        for row in rows
-    ]
+        rows = followup_plan["scheduled"]
+        trials = [
+            _trial_record(
+                row,
+                study_id=study_id,
+                phase="followup",
+                git_sha=git_sha,
+                dataset_membership_hashes=dataset_hashes,
+            )
+            for row in rows
+        ]
 
     assigned_execution_slots = len(trials)
     if args.smoke_only:
@@ -417,10 +369,6 @@ def main() -> int:
         artifact_root=args.artifact_root,
         smoke_only=args.smoke_only,
         assigned_execution_slots=assigned_execution_slots,
-        host_id=args.host_id,
-        preflight_freeze_hash=preflight_freeze["freeze_hash"],
-        host_manifest_hash=host_manifest["manifest_hash"],
-        throughput_decision_hash=throughput_decision["decision_hash"],
     )
     study_manifest_path = args.artifact_root / study_id / "study_manifest.json"
     study_summary_path = args.artifact_root / study_id / "study_summary.json"
@@ -431,13 +379,6 @@ def main() -> int:
 
     inventory = discover_nvidia_gpus()
     gpus = _select_gpus(inventory, args.gpus)
-    approved_uuids = set(
-        host_manifest["shards"][args.host_id]["approved_gpu_uuids"]
-    )
-    if {gpu.uuid for gpu in gpus} != approved_uuids:
-        raise ValueError(
-            "selected GPU UUIDs differ from the immutable approved host shard"
-        )
     try:
         result = run_independent_trials(
             study_id=study_id,

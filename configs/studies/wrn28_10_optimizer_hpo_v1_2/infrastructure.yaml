@@ -1,5 +1,5 @@
 schema_version: "1.0"
-status: awaiting_server_measurement
+status: candidate_hosts
 hosts:
   - host_id: curie
     display_name: curie
@@ -13,17 +13,13 @@ hosts:
     expected_gpu_count: 2
   - host_id: precision_medicine
     display_name: 맞춤의약
-    expected_hostname: UNSPECIFIED
+    expected_hostname: math-SYS-740GP-TNRT
     expected_gpu_name: NVIDIA RTX A6000
     expected_gpu_count: 4
 forbidden_gpu_name_substrings:
   - RTX PRO 6000
   - Blackwell
-throughput:
-  worker_candidates: [0, 4, 8]
-  minimum_improvement: 0.15
-  require_full_gpu_concurrency: true
-parity:
-  atol: 0.00001
-  rtol: 0.0001
-  initialization_seed: 2027
+assignment:
+  record_host_and_gpu: true
+  require_every_optimizer_on_every_host: true
+  gpu_uuid_is_record_only: true

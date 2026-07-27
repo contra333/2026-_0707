@@ -52,9 +52,8 @@ Implemented foundation:
 
 Documented for later implementation, but not yet implemented or validated:
 
-- common-server environment and measured numerical-policy pinning,
-  DataLoader throughput hardening, mixed-GPU immutable shards, and production
-  execution;
+- practical common-server runtime and measured numerical-policy validation,
+  actual-data one-epoch smokes, and production execution;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
