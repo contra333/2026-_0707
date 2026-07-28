@@ -1,8 +1,69 @@
 # AGENTS.md
 
+## Prompt-only owner fast path
+
+The only fast-path trigger is the exact lowercase prompt prefix `fast path`.
+A prompt triggers the fast path only when its first non-empty line starts with
+the exact words `fast path` and the next character is whitespace or the line
+ends. The task text follows that prefix.
+
+Before choosing the workflow, apply this case-sensitive conceptual regular
+expression to the first non-empty line:
+
+```text
+^fast path(?:[ \t]|$)
+```
+
+Do not use a broad string-prefix check. In particular, a colon immediately
+after `path` fails the expression and must use the standard workflow.
+
+| First non-empty line | Fast path |
+| --- | --- |
+| `fast path do the task` | yes |
+| `fast path` | yes; ask for the missing task |
+| `fast path: do the task` | no |
+| `FAST PATH do the task` | no |
+| `/fast do the task` | no |
+| `fast-path do the task` | no |
+
+`FAST PATH`, `fast path:`, `/fast`, `fast-path`, and `FAST:` are not aliases
+and do not trigger this workflow. Do not require a shell command, slash
+command, executable, alias, environment variable, configuration toggle, or
+separate activation step.
+
+For one bounded fast-path task:
+
+- do not create a GitHub Issue, task branch, or Pull Request;
+- work directly on `main`, first confirming that local `main` can be safely
+  fast-forwarded to `origin/main`;
+- read the core context documents and every relevant reference card, code path,
+  and test, but do not require an active Issue;
+- allow the explicitly requested scope to include documentation,
+  configuration, scripts, core code, tests, and durable research protocol;
+- update the relevant authoritative repository documents in the same task when
+  research semantics or workflow rules change;
+- run validation in proportion to the risk of the change;
+- stage only the task files, commit intentionally, and push `main`;
+- complete explicitly requested server synchronization, training, transfer,
+  and Hugging Face upload steps without another project-workflow confirmation;
+- preserve unrelated files and report exact `PASS`, `FAILED`, `NOT_RUN`, and
+  `BLOCKED` evidence.
+
+The authorization covers the named task and the steps needed to complete it,
+including follow-up corrections during that unfinished task. It expires when
+the task is complete; a new unrelated task requires a new `fast path` prefix.
+If the prompt contains only `fast path` without a task, ask for the task rather
+than creating persistent fast-path state.
+
+The prefix does not silently authorize unrequested deletion, force-push,
+artifact overwrite, protected-split access, secret disclosure, or termination
+of another user's process. Destructive or protected actions must be explicit
+in the task and remain subject to the applicable safety and evidence rules.
+Never fabricate validation or research evidence.
+
 ## Mandatory reading order
 
-Before planning or editing, read:
+For the standard Issue workflow, before planning or editing, read:
 
 1. `docs/PROJECT_CONTEXT.md`
 2. `docs/WORKFLOW.md`
@@ -11,7 +72,13 @@ Before planning or editing, read:
 5. every reference card listed in that Issue
 6. relevant code and tests
 
-If no active Issue is identified, do not start a repository-changing task unless the change satisfies every condition in the **Trivial documentation exception** below. Otherwise, ask for or locate the bounded task specification first.
+For a triggered fast-path task, read items 1-3 and every reference card, code
+path, and test relevant to the explicit task; items 4-5 are not required.
+
+If no active Issue is identified and the prompt does not trigger the fast path,
+do not start a repository-changing task unless the change satisfies every
+condition in the **Trivial documentation exception** below. Otherwise, ask for
+or locate the bounded task specification first.
 
 ## Project scope
 
@@ -56,16 +123,27 @@ When instructions conflict, use this order:
 
 Do not silently resolve a material conflict. Stop the affected work and report the conflicting sources.
 
+The fast-path prefix changes the workflow, not the source-of-truth priority.
+When a fast-path task explicitly changes a durable rule, update the relevant
+reference card or repository policy in the same direct-main task before
+implementation relies on the new rule.
+
 ## Scope control
 
-- Modify only files and behaviors allowed by the active Issue.
-- Do not perform adjacent refactors, renames, formatting sweeps, or API changes unless required by the Issue.
+- Modify only files and behaviors allowed by the active Issue or explicitly
+  named by the triggered fast-path task.
+- Do not perform adjacent refactors, renames, formatting sweeps, or API changes
+  unless required by the active Issue or explicitly requested by the
+  fast-path task.
 - Do not add a new research variable implicitly.
 - Architecture and dataset variants must be explicit in configuration.
 - Do not treat toy fixtures, smoke tests, or partial runs as research evidence.
-- Do not add training, dataset, OOD, geometry, or GPU infrastructure unless the active Issue allows it.
+- Do not add training, dataset, OOD, geometry, or GPU infrastructure unless the
+  active Issue allows it or the fast-path task explicitly requests it.
 
-The first two rules do not require an Issue for a change that satisfies the **Trivial documentation exception**. Such a change must remain strictly limited to the stated correction.
+The first two rules do not require an Issue for a triggered fast-path task or
+for a change that satisfies the **Trivial documentation exception**. A trivial
+documentation change must remain strictly limited to the stated correction.
 
 ## Existing safety rules
 
@@ -88,9 +166,12 @@ A change to `AGENTS.md`, `docs/WORKFLOW.md`, `docs/STATUS.md`, or a reference ca
 
 ## Branch and Pull Request policy
 
-- Do not push task work directly to `main`, except for a change that satisfies every condition in the **Trivial documentation exception**.
+- Do not push standard task work directly to `main`, except for a triggered
+  fast-path task or a change that satisfies every condition in the **Trivial
+  documentation exception**.
 - Use one bounded branch and Pull Request per Issue when practical.
-- Server fixes and validation changes should be committed to the same task branch.
+- For a standard Issue task, commit server fixes and validation changes to the
+  same task branch. For a fast-path task, commit them directly to `main`.
 - Link the Pull Request to the Issue with `Closes #<issue-number>` when merge should close it.
 - Do not mark acceptance criteria complete without evidence.
 
@@ -112,4 +193,15 @@ Never claim that a test, training run, GPU check, or external behavior succeeded
 
 ## Context synchronization
 
-Do not maintain an independent edited copy of repository context documents when the repository is accessible. External ChatGPT Projects or local context folders may contain temporary snapshots, but the repository remains authoritative. Decisions made in Chat or Work must be recorded in an Issue, reference card, status document, or Pull Request before implementation relies on them.
+Do not maintain an independent edited copy of repository context documents when
+the repository is accessible. External ChatGPT Projects or local context
+folders may contain temporary snapshots, but the repository remains
+authoritative. Decisions made in Chat or Work must be recorded in an Issue,
+reference card, status document, Pull Request, or the direct-main commit and
+affected repository artifacts of a triggered fast-path task before
+implementation relies on them.
+
+For a triggered fast-path task, the direct-main commit and any updated
+reference card, status document, configuration, validation record, or run
+artifact provide that authoritative repository record; an Issue or Pull
+Request is not additionally required.
