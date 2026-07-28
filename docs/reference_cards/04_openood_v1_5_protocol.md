@@ -247,9 +247,14 @@ For every imglist, record path, SHA256, line count, missing image count,
 duplicate sample-ID count, label range, and class histogram where applicable.
 The Issue 6 server validation established these observations for the upstream
 OpenOOD artifact and exercised real-data loaders and bounded CUDA evaluation.
-The committed project holdout has deterministic local membership/hash tests;
-its image-path and loader validation in the department-server data root remains
-required before production execution.
+Issue #37 then verified the committed project holdout byte-for-byte, checked
+all 45k/5k/10k image paths, and passed bounded loaders on `curie`,
+`precision_medicine`, and `lise` at clean execution SHA
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. See the
+[Issue 37 practical runtime report](../validation/issue37_practical_runtime_status.md).
+This is pre-execution readiness evidence, not production authorization; the
+later execution Issue must recheck that the final clean SHA and runtime data
+roots still match before launching a production cell.
 
 ## Remaining limitations
 

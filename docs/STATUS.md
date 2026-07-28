@@ -12,15 +12,15 @@ independently validated at pinned training commit
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
 foundation and completed its bounded department-server smoke. No
-protocol-v1.2 36-cell production grid has started. Issue #35 replaces the
-current-tree v1.1 random-search path with the v1.2 deterministic grid,
+protocol-v1.2 36-cell production grid has started. Issue #35 and merged PR #36
+replaced the current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
 `oge_cifar10_holdout_v1`; its practical runtime, numerical-policy,
 actual-data loader, and one-epoch smoke checks passed on `curie`,
 `precision_medicine`, and `lise` at clean execution SHA
-`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Issue #37 now has a complete
-three-host practical acceptance ledger. Benchmark-grade Conda/cache parity,
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Issue #37 and merged PR #38
+completed the three-host practical acceptance ledger. Benchmark-grade Conda/cache parity,
 DataLoader throughput experiments, cross-GPU parity gates, and immutable UUID
 shards are not production prerequisites. A separate execution Issue is still
 required before the 200-epoch canary or frozen grid may start.
@@ -35,7 +35,7 @@ required before the 200-epoch canary or frozen grid may start.
 - `resnet18` is implemented as a research backbone.
 - `wrn28_10` is implemented as a research backbone.
 - The OpenOOD v1.5-aligned CIFAR-10 dataset and evaluation contract is documented and implemented.
-- Issue #33 locally implements the deterministic project CIFAR-10 ID
+- Issue #33 and merged PR #34 implement the deterministic project CIFAR-10 ID
   membership: official train is split into class-balanced 45k/5k using the
   frozen SHA-256 rule, official test is reconstructed as the verified
   OpenOOD 1k/9k union, and all three imglists plus a 60,000-row provenance
@@ -70,8 +70,8 @@ required before the 200-epoch canary or frozen grid may start.
   actual OpenOOD membership verification, and a bounded two-GPU/two-trial,
   one-epoch smoke with checkpoint, checksum, GPU-identity, and deferred-ID-test
   validation. The smoke consumed no production study slot.
-- Issue #35 implements protocol v1.2 as three deterministic 12-cell tables,
-  with no sampler. The frozen manifest binds row/table/grid hashes to the
+- Issue #35 and merged PR #36 implement protocol v1.2 as three deterministic
+  12-cell tables, with no sampler. The frozen manifest binds row/table/grid hashes to the
   45k/5k/10k membership and split-manifest hashes. Selection requires all 36
   seed-0 cells to be terminal, implements C1-C4 including widening and
   absent/unresolved states, freezes the result identity, deduplicates role and
@@ -82,11 +82,11 @@ required before the 200-epoch canary or frozen grid may start.
   or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
   justification. Its executable config, tables, sampler, default path, and
   golden hashes are absent from the current tree.
-- Issue #37 locally records practical runtime targets and adds the effective
-  FP32/TF32/cuDNN policy, Python executable, hostname, driver, and GPU metadata
-  to each training run's `environment.json`. The existing study runner remains
-  responsible for bounded one-epoch smokes; no new preflight/throughput/shard
-  gate is inserted into production execution. See
+- Issue #37 and merged PR #38 record the practical runtime contract and add the
+  effective FP32/TF32/cuDNN policy, Python executable, hostname, driver, and
+  GPU metadata to each training run's `environment.json`. The existing study
+  runner remains responsible for bounded one-epoch smokes; no new
+  preflight/throughput/shard gate is inserted into production execution. See
   `docs/validation/issue37_practical_runtime_status.md`.
 - Issue #37's `precision_medicine` runtime candidate passed `pip check`, the
   complete 175-test suite, bounded CUDA/cuDNN probes, and the required numerical
@@ -150,10 +150,10 @@ required before the 200-epoch canary or frozen grid may start.
 
 ## Active next phase
 
-Review and merge Issue #37 current three-host practical runtime/data/smoke
-report. After merge, create a separate execution Issue before starting the
-200-epoch SGD canary or any frozen grid cell. Issue #37 itself does not
-authorize production execution.
+Create a separate production-execution Issue before starting the 200-epoch SGD
+canary or any frozen grid cell. Issue #37 and PR #38 completed the practical
+three-host readiness gate but did not authorize production execution. No
+production-execution Issue has been created.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -170,11 +170,11 @@ not authorize detector implementation without a separately bounded task.
 
 - Only one optimizer and one seed have a completed long-run baseline. No
   optimizer-comparison or multi-seed conclusion is currently supported.
-- Optimizer-comparison server hardening and execution require separately
-  bounded Issues before long-running experiments.
+- Optimizer-comparison production execution requires a separately bounded
+  Issue and fresh pre-execution checks before long-running experiments.
 - Production GPU availability, artifact retention and backup behavior, and
-  optimizer-specific 200-epoch wall time remain unverified until the practical
-  server runtime and smoke checks complete.
+  optimizer-specific 200-epoch wall time remain dynamic or unverified and must
+  be checked by the production-execution Issue.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 

@@ -102,14 +102,19 @@ optimizer-independent training loop performs the following for every batch:
 7. increment `global_step` once.
 
 The first protocol uses FP32 parameter, activation, and storage values. It does
-not use autocast, `GradScaler`, AMP, BF16, or distributed training. TF32
-eligibility is an environment policy that must be measured and pinned
-uniformly by the production-execution Issue. Each run records the effective
-TF32, float32-matmul, cuDNN benchmark/deterministic, and deterministic-algorithm
-values in `environment.json`. The approved hosts must use the same locked
-runtime distributions and effective numerical policy. Python patch versions,
-driver versions, installation prefixes, and GPU UUIDs are recorded metadata,
-not equality gates.
+not use autocast, `GradScaler`, AMP, BF16, or distributed training. Issue #37
+measured an agreeing candidate policy on all three approved hosts at clean
+execution SHA `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`: float32 matmul
+precision `highest`, CUDA matmul TF32 disabled, cuDNN TF32 enabled, and cuDNN
+benchmark/deterministic plus deterministic algorithms disabled. This is a
+validated pre-execution baseline, not the production freeze. The
+production-execution Issue must reverify and explicitly pin the effective
+values on its final clean SHA before the first production cell. Each run
+records the effective TF32, float32-matmul, cuDNN benchmark/deterministic, and
+deterministic-algorithm values in `environment.json`. The approved hosts must
+use the same locked runtime distributions and effective numerical policy.
+Python patch versions, driver versions, installation prefixes, and GPU UUIDs
+are recorded metadata, not equality gates.
 
 Validation on the fixed 5,000-image holdout runs after every completed training
 epoch with `model.eval()` and without gradient creation. Validation NLL is the
@@ -349,6 +354,13 @@ training batch through the same common engine. The environment, commands, and
 artifacts are recorded in
 [`issue10_cifar_training_server_validation.md`](../validation/issue10_cifar_training_server_validation.md).
 These smokes validate infrastructure only; they are not research evidence.
+
+Issue #37 and merged PR #38 later completed the practical three-host
+runtime/data/one-epoch smoke gate for the active holdout and protocol-v1.2
+runner. The commands, execution SHA, numerical policy, and external artifacts
+are recorded in
+[`issue37_practical_runtime_status.md`](../validation/issue37_practical_runtime_status.md).
+That gate does not authorize a 200-epoch canary or production grid.
 
 Future changes to training, checkpoint, resume, loader-state, or device
 semantics require the local and environment-dependent validation specified by

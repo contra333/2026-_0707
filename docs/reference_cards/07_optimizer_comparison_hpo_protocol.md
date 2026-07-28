@@ -46,8 +46,9 @@ Every primary grid cell uses:
 - multistep schedule `[60, 120, 160]`, `gamma=0.2`, stepped at epoch end;
 - train-only flip and reflection-padded crop augmentation;
 - `weights_only_no_bias_norm`;
-- FP32 parameter/activation/storage. TF32 eligibility is not yet frozen and
-  must be measured and pinned uniformly in the execution Issue;
+- FP32 parameter/activation/storage. Issue #37 measured an agreeing candidate
+  numerical policy on all three approved hosts, but the execution Issue must
+  reverify and explicitly pin the effective values on its final clean SHA;
 - no AMP or BF16;
 - `cudnn.benchmark=false`, `training.deterministic=false`;
 - `last.pt` as the scientific endpoint and `best_val.pt` as a
@@ -204,7 +205,12 @@ promoted to primary role evidence.
 ## Execution boundary
 
 This card and Issue #35 authorize study-definition code only. Long training
-requires a separate execution Issue that verifies:
+requires a separate execution Issue. Issue #37 and merged PR #38 completed the
+practical runtime, data, numerical-policy, and one-epoch smoke readiness gate
+at clean execution SHA `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`; those
+smokes consumed no production slot. The execution Issue must verify that this
+evidence remains applicable to its final production SHA and rerun any
+invalidated gate. It must verify:
 
 - clean Git SHA;
 - byte-verified 36-row grid and dataset hashes;
@@ -212,8 +218,10 @@ requires a separate execution Issue that verifies:
   set on every approved host, while recording exact Python patch and driver
   versions as metadata;
 - identical measured and explicitly pinned numerical flags on all hosts;
-- actual-data loader readiness and external artifact/backup locations;
-- one-epoch smoke on every server;
+- continued actual-data loader readiness and external artifact/backup
+  locations;
+- applicability of the completed one-epoch smoke on every server, with any
+  invalidated smoke rerun before production;
 - a recorded execution assignment in which every optimizer appears on every
   host, without treating GPU UUIDs or LR/WD-rank balance as immutable gates;
 - successful 200-epoch SGD canary with train/ID-validation and artifact
