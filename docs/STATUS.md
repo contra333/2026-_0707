@@ -25,8 +25,10 @@ DataLoader throughput experiments, cross-GPU parity gates, and immutable UUID
 shards are not production prerequisites. On 2026-07-28, an owner-authorized
 `fast path` task bounded the seed-0 production execution directly on `main`.
 The committed exact-once assignment uses `curie` 14 cells, `lise` 8 cells, and
-`precision_medicine` 14 cells, with `grid-sgd-06` completing unchanged as the
-200-epoch canary before any remaining grid cell starts.
+`precision_medicine` 14 cells. A follow-up owner `fast path` fixes
+`grid-sgd-06` as a concurrently running operational sentinel rather than a
+blocking gate; all 36 cells remain pinned to production Git SHA
+`0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`.
 
 ## Validated or implemented
 
@@ -155,8 +157,8 @@ The committed exact-once assignment uses `curie` 14 cells, `lise` 8 cells, and
 
 Execute the bounded seed-0 production task authorized by the 2026-07-28 owner
 `fast path`. First run `grid-sgd-06` as the unchanged 200-epoch canary on
-`precision_medicine`; only after it passes may the `remaining` stage start on
-the three committed host shards. Upload complete study artifacts to
+`precision_medicine`, then run the `remaining` stage concurrently on the three
+committed host shards under launch policy `concurrent_sentinel`. Upload complete study artifacts to
 `contra333/ICLR_RUN`, then combine all 36 terminal trial records and freeze
 `C1`-`C4`. Issue #37 and PR #38 remain readiness evidence rather than
 production evidence.

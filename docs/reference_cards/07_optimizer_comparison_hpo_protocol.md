@@ -235,9 +235,14 @@ The owner-authorized `fast path` task on 2026-07-28 is the bounded exception
 that authorizes this seed-0 production execution without a separate Issue. Its
 exact-once multi-host assignment is committed at
 `configs/studies/wrn28_10_optimizer_hpo_v1_2/seed0_execution.yaml`.
-`grid-sgd-06` is the predeclared 200-epoch canary and must complete unchanged
-before any `remaining` stage starts. After that gate, the complete assignment
-uses the approved 4:2:4 GPU capacities:
+The follow-up owner `fast path` on 2026-07-28 fixes the bounded execution's
+launch policy as `concurrent_sentinel`: `grid-sgd-06` starts first and remains
+the named operational sentinel, but the frozen `remaining` cells may run
+concurrently after the sentinel has started healthily. All cells remain pinned
+to production Git SHA `0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`.
+This changes launch order only; it does not change scientific configs,
+terminal-slot accounting, role selection, or retry rules. The complete
+assignment uses the approved 4:2:4 GPU capacities:
 
 - `curie`: 14 total cells at concurrency 4;
 - `lise`: 8 total cells at concurrency 2;

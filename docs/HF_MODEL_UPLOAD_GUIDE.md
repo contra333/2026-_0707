@@ -190,8 +190,10 @@ hf://buckets/contra333/ICLR_RUN/servers/<host_id>/seed0_20260728/<stage>
 ```
 
 `<stage>`는 `canary` 또는 `remaining`이다. `canary`는
-`precision_medicine`의 `grid-sgd-06` 하나뿐이다. Canary가 정상 완료되고
-업로드된 뒤에만 세 서버의 `remaining` stage를 시작한다. 모든 업로드는
+`precision_medicine`의 `grid-sgd-06` 하나뿐이다. 이 bounded 실행의
+`concurrent_sentinel` policy에서는 canary가 먼저 건강하게 시작된 뒤 세
+서버의 `remaining` stage가 병렬로 실행된다. 각 stage는 독립적으로
+terminal 상태가 된 뒤 업로드한다. 모든 업로드는
 먼저 `hf buckets sync ... --dry-run`으로 파일과 용량을 확인하고,
 `--delete` 없이 실행한 뒤 recursive remote listing으로 검증한다.
 

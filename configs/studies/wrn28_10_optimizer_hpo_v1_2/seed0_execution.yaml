@@ -1,9 +1,11 @@
 schema_version: "1.0"
 protocol_version: wrn28_10_optimizer_hpo_v1.2
 execution_id: seed0_20260728
+production_git_sha: 0d30054b38f0dc7a513c3eacc5c4e5435670fc4d
 grid_manifest_hash: 9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8
 training_seed: 0
 canary_trial_id: grid-sgd-06
+launch_policy: concurrent_sentinel
 huggingface:
   bucket: contra333/ICLR_RUN
   remote_layout: servers/<host_id>/seed0_20260728/<stage>
