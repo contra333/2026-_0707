@@ -1,0 +1,22 @@
+schema_version: "1.0"
+status: candidate
+note: >-
+  Runtime contract for the three approved hosts. The hash-locked wheel bundle
+  is the install source; Conda/cache identity is outside this contract.
+python:
+  required_major_minor: "3.11"
+  exact_patch: record_only
+packages:
+  torch: 2.5.1+cu121
+  torchvision: 0.20.1+cu121
+  numpy: 1.26.4
+  pillow: 10.4.0
+  pyyaml: 6.0.2
+  scikit-learn: 1.5.2
+runtime:
+  cuda_wheel: "12.1"
+  precision: fp32
+  amp: false
+  bf16: false
+  num_workers: 0
+  persistent_workers: false

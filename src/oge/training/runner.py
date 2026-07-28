@@ -510,6 +510,64 @@ def _optimizer_parameter_names(
     return groups
 
 
+def _numerical_policy() -> dict[str, object]:
+    return {
+        "precision_contract": {
+            "parameters": "fp32",
+            "activations": "fp32",
+            "storage": "fp32",
+            "amp": False,
+            "bf16": False,
+        },
+        "float32_matmul_precision": torch.get_float32_matmul_precision(),
+        "tf32": {
+            "cuda_matmul_allow_tf32": getattr(
+                torch.backends.cuda.matmul,
+                "allow_tf32",
+                None,
+            ),
+            "cudnn_allow_tf32": getattr(torch.backends.cudnn, "allow_tf32", None),
+        },
+        "cudnn_benchmark": bool(torch.backends.cudnn.benchmark),
+        "cudnn_deterministic": bool(torch.backends.cudnn.deterministic),
+        "deterministic_algorithms": bool(
+            torch.are_deterministic_algorithms_enabled()
+        ),
+        "environment_overrides": {
+            name: os.environ.get(name)
+            for name in (
+                "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE",
+                "NVIDIA_TF32_OVERRIDE",
+                "TORCH_CUDNN_V8_API_DISABLED",
+            )
+        },
+    }
+
+
+def _nvidia_driver_version(*, cuda_available: bool) -> str | None:
+    if not cuda_available:
+        return None
+    try:
+        completed = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-gpu=driver_version",
+                "--format=csv,noheader",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    versions = {
+        line.strip()
+        for line in completed.stdout.splitlines()
+        if line.strip()
+    }
+    return ",".join(sorted(versions)) or None
+
+
 def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
     cuda_available = torch.cuda.is_available()
     actual_visible_gpu_uuid = None
@@ -522,7 +580,9 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
     return {
         "recorded_at": _utc_now(),
         "python": sys.version,
+        "python_executable": sys.executable,
         "platform": platform.platform(),
+        "hostname": platform.node(),
         "numpy": np.__version__,
         "torch": torch.__version__,
         "torchvision": torchvision.__version__,
@@ -531,6 +591,7 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
         "cuda_available": cuda_available,
         "cuda_runtime": torch.version.cuda,
         "cudnn": torch.backends.cudnn.version() if cuda_available else None,
+        "nvidia_driver": _nvidia_driver_version(cuda_available=cuda_available),
         "cuda_device_count": torch.cuda.device_count() if cuda_available else 0,
         "cuda_devices": (
             [torch.cuda.get_device_name(index) for index in range(torch.cuda.device_count())]
@@ -541,6 +602,7 @@ def _environment(device: str, *, deterministic: bool) -> dict[str, object]:
         "expected_physical_gpu_uuid": os.environ.get("OGE_PHYSICAL_GPU_UUID"),
         "actual_visible_gpu_uuid": actual_visible_gpu_uuid,
         "orchestrator_child_device": os.environ.get("OGE_CHILD_DEVICE"),
+        "numerical_policy": _numerical_policy(),
     }
 
 

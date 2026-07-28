@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-27
+Last updated: 2026-07-28
 
 ## Current phase
 
@@ -16,8 +16,14 @@ protocol-v1.2 36-cell production grid has started. Issue #35 replaces the
 current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
-`oge_cifar10_holdout_v1`; its department-server path/loader smoke and the
-common-server numerical preflight are still required before production.
+`oge_cifar10_holdout_v1`; its practical runtime, numerical-policy,
+actual-data loader, and one-epoch smoke checks passed on `curie`,
+`precision_medicine`, and `lise` at clean execution SHA
+`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Issue #37 now has a complete
+three-host practical acceptance ledger. Benchmark-grade Conda/cache parity,
+DataLoader throughput experiments, cross-GPU parity gates, and immutable UUID
+shards are not production prerequisites. A separate execution Issue is still
+required before the 200-epoch canary or frozen grid may start.
 
 ## Validated or implemented
 
@@ -35,8 +41,8 @@ common-server numerical preflight are still required before production.
   OpenOOD 1k/9k union, and all three imglists plus a 60,000-row provenance
   manifest are committed. The active training config uses
   `oge_cifar10_holdout_v1`, WRN `msr_fan_in`, and train-only reflection
-  padding. Local deterministic/hash tests are not a substitute for the pending
-  department-server image-path and loader smoke.
+  padding. The committed membership, image paths, and bounded loaders passed on
+  all three approved hosts at the clean Issue #37 execution SHA.
 - Official released OpenOOD imglists and all eight required archives were validated on the department server.
 - Actual-data manifest validation confirmed fixed split counts, image-path existence, sample-ID uniqueness, and label ranges.
 - A bounded CUDA WRN-28-10 MSP vertical slice completed with random-model output marked as infrastructure-only.
@@ -76,6 +82,31 @@ common-server numerical preflight are still required before production.
   or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
   justification. Its executable config, tables, sampler, default path, and
   golden hashes are absent from the current tree.
+- Issue #37 locally records practical runtime targets and adds the effective
+  FP32/TF32/cuDNN policy, Python executable, hostname, driver, and GPU metadata
+  to each training run's `environment.json`. The existing study runner remains
+  responsible for bounded one-epoch smokes; no new preflight/throughput/shard
+  gate is inserted into production execution. See
+  `docs/validation/issue37_practical_runtime_status.md`.
+- Issue #37's `precision_medicine` runtime candidate passed `pip check`, the
+  complete 175-test suite, bounded CUDA/cuDNN probes, and the required numerical
+  policy checks. Its committed-holdout, bounded-loader, and actual-data
+  one-epoch smoke then passed at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`, with ID-test deferred and no
+  protected-evidence artifact.
+- Issue #37's `lise` validation passed at clean Git
+  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`: the hash-locked Python 3.11.9,
+  PyTorch `2.5.1+cu121`, TorchVision `0.20.1+cu121`, and CUDA 12.1 runtime
+  passed `pip check`, the complete 175-test suite, bounded A5000 CUDA/cuDNN
+  probes, committed 45k/5k/10k holdout path and loader checks, and one
+  existing-runner actual-data epoch on an idle GPU. The smoke deferred ID-test
+  and created no protected-evidence artifact.
+- Issue #37 current-scope `curie` validation passed at the same clean Git SHA
+  with the same 35-entry runtime/test lock surface and effective numerical
+  policy: `pip check`, the complete 175-test suite, bounded A5000 CUDA/cuDNN
+  probes, committed holdout and bounded loaders, and one actual-data epoch all
+  passed on idle GPU 0. The smoke completed 352 optimizer steps, strict-reloaded
+  both checkpoints, deferred ID-test, and created no evaluation artifact.
 
 ## Documented but not executed
 
@@ -110,9 +141,6 @@ common-server numerical preflight are still required before production.
 
 ## Still missing
 
-- Department-server verification of the committed
-  `oge_cifar10_holdout_v1` lists against the assembled image root and a bounded
-  loader smoke
 - Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
   replication, and the pair controls
 - Penultimate feature extraction pipeline
@@ -122,11 +150,10 @@ common-server numerical preflight are still required before production.
 
 ## Active next phase
 
-Complete separate bounded Issues for the three-server common environment and
-measured TF32 policy, DataLoader throughput decision, A5000/A6000 parity,
-immutable mixed-GPU host shards, and production preflight. Only after those
-gates pass may the execution Issue start the 200-epoch SGD canary and the
-remaining frozen grid.
+Review and merge Issue #37 current three-host practical runtime/data/smoke
+report. After merge, create a separate execution Issue before starting the
+200-epoch SGD canary or any frozen grid cell. Issue #37 itself does not
+authorize production execution.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -145,9 +172,9 @@ not authorize detector implementation without a separately bounded task.
   optimizer-comparison or multi-seed conclusion is currently supported.
 - Optimizer-comparison server hardening and execution require separately
   bounded Issues before long-running experiments.
-- Production GPU availability and identity, storage and inode capacity,
-  artifact retention and backup behavior, and optimizer-specific 200-epoch wall
-  time remain unverified until a fresh server preflight.
+- Production GPU availability, artifact retention and backup behavior, and
+  optimizer-specific 200-epoch wall time remain unverified until the practical
+  server runtime and smoke checks complete.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 

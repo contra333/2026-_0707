@@ -1,0 +1,25 @@
+schema_version: "1.0"
+status: candidate_hosts
+hosts:
+  - host_id: curie
+    display_name: curie
+    expected_hostname: curie
+    expected_gpu_name: NVIDIA RTX A5000
+    expected_gpu_count: 4
+  - host_id: lise
+    display_name: lise
+    expected_hostname: lise
+    expected_gpu_name: NVIDIA RTX A5000
+    expected_gpu_count: 2
+  - host_id: precision_medicine
+    display_name: 맞춤의약
+    expected_hostname: math-SYS-740GP-TNRT
+    expected_gpu_name: NVIDIA RTX A6000
+    expected_gpu_count: 4
+forbidden_gpu_name_substrings:
+  - RTX PRO 6000
+  - Blackwell
+assignment:
+  record_host_and_gpu: true
+  require_every_optimizer_on_every_host: true
+  gpu_uuid_is_record_only: true

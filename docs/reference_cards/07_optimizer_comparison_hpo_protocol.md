@@ -208,12 +208,14 @@ requires a separate execution Issue that verifies:
 
 - clean Git SHA;
 - byte-verified 36-row grid and dataset hashes;
-- common Python/PyTorch/TorchVision/CUDA environment;
+- Python 3.11 and one hash-locked PyTorch/TorchVision/CUDA runtime distribution
+  set on every approved host, while recording exact Python patch and driver
+  versions as metadata;
 - identical measured and explicitly pinned numerical flags on all hosts;
-- frozen host/shard manifest and approved GPU UUIDs;
-- A5000/A6000 forward and one-step parity;
-- storage, inode, and backup readiness;
+- actual-data loader readiness and external artifact/backup locations;
 - one-epoch smoke on every server;
+- a recorded execution assignment in which every optimizer appears on every
+  host, without treating GPU UUIDs or LR/WD-rank balance as immutable gates;
 - successful 200-epoch SGD canary with train/ID-validation and artifact
   integrity only.
 

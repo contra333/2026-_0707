@@ -104,8 +104,12 @@ optimizer-independent training loop performs the following for every batch:
 The first protocol uses FP32 parameter, activation, and storage values. It does
 not use autocast, `GradScaler`, AMP, BF16, or distributed training. TF32
 eligibility is an environment policy that must be measured and pinned
-uniformly by the production-execution Issue; this data migration does not
-claim a server value.
+uniformly by the production-execution Issue. Each run records the effective
+TF32, float32-matmul, cuDNN benchmark/deterministic, and deterministic-algorithm
+values in `environment.json`. The approved hosts must use the same locked
+runtime distributions and effective numerical policy. Python patch versions,
+driver versions, installation prefixes, and GPU UUIDs are recorded metadata,
+not equality gates.
 
 Validation on the fixed 5,000-image holdout runs after every completed training
 epoch with `model.eval()` and without gradient creation. Validation NLL is the
@@ -303,7 +307,9 @@ run_dir/
 - `run_metadata.json` identifies the schema, run, protocol, model, repository
   Git SHA, start/resume context, and artifact role.
 - `environment.json` records Python, NumPy, PyTorch, TorchVision, platform,
-  device, and available CUDA/cuDNN information.
+  host, device, available CUDA/cuDNN/driver information, effective TF32 values,
+  float32 matmul precision, cuDNN benchmark/deterministic flags,
+  strict-determinism state, and the FP32/AMP/BF16 contract.
 - `history.jsonl` contains one row per completed epoch in ascending order.
 - `summary.json` records completion state, final epoch/global step, final and
   best-validation metrics and epoch, and the ID-test artifact locations.
