@@ -1,6 +1,6 @@
 # Optimizer Geometry Experiments
 
-Initial PyTorch codebase for ICLR 2027 optimizer-geometry experiments.
+PyTorch research codebase for ICLR 2027 optimizer-geometry experiments.
 
 The repository currently contains:
 
@@ -15,8 +15,10 @@ The repository currently contains:
   checkpoints, strict reload, epoch-boundary resume, and stable run artifacts;
 - a CIFAR-10 training CLI validated with bounded actual-data CUDA runs;
 - deterministic optimizer-study orchestration with versioned provenance,
-  frozen trial tables, deferred ID-test selection mode, failure/retry
-  accounting, and independent single-GPU trial scheduling;
+  frozen protocol-v1.2 grid tables, deferred ID-test selection mode,
+  failure/retry accounting, and independent single-GPU trial scheduling;
+- a practical three-server runtime, numerical-policy, committed-data,
+  bounded-loader, and actual-data one-epoch smoke gate completed by Issue #37;
 - an AI-assisted research and implementation workflow;
 - durable DDU fitting, adaptive-jitter, score, naming, and post-hoc variant
   semantics documented for a later implementation task;
@@ -25,16 +27,21 @@ The repository currently contains:
 - a documented WRN-28-10 optimizer HPO and comparison protocol whose
   orchestration foundation has passed bounded department-server validation.
 
-The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and `wrn28_10` are implemented research backbones. VGG-16 and ConvNeXt-Tiny remain documented as planned backbones and should not be treated as implemented until code and tests add them.
+The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and
+`wrn28_10` are implemented research backbones. The current research lineup
+adds planned VGG-16-BN/CIFAR-10 and pilot-gated `vit_small`/CIFAR-10 arms;
+`convnext_tiny` remains a documented ViT fallback and later extension. None of
+`vgg16`, `vit_small`, or `convnext_tiny` is implemented.
 
 This repository does **not** yet include learned-feature extraction, geometry
 or Neural Collapse metrics, feature-based OOD detector implementations,
 executed grid or multi-seed optimizer studies, or completed
 optimizer-comparison research runs. The orchestration code and frozen trial
 tables implement protocol v1.2, but no v1.2 production cell has run. The
-current MSP, training, and orchestration CUDA runs validate infrastructure only; they are not
-optimizer-comparison research results. The DDU reference card fixes future
-semantics but does not mean DDU or any DDU variant is implemented or validated.
+current MSP, training, orchestration, and three-server CUDA runs validate
+infrastructure only; they are not optimizer-comparison research results. The
+DDU reference card fixes future semantics but does not mean DDU or any DDU
+variant is implemented or validated.
 
 ## Start here
 
@@ -67,6 +74,7 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
 - CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`
 - Optimizer-HPO orchestration server validation: `docs/validation/issue22_optimizer_hpo_orchestration_server_validation.md`
+- Practical three-server runtime/data/smoke validation: `docs/validation/issue37_practical_runtime_status.md`
 - New task template: `.github/ISSUE_TEMPLATE/research_task.md`
 - Pull Request template: `.github/pull_request_template.md`
 

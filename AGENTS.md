@@ -31,6 +31,14 @@ Use:
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` for the
   WRN-28-10 four-optimizer HPO, comparison, seed, checkpoint, and study
   provenance protocol;
+- `docs/reference_cards/08_raw_feature_artifact_contract.md` for deterministic
+  checkpoint-feature artifacts, provenance, checksums, and protected-split
+  authorization;
+- `docs/reference_cards/09_core_representation_metrics.md` for the frozen
+  confirmatory geometry, logit-control, and low-complexity detector panel;
+- `docs/reference_cards/10_optimizer_grid_literature_anchors.md` for the
+  literature and project-judgment anchors behind protocol v1.2 grids and the
+  architecture lineup;
 - future task-specific reference cards for other durable experiment protocols.
 
 `docs/reference_cards/03_architecture_implementation_checklist.md` is historical context for the first architecture implementation. Its one-time task scope is not the current active task.

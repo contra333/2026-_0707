@@ -30,7 +30,7 @@ sources:
     role: feature_detector_semantics_reference; documentation only until a later implementation PR
   local_optimizer_hpo_protocol_reference_card:
     path: docs/reference_cards/07_optimizer_comparison_hpo_protocol.md
-    role: WRN-28-10 four-optimizer HPO and comparison protocol; documentation only until a later implementation PR
+    role: implemented WRN-28-10 protocol-v1.2 HPO and comparison authority; production grid not executed
   local_raw_feature_artifact_reference_card:
     path: docs/reference_cards/08_raw_feature_artifact_contract.md
     role: raw checkpoint-feature artifact, provenance, checksum, and protected-split reference
@@ -70,7 +70,7 @@ sources:
     stable_source: JMLR 13 (2012), 281-305
     url: https://www.jmlr.org/papers/v13/bergstra12a.html
     accessed: 2026-07-14
-    role: general random-search HPO rationale; does not validate this project's numeric ranges, trial budget, or seeds
+    role: historical protocol-v1.1 random-search rationale only; superseded by deterministic protocol v1.2 and not a current numeric or execution source
   vgg16_paper:
     title: Very Deep Convolutional Networks for Large-Scale Image Recognition
     authors: Simonyan and Zisserman

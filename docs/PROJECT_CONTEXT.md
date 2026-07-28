@@ -48,12 +48,15 @@ Implemented foundation:
   deduplicated role/pair-control reuse planning, and protected-evidence
   authorization by frozen config/seed identity;
 - bounded actual-data, two-GPU orchestration smoke validation with checkpoint,
-  checksum, GPU-identity, and artifact-provenance verification.
+  checksum, GPU-identity, and artifact-provenance verification;
+- a practical three-host gate with one hash-locked runtime/test distribution
+  set, an agreeing measured FP32/TF32/cuDNN policy, committed 45k/5k/10k
+  data-path and bounded-loader checks, and one actual-data smoke epoch per
+  approved host.
 
-Documented for later implementation, but not yet implemented or validated:
+Documented or prepared, but not yet implemented or executed:
 
-- practical common-server runtime and measured numerical-policy validation,
-  actual-data one-epoch smokes, and production execution;
+- the protocol-v1.2 200-epoch SGD canary and production grid execution;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
@@ -83,8 +86,14 @@ Not yet part of the validated foundation unless added by a later merged pull req
   optimizer HPO, comparison, seed, checkpoint, and provenance semantics.
   Protocol v1.2 is authoritative; the earlier random-search execution is only
   a one-sentence excluded-study decision record.
+- `docs/reference_cards/08_raw_feature_artifact_contract.md`: durable raw
+  checkpoint-feature artifact, checksum, and protected-split contract.
+- `docs/reference_cards/09_core_representation_metrics.md`: frozen
+  confirmatory representation-metric and low-complexity detector panel.
 - `docs/reference_cards/10_optimizer_grid_literature_anchors.md`: literature
   anchor mapping for the v1.2 grids and the research lineup.
+- `docs/validation/issue37_practical_runtime_status.md`: completed three-host
+  practical runtime, data, and one-epoch smoke evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.
 - Pull Requests: actual changes, validation evidence, and unresolved limitations.
 

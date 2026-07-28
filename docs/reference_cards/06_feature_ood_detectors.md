@@ -179,11 +179,12 @@ finite-precision effects can still make the covariance singular or severely
 ill-conditioned.
 
 For the current WRN-28-10 CIFAR-10 main path, `d = 640` and the detector fits on
-`id_train`, which has about 5,000 samples per balanced class. Sample count alone
-does not guarantee singularity in that setting, but the official adaptive jitter
-is still mandatory because representation geometry can be low-rank or
-ill-conditioned. The 1,000-sample ID validation split and 9,000-sample ID test
-split are not covariance-fitting data.
+`id_train`, which has exactly 4,500 samples per balanced class. Sample count
+alone does not guarantee singularity in that setting, but the official
+adaptive jitter is still mandatory because representation geometry can be
+low-rank or ill-conditioned. The 5,000-sample `id_validation` split, the
+10,000-sample project `id_test`, and the separate 9,000-sample
+`id_test_openood` role are not covariance-fitting data.
 
 ## Relationship to neighboring detector families
 
