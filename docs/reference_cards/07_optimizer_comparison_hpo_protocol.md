@@ -230,3 +230,23 @@ invalidated gate. It must verify:
 The canary is included as its normal grid cell only after it completes
 unchanged. No ID-test/OOD/geometry/detector result may be opened during that
 check.
+
+The owner-authorized `fast path` task on 2026-07-28 is the bounded exception
+that authorizes this seed-0 production execution without a separate Issue. Its
+exact-once multi-host assignment is committed at
+`configs/studies/wrn28_10_optimizer_hpo_v1_2/seed0_execution.yaml`.
+`grid-sgd-06` is the predeclared 200-epoch canary and must complete unchanged
+before any `remaining` stage starts. After that gate, the complete assignment
+uses the approved 4:2:4 GPU capacities:
+
+- `curie`: 14 total cells at concurrency 4;
+- `lise`: 8 total cells at concurrency 2;
+- `precision_medicine`: 14 total cells at concurrency 4, including the canary.
+
+The assignment covers all 36 cells exactly once and includes every optimizer
+on every host. Each host uploads its complete study-artifact directory,
+including trial records and checkpoints, under
+`hf://buckets/contra333/ICLR_RUN/servers/<host_id>/seed0_20260728/<stage>`.
+Only after all 36 records are terminal may the uploaded trial records be
+combined to freeze `C1`-`C4`. This exception does not authorize role
+replication, pair controls, protected evidence, or another production study.

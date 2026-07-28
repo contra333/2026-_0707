@@ -14,6 +14,10 @@ from typing import Any
 import yaml
 
 from oge.studies.artifacts import atomic_write_json
+from oge.studies.execution import (
+    load_seed0_execution_plan,
+    staged_host_trial_ids,
+)
 from oge.studies.failures import classify_failure, make_retry_attempt
 from oge.studies.hashing import provenance_identity_hash, scientific_config_hash
 from oge.studies.hashing import canonical_sha256
@@ -72,6 +76,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--smoke-trials", type=int, default=2)
     parser.add_argument("--retry-trial-id")
     parser.add_argument("--retry-reason-code")
+    parser.add_argument(
+        "--execution-plan",
+        type=Path,
+        help="Exact-once multi-host assignment for the frozen seed-0 grid.",
+    )
+    parser.add_argument(
+        "--host-id",
+        help="Host assignment to execute from --execution-plan.",
+    )
+    parser.add_argument(
+        "--execution-stage",
+        choices=["canary", "remaining"],
+        help="Run the predeclared canary first or the post-canary host shard.",
+    )
     return parser.parse_args()
 
 
@@ -159,6 +177,7 @@ def _study_record(
     artifact_root: Path,
     smoke_only: bool,
     assigned_execution_slots: int,
+    execution_assignment: dict[str, Any] | None,
 ) -> dict[str, Any]:
     record = {
         "schema_version": STUDY_SCHEMA_VERSION,
@@ -188,6 +207,8 @@ def _study_record(
             "smoke_only": smoke_only,
         },
     }
+    if execution_assignment is not None:
+        record["execution_assignment"] = copy.deepcopy(execution_assignment)
     validate_study_record(record)
     return record
 
@@ -253,11 +274,58 @@ def main() -> int:
         resolved["dataset"]["membership_manifest"]["sha256"]
     )
     study_id = str(study_config["study_id"])
+    execution_args = (args.execution_plan, args.host_id, args.execution_stage)
+    if any(value is not None for value in execution_args) and not all(
+        value is not None for value in execution_args
+    ):
+        raise ValueError(
+            "--execution-plan, --host-id, and --execution-stage must be provided together"
+        )
+    execution_assignment = None
+    assigned_trial_ids = None
+    if args.execution_plan is not None:
+        if args.phase != "grid":
+            raise ValueError(
+                "multi-host execution plans are supported only for the grid phase"
+            )
+        execution_plan = load_seed0_execution_plan(args.execution_plan, frozen)
+        assigned_trial_ids = staged_host_trial_ids(
+            execution_plan,
+            str(args.host_id),
+            str(args.execution_stage),
+        )
+        host_config = execution_plan["hosts"][str(args.host_id)]
+        expected_concurrency = (
+            1
+            if args.execution_stage == "canary"
+            else min(int(host_config["concurrency"]), len(assigned_trial_ids))
+        )
+        if int(args.concurrency) != expected_concurrency:
+            raise ValueError(
+                "--concurrency must match the committed execution stage"
+            )
+        study_id = (
+            f"{study_id}__{execution_plan['execution_id']}__"
+            f"{str(args.host_id)}__{str(args.execution_stage)}"
+        )
+        execution_assignment = {
+            "execution_id": execution_plan["execution_id"],
+            "grid_manifest_hash": execution_plan["grid_manifest_hash"],
+            "host_id": str(args.host_id),
+            "stage": str(args.execution_stage),
+            "canary_trial_id": execution_plan["canary_trial_id"],
+            "assigned_trial_ids": assigned_trial_ids,
+            "assigned_trial_count": len(assigned_trial_ids),
+        }
     if args.phase == "grid":
+        selected_trial_ids = (
+            None if assigned_trial_ids is None else set(assigned_trial_ids)
+        )
         rows = [
             row
             for name in study_config["optimizer_order"]
             for row in frozen["tables"][name]["rows"]
+            if selected_trial_ids is None or row["trial_id"] in selected_trial_ids
         ]
         trials = [
             _trial_record(
@@ -369,6 +437,7 @@ def main() -> int:
         artifact_root=args.artifact_root,
         smoke_only=args.smoke_only,
         assigned_execution_slots=assigned_execution_slots,
+        execution_assignment=execution_assignment,
     )
     study_manifest_path = args.artifact_root / study_id / "study_manifest.json"
     study_summary_path = args.artifact_root / study_id / "study_summary.json"

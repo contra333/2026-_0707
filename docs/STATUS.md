@@ -22,8 +22,11 @@ actual-data loader, and one-epoch smoke checks passed on `curie`,
 `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Issue #37 and merged PR #38
 completed the three-host practical acceptance ledger. Benchmark-grade Conda/cache parity,
 DataLoader throughput experiments, cross-GPU parity gates, and immutable UUID
-shards are not production prerequisites. A separate execution Issue is still
-required before the 200-epoch canary or frozen grid may start.
+shards are not production prerequisites. On 2026-07-28, an owner-authorized
+`fast path` task bounded the seed-0 production execution directly on `main`.
+The committed exact-once assignment uses `curie` 14 cells, `lise` 8 cells, and
+`precision_medicine` 14 cells, with `grid-sgd-06` completing unchanged as the
+200-epoch canary before any remaining grid cell starts.
 
 ## Validated or implemented
 
@@ -150,10 +153,13 @@ required before the 200-epoch canary or frozen grid may start.
 
 ## Active next phase
 
-Create a separate production-execution Issue before starting the 200-epoch SGD
-canary or any frozen grid cell. Issue #37 and PR #38 completed the practical
-three-host readiness gate but did not authorize production execution. No
-production-execution Issue has been created.
+Execute the bounded seed-0 production task authorized by the 2026-07-28 owner
+`fast path`. First run `grid-sgd-06` as the unchanged 200-epoch canary on
+`precision_medicine`; only after it passes may the `remaining` stage start on
+the three committed host shards. Upload complete study artifacts to
+`contra333/ICLR_RUN`, then combine all 36 terminal trial records and freeze
+`C1`-`C4`. Issue #37 and PR #38 remain readiness evidence rather than
+production evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -170,11 +176,12 @@ not authorize detector implementation without a separately bounded task.
 
 - Only one optimizer and one seed have a completed long-run baseline. No
   optimizer-comparison or multi-seed conclusion is currently supported.
-- Optimizer-comparison production execution requires a separately bounded
-  Issue and fresh pre-execution checks before long-running experiments.
+- Optimizer-comparison production execution is authorized only for the
+  committed `seed0_20260728` assignment; later role replication, pair controls,
+  or a different production study require separate authorization.
 - Production GPU availability, artifact retention and backup behavior, and
   optimizer-specific 200-epoch wall time remain dynamic or unverified and must
-  be checked by the production-execution Issue.
+  be checked by the active production-execution task.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 

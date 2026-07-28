@@ -174,3 +174,27 @@ REMOTE_DIR=hf://buckets/contra333/ICLR_RUN/servers/<server-id>/<run-id>
   업로드도 수행하지 않았다.
 - 따라서 업로드 결과는 모두 `NOT_RUN`이며, bucket 경로 규칙은 향후 실행을
   위한 문서상 규칙이다.
+
+## 7. seed-0 v1.2 production 실행
+
+2026-07-28 owner-authorized `fast path` seed-0 실행은 checkpoint 폴더만이
+아니라 `study_manifest.json`, `study_summary.json`, `ordered_plan.json`,
+각 `trial.json`, attempt 기록, console log, resolved config, environment,
+history, summary, checkpoint를 포함하는 서버별 전체 study artifact를
+업로드한다. 데이터셋 자체는 업로드하지 않는다.
+
+원격 경로는 다음처럼 고정한다.
+
+```text
+hf://buckets/contra333/ICLR_RUN/servers/<host_id>/seed0_20260728/<stage>
+```
+
+`<stage>`는 `canary` 또는 `remaining`이다. `canary`는
+`precision_medicine`의 `grid-sgd-06` 하나뿐이다. Canary가 정상 완료되고
+업로드된 뒤에만 세 서버의 `remaining` stage를 시작한다. 모든 업로드는
+먼저 `hf buckets sync ... --dry-run`으로 파일과 용량을 확인하고,
+`--delete` 없이 실행한 뒤 recursive remote listing으로 검증한다.
+
+`C1`-`C4` freeze는 네 artifact 집합
+(`precision_medicine/canary`와 세 서버의 `remaining`)에서 36개 고유
+`trial.json`이 모두 terminal임을 확인한 뒤에만 수행한다.

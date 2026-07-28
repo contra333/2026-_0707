@@ -1,0 +1,55 @@
+schema_version: "1.0"
+protocol_version: wrn28_10_optimizer_hpo_v1.2
+execution_id: seed0_20260728
+grid_manifest_hash: 9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8
+training_seed: 0
+canary_trial_id: grid-sgd-06
+huggingface:
+  bucket: contra333/ICLR_RUN
+  remote_layout: servers/<host_id>/seed0_20260728/<stage>
+hosts:
+  curie:
+    concurrency: 4
+    trial_ids:
+      - grid-sgd-00
+      - grid-sgd-01
+      - grid-sgd-02
+      - grid-sgd-03
+      - grid-sgd-10
+      - grid-sgd-11
+      - grid-adam-06
+      - grid-adam-07
+      - grid-adam-08
+      - grid-adam-09
+      - grid-adamw-02
+      - grid-adamw-03
+      - grid-adamw-04
+      - grid-adamw-05
+  lise:
+    concurrency: 2
+    trial_ids:
+      - grid-sgd-04
+      - grid-sgd-05
+      - grid-adam-00
+      - grid-adam-01
+      - grid-adam-10
+      - grid-adam-11
+      - grid-adamw-06
+      - grid-adamw-07
+  precision_medicine:
+    concurrency: 4
+    trial_ids:
+      - grid-sgd-06
+      - grid-sgd-07
+      - grid-sgd-08
+      - grid-sgd-09
+      - grid-adam-02
+      - grid-adam-03
+      - grid-adam-04
+      - grid-adam-05
+      - grid-adamw-00
+      - grid-adamw-01
+      - grid-adamw-08
+      - grid-adamw-09
+      - grid-adamw-10
+      - grid-adamw-11
