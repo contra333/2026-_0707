@@ -11,8 +11,8 @@ independently validated at pinned training commit
 `d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
-foundation and completed its bounded department-server smoke. No
-protocol-v1.2 36-cell production grid has started. Issue #35 and merged PR #36
+foundation and completed its bounded department-server smoke. The owner-authorized
+protocol-v1.2 36-cell production grid is now in progress. Issue #35 and merged PR #36
 replaced the current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
