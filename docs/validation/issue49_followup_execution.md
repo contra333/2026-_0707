@@ -82,6 +82,11 @@ depend on the launching SSH, WSL computer, or Codex session.
 | `lise` | `1513090` | `RUNNING` | 2 |
 | `precision_medicine` | `3986916` | `RUNNING` | initialization pending at first snapshot |
 
+Later fresh connections observed epoch 1 on all active `curie` and `lise`
+children and epoch 2 on all four `precision_medicine` children. The
+intermittent precision SSH refusal therefore did not stop its detached
+supervisor or training processes.
+
 The supervisor will upload only after all assigned rows are epoch-200
 `completed` and pass the independent artifact gate. It creates a whole-tree
 SHA-256 manifest, records a no-delete dry run, saves and applies an HF sync
