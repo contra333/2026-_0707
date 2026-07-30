@@ -15,6 +15,8 @@ import yaml
 
 from oge.studies.artifacts import atomic_write_json
 from oge.studies.execution import (
+    host_trial_ids,
+    load_followup_execution_plan,
     load_seed0_execution_plan,
     staged_host_trial_ids,
 )
@@ -79,7 +81,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--execution-plan",
         type=Path,
-        help="Exact-once multi-host assignment for the frozen seed-0 grid.",
+        help="Exact-once multi-host assignment for the selected study phase.",
     )
     parser.add_argument(
         "--host-id",
@@ -88,7 +90,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--execution-stage",
         choices=["canary", "remaining"],
-        help="Run the predeclared canary first or the post-canary host shard.",
+        help="Grid-only predeclared canary or post-canary host shard.",
     )
     return parser.parse_args()
 
@@ -274,46 +276,80 @@ def main() -> int:
         resolved["dataset"]["membership_manifest"]["sha256"]
     )
     study_id = str(study_config["study_id"])
-    execution_args = (args.execution_plan, args.host_id, args.execution_stage)
-    if any(value is not None for value in execution_args) and not all(
-        value is not None for value in execution_args
-    ):
-        raise ValueError(
-            "--execution-plan, --host-id, and --execution-stage must be provided together"
-        )
     execution_assignment = None
     assigned_trial_ids = None
-    if args.execution_plan is not None:
-        if args.phase != "grid":
+    followup_plan = None
+    if args.phase == "grid":
+        execution_args = (args.execution_plan, args.host_id, args.execution_stage)
+        if any(value is not None for value in execution_args) and not all(
+            value is not None for value in execution_args
+        ):
             raise ValueError(
-                "multi-host execution plans are supported only for the grid phase"
+                "--execution-plan, --host-id, and --execution-stage must be "
+                "provided together for the grid phase"
             )
-        execution_plan = load_seed0_execution_plan(args.execution_plan, frozen)
-        assigned_trial_ids = staged_host_trial_ids(
-            execution_plan,
-            str(args.host_id),
-            str(args.execution_stage),
+        if args.execution_plan is not None:
+            execution_plan = load_seed0_execution_plan(args.execution_plan, frozen)
+            assigned_trial_ids = staged_host_trial_ids(
+                execution_plan,
+                str(args.host_id),
+                str(args.execution_stage),
+            )
+            host_config = execution_plan["hosts"][str(args.host_id)]
+            expected_concurrency = (
+                1
+                if args.execution_stage == "canary"
+                else min(int(host_config["concurrency"]), len(assigned_trial_ids))
+            )
+            if int(args.concurrency) != expected_concurrency:
+                raise ValueError(
+                    "--concurrency must match the committed execution stage"
+                )
+            study_id = (
+                f"{study_id}__{execution_plan['execution_id']}__"
+                f"{str(args.host_id)}__{str(args.execution_stage)}"
+            )
+            execution_assignment = {
+                "execution_id": execution_plan["execution_id"],
+                "grid_manifest_hash": execution_plan["grid_manifest_hash"],
+                "host_id": str(args.host_id),
+                "stage": str(args.execution_stage),
+                "canary_trial_id": execution_plan["canary_trial_id"],
+                "assigned_trial_ids": assigned_trial_ids,
+                "assigned_trial_count": len(assigned_trial_ids),
+            }
+    else:
+        if args.trial_plan is None:
+            raise ValueError("follow-up phase requires a pre-frozen --trial-plan")
+        if args.execution_stage is not None:
+            raise ValueError("--execution-stage is forbidden for the follow-up phase")
+        if args.execution_plan is None or args.host_id is None:
+            raise ValueError(
+                "follow-up phase requires --execution-plan and --host-id"
+            )
+        followup_plan = _load_followup_plan(args.trial_plan)
+        execution_plan = load_followup_execution_plan(
+            args.execution_plan,
+            followup_plan,
         )
+        assigned_trial_ids = host_trial_ids(execution_plan, str(args.host_id))
         host_config = execution_plan["hosts"][str(args.host_id)]
-        expected_concurrency = (
-            1
-            if args.execution_stage == "canary"
-            else min(int(host_config["concurrency"]), len(assigned_trial_ids))
+        expected_concurrency = min(
+            int(host_config["concurrency"]),
+            len(assigned_trial_ids),
         )
         if int(args.concurrency) != expected_concurrency:
-            raise ValueError(
-                "--concurrency must match the committed execution stage"
-            )
+            raise ValueError("--concurrency must match the committed follow-up shard")
         study_id = (
-            f"{study_id}__{execution_plan['execution_id']}__"
-            f"{str(args.host_id)}__{str(args.execution_stage)}"
+            f"{study_id}__followup__{str(followup_plan['role_freeze_hash'])[:12]}"
+            f"__{execution_plan['execution_id']}__{str(args.host_id)}"
         )
         execution_assignment = {
             "execution_id": execution_plan["execution_id"],
             "grid_manifest_hash": execution_plan["grid_manifest_hash"],
+            "role_freeze_hash": execution_plan["role_freeze_hash"],
+            "followup_plan_hash": execution_plan["followup_plan_hash"],
             "host_id": str(args.host_id),
-            "stage": str(args.execution_stage),
-            "canary_trial_id": execution_plan["canary_trial_id"],
             "assigned_trial_ids": assigned_trial_ids,
             "assigned_trial_count": len(assigned_trial_ids),
         }
@@ -338,14 +374,12 @@ def main() -> int:
             for row in rows
         ]
     else:
-        if args.trial_plan is None:
-            raise ValueError("follow-up phase requires a pre-frozen --trial-plan")
-        followup_plan = _load_followup_plan(args.trial_plan)
-        study_id = (
-            f"{study_id}__followup__"
-            f"{str(followup_plan['role_freeze_hash'])[:12]}"
-        )
-        rows = followup_plan["scheduled"]
+        selected_trial_ids = set(assigned_trial_ids or ())
+        rows = [
+            row
+            for row in followup_plan["scheduled"]
+            if row["trial_id"] in selected_trial_ids
+        ]
         trials = [
             _trial_record(
                 row,

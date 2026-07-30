@@ -1,0 +1,83 @@
+schema_version: "1.0"
+protocol_version: wrn28_10_optimizer_hpo_v1.2
+execution_id: role_pair_followup_20260730
+grid_manifest_hash: 9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8
+role_freeze_hash: fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa
+followup_plan_hash: 3a3b00dbcf0ee3dc20c0959013665bf4243a2644e21f4552a831e0fdaed69264
+approved_hosts:
+  - curie
+  - lise
+  - precision_medicine
+hf_account: contra333
+hf_bucket: contra333/ICLR_RUN
+hf_destination_template: hf://buckets/contra333/ICLR_RUN/servers/{host_id}/role_pair_followup_20260730
+seed0_reuse_hosts:
+  0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f: lise
+  3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78: lise
+  a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae: precision_medicine
+  b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328: lise
+  db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211: precision_medicine
+  4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e: precision_medicine
+  5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f: curie
+  61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f: precision_medicine
+  188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2: precision_medicine
+  7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c: precision_medicine
+  86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9: precision_medicine
+  f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242: lise
+pair_colocations:
+  - pair_id: adam_adamw_shared_1
+    left_config_hash: a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae
+    right_config_hash: 5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f
+    seeds: [2]
+  - pair_id: adam_adamw_shared_2
+    left_config_hash: 0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f
+    right_config_hash: 4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e
+    seeds: [1]
+  - pair_id: sgd_sgdw_A
+    left_config_hash: 188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2
+    right_config_hash: 99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4
+    seeds: [0, 1, 2]
+  - pair_id: sgd_sgdw_B
+    left_config_hash: 86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9
+    right_config_hash: 2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f
+    seeds: [0, 1, 2]
+hosts:
+  curie:
+    concurrency: 4
+    trial_ids:
+      - followup-adam-b701f780ad99-seed-2
+      - followup-adam-db137e7d3c71-seed-2
+      - followup-adam-3e2bac6d488d-seed-2
+      - followup-adam-a8d0e1a8e585-seed-1
+      - followup-adam-0ac334244797-seed-1
+      - followup-adamw-61d7d1f20bc5-seed-2
+      - followup-adamw-4039a31891b5-seed-1
+      - followup-sgd-188f2e248d51-seed-1
+      - followup-sgd-86af0abedd46-seed-2
+      - followup-sgd-f315d560c588-seed-1
+      - followup-sgd-7aa36ee28bf5-seed-2
+      - followup-sgdw-99f6ea026047-seed-1
+      - followup-sgdw-2f7b24bb35f8-seed-2
+  lise:
+    concurrency: 2
+    trial_ids:
+      - followup-adam-db137e7d3c71-seed-1
+      - followup-adam-a8d0e1a8e585-seed-2
+      - followup-adamw-61d7d1f20bc5-seed-1
+      - followup-adamw-5742764ef3bd-seed-2
+      - followup-adamw-4039a31891b5-seed-2
+      - followup-sgd-188f2e248d51-seed-2
+      - followup-sgd-86af0abedd46-seed-1
+      - followup-sgd-7aa36ee28bf5-seed-1
+      - followup-sgdw-99f6ea026047-seed-2
+      - followup-sgdw-2f7b24bb35f8-seed-1
+  precision_medicine:
+    concurrency: 4
+    trial_ids:
+      - followup-adam-b701f780ad99-seed-1
+      - followup-adam-3e2bac6d488d-seed-1
+      - followup-adam-0ac334244797-seed-2
+      - followup-adamw-5742764ef3bd-seed-1
+      - followup-sgd-f315d560c588-seed-2
+      - followup-sgdw-99f6ea026047-seed-0
+      - followup-sgdw-2f7b24bb35f8-seed-0
