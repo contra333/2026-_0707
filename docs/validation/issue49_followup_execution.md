@@ -47,7 +47,7 @@ Local WSL:
 
 - focused execution/selection/orchestration/supervisor tests: **PASS**,
   `44 passed`;
-- full regression suite: **PASS**, `186 passed, 1 warning`; the warning is
+- full regression suite: **PASS**, `187 passed, 1 warning`; the warning is
   the recorded local CUDA driver/runtime mismatch and is not a server CUDA
   result;
 - `git diff --check`: **PASS**.
