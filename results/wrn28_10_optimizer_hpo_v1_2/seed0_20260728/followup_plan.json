@@ -1,0 +1,4332 @@
+{
+  "grid_manifest_hash": "9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8",
+  "plan_hash": "3a3b00dbcf0ee3dc20c0959013665bf4243a2644e21f4552a831e0fdaed69264",
+  "reused": [
+    {
+      "assigned_slot": null,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adam",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "training_seed": 0,
+      "trial_id": "followup-adam-0ac334244797-seed-0",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "training_seed": 0,
+      "trial_id": "followup-adam-3e2bac6d488d-seed-0",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adam",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "training_seed": 0,
+      "trial_id": "followup-adam-a8d0e1a8e585-seed-0",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "training_seed": 0,
+      "trial_id": "followup-adam-b701f780ad99-seed-0",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "training_seed": 0,
+      "trial_id": "followup-adam-db137e7d3c71-seed-0",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "training_seed": 0,
+      "trial_id": "followup-adamw-4039a31891b5-seed-0",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adamw",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adamw",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "training_seed": 0,
+      "trial_id": "followup-adamw-5742764ef3bd-seed-0",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.1,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "training_seed": 0,
+      "trial_id": "followup-adamw-61d7d1f20bc5-seed-0",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 0,
+      "trial_id": "followup-sgd-188f2e248d51-seed-0",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "training_seed": 0,
+      "trial_id": "followup-sgd-7aa36ee28bf5-seed-0",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 0,
+      "trial_id": "followup-sgd-86af0abedd46-seed-0",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": null,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": "seed0_grid",
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "training_seed": 0,
+      "trial_id": "followup-sgd-f315d560c588-seed-0",
+      "weight_decay_rank": 0
+    }
+  ],
+  "role_freeze_hash": "fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa",
+  "scheduled": [
+    {
+      "assigned_slot": 0,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "training_seed": 1,
+      "trial_id": "followup-adam-0ac334244797-seed-1",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 1,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "training_seed": 2,
+      "trial_id": "followup-adam-0ac334244797-seed-2",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 2,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "training_seed": 1,
+      "trial_id": "followup-adam-3e2bac6d488d-seed-1",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 3,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "training_seed": 2,
+      "trial_id": "followup-adam-3e2bac6d488d-seed-2",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 4,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "training_seed": 1,
+      "trial_id": "followup-adam-a8d0e1a8e585-seed-1",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 5,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adam",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "training_seed": 2,
+      "trial_id": "followup-adam-a8d0e1a8e585-seed-2",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 6,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "training_seed": 1,
+      "trial_id": "followup-adam-b701f780ad99-seed-1",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 7,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "training_seed": 2,
+      "trial_id": "followup-adam-b701f780ad99-seed-2",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 8,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "training_seed": 1,
+      "trial_id": "followup-adam-db137e7d3c71-seed-1",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 9,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "lr_rank": 0,
+      "optimizer_family": "adam",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.0003,
+          "name": "adam",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "training_seed": 2,
+      "trial_id": "followup-adam-db137e7d3c71-seed-2",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 10,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "training_seed": 1,
+      "trial_id": "followup-adamw-4039a31891b5-seed-1",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 11,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "training_seed": 2,
+      "trial_id": "followup-adamw-4039a31891b5-seed-2",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 12,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adamw",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "training_seed": 1,
+      "trial_id": "followup-adamw-5742764ef3bd-seed-1",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 13,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.001,
+          "name": "adamw",
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "training_seed": 2,
+      "trial_id": "followup-adamw-5742764ef3bd-seed-2",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 14,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.1,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "training_seed": 1,
+      "trial_id": "followup-adamw-61d7d1f20bc5-seed-1",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 15,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "adamw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "beta1": 0.9,
+          "beta2": 0.999,
+          "eps": 1e-08,
+          "lr": 0.003,
+          "name": "adamw",
+          "weight_decay": 0.1,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "training_seed": 2,
+      "trial_id": "followup-adamw-61d7d1f20bc5-seed-2",
+      "weight_decay_rank": 3
+    },
+    {
+      "assigned_slot": 16,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 1,
+      "trial_id": "followup-sgd-188f2e248d51-seed-1",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": 17,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 2,
+      "trial_id": "followup-sgd-188f2e248d51-seed-2",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": 18,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "training_seed": 1,
+      "trial_id": "followup-sgd-7aa36ee28bf5-seed-1",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 19,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "training_seed": 2,
+      "trial_id": "followup-sgd-7aa36ee28bf5-seed-2",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 20,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 1,
+      "trial_id": "followup-sgd-86af0abedd46-seed-1",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 21,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 2,
+      "trial_id": "followup-sgd-86af0abedd46-seed-2",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 22,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "training_seed": 1,
+      "trial_id": "followup-sgd-f315d560c588-seed-1",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 23,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgd",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgd",
+          "nesterov": true,
+          "weight_decay": 0.0,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "training_seed": 2,
+      "trial_id": "followup-sgd-f315d560c588-seed-2",
+      "weight_decay_rank": 0
+    },
+    {
+      "assigned_slot": 24,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 0,
+      "trial_id": "followup-sgdw-99f6ea026047-seed-0",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": 25,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 1,
+      "trial_id": "followup-sgdw-99f6ea026047-seed-1",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": 26,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "lr_rank": 1,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.1,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0005,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "training_seed": 2,
+      "trial_id": "followup-sgdw-99f6ea026047-seed-2",
+      "weight_decay_rank": 2
+    },
+    {
+      "assigned_slot": 27,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 0
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 0,
+      "trial_id": "followup-sgdw-2f7b24bb35f8-seed-0",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 28,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 1
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 1,
+      "trial_id": "followup-sgdw-2f7b24bb35f8-seed-1",
+      "weight_decay_rank": 1
+    },
+    {
+      "assigned_slot": 29,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "lr_rank": 2,
+      "optimizer_family": "sgdw",
+      "reuse_source": null,
+      "scientific_config": {
+        "checkpoint": {
+          "snapshot_epochs": [
+            0,
+            60,
+            61,
+            120,
+            121,
+            160,
+            161,
+            200
+          ]
+        },
+        "dataset": {
+          "config_path": "configs/datasets/oge_cifar10_holdout_v1.yaml",
+          "membership": {
+            "test": {
+              "imglist": "oge_cifar10_holdout_v1/test_cifar10_10k.txt",
+              "line_count": 10000,
+              "selection_key": "id_test",
+              "sha256": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73"
+            },
+            "train": {
+              "imglist": "oge_cifar10_holdout_v1/train_cifar10_45k.txt",
+              "line_count": 45000,
+              "selection_key": "id_train",
+              "sha256": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6"
+            },
+            "validation": {
+              "imglist": "oge_cifar10_holdout_v1/val_cifar10_5k.txt",
+              "line_count": 5000,
+              "selection_key": "id_validation",
+              "sha256": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+            }
+          },
+          "membership_manifest": {
+            "path": "oge_cifar10_holdout_v1/split_manifest.jsonl",
+            "row_count": 60001,
+            "sha256": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056"
+          },
+          "protocol": "oge_cifar10_holdout_v1",
+          "test_split": "id_test",
+          "train_split": "id_train",
+          "validation_split": "id_validation"
+        },
+        "loss": {
+          "label_smoothing": 0.0,
+          "name": "cross_entropy"
+        },
+        "model": {
+          "depth": 28,
+          "dropout_rate": 0.0,
+          "init_policy": "msr_fan_in",
+          "name": "wrn28_10",
+          "num_classes": 10,
+          "widen_factor": 10
+        },
+        "optimizer": {
+          "lr": 0.3,
+          "momentum": 0.9,
+          "name": "sgdw",
+          "nesterov": true,
+          "weight_decay": 0.0001,
+          "weight_decay_policy": "weights_only_no_bias_norm"
+        },
+        "scheduler": {
+          "gamma": 0.2,
+          "milestones": [
+            60,
+            120,
+            160
+          ],
+          "name": "multistep",
+          "step_timing": "end_of_epoch"
+        },
+        "schema_version": "1.0",
+        "training": {
+          "batch_size": 128,
+          "deterministic": false,
+          "drop_last": false,
+          "max_epochs": 200,
+          "num_workers": 0,
+          "persistent_workers": false,
+          "pin_memory": false,
+          "precision": "fp32",
+          "seed": 2
+        }
+      },
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "training_seed": 2,
+      "trial_id": "followup-sgdw-2f7b24bb35f8-seed-2",
+      "weight_decay_rank": 1
+    }
+  ]
+}

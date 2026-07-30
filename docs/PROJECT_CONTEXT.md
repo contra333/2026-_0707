@@ -52,11 +52,13 @@ Implemented foundation:
 - a practical three-host gate with one hash-locked runtime/test distribution
   set, an agreeing measured FP32/TF32/cuDNN policy, committed 45k/5k/10k
   data-path and bounded-loader checks, and one actual-data smoke epoch per
-  approved host.
+  approved host;
+- completed execution and metadata-integrity validation of all 36 seed-0
+  protocol-v1.2 grid cells across the three approved hosts, plus the immutable
+  C1-C4 role freeze and deduplicated follow-up plan.
 
 Documented or prepared, but not yet implemented or executed:
 
-- the protocol-v1.2 200-epoch SGD canary and production grid execution;
 - DDU as a class-wise full-covariance GDA density detector using the pinned
   official adaptive jitter and `logsumexp` score convention;
 - explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
@@ -65,8 +67,8 @@ Documented or prepared, but not yet implemented or executed:
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- completed optimizer-comparison and multi-seed research results;
-- executed grid, role-replication, and pair-control study runs;
+- completed multi-seed optimizer-comparison results;
+- executed role-replication and pair-control study runs;
 - feature extraction pipelines;
 - geometry metrics;
 - feature-based OOD detector implementations such as Mahalanobis, kNN, generic
@@ -94,6 +96,8 @@ Not yet part of the validated foundation unless added by a later merged pull req
   anchor mapping for the v1.2 grids and the research lineup.
 - `docs/validation/issue37_practical_runtime_status.md`: completed three-host
   practical runtime, data, and one-epoch smoke evidence.
+- `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid
+  integrity, validation metrics, and immutable C1-C4 selection evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.
 - Pull Requests: actual changes, validation evidence, and unresolved limitations.
 

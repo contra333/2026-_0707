@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-28
+Last updated: 2026-07-30
 
 ## Current phase
 
@@ -11,8 +11,7 @@ independently validated at pinned training commit
 `d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
 [Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
 Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
-foundation and completed its bounded department-server smoke. No
-protocol-v1.2 36-cell production grid has started. Issue #35 and merged PR #36
+foundation and completed its bounded department-server smoke. Issue #35 and merged PR #36
 replaced the current-tree v1.1 random-search path with the v1.2 deterministic grid,
 `C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
 gate. The active classifier data configuration uses
@@ -28,7 +27,9 @@ The committed exact-once assignment uses `curie` 14 cells, `lise` 8 cells, and
 `precision_medicine` 14 cells. A follow-up owner `fast path` fixes
 `grid-sgd-06` as a concurrently running operational sentinel rather than a
 blocking gate; all 36 cells remain pinned to production Git SHA
-`0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`.
+`0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`. The 36 cells subsequently
+completed, their uploaded metadata and checksums passed the Issue #47 integrity
+gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
 
 ## Validated or implemented
 
@@ -112,14 +113,22 @@ blocking gate; all 36 cells remain pinned to production Git SHA
   probes, committed holdout and bounded loaders, and one actual-data epoch all
   passed on idle GPU 0. The smoke completed 352 optimizer steps, strict-reloaded
   both checkpoints, deferred ID-test, and created no evaluation artifact.
+- Issue #47 verified 12/12 stage-level metadata sidecars and 36/36 trial-record
+  sidecars from `contra333/ICLR_RUN`, exact-once host assignment, schema,
+  grid/dataset/config identities, production Git SHA, terminal epoch-200
+  metrics, deferred ID-test state, and protected-field absence. The official
+  C1-C4 freeze hash is
+  `fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa`;
+  see
+  `docs/validation/seed0_20260728_grid_role_freeze.md`.
 
 ## Documented but not executed
 
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
   deterministic grid, C1-C4 selection, pairwise coupling controls, budget,
-  seeds, checkpoints, provenance, and rerun rules. The v1.2 definition and
-  selection implementation exist, but no v1.2 grid, role-replication,
-  pair-control, or downstream run has been executed.
+  seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid and
+  C1-C4 freeze are complete; role replication, pair controls, and downstream
+  protected evaluation have not been executed.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
   name, class-wise full unbiased covariance, official adaptive-jitter ladder,
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
@@ -146,8 +155,7 @@ blocking gate; all 36 cells remain pinned to production Git SHA
 
 ## Still missing
 
-- Execution of the v1.2 grid, the `C1`-`C4` role freeze, three-seed role
-  replication, and the pair controls
+- Three-seed role replication and the pair controls
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
@@ -155,13 +163,12 @@ blocking gate; all 36 cells remain pinned to production Git SHA
 
 ## Active next phase
 
-Execute the bounded seed-0 production task authorized by the 2026-07-28 owner
-`fast path`. First run `grid-sgd-06` as the unchanged 200-epoch canary on
-`precision_medicine`, then run the `remaining` stage concurrently on the three
-committed host shards under launch policy `concurrent_sentinel`. Upload complete study artifacts to
-`contra333/ICLR_RUN`, then combine all 36 terminal trial records and freeze
-`C1`-`C4`. Issue #37 and PR #38 remain readiness evidence rather than
-production evidence.
+The next separately authorized execution phase is seed 1/2 replication of the
+unique frozen role configurations and the predeclared pair controls. Issue #47
+records the deduplicated follow-up plan but does not authorize or execute it.
+Protected ID-test, OOD, geometry/Neural Collapse, and detector evaluation also
+remain outside Issue #47. Issue #37 and PR #38 remain readiness evidence rather
+than production evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -176,14 +183,13 @@ not authorize detector implementation without a separately bounded task.
 
 ## Blockers and unknowns
 
-- Only one optimizer and one seed have a completed long-run baseline. No
-  optimizer-comparison or multi-seed conclusion is currently supported.
+- The complete seed-0 configuration landscape and C1-C4 roles are available,
+  but no multi-seed optimizer-comparison conclusion is currently supported.
 - Optimizer-comparison production execution is authorized only for the
   committed `seed0_20260728` assignment; later role replication, pair controls,
   or a different production study require separate authorization.
-- Production GPU availability, artifact retention and backup behavior, and
-  optimizer-specific 200-epoch wall time remain dynamic or unverified and must
-  be checked by the active production-execution task.
+- Follow-up GPU availability and artifact retention remain dynamic and must be
+  checked by the separately authorized replication/pair-control task.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 
