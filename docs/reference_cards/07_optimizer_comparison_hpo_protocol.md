@@ -12,8 +12,10 @@ The executable protocol and frozen tables live under
 the exact row, table, grid, dataset-membership, dataset-manifest, and
 whole-manifest hashes.
 
-No v1.2 production run has started. Local tests and server smoke runs are
-not research results.
+The `seed0_20260728` v1.2 production grid completed all 36 assigned cells and
+its metadata-integrity validation and C1-C4 role freeze are recorded in
+`docs/validation/seed0_20260728_grid_role_freeze.md`. Local tests and server
+smoke runs remain infrastructure evidence rather than research results.
 
 ## Superseded-study decision log
 
@@ -252,6 +254,9 @@ The assignment covers all 36 cells exactly once and includes every optimizer
 on every host. Each host uploads its complete study-artifact directory,
 including trial records and checkpoints, under
 `hf://buckets/contra333/ICLR_RUN/servers/<host_id>/seed0_20260728/<stage>`.
-Only after all 36 records are terminal may the uploaded trial records be
-combined to freeze `C1`-`C4`. This exception does not authorize role
-replication, pair controls, protected evidence, or another production study.
+All 36 uploaded records were verified terminal and combined under Issue #47.
+The resulting immutable role-freeze hash is
+`fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa`.
+The execution exception did not authorize role replication, pair controls,
+protected-evidence execution, or another production study; those remain
+separately bounded tasks.

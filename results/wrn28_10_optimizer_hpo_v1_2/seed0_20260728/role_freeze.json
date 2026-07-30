@@ -1,0 +1,835 @@
+{
+  "freeze_hash": "fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa",
+  "freeze_kind": "role_selection",
+  "payload": {
+    "c3": {
+      "band_used": 0.002,
+      "status": "selected",
+      "triple": {
+        "accuracy_spread": 0.0016000000000000458,
+        "cells": {
+          "adam": {
+            "assigned_slot": 0,
+            "best_validation_epoch": 187,
+            "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+            "final_validation": {
+              "accuracy": 0.945,
+              "epoch": 200,
+              "nll": 0.376301890540123
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-00",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          "adamw": {
+            "assigned_slot": 4,
+            "best_validation_epoch": 198,
+            "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+            "final_validation": {
+              "accuracy": 0.9466,
+              "epoch": 200,
+              "nll": 0.42316807399615647
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-04",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 0
+          },
+          "sgd": {
+            "assigned_slot": 4,
+            "best_validation_epoch": 102,
+            "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+            "final_validation": {
+              "accuracy": 0.9458,
+              "epoch": 200,
+              "nll": 0.3173420382022858
+            },
+            "lr": 0.1,
+            "lr_rank": 1,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-04",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          }
+        },
+        "concatenated_config_hashes": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca1423285742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+        "mean_accuracy": 0.9457999999999999,
+        "mean_nll": 0.37227066757952176
+      }
+    },
+    "c4": {
+      "band_used": 0.002,
+      "status": "selected",
+      "triple": {
+        "accuracy_spread": 0.0014000000000000679,
+        "cells": {
+          "adam": {
+            "assigned_slot": 1,
+            "best_validation_epoch": 125,
+            "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+            "final_validation": {
+              "accuracy": 0.9392,
+              "epoch": 200,
+              "nll": 0.3299827679634094
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-01",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          "adamw": {
+            "assigned_slot": 9,
+            "best_validation_epoch": 180,
+            "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+            "final_validation": {
+              "accuracy": 0.9378,
+              "epoch": 200,
+              "nll": 0.48033701395988465
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-09",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 1
+          },
+          "sgd": {
+            "assigned_slot": 8,
+            "best_validation_epoch": 113,
+            "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+            "final_validation": {
+              "accuracy": 0.9384,
+              "epoch": 200,
+              "nll": 0.3848750257015228
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-08",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          }
+        },
+        "concatenated_config_hashes": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec784039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+        "mean_accuracy": 0.9384666666666667,
+        "mean_nll": 0.3983982692082723
+      }
+    },
+    "grid_manifest_hash": "9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8",
+    "grid_result_identity_hash": "22acbf503ca00b79c8ade31bb2f16685957c1a222c7dfe2253ec09c599b0430c",
+    "per_optimizer": {
+      "adam": {
+        "c1": {
+          "assigned_slot": 0,
+          "best_validation_epoch": 187,
+          "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+          "final_validation": {
+            "accuracy": 0.945,
+            "epoch": 200,
+            "nll": 0.376301890540123
+          },
+          "lr": 0.0003,
+          "lr_rank": 0,
+          "optimizer_family": "adam",
+          "trial_id": "grid-adam-00",
+          "weight_decay": 0.0,
+          "weight_decay_rank": 0
+        },
+        "c2": {
+          "band_used": 0.005,
+          "cell": {
+            "assigned_slot": 3,
+            "best_validation_epoch": 166,
+            "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+            "final_validation": {
+              "accuracy": 0.941,
+              "epoch": 200,
+              "nll": 0.263799653172493
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-03",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          "distance": 2.0,
+          "status": "selected"
+        },
+        "ranked_valid_cells": [
+          {
+            "assigned_slot": 0,
+            "best_validation_epoch": 187,
+            "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+            "final_validation": {
+              "accuracy": 0.945,
+              "epoch": 200,
+              "nll": 0.376301890540123
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-00",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 4,
+            "best_validation_epoch": 141,
+            "config_hash": "2607d62212420d58d2ac25ee8c846256f6e02972d8f6f371392a665142c29116",
+            "final_validation": {
+              "accuracy": 0.943,
+              "epoch": 200,
+              "nll": 0.4412554766535759
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-04",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 8,
+            "best_validation_epoch": 134,
+            "config_hash": "2a64d919f04ec2901032b00155b09e4f49c390dbbab05dcc013a7ba18d388ad0",
+            "final_validation": {
+              "accuracy": 0.9412,
+              "epoch": 200,
+              "nll": 0.47984080884456637
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-08",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 3,
+            "best_validation_epoch": 166,
+            "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+            "final_validation": {
+              "accuracy": 0.941,
+              "epoch": 200,
+              "nll": 0.263799653172493
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-03",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 2,
+            "best_validation_epoch": 174,
+            "config_hash": "cae4d1e918d89e62bf0f652f669fd8c4868dc682e34ff5a2cb06693eea34f106",
+            "final_validation": {
+              "accuracy": 0.9404,
+              "epoch": 200,
+              "nll": 0.3197277941226959
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-02",
+            "weight_decay": 0.0005,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 1,
+            "best_validation_epoch": 125,
+            "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+            "final_validation": {
+              "accuracy": 0.9392,
+              "epoch": 200,
+              "nll": 0.3299827679634094
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-01",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 5,
+            "best_validation_epoch": 169,
+            "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+            "final_validation": {
+              "accuracy": 0.9384,
+              "epoch": 200,
+              "nll": 0.3364457526683418
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-05",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 6,
+            "best_validation_epoch": 185,
+            "config_hash": "4e228d70b30bda41bb270d50a0aacd01d978b1ddede3065c7e409306959c7762",
+            "final_validation": {
+              "accuracy": 0.9306,
+              "epoch": 200,
+              "nll": 0.3435121861457825
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-06",
+            "weight_decay": 0.0005,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 7,
+            "best_validation_epoch": 183,
+            "config_hash": "5869d89f7a598eeca333afb864ad3c08514aa7d724dfb6c6e57ecd84b62b5041",
+            "final_validation": {
+              "accuracy": 0.9126,
+              "epoch": 200,
+              "nll": 0.4083277271747589
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-07",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 9,
+            "best_validation_epoch": 136,
+            "config_hash": "d12054c089a64f6a36384cc0b0d6f415d117dea349e4fae51d77ff360b226dfd",
+            "final_validation": {
+              "accuracy": 0.9042,
+              "epoch": 200,
+              "nll": 0.5044256145000457
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adam",
+            "trial_id": "grid-adam-09",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          }
+        ],
+        "valid_cell_count": 10
+      },
+      "adamw": {
+        "c1": {
+          "assigned_slot": 11,
+          "best_validation_epoch": 168,
+          "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+          "final_validation": {
+            "accuracy": 0.9564,
+            "epoch": 200,
+            "nll": 0.29699771164655686
+          },
+          "lr": 0.003,
+          "lr_rank": 2,
+          "optimizer_family": "adamw",
+          "trial_id": "grid-adamw-11",
+          "weight_decay": 0.1,
+          "weight_decay_rank": 3
+        },
+        "c2": {
+          "band_used": 0.005,
+          "cell": null,
+          "distance": null,
+          "status": "absent"
+        },
+        "ranked_valid_cells": [
+          {
+            "assigned_slot": 11,
+            "best_validation_epoch": 168,
+            "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+            "final_validation": {
+              "accuracy": 0.9564,
+              "epoch": 200,
+              "nll": 0.29699771164655686
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-11",
+            "weight_decay": 0.1,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 4,
+            "best_validation_epoch": 198,
+            "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+            "final_validation": {
+              "accuracy": 0.9466,
+              "epoch": 200,
+              "nll": 0.42316807399615647
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-04",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 7,
+            "best_validation_epoch": 188,
+            "config_hash": "0cb9982e9b1343a7f5671abdae7c25f5e50190fc8736fbd35754e4b3e6e8f3a7",
+            "final_validation": {
+              "accuracy": 0.9462,
+              "epoch": 200,
+              "nll": 0.35535426124334335
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-07",
+            "weight_decay": 0.1,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 1,
+            "best_validation_epoch": 198,
+            "config_hash": "3af08c79b024ccbfeb0fe88ee4f1e0dadb611fff68116aa983ea0e37022804a4",
+            "final_validation": {
+              "accuracy": 0.946,
+              "epoch": 200,
+              "nll": 0.3526235310077667
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-01",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 10,
+            "best_validation_epoch": 198,
+            "config_hash": "3624e351db12876ca4dbcc22525015bc5d224ce3c035c4bea591f8ad3f3adc7c",
+            "final_validation": {
+              "accuracy": 0.946,
+              "epoch": 200,
+              "nll": 0.4157911086410284
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-10",
+            "weight_decay": 0.01,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 3,
+            "best_validation_epoch": 185,
+            "config_hash": "e4df116fccbfe3e28e684d0b09595d44d2338fafba30e8235ac4fe919a00a17a",
+            "final_validation": {
+              "accuracy": 0.9444,
+              "epoch": 200,
+              "nll": 0.3430791519001126
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-03",
+            "weight_decay": 0.1,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 2,
+            "best_validation_epoch": 198,
+            "config_hash": "3a2c9dbaa36a6d0308d3a8a3cdbbd70cb03549fefcbec860ddf71bbb22f2b8da",
+            "final_validation": {
+              "accuracy": 0.9444,
+              "epoch": 200,
+              "nll": 0.3774516030788422
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-02",
+            "weight_decay": 0.01,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 6,
+            "best_validation_epoch": 139,
+            "config_hash": "4b82502c9e642bbddd289deda4c1f4f0f276593aee4a0751b5e0ba8c5b9363a4",
+            "final_validation": {
+              "accuracy": 0.9424,
+              "epoch": 200,
+              "nll": 0.4432291986271739
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-06",
+            "weight_decay": 0.01,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 0,
+            "best_validation_epoch": 184,
+            "config_hash": "e307a2e93799a371b98ab7cd282e825d3768e9df6a6209718f31db1729499d39",
+            "final_validation": {
+              "accuracy": 0.9416,
+              "epoch": 200,
+              "nll": 0.39063016192018984
+            },
+            "lr": 0.0003,
+            "lr_rank": 0,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-00",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 5,
+            "best_validation_epoch": 189,
+            "config_hash": "ca3ca3f64741293187453df53a695fd5b134e44c226d0488e16aacf46ef65f3e",
+            "final_validation": {
+              "accuracy": 0.9408,
+              "epoch": 200,
+              "nll": 0.4529989641189575
+            },
+            "lr": 0.001,
+            "lr_rank": 1,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-05",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 9,
+            "best_validation_epoch": 180,
+            "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+            "final_validation": {
+              "accuracy": 0.9378,
+              "epoch": 200,
+              "nll": 0.48033701395988465
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-09",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 8,
+            "best_validation_epoch": 149,
+            "config_hash": "1417139ffbd33cfc8c9a43f5d58cfb4cbca2a99d14ef9663adb3cee27b709c6c",
+            "final_validation": {
+              "accuracy": 0.9368,
+              "epoch": 200,
+              "nll": 0.5133603096008301
+            },
+            "lr": 0.003,
+            "lr_rank": 2,
+            "optimizer_family": "adamw",
+            "trial_id": "grid-adamw-08",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 0
+          }
+        ],
+        "valid_cell_count": 12
+      },
+      "sgd": {
+        "c1": {
+          "assigned_slot": 6,
+          "best_validation_epoch": 176,
+          "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+          "final_validation": {
+            "accuracy": 0.9582,
+            "epoch": 200,
+            "nll": 0.1867704642534256
+          },
+          "lr": 0.1,
+          "lr_rank": 1,
+          "optimizer_family": "sgd",
+          "trial_id": "grid-sgd-06",
+          "weight_decay": 0.0005,
+          "weight_decay_rank": 2
+        },
+        "c2": {
+          "band_used": 0.002,
+          "cell": {
+            "assigned_slot": 9,
+            "best_validation_epoch": 189,
+            "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+            "final_validation": {
+              "accuracy": 0.9582,
+              "epoch": 200,
+              "nll": 0.19200074803829192
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-09",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          "distance": 1.1760912590556811,
+          "status": "selected"
+        },
+        "ranked_valid_cells": [
+          {
+            "assigned_slot": 6,
+            "best_validation_epoch": 176,
+            "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+            "final_validation": {
+              "accuracy": 0.9582,
+              "epoch": 200,
+              "nll": 0.1867704642534256
+            },
+            "lr": 0.1,
+            "lr_rank": 1,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-06",
+            "weight_decay": 0.0005,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 9,
+            "best_validation_epoch": 189,
+            "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+            "final_validation": {
+              "accuracy": 0.9582,
+              "epoch": 200,
+              "nll": 0.19200074803829192
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-09",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 3,
+            "best_validation_epoch": 165,
+            "config_hash": "aeb58da3f185e761239444c82fdecce1af00a3b5a1eff836ed9c1c3a71c530ef",
+            "final_validation": {
+              "accuracy": 0.958,
+              "epoch": 200,
+              "nll": 0.18222772564888
+            },
+            "lr": 0.03,
+            "lr_rank": 0,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-03",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 2,
+            "best_validation_epoch": 172,
+            "config_hash": "4accd8c3eefe9e1d3339c6d88023092180df429de3347340a7816f7ca3aded0e",
+            "final_validation": {
+              "accuracy": 0.958,
+              "epoch": 200,
+              "nll": 0.18817530694007872
+            },
+            "lr": 0.03,
+            "lr_rank": 0,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-02",
+            "weight_decay": 0.0005,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 11,
+            "best_validation_epoch": 183,
+            "config_hash": "9de7e6f3b22d49a105c894c36530aa710ff5c7b787043de8efe36ba68a896e87",
+            "final_validation": {
+              "accuracy": 0.9566,
+              "epoch": 200,
+              "nll": 0.17198527884483336
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-11",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 10,
+            "best_validation_epoch": 199,
+            "config_hash": "2e7b911cc8955a9219edeb6209cb3e5e7116f11e6ade831ad3a2bf67ad44ed33",
+            "final_validation": {
+              "accuracy": 0.9552,
+              "epoch": 200,
+              "nll": 0.2008214617729187
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-10",
+            "weight_decay": 0.0005,
+            "weight_decay_rank": 2
+          },
+          {
+            "assigned_slot": 7,
+            "best_validation_epoch": 191,
+            "config_hash": "a213a28df17ed2ab126bde101c4a7cf6bf9933e7b350f356658747a46e19c86f",
+            "final_validation": {
+              "accuracy": 0.9534,
+              "epoch": 200,
+              "nll": 0.20186925389766694
+            },
+            "lr": 0.1,
+            "lr_rank": 1,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-07",
+            "weight_decay": 0.001,
+            "weight_decay_rank": 3
+          },
+          {
+            "assigned_slot": 5,
+            "best_validation_epoch": 173,
+            "config_hash": "55a293a12adc751d9645431b5836f5b6a124bd7378a8fb2e2a766f593f0d2115",
+            "final_validation": {
+              "accuracy": 0.9534,
+              "epoch": 200,
+              "nll": 0.21930254442691802
+            },
+            "lr": 0.1,
+            "lr_rank": 1,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-05",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 1,
+            "best_validation_epoch": 81,
+            "config_hash": "dd7f5ee6ad04d02bc5546057b7af745493285ff3a8102ff4388f7b7a306ceeb5",
+            "final_validation": {
+              "accuracy": 0.9478,
+              "epoch": 200,
+              "nll": 0.2574958867073059
+            },
+            "lr": 0.03,
+            "lr_rank": 0,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-01",
+            "weight_decay": 0.0001,
+            "weight_decay_rank": 1
+          },
+          {
+            "assigned_slot": 0,
+            "best_validation_epoch": 174,
+            "config_hash": "f56c225d5dd780010a0261d24e92afb01a49a39ecd2d98c765f117de265e586e",
+            "final_validation": {
+              "accuracy": 0.9472,
+              "epoch": 200,
+              "nll": 0.2942229103207588
+            },
+            "lr": 0.03,
+            "lr_rank": 0,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-00",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 4,
+            "best_validation_epoch": 102,
+            "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+            "final_validation": {
+              "accuracy": 0.9458,
+              "epoch": 200,
+              "nll": 0.3173420382022858
+            },
+            "lr": 0.1,
+            "lr_rank": 1,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-04",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          },
+          {
+            "assigned_slot": 8,
+            "best_validation_epoch": 113,
+            "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+            "final_validation": {
+              "accuracy": 0.9384,
+              "epoch": 200,
+              "nll": 0.3848750257015228
+            },
+            "lr": 0.3,
+            "lr_rank": 2,
+            "optimizer_family": "sgd",
+            "trial_id": "grid-sgd-08",
+            "weight_decay": 0.0,
+            "weight_decay_rank": 0
+          }
+        ],
+        "valid_cell_count": 12
+      }
+    },
+    "protected_evidence_released": true,
+    "released_training_seeds": [
+      0,
+      1,
+      2
+    ],
+    "role_labels_by_config_hash": {
+      "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2": [
+        "sgd:C1"
+      ],
+      "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78": [
+        "adam:C4"
+      ],
+      "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e": [
+        "adamw:C4"
+      ],
+      "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f": [
+        "adamw:C3"
+      ],
+      "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f": [
+        "adamw:C1"
+      ],
+      "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c": [
+        "sgd:C4"
+      ],
+      "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9": [
+        "sgd:C2"
+      ],
+      "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328": [
+        "adam:C1",
+        "adam:C3"
+      ],
+      "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211": [
+        "adam:C2"
+      ],
+      "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242": [
+        "sgd:C3"
+      ]
+    },
+    "selection_policy": {
+      "bands_are": "predeclared_operational_not_statistical_significance",
+      "c4_mean_gap": 0.005,
+      "checkpoint": "last.pt",
+      "checkpoint_epoch": 200,
+      "primary_band": 0.002,
+      "valid_accuracy_floor": 0.9,
+      "widened_band": 0.005
+    }
+  },
+  "protocol_version": "wrn28_10_optimizer_hpo_v1.2",
+  "schema_version": "1.0"
+}
