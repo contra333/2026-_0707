@@ -68,7 +68,9 @@ Documented or prepared, but not yet implemented or executed:
 Not yet part of the validated foundation unless added by a later merged pull request:
 
 - completed multi-seed optimizer-comparison results;
-- executed role-replication and pair-control study runs;
+- completed role-replication and pair-control study runs; Issue #49 and draft
+  PR #50 have started the frozen 30-row execution, but running jobs are not
+  terminal research evidence;
 - feature extraction pipelines;
 - geometry metrics;
 - feature-based OOD detector implementations such as Mahalanobis, kNN, generic

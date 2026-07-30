@@ -30,6 +30,11 @@ blocking gate; all 36 cells remain pinned to production Git SHA
 `0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`. The 36 cells subsequently
 completed, their uploaded metadata and checksums passed the Issue #47 integrity
 gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
+Issue #49 and draft PR #50 now fix the exact-once 13/10/7 follow-up
+assignment and detached validation/upload supervisor at production Git SHA
+`3556841340e6f6b92782af045ed4a468e6e271bd`. All three server gates and
+one-epoch smokes passed, and the 30 new production rows are running. They are
+not yet terminal multi-seed evidence.
 
 ## Validated or implemented
 
@@ -155,7 +160,8 @@ gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
 
 ## Still missing
 
-- Three-seed role replication and the pair controls
+- Completion, upload, and aggregation of the running three-seed role
+  replication and pair controls
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
@@ -163,12 +169,16 @@ gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
 
 ## Active next phase
 
-The next separately authorized execution phase is seed 1/2 replication of the
-unique frozen role configurations and the predeclared pair controls. Issue #47
-records the deduplicated follow-up plan but does not authorize or execute it.
-Protected ID-test, OOD, geometry/Neural Collapse, and detector evaluation also
-remain outside Issue #47. Issue #37 and PR #38 remain readiness evidence rather
-than production evidence.
+Issue #49 is executing seed 1/2 replication of the unique frozen role
+configurations and the predeclared pair controls. Its exact production
+assignment is committed in
+`configs/studies/wrn28_10_optimizer_hpo_v1_2/followup_execution.yaml`; see
+`docs/validation/issue49_followup_execution.md`. Completion requires 30/30
+terminal records, three verified no-delete Hugging Face uploads, and the
+12-reused-plus-30-new aggregate. Until then, no multi-seed conclusion is
+supported. Protected ID-test, OOD, geometry/Neural Collapse, and detector
+evaluation remain outside Issue #49. Issue #37 and PR #38 remain readiness
+evidence rather than production evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -185,11 +195,8 @@ not authorize detector implementation without a separately bounded task.
 
 - The complete seed-0 configuration landscape and C1-C4 roles are available,
   but no multi-seed optimizer-comparison conclusion is currently supported.
-- Optimizer-comparison production execution is authorized only for the
-  committed `seed0_20260728` assignment; later role replication, pair controls,
-  or a different production study require separate authorization.
-- Follow-up GPU availability and artifact retention remain dynamic and must be
-  checked by the separately authorized replication/pair-control task.
+- Follow-up completion and remote upload remain pending. Running GPU processes
+  and partial histories are not terminal evidence.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 

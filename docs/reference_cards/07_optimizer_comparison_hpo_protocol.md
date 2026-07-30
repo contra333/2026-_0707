@@ -260,3 +260,15 @@ The resulting immutable role-freeze hash is
 The execution exception did not authorize role replication, pair controls,
 protected-evidence execution, or another production study; those remain
 separately bounded tasks.
+
+Issue #49 is the separate bounded task for the frozen role replication and
+pair controls. Its committed
+`configs/studies/wrn28_10_optimizer_hpo_v1_2/followup_execution.yaml` binds
+the role-freeze and follow-up-plan hashes, assigns the 30 new rows exactly
+once as `curie=13`, `lise=10`, and `precision_medicine=7`, rotates every
+configuration across all three hosts over seeds 0/1/2, and preserves the
+declared pair co-locations. Production uses clean Git SHA
+`3556841340e6f6b92782af045ed4a468e6e271bd` and detached host supervisors.
+This running execution does not become multi-seed evidence until every row is
+terminal, independently validated, uploaded without delete, and combined with
+the 12 reused seed-0 records.
