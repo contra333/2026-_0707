@@ -68,9 +68,15 @@ Implemented foundation:
 - checksum-addressed planning for the protected Metric Contract v1.2 run:
   42 source config/seed identities, 30 authorized role identities, 12 explicit
   pair-control-only exclusions, 60 separate checkpoint jobs, and deterministic
-  source-local 20/20/20 assignment with execution still `not_started`.
+  source-local 20/20/20 assignment;
+- completed protected Metric Contract v1.2 execution at scientific evaluator
+  SHA `c38b09694be88aa74de0741b39e9d3ba0d6ff61a`: 60/60 checkpoint bundles and
+  three host operational shards are `REMOTE_VERIFIED`, and the checksum-valid
+  central aggregate contains separate `last` primary and `best_val` control
+  rows for all 30 authorized training identities and seeds `{0,1,2}`. See
+  `docs/validation/issue57_metric_evaluation_execution.md`.
 
-Documented and implemented, but not yet executed on protected research splits:
+Documented and implemented result boundaries:
 
 - `GDA-ClassDensity` as the SN-off class-wise full-covariance Gaussian density
   readout using the pinned adaptive jitter and class-prior-weighted `logsumexp`;
@@ -81,12 +87,11 @@ Documented and implemented, but not yet executed on protected research splits:
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- protected feature extraction for the 10k ID-test and OOD datasets;
-- full frozen-checkpoint execution, multi-server sharding, external result
-  upload, seed aggregation, and paper analysis;
+- plots, statistical interpretation, optimizer-effect conclusions, and paper
+  tables derived from the completed protected aggregate;
 - spectral-normalization training and any future DDU ablation;
-- research-result OOD evaluation beyond bounded non-protected infrastructure
-  smokes.
+- protected research-result evaluation for any architecture, dataset, or
+  checkpoint population outside the completed WRN-28-10/CIFAR-10 inventory.
 
 ## Document roles
 
@@ -117,6 +122,10 @@ Not yet part of the validated foundation unless added by a later merged pull req
 - `docs/validation/issue55_metric_evaluation_plan.md`: checksum-sealed
   checkpoint inventory, protected-evaluation exclusions, and deterministic
   three-host launch plan; it is planning evidence, not a research result.
+- `docs/validation/issue57_metric_evaluation_execution.md`: completed
+  20/20/20 protected execution, checkpoint-centric Hugging Face publication,
+  operational-shard readback, deterministic seed aggregation, and local
+  checksum-verified analysis handoff.
 - `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid
   integrity, validation metrics, and immutable C1-C4 selection evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.
