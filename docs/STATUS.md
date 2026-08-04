@@ -145,6 +145,16 @@ the seed-0 selection-bias disclosure.
   `id_train` and 500 `id_validation` samples. All 18 score arrays were finite,
   raw/metric checksums passed, `git_dirty=false`, and no protected split was
   accessed; see `docs/validation/issue53_metric_runtime_curie.md`.
+- Issue #55 freezes the protected-evaluation launch population without starting
+  evaluation. Its checksum-addressed inventory imports all 42 completed
+  config/seed identities, authorizes only the 30 frozen role identities,
+  retains 12 pair-control-only identities as explicit exclusions, and creates
+  60 separate `last`/`best_val` checkpoint jobs. Source-local assignment is
+  exactly 20 jobs on each of `curie`, `lise`, and `precision_medicine`; see
+  `docs/validation/issue55_metric_evaluation_plan.md`. At clean pushed Git
+  `3e34076efc83daf5e2ed5bc3a5e7c451bc911904`, Curie passed deterministic
+  regeneration, the 17 focused planning tests, and the complete 255-test CPU
+  suite without accessing a checkpoint or dataset.
 
 ## Documented but not executed
 
@@ -177,9 +187,10 @@ the seed-0 selection-bias disclosure.
   WRN-28-10/CIFAR-10 metric dictionary. It fixes the paper formulas, reporting
   tiers, checkpoint/split roles, artifact keys, degeneracy rules, source pins,
   and validation oracles. Issue #53 provides their canonical implementation
-  entrypoints and bounded non-protected validation.
+  entrypoints and bounded non-protected validation. Issue #55 provides the
+  frozen 60-job launch inventory while leaving every launch state `not_started`.
 - No protected ID-test/OOD production result, DDU/SN ablation, multi-seed
-  metric aggregate, or paper conclusion has been produced by Issue #53.
+  metric aggregate, or paper conclusion has been produced by Issues #53/#55.
 
 ## Still missing
 
@@ -192,13 +203,14 @@ the seed-0 selection-bias disclosure.
 
 ## Active next phase
 
-Issue #49's role replication and pair controls are complete, and Issue #53
+Issue #49's role replication and pair controls are complete, Issue #53
 implements the frozen evaluation definitions with non-protected Curie
-evidence. After review and merge, the next phase requires a separately bounded
-task for protected feature extraction and checkpoint evaluation using only the
-frozen role config/seed identities. ID-test and OOD evaluation have not been
-executed. Issue #37/PR #38 and the Issue #53 bounded smoke remain readiness
-evidence rather than production research evidence.
+evidence, and Issue #55 freezes the 30-identity/60-checkpoint source-local
+launch plan. After review and merge, the next phase requires a separately
+bounded task to synchronize all three hosts to the merged plan SHA and execute
+only those jobs. ID-test and OOD evaluation have not been executed. Issue
+#37/PR #38, the Issue #53 bounded smoke, and the Issue #55 inventory remain
+readiness evidence rather than production research evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
@@ -216,8 +228,8 @@ SN ablation.
 ## Blockers and unknowns
 
 - Protected feature extraction and checkpoint evaluation remain unexecuted and
-  require their own bounded Issue and validation evidence after review of the
-  Issue #53 runtime.
+  require their own bounded execution Issue and validation evidence after
+  review and merge of the Issue #55 launch plan.
 - DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
   and require a separately bounded future ablation if the project retains them.
 
