@@ -14,7 +14,9 @@ dataset construction, or the complete Config/Pipeline framework. OGE remains
 authoritative for optimizer semantics, parameter groups, model and feature API,
 geometry definitions, score naming, and artifact policy. Durable feature-based
 detector fitting and score semantics are defined separately in
-[`06_feature_ood_detectors.md`](06_feature_ood_detectors.md).
+[`06_feature_ood_detectors.md`](06_feature_ood_detectors.md). The complete
+WRN-28-10/CIFAR-10 metric formulas, reporting names, and validation oracles are
+frozen in [`11_metric_contract_v1_2.md`](11_metric_contract_v1_2.md).
 
 ## Pinned external sources
 
@@ -38,18 +40,20 @@ Official CIFAR-10 supplies 50,000 train and 10,000 test images, with no
 official validation split. The project deterministically partitions the
 official train set once and commits the resulting membership:
 
-| role | membership | committed imglist |
-| --- | ---: | --- |
-| `id_train` | official train 45,000; 4,500 per class | `configs/datasets/oge_cifar10_holdout_v1/train_cifar10_45k.txt` |
-| `id_validation` | official train 5,000; 500 per class | `configs/datasets/oge_cifar10_holdout_v1/val_cifar10_5k.txt` |
-| `id_test` | official test 10,000; 1,000 per class | `configs/datasets/oge_cifar10_holdout_v1/test_cifar10_10k.txt` |
-| `id_test_openood` | OpenOOD's released test subset, 9,000 | `benchmark_imglist/cifar10/test_cifar10.txt` |
+| role | membership | metric-contract v1.2 use | committed imglist |
+| --- | ---: | --- | --- |
+| `id_train` | official train 45,000; 4,500 per class | training, detector fitting, geometry | `configs/datasets/oge_cifar10_holdout_v1/train_cifar10_45k.txt` |
+| `id_validation` | official train 5,000; 500 per class | selection and calibration only | `configs/datasets/oge_cifar10_holdout_v1/val_cifar10_5k.txt` |
+| `id_test` | official test 10,000; 1,000 per class | sole protected primary ID/OOD evaluation side | `configs/datasets/oge_cifar10_holdout_v1/test_cifar10_10k.txt` |
+| `id_test_openood` | OpenOOD's released test subset, 9,000 | compatibility-only provenance; not executed | `benchmark_imglist/cifar10/test_cifar10.txt` |
 
 `id_validation` is the only split permitted for LR/WD selection, checkpoint
 selection, and protocol-v1.2 `C1`-`C4` role selection. `id_test` is the
-protected final classification split. `id_test_openood` exists only as the ID
-side of OpenOOD-aligned OOD metrics, so those metrics remain directly aligned
-with the released 9,000-image evaluation membership.
+protected final classification split and the only ID side paired with OOD
+datasets under metric-contract v1.2. `id_test_openood` is retained so the
+released upstream membership remains auditable, but it is not extracted or
+evaluated by this contract. Consequently, project v1.2 OOD scalars must not be
+claimed as directly comparable to OpenOOD's released 9,000-ID protocol.
 
 The source for the 45k/5k partition is OpenOOD's released 50,000-row
 `train_cifar10.txt`, which enumerates the official training set. For each row,
@@ -195,14 +199,15 @@ id_like_score = max(softmax(logits))
 
 The required metrics have no ambiguous aliases:
 
-- `fpr95_id_tpr`: sort unique ID-like thresholds from highest to lowest and
-  choose the first threshold whose inclusive rule `score >= threshold` reaches
-  ID TPR at least 0.95. Report the fraction of OOD scores satisfying the same
-  inclusive rule. Equal scores form one threshold group; ties are never split.
-- `fpr95_openood_ood_tpr`: reproduce pinned OpenOOD `metrics.py` by treating
-  OOD as positive, passing `-id_like_score` to
-  `sklearn.metrics.roc_curve`, and choosing the first returned point whose OOD
-  TPR is at least 0.95. This reports the corresponding ID false-positive rate.
+- `fpr95_id_tpr`: set
+  `threshold = np.quantile(id_scores, 0.05, method="linear")`, apply the
+  inclusive rule `score >= threshold`, and report both
+  `mean(ood_scores >= threshold)` and the achieved
+  `mean(id_scores >= threshold)`. The quantile may interpolate between sample
+  scores; no order-statistic replacement is permitted.
+- `fpr95_openood_ood_tpr`: retained only as the name of the pinned upstream
+  compatibility statistic. It is not emitted by metric-contract v1.2 and may
+  return only in a separately versioned compatibility protocol.
 - `aupr_in_ap`: `sklearn.metrics.average_precision_score` with ID positive and
   the ID-like score.
 - `aupr_in_openood_auc`: `sklearn.metrics.precision_recall_curve` with ID
@@ -212,14 +217,16 @@ The required metrics have no ambiguous aliases:
   OpenOOD OOD-positive/negated-score representation.
 
 All metric functions reject empty ID or OOD arrays and non-finite scores.
-OpenOOD parity tests target only the explicitly OpenOOD-compatible metrics.
+The current runtime FPR implementation predates metric-contract v1.2; replacing
+it and its tests belongs to the later metric implementation Issue, not this
+documentation change.
 
 ## Evaluation, aggregation, and artifacts
 
-Evaluate each OOD dataset against the same `id_test_openood` scores. Compute
-near/far summaries as arithmetic means of per-dataset metrics; never pool group
-samples. The full 10,000-image `id_test` remains the classification-metric
-split and is not silently substituted into OpenOOD-compatible OOD results.
+Evaluate each OOD dataset against the same full 10,000-image `id_test` score
+array. Compute near/far summaries as arithmetic means of per-dataset metrics;
+never pool group samples. The 9,000-image `id_test_openood` score array is not
+generated or substituted into metric-contract v1.2 results.
 
 An output directory contains at least:
 

@@ -15,6 +15,9 @@ artifacts defined by
 the penultimate endpoint from [`02_architectures.md`](02_architectures.md), and
 the OOD score/aggregation rules from
 [`04_openood_v1_5_protocol.md`](04_openood_v1_5_protocol.md).
+The self-contained paper notation, expanded metric dictionary, artifact keys,
+and validation oracles are fixed in
+[`11_metric_contract_v1_2.md`](11_metric_contract_v1_2.md).
 
 The audit evidence paths below refer to the reviewed
 `OOD_metric_audit_handoff.zip` supplied for Issue #24. This card, not that local
@@ -29,11 +32,15 @@ verify formulas against the pinned upstream commits in
 - Do not use ID test or any OOD sample to fit a detector or select a
   hyperparameter.
 - Every detector score is ID-like: larger means more ID-like.
-- Reuse `src/oge/evaluation/metrics.py::compute_ood_metrics`; do not introduce a
-  second AUROC/AUPR/FPR95 implementation or add a sign flip to an already
-  ID-like score.
-- Reject empty classes, zero-norm inputs where normalization is required,
-  non-finite arrays, non-finite fitted statistics, and non-finite outputs.
+- The later implementation Issue must update
+  `src/oge/evaluation/metrics.py::compute_ood_metrics` to card 11 and retain one
+  shared AUROC/AUPR/FPR95 implementation; it must not add a second metric path
+  or negate an already ID-like score.
+- Record exact-zero and near-zero (`0 < norm <= 1e-12`) counts before every
+  normalization. Reject empty classes, exact-zero norms, non-finite arrays,
+  non-finite fitted statistics, and non-finite outputs as `failed`; near-zero
+  norms make the affected metric `degenerate`. A silent clamp cannot turn
+  either condition into `success`.
 - Store the metric name, fit/query splits, normalization, dtype, estimator,
   inverse or decomposition method, and runtime decisions with every result.
 
@@ -52,7 +59,7 @@ code-verified and must not be claimed. Evidence:
 `evidence/A1-A6_neural_collapse_optimizer.md`, audited commit
 `7cab4a59bc28da6e356cee1e793ec67a694933b9`.
 
-### `NC1-SVD`
+### `NC1-Moore-Penrose`
 
 Using raw `id_train` features, compute class means, the class-balanced global
 mean, biased within-class covariance, and biased between-class covariance:
@@ -63,19 +70,27 @@ Sigma_W = (1 / N) sum_c sum_{i in c} (z_i - mu_c)(z_i - mu_c)^T
 Sigma_B = (1 / K) sum_c (mu_c - mu_G)(mu_c - mu_G)^T
 ```
 
-The primary NC1 value is the audited `svd` variant using the top `K - 1`
-singular directions of `Sigma_B` to evaluate the within/between variability
-ratio. The Moore-Penrose and trace-quotient forms are not primary panel values.
-Smaller is closer to collapse. Record `K`, `N`, covariance denominators, SVD
-rank, and tolerance. Evidence:
-`evidence/A1-A6_neural_collapse_optimizer.md`, audited commit `7cab4a5`.
+The primary NC1 value follows the paper definition:
+
+```text
+NC1 = Tr(Sigma_W Sigma_B^dagger) / K.
+```
+
+Compute the Moore-Penrose inverse in float64 on the symmetrized `Sigma_B`,
+retaining eigenvalues `lambda > 1e-15 * lambda_max`. Smaller is closer to
+collapse. Record `K`, `N`, both covariance denominators, retained rank, and
+tolerance. Store the earlier top-`K-1` SVD ratio and trace quotient only as
+separately named diagnostics. Evidence: neural-collapse paper
+`arXiv:2008.08186` and audited commit
+`7cab4a59bc28da6e356cee1e793ec67a694933b9`.
 
 ### NC2 family
 
 Let `m_c = mu_c - mu_G` from raw `id_train` features.
 
 - `NC2-equinorm` is
-  `std_c(||m_c||_2) / mean_c(||m_c||_2)`.
+  `std_c(||m_c||_2) / mean_c(||m_c||_2)` with sample standard deviation
+  (`correction=1`) across the `K` classes.
 - `NC2-equiangular` is the mean over `c != c'` of
   `|cos(m_c, m_c') + 1/(K-1)|`, with the audited cosine epsilon `1e-9`.
 - `NC2-ETF` is the audited normalized simplex-ETF structure error.
@@ -97,13 +112,14 @@ Use raw `id_train` means and the matching checkpoint classifier. Smaller is
 closer to self-duality. Evidence:
 `evidence/A1-A6_neural_collapse_optimizer.md`, audited commit `7cab4a5`.
 
-### `feature-norm-IDTest`
+### `feature-norm-IDTrain`
 
-After protected-split authorization, compute `||z_i||_2` on raw `id_test`
-features and report count, mean, sample standard deviation, CV
-`std / mean`, minimum, quantiles, maximum, a histogram, and the same summaries
-per class. Do not replace the distribution with only one aggregate. This is a
-project measurement protocol rather than a single official method. Evidence:
+Compute `||z_i||_2` on raw `id_train` features as primary geometry and on
+`id_validation` as a held-out control. Report count, mean, population standard
+deviation, CV `std / mean`, minimum, linear quantiles, maximum, and the same
+summaries per class. Store the raw norm vector; a histogram is a visualization
+artifact whose exact bin edges must accompany the plot. This is a project
+measurement protocol rather than a single official method. Evidence:
 `evidence/A9_feature_norm_cosine.md` and `output/groupA_summary.md`.
 
 ### `RankMe`
@@ -121,14 +137,28 @@ epsilon into the denominator. This definition is PAPER-verified; no official
 standalone implementation was found. Evidence:
 `evidence/A7_effective_rank_rankme.md`, RankMe arXiv:2210.02885.
 
-### `covariance-effective-rank`: `UNSPECIFIED`
+### Covariance spectrum and three rank statistics
 
-Issue #24 requests covariance spectrum and covariance effective rank, but the
-audit only freezes singular-value effective rank/RankMe on uncentered `Z`. It
-does not fix whether a covariance version is centered, which covariance is
-used, or whether probabilities derive from eigenvalues or singular values.
-A later literature-backed Issue must resolve those fields before implementation.
-Do not alias this name to RankMe or invent a formula.
+For primary within-class covariance `Sigma_W`, secondary total covariance, and
+diagnostic between-class covariance, compute float64 eigenvalues after explicit
+symmetrization. Let
+
+```text
+tol = lambda_max * p * eps_float64.
+```
+
+An eigenvalue below `-tol` is `failed`; values in `[-tol, 0)` are clipped to
+zero with the clip count recorded. For nonnegative eigenvalues and
+`q_i = lambda_i / sum_j lambda_j`, store three non-interchangeable values:
+
+```text
+covariance_entropy_rank       = exp(-sum_{q_i>0} q_i log q_i)
+covariance_trace_top_rank     = sum_i lambda_i / lambda_1
+covariance_participation_ratio = (sum_i lambda_i)^2 / sum_i lambda_i^2
+```
+
+An all-zero spectrum is `failed`. These values are not RankMe and must never
+share a name or artifact key.
 
 ## Frozen logit controls
 
@@ -229,12 +259,13 @@ metadata even when its numeric primitive is identical. Evidence:
    classifier-weight row.
 3. `RankMe` is singular-value spectral entropy on uncentered features; it is
    not covariance effective rank.
-4. Covariance effective rank is not participation ratio. Neither may be
-   emitted until its own estimator and spectrum contract are fixed.
+4. Covariance entropy effective rank, trace-to-top rank, and participation
+   ratio are distinct; none is RankMe.
 
-Base DDU also remains distinct from Mahalanobis, tied GMM, diagonal GMM, and
-shrinkage GMM. [`06_feature_ood_detectors.md`](06_feature_ood_detectors.md) is
-the sole authority for DDU and its variants; this card does not redefine them.
+`GDA-ClassDensity` and future SN `DDU` remain distinct from Mahalanobis, tied
+GMM, diagonal GMM, and shrinkage GMM.
+[`06_feature_ood_detectors.md`](06_feature_ood_detectors.md) is the authority
+for their density kernel and naming boundary; this card does not redefine them.
 
 ## Artifact requirements
 
@@ -266,10 +297,11 @@ Result-dependent method addition, sign changes, normalization switches, or
 hyperparameter sweeps require a new Issue and explicitly exploratory result
 names.
 
-ViM, NeCo, RMD, TwoNN, advanced calibration, DDU variants, and any unresolved
-covariance-rank statistic are outside this core card. Their audited definitions
-may be promoted by later reference cards, but they are not silently added to
-the confirmatory panel.
+ViM, NECO, Relative Mahalanobis, GDA-ClassDensity, advanced calibration, LID,
+TwoNN, and spectrum diagnostics are defined by card 11. Inclusion in that
+dictionary freezes definitions but does not claim that code or research
+results exist.
 
 This card is documentation only. It does not claim that extraction, geometry,
-Energy, distance/angle detectors, or DDU are implemented or validated.
+Energy, distance/angle detectors, GDA-ClassDensity, or DDU are implemented or
+validated.

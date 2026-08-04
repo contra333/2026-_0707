@@ -37,6 +37,9 @@ sources:
   local_core_representation_metrics_reference_card:
     path: docs/reference_cards/09_core_representation_metrics.md
     role: frozen confirmatory representation-metric and low-complexity detector reference; documentation only until later implementation PRs
+  local_metric_contract_v1_2_reference_card:
+    path: docs/reference_cards/11_metric_contract_v1_2.md
+    role: authoritative WRN-28-10/CIFAR-10 metric definition dictionary, paper notation, artifact naming, and validation oracle; implementation pending
   local_optimizer_grid_literature_anchors_reference_card:
     path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
     role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
@@ -280,6 +283,87 @@ sources:
       - core/detection/methods/post_hoc/ctm.py
     accessed: 2026-07-15
     role: audited author implementation reference; project explicitly normalizes query features to realize pure cosine scoring
+  calibration_paper:
+    title: On Calibration of Modern Neural Networks
+    authors: Guo, Pleiss, Sun, and Weinberger
+    stable_source: arXiv:1706.04599
+    url: https://arxiv.org/abs/1706.04599
+    accessed: 2026-08-04
+    role: temperature scaling and expected calibration error reference; project optimizer and fallback settings are fixed separately in card 11
+  temperature_scaling_official_repository:
+    repository: gpleiss/temperature_scaling
+    url: https://github.com/gpleiss/temperature_scaling
+    commit: ce1154ec7d5235eee046f28875c3dd8421f11d45
+    files:
+      - temperature_scaling.py
+    accessed: 2026-08-04
+    role: pinned scalar-temperature LBFGS implementation reference; card 11 uses a positive log-temperature project variant with explicit fallback
+  fd_shifts_repository:
+    repository: IML-DKFZ/fd-shifts
+    url: https://github.com/IML-DKFZ/fd-shifts
+    commit: c4467aec134e99691359da209f811d91283fc1e3
+    accessed: 2026-08-04
+    role: pinned tie-grouped selective-risk and risk-coverage AURC reference; card 11 stores the unscaled area
+  mahalanobis_pp_paper:
+    title: "Mahalanobis++: Improving OOD Detection via Feature Normalization"
+    authors: Mueller and Hein
+    stable_source: arXiv:2505.18032
+    url: https://arxiv.org/abs/2505.18032
+    accessed: 2026-08-04
+    role: L2-normalized Mahalanobis detector reference
+  mahalanobis_pp_official_repository:
+    repository: mueller-mp/maha-norm
+    url: https://github.com/mueller-mp/maha-norm
+    commit: 53de550be7f88acad959f5fdd8f2430fb9a8b6ea
+    accessed: 2026-08-04
+    role: pinned Mahalanobis++ and CIFAR/OpenOOD evaluation implementation reference
+  vim_paper:
+    title: "ViM: Out-Of-Distribution with Virtual-logit Matching"
+    authors: Wang, Li, Feng, Zhang, Su, Zhu, Zhang, and Wang
+    stable_source: CVPR 2022
+    url: https://arxiv.org/abs/2203.10807
+    accessed: 2026-08-04
+    role: ViM origin, residual-subspace, virtual-logit, and score reference
+  vim_official_repository:
+    repository: haoqiwang/vim
+    url: https://github.com/haoqiwang/vim
+    commit: dabf9e5b242dbd31c15e09ff12af3d11f009f79c
+    files:
+      - benchmark.py
+    accessed: 2026-08-04
+    role: pinned assume-centered covariance, author DIM rule, alpha, and Energy-minus-residual implementation reference
+  neco_paper:
+    title: "NECO: NEural Collapse Based Out-of-distribution Detection"
+    authors: Ben Ammar et al.
+    stable_source: ICLR 2024
+    url: https://openreview.net/forum?id=9ROuKblmi7
+    accessed: 2026-08-04
+    role: NECO detector reference
+  neco_official_repository:
+    repository: drti/neco
+    url: https://gitlab.com/drti/neco
+    commit: 6a55640669f0aad3e23f45ce2f6a8e6400c929ba
+    files:
+      - ood_methods.py
+      - test_all_ood.py
+    accessed: 2026-08-04
+    role: pinned StandardScaler, fixed neco_dim, PCA-ratio, and ResNet no-MaxLogit implementation reference
+  twonn_paper:
+    title: Estimating the intrinsic dimension of datasets by a minimal neighborhood information
+    authors: Facco, d'Errico, Rodriguez, and Laio
+    stable_source: Scientific Reports 7, 12140 (2017)
+    url: https://doi.org/10.1038/s41598-017-11873-y
+    accessed: 2026-08-04
+    role: TwoNN intrinsic-dimension estimator reference
+  dadapy_repository:
+    repository: sissa-data-science/DADApy
+    url: https://github.com/sissa-data-science/DADApy
+    commit: c37e52ca3cbe00107696720e5e3efa09f8370bbb
+    files:
+      - dadapy/id_estimation.py
+      - dadapy/_utils/utils.py
+    accessed: 2026-08-04
+    role: pinned float64 Euclidean-neighbor and base TwoNN mu_fraction 0.9 reference
   optimizer_comparison_protocol_paper:
     title: On Empirical Comparisons of Optimizers for Deep Learning
     authors: Choi, Shallue, Nado, Lee, Maddison, and Dahl

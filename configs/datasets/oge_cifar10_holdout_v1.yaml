@@ -32,6 +32,7 @@ datasets:
     split: test
     is_id: true
     group: id
+    role: metric_contract_primary
     imglist_location: dataset_config
     imglist: oge_cifar10_holdout_v1/test_cifar10_10k.txt
     expected_count: 10000
@@ -41,7 +42,7 @@ datasets:
     split: test_openood
     is_id: true
     group: id
-    role: openood_ood_metric_id_side
+    role: compatibility_only
     imglist: benchmark_imglist/cifar10/test_cifar10.txt
     expected_count: 9000
     expected_sha256: 84559ec5225425e7f7363058d5f9442ed21a39c7c66b63c3f1bb8b1ddb935e13
