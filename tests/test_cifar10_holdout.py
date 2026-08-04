@@ -180,7 +180,9 @@ def test_new_dataset_config_keeps_openood_ood_roles_separate():
     assert config["datasets"]["id_train"]["expected_count"] == 45_000
     assert config["datasets"]["id_validation"]["expected_count"] == 5_000
     assert config["datasets"]["id_test"]["expected_count"] == 10_000
+    assert config["datasets"]["id_test"]["role"] == "metric_contract_primary"
     assert config["datasets"]["id_test_openood"]["expected_count"] == 9_000
+    assert config["datasets"]["id_test_openood"]["role"] == "compatibility_only"
     assert (
         config["datasets"]["ood_validation_tin"]["role"] == "compatibility_only"
     )

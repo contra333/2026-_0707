@@ -4,8 +4,9 @@
 
 This card defines durable naming, fitting, scoring, and artifact semantics for
 feature-based OOD detectors in this repository. The first detector fixed here is
-DDU. The implementation status remains **planned** until a later bounded Issue
-adds code, tests, configuration, and real-environment validation.
+the class-wise Gaussian density kernel shared by `GDA-ClassDensity` and a future
+DDU ablation. The implementation status remains **planned** until a later
+bounded Issue adds code, tests, configuration, and real-environment validation.
 
 The following cards remain authoritative for adjacent concerns:
 
@@ -15,12 +16,15 @@ The following cards remain authoritative for adjacent concerns:
   CIFAR-10 ID/OOD membership, preprocessing, ID-like score orientation, metrics,
   and per-dataset aggregation.
 - [`05_training_protocol.md`](05_training_protocol.md) defines checkpoint and
-  run metadata. Whether spectral normalization was used is a training variable,
-  not a detector-name change.
+  run metadata and whether spectral normalization was used.
+- [`11_metric_contract_v1_2.md`](11_metric_contract_v1_2.md) defines the
+  executable WRN-28-10/CIFAR-10 detector panel, formulas, artifact keys, and
+  validation oracles.
 
-OpenOOD is not the authority for the DDU estimator. For DDU, the pinned paper
-and official `omegafragger/DDU` implementation in `docs/sources.lock.yaml` are
-the external references, while this card fixes the project-facing contract.
+OpenOOD is not the authority for this estimator. The pinned DDU paper and
+official `omegafragger/DDU` implementation in `docs/sources.lock.yaml` provide
+the numerical covariance, jitter, and density reference, while this card fixes
+the project-facing names and experimental boundary.
 
 ## Common detector rules
 
@@ -40,18 +44,20 @@ the external references, while this card fixes the project-facing contract.
 - Reject non-finite features, non-finite fitted parameters, empty classes, and
   non-finite scores with a clear error.
 
-## DDU naming and experimental boundary
+## GDA and DDU naming boundary
 
-The project-facing detector name is **DDU**, including when the evaluated
-classifier was trained without spectral normalization (SN).
+For ordinary project checkpoints trained **without** spectral normalization,
+the detector is named **`GDA-ClassDensity`**. A class-wise Gaussian density
+readout alone does not establish the complete DDU method, whose representation
+is learned with the paper's spectral-normalization condition.
 
-SN on/off is a separately recorded training ablation. It changes the learned
-representation supplied to the detector, but it does not rename the detector to
-`DDU-style` or another alias. Every DDU result must retain the checkpoint's
-training metadata so the paper can distinguish main SN-off runs from the SN
-ablation.
+The name **`DDU`** is reserved for a future, separately configured SN training
+ablation that applies this density kernel to the matching SN checkpoint. That
+future result must retain the training metadata and must never be pooled with
+the SN-off `GDA-ClassDensity` result. No current checkpoint is retroactively
+renamed DDU.
 
-The base detector name is `DDU`. Explicit post-hoc variants use names such as:
+Future DDU post-hoc variants may use names such as:
 
 - `DDU-PCA`
 - `DDU-Diag`
@@ -61,7 +67,7 @@ The base detector name is `DDU`. Explicit post-hoc variants use names such as:
 Compositions must be named compositionally, for example `DDU-L2-PCA`, and must
 not be pooled with a one-axis ablation.
 
-## Base DDU definition
+## Shared class-density fit
 
 Let the ID-train penultimate feature of sample `i` be
 `z_i = f_theta(x_i) in R^d`, and let `I_c = {i : y_i = c}` with
@@ -80,7 +86,7 @@ Sigma_c = (1 / (n_c - 1))
           * sum_{i in I_c} (z_i - mu_c) (z_i - mu_c)^T.
 ```
 
-The base DDU fit uses:
+The shared fit uses:
 
 - raw penultimate features;
 - one full covariance matrix per class;
@@ -95,8 +101,9 @@ The base DDU fit uses:
 - no statistical covariance shrinkage;
 - no explicit matrix inverse or Moore-Penrose pseudo-inverse.
 
-The paper describes the class-conditional GDA density. The pinned official code
-is authoritative for the numerical covariance and score convention below.
+The DDU paper describes the class-conditional GDA density. Its pinned official
+code is authoritative for the numerical covariance and jitter convention
+below; metric-contract v1.2 separately fixes the SN-off score name and prior.
 
 ## Official adaptive jitter contract
 
@@ -133,7 +140,7 @@ The later implementation must preserve these semantics:
 Jitter is a numerical positive-definiteness repair. It is not the same as a
 statistical shrinkage estimator and must not be labeled `shrinkage`.
 
-## Base DDU score
+## Class-density score
 
 For a query feature `z`, compute every class log density
 
@@ -141,23 +148,23 @@ For a query feature `z`, compute every class log density
 ell_c(z) = log Normal(z; mu_c, Sigma_c(epsilon)).
 ```
 
-Following the pinned official repository, aggregate with
+For the metric-contract v1.2 SN-off detector, use empirical class priors and
+aggregate with
 
 ```text
-DDU(z) = logsumexp_c ell_c(z).
+GDA-ClassDensity(z) = logsumexp_c(log(n_c / N) + ell_c(z)).
 ```
 
 This is already ID-like: a larger feature-space log density means more ID-like.
 Do not negate it at the project boundary.
 
-The official code does not add an explicit `log pi_c` class-prior term before
-`logsumexp`. The balanced CIFAR-10 setting therefore follows the exact official
-code convention. Adding a uniform prior would only subtract the constant
-`log K`, leaving rank metrics unchanged, but it is still a different stored
-score. A future class-imbalanced protocol must make its prior convention
-explicit rather than silently changing this detector.
+The future DDU ablation follows the pinned official code and omits an explicit
+class-prior term: `DDU(z) = logsumexp_c ell_c(z)`. Balanced CIFAR-10 makes the
+GDA empirical prior uniform, so the two score rankings differ only by the
+constant `-log K`; their stored values and names nevertheless remain distinct.
+A future class-imbalanced protocol must preserve this distinction explicitly.
 
-The base DDU score is not any of the following:
+Neither class-density score is any of the following:
 
 - maximum class density instead of `logsumexp`;
 - negative nearest-class Mahalanobis distance;
@@ -184,24 +191,25 @@ alone does not guarantee singularity in that setting, but the official
 adaptive jitter is still mandatory because representation geometry can be
 low-rank or ill-conditioned. The 5,000-sample `id_validation` split, the
 10,000-sample project `id_test`, and the separate 9,000-sample
-`id_test_openood` role are not covariance-fitting data.
+compatibility-only 9,000-image upstream role are not covariance-fitting data.
 
 ## Relationship to neighboring detector families
 
-DDU must remain distinct from generic GMM and distance baselines:
+GDA-ClassDensity and future DDU must remain distinct from distance baselines:
 
 - Mahalanobis commonly uses a shared covariance and a nearest-class quadratic
   distance, often omitting the Gaussian log-determinant and mixture aggregation.
 - `GMM-Tied` uses one covariance shared across classes.
 - `GMM-Diag` uses class-wise diagonal covariance.
 - `GMM-Shrinkage` uses an explicitly named statistical shrinkage rule.
-- Base DDU uses class-wise full unbiased covariance, official adaptive jitter,
-  full Gaussian log density, and class `logsumexp` aggregation.
+- Both density readouts use class-wise full unbiased covariance, official
+  adaptive jitter, full Gaussian log density, and class `logsumexp`
+  aggregation; they differ in training condition, name, and prior convention.
 
 A later experiment may compare these methods, but no implementation may alias
 one score to another merely because some terms coincide in a special case.
 
-## Planned post-hoc DDU variants
+## Future DDU variants outside metric-contract v1.2
 
 ### `DDU-PCA`
 
@@ -253,7 +261,7 @@ A later implementation must record at least:
 
 ```text
 score_name
-base_detector = DDU
+base_detector = GDA-ClassDensity or DDU
 variant_operations in application order
 fit_split = id_train
 checkpoint identifier and completed epoch
@@ -273,6 +281,11 @@ L2 normalization flag when applicable
 shrinkage estimator/target/coefficient when applicable
 implementation source commit
 ```
+
+For `GDA-ClassDensity`, the canonical artifact key is
+`detector/gda_class_density`; for the future SN ablation it is
+`detector/ddu_sn`. The optional variants above are not emitted by
+metric-contract v1.2.
 
 Per-sample artifacts use the common `id_like_score` field from the OpenOOD
 protocol card. Aggregate metrics remain the already pinned project metrics and

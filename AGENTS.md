@@ -106,6 +106,9 @@ Use:
 - `docs/reference_cards/10_optimizer_grid_literature_anchors.md` for the
   literature and project-judgment anchors behind protocol v1.2 grids and the
   architecture lineup;
+- `docs/reference_cards/11_metric_contract_v1_2.md` for the authoritative
+  WRN-28-10/CIFAR-10 metric formulas, reporting names, artifact keys,
+  numerical failure semantics, and validation oracles;
 - future task-specific reference cards for other durable experiment protocols.
 
 `docs/reference_cards/03_architecture_implementation_checklist.md` is historical context for the first architecture implementation. Its one-time task scope is not the current active task.

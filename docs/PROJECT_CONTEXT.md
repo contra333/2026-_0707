@@ -62,18 +62,19 @@ Implemented foundation:
 
 Documented or prepared, but not yet implemented or executed:
 
-- DDU as a class-wise full-covariance GDA density detector using the pinned
-  official adaptive jitter and `logsumexp` score convention;
-- explicit post-hoc DDU variants for PCA, diagonal covariance, L2-normalized
-  features, and statistical covariance shrinkage;
-- SN on/off as a training ablation that does not rename the detector.
+- `GDA-ClassDensity` as the SN-off class-wise full-covariance Gaussian density
+  readout using the pinned adaptive jitter and class-prior-weighted `logsumexp`;
+- the complete DDU name reserved for a future spectral-normalization training
+  ablation, with optional post-hoc variants outside metric-contract v1.2;
+- the WRN-28-10/CIFAR-10 metric-contract v1.2 formulas, paper names, artifact
+  keys, numerical failure semantics, and validation oracles.
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
 - feature extraction pipelines;
 - geometry metrics;
 - feature-based OOD detector implementations such as Mahalanobis, kNN, generic
-  GMM baselines, DDU and its variants, CTM, ViM, and NeCo;
+  GMM baselines, GDA-ClassDensity, future DDU, CTM, ViM, and NECO;
 - research-result OOD evaluation beyond the bounded MSP infrastructure smoke.
 
 ## Document roles
@@ -95,6 +96,9 @@ Not yet part of the validated foundation unless added by a later merged pull req
   confirmatory representation-metric and low-complexity detector panel.
 - `docs/reference_cards/10_optimizer_grid_literature_anchors.md`: literature
   anchor mapping for the v1.2 grids and the research lineup.
+- `docs/reference_cards/11_metric_contract_v1_2.md`: authoritative
+  WRN-28-10/CIFAR-10 metric definition dictionary for paper notation,
+  reporting tiers, artifact keys, degeneracy states, and implementation tests.
 - `docs/validation/issue37_practical_runtime_status.md`: completed three-host
   practical runtime, data, and one-epoch smoke evidence.
 - `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid

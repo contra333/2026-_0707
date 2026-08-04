@@ -19,6 +19,8 @@ also follow:
   provenance;
 - [`06_feature_ood_detectors.md`](06_feature_ood_detectors.md) for detector fit
   splits and downstream transformations.
+- [`11_metric_contract_v1_2.md`](11_metric_contract_v1_2.md) for checkpoint
+  roles, the executable split registry, metric names, and validation status.
 
 The audit handoff informed this contract, but the repository API overrides its
 stale suggestions to use a forward hook and `model.fc`. Project code must use
@@ -59,8 +61,9 @@ torch.inference_mode()
 ```
 
 The frozen project imglist order and stable `sample_id` are preserved for
-`id_train`, `id_validation`, and full `id_test`. The released OpenOOD order is
-preserved for `id_test_openood` and every OOD dataset. No sample may be
+`id_train`, `id_validation`, and full `id_test`. Metric-contract v1.2 does not
+extract `id_test_openood`; its released order remains provenance for a future
+compatibility protocol. The released order is preserved for every OOD dataset. No sample may be
 silently skipped, duplicated, re-ordered, or augmented. A later implementation
 must reject a mismatch between the observed sample sequence and the configured
 manifest.
@@ -71,17 +74,20 @@ The permitted roles are:
 | --- | --- |
 | `id_train` | fit detector and representation statistics |
 | `id_validation` | ID-only validation when a later reference card explicitly permits it |
-| `id_test` | protected final classification evaluation on official test 10k after authorization |
-| `id_test_openood` | protected OpenOOD-aligned OOD-metric ID side on released 9k after authorization |
+| `id_test` | protected final classification and sole metric-contract v1.2 OOD ID side on official test 10k after authorization |
+| `id_test_openood` | compatibility-only released 9k provenance; not extracted by metric-contract v1.2 |
 | near/far OOD test | protected detector evaluation after authorization |
 | OOD validation | compatibility only; never metric or detector selection in the main protocol |
 
 ## Protected-split authorization
 
-`id_test`, `id_test_openood`, and OOD-test extraction is allowed only after the
+`id_test` and OOD-test extraction is allowed only after the
 evaluated configuration, training seed, checkpoint role, and checkpoint
 identity are frozen by the active experiment Issue. Discovery and confirmation
 HPO trials must not extract or traverse protected splits.
+
+The 9,000-image `id_test_openood` role requires a separately versioned future
+compatibility Issue; the authorization above does not enable it.
 
 A fixed random/untrained checkpoint or the historical SGD seed-0 checkpoint may
 be authorized by a bounded validation Issue to test the pipeline. Such output
@@ -112,9 +118,9 @@ Checkpoint-level arrays are stored once per checkpoint artifact:
 | `classifier_weight.npy` | `float32` | `[C, D]` | `model.classifier.weight` |
 | `classifier_bias.npy` | `float32` | `[C]` | classifier bias; manifest records `null` when absent |
 
-Downstream covariance, eigendecomposition, and DDU paths cast the raw cache to
-float64 as required by their own reference cards. They must not reinterpret the
-stored extraction dtype as the fit dtype.
+Downstream covariance, eigendecomposition, GDA-ClassDensity, and future DDU
+paths cast the raw cache to float64 as required by their own reference cards.
+They must not reinterpret the stored extraction dtype as the fit dtype.
 
 ## Layout and manifest
 
@@ -152,6 +158,10 @@ device and extraction command
 protected-split authorization reference
 smoke_only
 ```
+
+For metric-contract v1.2, `last.pt` is the confirmatory primary endpoint and
+`best_val.pt` is a separately reported validation-selected deployment control.
+Artifacts from these checkpoints never share fitted statistics or result rows.
 
 Absolute data roots are runtime provenance and must not leak into
 `sample_ids.npy`. A completed artifact must not be silently overwritten; a new

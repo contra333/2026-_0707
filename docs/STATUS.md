@@ -142,18 +142,17 @@ the seed-0 selection-bias disclosure.
   seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid,
   C1-C4 freeze, role replication, and pair controls are complete; downstream
   protected evaluation has not been executed.
-- `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
-  name, class-wise full unbiased covariance, official adaptive-jitter ladder,
-  `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
-  boundaries.
-- SN on/off is documented as a training ablation and does not rename DDU.
+- `docs/reference_cards/06_feature_ood_detectors.md` fixes the SN-off
+  `GDA-ClassDensity` name, class-wise full unbiased covariance, official
+  adaptive-jitter ladder, empirical-prior `logsumexp` score, and the boundary
+  that reserves `DDU` for a future spectral-normalization training ablation.
 - `docs/reference_cards/08_raw_feature_artifact_contract.md` fixes the future
   deterministic checkpoint-feature cache, provenance, checksum, and
   protected-split authorization contract.
 - `docs/reference_cards/09_core_representation_metrics.md` freezes the future
   confirmatory geometry, logit-control, and low-complexity distance/angle
-  panel. Covariance effective rank remains explicitly `UNSPECIFIED` rather
-  than receiving an unaudited formula.
+  panel, including Moore-Penrose NC1 and separate covariance entropy-rank,
+  trace-to-top-rank, and participation-ratio definitions.
 - `docs/reference_cards/02_architectures.md` now fixes the research lineup
   (2026-07-23): WRN-28-10/CIFAR-10 main (full protocol), ResNet-18 on
   CIFAR-10 and CIFAR-100 plus VGG-16-BN/CIFAR-10 (reduced protocol), and a
@@ -163,15 +162,20 @@ the seed-0 selection-bias disclosure.
   v1.2 grid value and lineup row to pinned sources or labeled project
   judgment, and records prior-work positioning found in the 2026-07-23
   literature pass.
-- These decisions are documentation only. No DDU detector code, test, config,
-  checkpoint evaluation, or OOD result has been implemented or validated.
+- `docs/reference_cards/11_metric_contract_v1_2.md` is the authoritative
+  WRN-28-10/CIFAR-10 metric dictionary. It fixes the paper formulas, reporting
+  tiers, checkpoint/split roles, artifact keys, degeneracy rules, source pins,
+  and validation oracles before implementation.
+- These decisions are documentation only. No GDA-ClassDensity, DDU, expanded
+  metric code, checkpoint evaluation, or OOD result has been implemented or
+  validated by the metric-contract task.
 
 ## Still missing
 
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
-- Feature-based OOD detector implementations, including DDU and its planned
-  PCA/Diag/L2/Shrinkage variants
+- Feature-based OOD detector implementations, including GDA-ClassDensity and
+  any future DDU/SN ablation
 
 ## Active next phase
 
@@ -185,8 +189,9 @@ The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
 
-The DDU reference-card decision does not replace that next-phase Issue and does
-not authorize detector implementation without a separately bounded task.
+The metric-contract and GDA/DDU naming decisions do not replace that next-phase
+Issue and do not authorize detector implementation without a separately
+bounded task.
 
 ## Known workflow maintenance
 
@@ -197,8 +202,8 @@ not authorize detector implementation without a separately bounded task.
 
 - Protected feature extraction and checkpoint evaluation remain unimplemented
   and require their own bounded Issue and validation evidence.
-- The canonical DDU shrinkage estimator and PCA component-selection rule remain
-  literature-backed decisions for a later implementation Issue.
+- DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
+  and require a separately bounded future ablation if the project retains them.
 
 ## Update rule
 
