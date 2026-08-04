@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 
 from oge.evaluation.supervisor import (
+    _record_job_result,
     host_jobs,
     parse_source_roots,
     resolve_checkpoint_path,
@@ -63,3 +64,19 @@ def test_source_root_and_host_assignment_drift_are_rejected():
         )
     with pytest.raises(ValueError, match="absent"):
         host_jobs(inventory, execution, host_id="lise")
+
+
+def test_terminal_result_records_job_identity_once():
+    calls = []
+
+    def update_job(job_id, **updates):
+        calls.append((job_id, updates))
+
+    _record_job_result(
+        update_job,
+        {"job_id": "job-a", "status": "REMOTE_VERIFIED", "resumed": True},
+    )
+
+    assert calls == [
+        ("job-a", {"status": "REMOTE_VERIFIED", "resumed": True})
+    ]

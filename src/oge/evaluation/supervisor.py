@@ -109,6 +109,16 @@ def _completed_upload_evidence(control_root: Path, destination: str) -> dict[str
     return evidence
 
 
+def _record_job_result(
+    update_job: Callable[..., None], result: Mapping[str, Any]
+) -> None:
+    """Record one terminal result without passing ``job_id`` twice."""
+
+    job_id = str(result["job_id"])
+    updates = {key: value for key, value in result.items() if key != "job_id"}
+    update_job(job_id, **updates)
+
+
 def execute_host_jobs(
     *,
     repository_root: str | Path,
@@ -210,7 +220,7 @@ def execute_host_jobs(
             if preserved is not None:
                 verify_production_bundle(bundle)
                 result = {"job_id": job_id, "status": "REMOTE_VERIFIED", "resumed": True}
-                update_job(job_id, **result)
+                _record_job_result(update_job, result)
                 results.append(result)
                 continue
             attempt_root = _next_attempt_root(state_directory, job_id)
@@ -321,7 +331,7 @@ def execute_host_jobs(
                     "total_size": evidence["total_size"],
                     "destination": destination,
                 }
-                update_job(job_id, **result)
+                _record_job_result(update_job, result)
                 results.append(result)
         return results
 
