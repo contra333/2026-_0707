@@ -125,6 +125,7 @@ def execute_host_jobs(
     dataset_config_path: str | Path,
     batch_size: int = 128,
     num_workers: int = 4,
+    blas_threads: int = 4,
     hf_bucket: str = "contra333/ICLR_RUN",
     hf_account: str = "contra333",
     minimum_free_gb: float = 100.0,
@@ -143,6 +144,8 @@ def execute_host_jobs(
         raise SupervisorBlockedError(
             f"host {host_id} requires exactly {expected_concurrency} unique GPU UUIDs"
         )
+    if blas_threads <= 0:
+        raise ValueError("blas_threads must be positive")
     verify_clean_git(repository, expected_git_sha)
     validate_dataset_policy(inventory, dataset_config_path=dataset_config_path)
     if not Path(data_root).is_dir():
@@ -243,8 +246,9 @@ def execute_host_jobs(
             ]
             environment = production_environment()
             environment["CUDA_VISIBLE_DEVICES"] = gpu_uuid
-            environment["OMP_NUM_THREADS"] = "1"
-            environment["MKL_NUM_THREADS"] = "1"
+            environment["OMP_NUM_THREADS"] = str(blas_threads)
+            environment["MKL_NUM_THREADS"] = str(blas_threads)
+            environment["OPENBLAS_NUM_THREADS"] = str(blas_threads)
             with (attempt_root / "stdout.log").open("w", encoding="utf-8") as stdout, (
                 attempt_root / "stderr.log"
             ).open("w", encoding="utf-8") as stderr:

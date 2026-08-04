@@ -26,6 +26,7 @@ def parse_args() -> argparse.Namespace:
     run.add_argument("--hf-cli", type=Path, required=True)
     run.add_argument("--batch-size", type=int, default=128)
     run.add_argument("--num-workers", type=int, default=4)
+    run.add_argument("--blas-threads", type=int, default=4)
     run.add_argument("--minimum-free-gb", type=float, default=100.0)
     run.add_argument(
         "--inventory",
@@ -77,6 +78,7 @@ def main() -> int:
         dataset_config_path=args.dataset_config,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
+        blas_threads=args.blas_threads,
         minimum_free_gb=args.minimum_free_gb,
     )
     print(json.dumps(ledger, indent=2, sort_keys=True))
