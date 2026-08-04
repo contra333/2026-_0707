@@ -106,7 +106,9 @@ def _production_fixture(tmp_path):
         },
         "dataset": {"splits": split_manifest},
     }
-    (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (root / "manifest.json").write_text(
+        json.dumps(manifest, sort_keys=True), encoding="utf-8"
+    )
     raw_rows = [
         f"{sha256_file(path)}  {path.relative_to(root).as_posix()}"
         for path in sorted(root.rglob("*"))

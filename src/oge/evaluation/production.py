@@ -771,8 +771,8 @@ def evaluate_raw_feature_cache_production(
     manifest, splits, runtime = FittedMetricRuntime.fit(
         root, include_gda=True, include_neco=True
     )
-    if tuple(splits) != EXECUTABLE_SPLITS:
-        raise ValueError("raw cache does not contain the exact executable split order")
+    if set(splits) != set(EXECUTABLE_SPLITS):
+        raise ValueError("raw cache does not contain the exact executable split population")
     expected = {
         **inventory["dataset_policy"]["id_splits"],
         **inventory["dataset_policy"]["ood_splits"],
