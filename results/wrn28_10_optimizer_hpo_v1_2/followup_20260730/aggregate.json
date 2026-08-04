@@ -1,0 +1,3307 @@
+{
+  "aggregate_hash": "a403d23b747ba6b927211dd3a9acc7526fabcbba1daf9b56ad735219191fc856",
+  "aggregation_policy": {
+    "checkpoint_epoch": 200,
+    "dispersion": "sample_sd_ddof_1",
+    "metric_source": "final_validation",
+    "pair_difference": "decoupled_minus_coupled",
+    "primary_checkpoint": "last.pt",
+    "protected_evaluation": "deferred",
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "config_statistics": [
+    {
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.8691333333333334,
+          "sample_sd": 0.006830324540849711
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.43063221904734766,
+          "sample_sd": 0.008838330128181016
+        }
+      },
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "per_seed": [
+        {
+          "accuracy": 0.8676,
+          "host_id": "lise",
+          "nll": 0.4298694788947701,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.8632,
+          "host_id": "curie",
+          "nll": 0.43982720075845716,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.8766,
+          "host_id": "precision_medicine",
+          "nll": 0.42219997748881577,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9398,
+          "sample_sd": 0.0005291502622129018
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.3398322881499926,
+          "sample_sd": 0.00881151038733517
+        }
+      },
+      "labels": [
+        "role:adam:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "per_seed": [
+        {
+          "accuracy": 0.9392,
+          "host_id": "lise",
+          "nll": 0.3299827679634094,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9402,
+          "host_id": "precision_medicine",
+          "nll": 0.3469667833805084,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.94,
+          "host_id": "curie",
+          "nll": 0.34254731310606,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.934,
+          "sample_sd": 0.0038574603043971772
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.35434147830306184,
+          "sample_sd": 0.015550253105260089
+        }
+      },
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "per_seed": [
+        {
+          "accuracy": 0.9384,
+          "host_id": "precision_medicine",
+          "nll": 0.3364457526683418,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9324,
+          "host_id": "curie",
+          "nll": 0.36456119985580443,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9312,
+          "host_id": "lise",
+          "nll": 0.36201748238503934,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9430666666666667,
+          "sample_sd": 0.0019008769905843918
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.3927142058769862,
+          "sample_sd": 0.014233019861424126
+        }
+      },
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "per_seed": [
+        {
+          "accuracy": 0.945,
+          "host_id": "lise",
+          "nll": 0.376301890540123,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.943,
+          "host_id": "precision_medicine",
+          "nll": 0.40017485476732256,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9412,
+          "host_id": "curie",
+          "nll": 0.40166587232351303,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9376000000000001,
+          "sample_sd": 0.00330454232837163
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.28145073691209155,
+          "sample_sd": 0.01813866838002655
+        }
+      },
+      "labels": [
+        "role:adam:C2"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "per_seed": [
+        {
+          "accuracy": 0.941,
+          "host_id": "precision_medicine",
+          "nll": 0.263799653172493,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9344,
+          "host_id": "lise",
+          "nll": 0.3000405361890793,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9374,
+          "host_id": "curie",
+          "nll": 0.28051202137470244,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9421333333333334,
+          "sample_sd": 0.003754108860080325
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.44679257637819586,
+          "sample_sd": 0.04009636544320985
+        }
+      },
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "per_seed": [
+        {
+          "accuracy": 0.9378,
+          "host_id": "precision_medicine",
+          "nll": 0.48033701395988465,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9444,
+          "host_id": "curie",
+          "nll": 0.4576572270238772,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9442,
+          "host_id": "lise",
+          "nll": 0.4023834881508257,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9426666666666667,
+          "sample_sd": 0.0034195516275285828
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.4393219180737622,
+          "sample_sd": 0.03761190667477653
+        }
+      },
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adamw",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "per_seed": [
+        {
+          "accuracy": 0.9466,
+          "host_id": "curie",
+          "nll": 0.42316807399615647,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.941,
+          "host_id": "precision_medicine",
+          "nll": 0.4124854398936033,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9404,
+          "host_id": "lise",
+          "nll": 0.48231224033152686,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9560666666666666,
+          "sample_sd": 0.0009451631252505429
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.2836286849021912,
+          "sample_sd": 0.012360489349681461
+        }
+      },
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.1,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "per_seed": [
+        {
+          "accuracy": 0.9564,
+          "host_id": "precision_medicine",
+          "nll": 0.29699771164655686,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.955,
+          "host_id": "lise",
+          "nll": 0.2726159455776215,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9568,
+          "host_id": "curie",
+          "nll": 0.2812723974823952,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9574000000000001,
+          "sample_sd": 0.0007211102550928262
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.19254776924649875,
+          "sample_sd": 0.005657809157514444
+        }
+      },
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "per_seed": [
+        {
+          "accuracy": 0.9582,
+          "host_id": "precision_medicine",
+          "nll": 0.1867704642534256,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9568,
+          "host_id": "curie",
+          "nll": 0.19279485691785814,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9572,
+          "host_id": "lise",
+          "nll": 0.19807798656821252,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9382666666666667,
+          "sample_sd": 0.0006110100926607719
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.3796503555496534,
+          "sample_sd": 0.008756133842274359
+        }
+      },
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "per_seed": [
+        {
+          "accuracy": 0.9384,
+          "host_id": "precision_medicine",
+          "nll": 0.3848750257015228,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9388,
+          "host_id": "lise",
+          "nll": 0.38453448605537416,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9376,
+          "host_id": "curie",
+          "nll": 0.36954155489206314,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9558666666666666,
+          "sample_sd": 0.003372437298651179
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.2090925967514515,
+          "sample_sd": 0.016364073540505668
+        }
+      },
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "per_seed": [
+        {
+          "accuracy": 0.9582,
+          "host_id": "precision_medicine",
+          "nll": 0.19200074803829192,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9574,
+          "host_id": "lise",
+          "nll": 0.2106610979795456,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.952,
+          "host_id": "curie",
+          "nll": 0.22461594423651696,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9474666666666667,
+          "sample_sd": 0.0015275252316519481
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.3026603671590487,
+          "sample_sd": 0.013787937926761494
+        }
+      },
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "per_seed": [
+        {
+          "accuracy": 0.9458,
+          "host_id": "lise",
+          "nll": 0.3173420382022858,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9488,
+          "host_id": "curie",
+          "nll": 0.30065278897285463,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9478,
+          "host_id": "precision_medicine",
+          "nll": 0.28998627430200574,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9410666666666666,
+          "sample_sd": 0.002119748412744615
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.3241897277680536,
+          "sample_sd": 0.027586878441673547
+        }
+      },
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "per_seed": [
+        {
+          "accuracy": 0.943,
+          "host_id": "precision_medicine",
+          "nll": 0.29555316040739416,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9414,
+          "host_id": "lise",
+          "nll": 0.3505908968448639,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9388,
+          "host_id": "curie",
+          "nll": 0.32642512605190277,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "final_validation": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.9508666666666666,
+          "sample_sd": 0.0011015141094572268
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.239820199320217,
+          "sample_sd": 0.0067917408205490064
+        }
+      },
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "per_seed": [
+        {
+          "accuracy": 0.9496,
+          "host_id": "precision_medicine",
+          "nll": 0.2462009024143219,
+          "training_seed": 0
+        },
+        {
+          "accuracy": 0.9514,
+          "host_id": "curie",
+          "nll": 0.24057860889434815,
+          "training_seed": 1
+        },
+        {
+          "accuracy": 0.9516,
+          "host_id": "lise",
+          "nll": 0.23268108665198087,
+          "training_seed": 2
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "aggregate_records": 42,
+    "new_followup": 30,
+    "reused_seed0": 12,
+    "unique_config_seed_identities": 42,
+    "unique_configurations": 14
+  },
+  "execution_id": "role_pair_followup_20260730",
+  "followup_plan_hash": "3a3b00dbcf0ee3dc20c0959013665bf4243a2644e21f4552a831e0fdaed69264",
+  "grid_manifest_hash": "9f93f24e8b46c6d94b576d801f72913f3348a6fd8e67a018d4bd1e6f0f66fbd8",
+  "host_completion": {
+    "curie": {
+      "artifact_manifest_sha256": "050cd3fcfb0eee178cc6f3979d0c09b975deeccd4cef927db62679c44b42d1a4",
+      "assigned_trial_count": 13,
+      "destination": "hf://buckets/contra333/ICLR_RUN/servers/curie/role_pair_followup_20260730",
+      "dry_run_summary": {
+        "deletes": 0,
+        "downloads": 0,
+        "skips": 0,
+        "total_size": 24826205304,
+        "uploads": 283
+      },
+      "finished_at": "2026-07-31T01:06:24.425722+00:00",
+      "remote_complete": {
+        "path": "servers/curie/role_pair_followup_20260730/REMOTE_COMPLETE.json",
+        "size": 356,
+        "xet_hash": "3bfb3a0651266a21b1d516960c6da44d33888613c5ef3c611954bbc1ebdbcc1c"
+      },
+      "remote_listing_file_count": 284,
+      "status": "REMOTE_VERIFIED",
+      "total_size": 24826205304,
+      "verified_at": "2026-07-31T00:40:47.225843+00:00",
+      "verified_file_count_before_marker": 283
+    },
+    "lise": {
+      "artifact_manifest_sha256": "747330e4d783e0322161a0006c79ddd0679049f156c3f53288c9ea5f3ff61c3d",
+      "assigned_trial_count": 10,
+      "destination": "hf://buckets/contra333/ICLR_RUN/servers/lise/role_pair_followup_20260730",
+      "dry_run_summary": {
+        "deletes": 0,
+        "downloads": 0,
+        "skips": 0,
+        "total_size": 18984786670,
+        "uploads": 220
+      },
+      "finished_at": "2026-07-31T03:57:26.588249+00:00",
+      "remote_complete": {
+        "path": "servers/lise/role_pair_followup_20260730/REMOTE_COMPLETE.json",
+        "size": 355,
+        "xet_hash": "ae8ed3bb8b925b970287f70785a293212161e2f5807b57b80626b1c0b96357e0"
+      },
+      "remote_listing_file_count": 221,
+      "status": "REMOTE_VERIFIED",
+      "total_size": 18984786670,
+      "verified_at": "2026-07-31T03:36:36.724338+00:00",
+      "verified_file_count_before_marker": 220
+    },
+    "precision_medicine": {
+      "artifact_manifest_sha256": "81c153cda93839f5b7541ae58f35190ca6084c183e242543120210d85f242830",
+      "assigned_trial_count": 7,
+      "destination": "hf://buckets/contra333/ICLR_RUN/servers/precision_medicine/role_pair_followup_20260730",
+      "dry_run_summary": {
+        "deletes": 0,
+        "downloads": 0,
+        "skips": 0,
+        "total_size": 13435325201,
+        "uploads": 157
+      },
+      "finished_at": "2026-07-30T15:01:19.102152+00:00",
+      "remote_complete": {
+        "path": "servers/precision_medicine/role_pair_followup_20260730/REMOTE_COMPLETE.json",
+        "size": 369,
+        "xet_hash": "21a9c93754a54c8d91dda5e59f93048385ed61f64155888b9837bf6b275f60dd"
+      },
+      "remote_listing_file_count": 158,
+      "status": "REMOTE_VERIFIED",
+      "total_size": 13435325201,
+      "verified_at": "2026-07-30T14:46:30.270082+00:00",
+      "verified_file_count_before_marker": 157
+    }
+  },
+  "pair_statistics": [
+    {
+      "cell": "lr=0.001,weight_decay=0.0001",
+      "coupled": {
+        "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+        "optimizer_family": "adam"
+      },
+      "decoupled": {
+        "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+        "optimizer_family": "adamw"
+      },
+      "difference_direction": "adamw_minus_adam",
+      "label": "pair:adam_adamw",
+      "paired_difference": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.008666666666666637,
+          "sample_sd": 0.00050332229568472
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.08498043977070036,
+          "sample_sd": 0.036216689234553415
+        }
+      },
+      "per_seed": [
+        {
+          "accuracy_difference": 0.008199999999999985,
+          "coupled_accuracy": 0.9384,
+          "coupled_nll": 0.3364457526683418,
+          "decoupled_accuracy": 0.9466,
+          "decoupled_nll": 0.42316807399615647,
+          "nll_difference": 0.08672232132781466,
+          "training_seed": 0
+        },
+        {
+          "accuracy_difference": 0.008599999999999941,
+          "coupled_accuracy": 0.9324,
+          "coupled_nll": 0.36456119985580443,
+          "decoupled_accuracy": 0.941,
+          "decoupled_nll": 0.4124854398936033,
+          "nll_difference": 0.04792424003779888,
+          "training_seed": 1
+        },
+        {
+          "accuracy_difference": 0.009199999999999986,
+          "coupled_accuracy": 0.9312,
+          "coupled_nll": 0.36201748238503934,
+          "decoupled_accuracy": 0.9404,
+          "decoupled_nll": 0.48231224033152686,
+          "nll_difference": 0.12029475794648753,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "cell": "lr=0.003,weight_decay=0.001",
+      "coupled": {
+        "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+        "optimizer_family": "adam"
+      },
+      "decoupled": {
+        "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+        "optimizer_family": "adamw"
+      },
+      "difference_direction": "adamw_minus_adam",
+      "label": "pair:adam_adamw",
+      "paired_difference": {
+        "accuracy": {
+          "count": 3,
+          "mean": 0.073,
+          "sample_sd": 0.0072194182591120626
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.016160357330848158,
+          "sample_sd": 0.035171748141617255
+        }
+      },
+      "per_seed": [
+        {
+          "accuracy_difference": 0.07019999999999993,
+          "coupled_accuracy": 0.8676,
+          "coupled_nll": 0.4298694788947701,
+          "decoupled_accuracy": 0.9378,
+          "decoupled_nll": 0.48033701395988465,
+          "nll_difference": 0.05046753506511453,
+          "training_seed": 0
+        },
+        {
+          "accuracy_difference": 0.08120000000000005,
+          "coupled_accuracy": 0.8632,
+          "coupled_nll": 0.43982720075845716,
+          "decoupled_accuracy": 0.9444,
+          "decoupled_nll": 0.4576572270238772,
+          "nll_difference": 0.017830026265420018,
+          "training_seed": 1
+        },
+        {
+          "accuracy_difference": 0.0676,
+          "coupled_accuracy": 0.8766,
+          "coupled_nll": 0.42219997748881577,
+          "decoupled_accuracy": 0.9442,
+          "decoupled_nll": 0.4023834881508257,
+          "nll_difference": -0.019816489337990073,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "cell": "A",
+      "coupled": {
+        "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+        "optimizer_family": "sgd"
+      },
+      "decoupled": {
+        "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+        "optimizer_family": "sgdw"
+      },
+      "difference_direction": "sgdw_minus_sgd",
+      "label": "pair:sgd_sgdw:A",
+      "paired_difference": {
+        "accuracy": {
+          "count": 3,
+          "mean": -0.006533333333333354,
+          "sample_sd": 0.00179257728796653
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.04727243007371822,
+          "sample_sd": 0.012421564577990665
+        }
+      },
+      "per_seed": [
+        {
+          "accuracy_difference": -0.008600000000000052,
+          "coupled_accuracy": 0.9582,
+          "coupled_nll": 0.1867704642534256,
+          "decoupled_accuracy": 0.9496,
+          "decoupled_nll": 0.2462009024143219,
+          "nll_difference": 0.0594304381608963,
+          "training_seed": 0
+        },
+        {
+          "accuracy_difference": -0.00539999999999996,
+          "coupled_accuracy": 0.9568,
+          "coupled_nll": 0.19279485691785814,
+          "decoupled_accuracy": 0.9514,
+          "decoupled_nll": 0.24057860889434815,
+          "nll_difference": 0.04778375197649001,
+          "training_seed": 1
+        },
+        {
+          "accuracy_difference": -0.005600000000000049,
+          "coupled_accuracy": 0.9572,
+          "coupled_nll": 0.19807798656821252,
+          "decoupled_accuracy": 0.9516,
+          "decoupled_nll": 0.23268108665198087,
+          "nll_difference": 0.03460310008376835,
+          "training_seed": 2
+        }
+      ]
+    },
+    {
+      "cell": "B",
+      "coupled": {
+        "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+        "optimizer_family": "sgd"
+      },
+      "decoupled": {
+        "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+        "optimizer_family": "sgdw"
+      },
+      "difference_direction": "sgdw_minus_sgd",
+      "label": "pair:sgd_sgdw:B",
+      "paired_difference": {
+        "accuracy": {
+          "count": 3,
+          "mean": -0.014800000000000035,
+          "sample_sd": 0.0014422205101856215
+        },
+        "nll": {
+          "count": 3,
+          "mean": 0.11509713101660211,
+          "sample_sd": 0.02152337700163125
+        }
+      },
+      "per_seed": [
+        {
+          "accuracy_difference": -0.015200000000000102,
+          "coupled_accuracy": 0.9582,
+          "coupled_nll": 0.19200074803829192,
+          "decoupled_accuracy": 0.943,
+          "decoupled_nll": 0.29555316040739416,
+          "nll_difference": 0.10355241236910223,
+          "training_seed": 0
+        },
+        {
+          "accuracy_difference": -0.016000000000000014,
+          "coupled_accuracy": 0.9574,
+          "coupled_nll": 0.2106610979795456,
+          "decoupled_accuracy": 0.9414,
+          "decoupled_nll": 0.3505908968448639,
+          "nll_difference": 0.13992979886531828,
+          "training_seed": 1
+        },
+        {
+          "accuracy_difference": -0.01319999999999999,
+          "coupled_accuracy": 0.952,
+          "coupled_nll": 0.22461594423651696,
+          "decoupled_accuracy": 0.9388,
+          "decoupled_nll": 0.32642512605190277,
+          "nll_difference": 0.10180918181538581,
+          "training_seed": 2
+        }
+      ]
+    }
+  ],
+  "production_git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+  "protocol_version": "wrn28_10_optimizer_hpo_v1.2",
+  "records": [
+    {
+      "aggregate_trial_id": "followup-adam-0ac334244797-seed-0",
+      "attempt_ids": [
+        "grid-adam-11-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.8736,
+        "epoch": 123,
+        "nll": 0.3899825498700142
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 123,
+          "sha256": "48c5fc7c4bd8f90ceef5424f096b78e7f41f8670a2536fa79bab49f205a8066f"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "660bf52f0e7acd04578d38868a9d9aafb989376823cd37846017d2ef25a1bdac"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.8676,
+        "epoch": 200,
+        "nll": 0.4298694788947701
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "lise",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "source_trial_id": "grid-adam-11",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adam-0ac334244797-seed-1",
+      "attempt_ids": [
+        "followup-adam-0ac334244797-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.875,
+        "epoch": 121,
+        "nll": 0.3878430643856525
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 121,
+          "sha256": "2c125c27711a75fd41600b5b1c5f1fabb209c6fddd88d995c82c0b7237adc385"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "d0e15592bc2660f04d27a5f66792ffaccadd38d60d3924248894a1f93bed9ff4"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.8632,
+        "epoch": 200,
+        "nll": 0.43982720075845716
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "source_trial_id": "followup-adam-0ac334244797-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adam-0ac334244797-seed-2",
+      "attempt_ids": [
+        "followup-adam-0ac334244797-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.8818,
+        "epoch": 188,
+        "nll": 0.40542797443270684
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 188,
+          "sha256": "0bca0534709f0fe5e0be8cb936058a7832d0292524edf134034e29feb93911fb"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "93428c361355734870ad63e1cc153a309f5c23f5b17872808c6db93a77840d6f"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.8766,
+        "epoch": 200,
+        "nll": 0.42219997748881577
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "0ac3342447975b57024d4ce446327fcc4c7ae8913e70bab222dc3ca0403a2b7f",
+      "source_trial_id": "followup-adam-0ac334244797-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adam-3e2bac6d488d-seed-0",
+      "attempt_ids": [
+        "grid-adam-01-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9418,
+        "epoch": 125,
+        "nll": 0.299469334936142
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 125,
+          "sha256": "2c899389d5a71f37e892965129fccb7bfd1df4849f2bca2ff93005d63d174220"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9392,
+        "epoch": 200,
+        "nll": 0.3299827679634094
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "lise",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "source_trial_id": "grid-adam-01",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adam-3e2bac6d488d-seed-1",
+      "attempt_ids": [
+        "followup-adam-3e2bac6d488d-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9428,
+        "epoch": 183,
+        "nll": 0.3452475392341614
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 183,
+          "sha256": "d2152855887f22f7ed4e1dbcb2ca74b610ee1e0c2ce97ea47503b94578fa52da"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9402,
+        "epoch": 200,
+        "nll": 0.3469667833805084
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "source_trial_id": "followup-adam-3e2bac6d488d-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adam-3e2bac6d488d-seed-2",
+      "attempt_ids": [
+        "followup-adam-3e2bac6d488d-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9414,
+        "epoch": 199,
+        "nll": 0.3536112094014883
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 199,
+          "sha256": "c8ef1419d36894ec2b71c911234e8d430976e99124902e7257c8fc8a986cec07"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.94,
+        "epoch": 200,
+        "nll": 0.34254731310606
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:adam:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "source_trial_id": "followup-adam-3e2bac6d488d-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adam-a8d0e1a8e585-seed-0",
+      "attempt_ids": [
+        "grid-adam-05-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9388,
+        "epoch": 169,
+        "nll": 0.3289707140672879
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 169,
+          "sha256": "8ba20c82aa4a5267f59a6b2a1f5e6b471047774c92eb5c2b07991aabedc40564"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "2d9da7c43870eaf360692b7b2652713e7fbc9ea5a8160a3f5011a840cdae38ad"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9384,
+        "epoch": 200,
+        "nll": 0.3364457526683418
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "source_trial_id": "grid-adam-05",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adam-a8d0e1a8e585-seed-1",
+      "attempt_ids": [
+        "followup-adam-a8d0e1a8e585-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.935,
+        "epoch": 182,
+        "nll": 0.3581114679813385
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 182,
+          "sha256": "8316b42aeda416f002d99d03651dc1ab0342a978660b92d6d3845005cbf0fd2f"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "1be7d343fd118db7a9f1bc4cc099601ca4d9b995085f653d0f55f488b0d99f03"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9324,
+        "epoch": 200,
+        "nll": 0.36456119985580443
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "source_trial_id": "followup-adam-a8d0e1a8e585-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adam-a8d0e1a8e585-seed-2",
+      "attempt_ids": [
+        "followup-adam-a8d0e1a8e585-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9336,
+        "epoch": 134,
+        "nll": 0.3493043505191803
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 134,
+          "sha256": "0863318876e0f5d2f20e394e094095a595a8b85e5761484dcd20566457fbed50"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "f77460c0eef35429c1eab8c88444eff939672de8ae87a948c6a8da294ae35e4e"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9312,
+        "epoch": 200,
+        "nll": 0.36201748238503934
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:adam_adamw"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adam",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "a8d0e1a8e585b3a3de9fb52ac4d198bd27f96cc4a1d39fe13c2672a45a2c48ae",
+      "source_trial_id": "followup-adam-a8d0e1a8e585-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adam-b701f780ad99-seed-0",
+      "attempt_ids": [
+        "grid-adam-00-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9458,
+        "epoch": 187,
+        "nll": 0.37626863236427305
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 187,
+          "sha256": "a2b600e905c38c24252d2e54aef60bb7996009e3c9c58dbf034a629b25f325b4"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.945,
+        "epoch": 200,
+        "nll": 0.376301890540123
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "lise",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "source_trial_id": "grid-adam-00",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adam-b701f780ad99-seed-1",
+      "attempt_ids": [
+        "followup-adam-b701f780ad99-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.944,
+        "epoch": 184,
+        "nll": 0.38936693422794344
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 184,
+          "sha256": "14b212fed5472f908a11dadc93a7374897261ef253b22c45cb5213e98f5cab08"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.943,
+        "epoch": 200,
+        "nll": 0.40017485476732256
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "source_trial_id": "followup-adam-b701f780ad99-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adam-b701f780ad99-seed-2",
+      "attempt_ids": [
+        "followup-adam-b701f780ad99-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9432,
+        "epoch": 186,
+        "nll": 0.3986462698504329
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 186,
+          "sha256": "2cec5cf3d482d7974b68759c958acb1a5beff1a69c898f373d91888458b6be19"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9412,
+        "epoch": 200,
+        "nll": 0.40166587232351303
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "source_trial_id": "followup-adam-b701f780ad99-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adam-db137e7d3c71-seed-0",
+      "attempt_ids": [
+        "grid-adam-03-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9414,
+        "epoch": 166,
+        "nll": 0.2644484766483307
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 166,
+          "sha256": "629a111533c4e97658b3a658d0d2edaf1b6806fd537cb6894cecbe8eaf3b5552"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "7dc37a66c5ed5355eeecea2a598494069d9950a03609075950720715f0520bd9"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.941,
+        "epoch": 200,
+        "nll": 0.263799653172493
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "source_trial_id": "grid-adam-03",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adam-db137e7d3c71-seed-1",
+      "attempt_ids": [
+        "followup-adam-db137e7d3c71-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9396,
+        "epoch": 178,
+        "nll": 0.28895152991116047
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 178,
+          "sha256": "45a763a16f2fac862a718b97e7f2ef39217aba629958b8af9e8ace1fa465ae86"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "50233983deddc4eaade19cb16a67fe141d81fdbda77fc9e4b19a47a50b00be6c"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9344,
+        "epoch": 200,
+        "nll": 0.3000405361890793
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "source_trial_id": "followup-adam-db137e7d3c71-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adam-db137e7d3c71-seed-2",
+      "attempt_ids": [
+        "followup-adam-db137e7d3c71-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9414,
+        "epoch": 173,
+        "nll": 0.2771269794791937
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 173,
+          "sha256": "c43d1deebfa8bbc2c925cc5723c691d565c0ecfb4dc7af7582204f5dcbbb8e24"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "3075455742ff496f3444bcf8e659183942baded1e8c7db03d2e424bbe19e4e86"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9374,
+        "epoch": 200,
+        "nll": 0.28051202137470244
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:adam:C2"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.0003,
+        "name": "adam",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adam",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "source_trial_id": "followup-adam-db137e7d3c71-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-4039a31891b5-seed-0",
+      "attempt_ids": [
+        "grid-adamw-09-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.94,
+        "epoch": 180,
+        "nll": 0.4771958649635315
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 180,
+          "sha256": "30b5f753c78a9dbe3559c03fa5b89f356300b56202862cbc656058a497e7e729"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9378,
+        "epoch": 200,
+        "nll": 0.48033701395988465
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "source_trial_id": "grid-adamw-09",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-4039a31891b5-seed-1",
+      "attempt_ids": [
+        "followup-adamw-4039a31891b5-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9468,
+        "epoch": 149,
+        "nll": 0.4594790757650509
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 149,
+          "sha256": "c96f83503da385d1e2608dd4bf6b0f515388fb05b3cb720c0e4d69f70d9fe026"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9444,
+        "epoch": 200,
+        "nll": 0.4576572270238772
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "source_trial_id": "followup-adamw-4039a31891b5-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-4039a31891b5-seed-2",
+      "attempt_ids": [
+        "followup-adamw-4039a31891b5-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9458,
+        "epoch": 143,
+        "nll": 0.3930217425182462
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 143,
+          "sha256": "af423e8c05483e78f346eb79ddc4ae3b375d38d9e250bcaa1e1677f4eb075e3a"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9442,
+        "epoch": 200,
+        "nll": 0.4023834881508257
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "source_trial_id": "followup-adamw-4039a31891b5-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-5742764ef3bd-seed-0",
+      "attempt_ids": [
+        "grid-adamw-04-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.948,
+        "epoch": 198,
+        "nll": 0.42256645221933725
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 198,
+          "sha256": "13c61bf745c766b3dcf65679d3b3706110a6a81155f0912b099d4f90e6fb1b26"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9466,
+        "epoch": 200,
+        "nll": 0.42316807399615647
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "curie",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adamw",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "source_trial_id": "grid-adamw-04",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-5742764ef3bd-seed-1",
+      "attempt_ids": [
+        "followup-adamw-5742764ef3bd-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9452,
+        "epoch": 136,
+        "nll": 0.3901248254776001
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 136,
+          "sha256": "01cdd4a7d25ad49579a9a0a4ed675adfdb8b546c169d54711ccc5d36d6993d9f"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.941,
+        "epoch": 200,
+        "nll": 0.4124854398936033
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adamw",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "source_trial_id": "followup-adamw-5742764ef3bd-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-5742764ef3bd-seed-2",
+      "attempt_ids": [
+        "followup-adamw-5742764ef3bd-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.942,
+        "epoch": 64,
+        "nll": 0.3239160419225693
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 64,
+          "sha256": "50629588eebe061f2a4e9e6dfb4f341dc34a0bb78b13d9605db04e655a93e8ca"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9404,
+        "epoch": 200,
+        "nll": 0.48231224033152686
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.001,
+        "name": "adamw",
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "source_trial_id": "followup-adamw-5742764ef3bd-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-61d7d1f20bc5-seed-0",
+      "attempt_ids": [
+        "grid-adamw-11-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9566,
+        "epoch": 168,
+        "nll": 0.28904512718915937
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 168,
+          "sha256": "bf8dd61dc44d3f6674b94e0a1bb3c4e714732efd90d0bd91279087cdca0d6863"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "f62a0ee09e8152772e8865ca59253f9a77e4f29e886d29f9b6538f3ceae182e6"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9564,
+        "epoch": 200,
+        "nll": 0.29699771164655686
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.1,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "source_trial_id": "grid-adamw-11",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-61d7d1f20bc5-seed-1",
+      "attempt_ids": [
+        "followup-adamw-61d7d1f20bc5-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.958,
+        "epoch": 176,
+        "nll": 0.24924125537872313
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 176,
+          "sha256": "56563983c46c846e4be885013ec604687c824a4a26ea2a3d800898edff337588"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "a6a5c4be6c91ec7131fa16f2ff5b78f67ca998e62a7cbce0eb07ca4373b6689e"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.955,
+        "epoch": 200,
+        "nll": 0.2726159455776215
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.1,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "source_trial_id": "followup-adamw-61d7d1f20bc5-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-adamw-61d7d1f20bc5-seed-2",
+      "attempt_ids": [
+        "followup-adamw-61d7d1f20bc5-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.958,
+        "epoch": 190,
+        "nll": 0.27602905003875494
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 190,
+          "sha256": "e472b9c7c8064d384daf10acca32c44f4446a38248bf5dff967ed3505247f52f"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "9a4e3a76aa795903df5d98bbcbbedfc2592c36de7a529286eae1762e9e12c62b"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9568,
+        "epoch": 200,
+        "nll": 0.2812723974823952
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "optimizer": {
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-08,
+        "lr": 0.003,
+        "name": "adamw",
+        "weight_decay": 0.1,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "adamw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "source_trial_id": "followup-adamw-61d7d1f20bc5-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-188f2e248d51-seed-0",
+      "attempt_ids": [
+        "grid-sgd-06-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.96,
+        "epoch": 176,
+        "nll": 0.18748922843933105
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 176,
+          "sha256": "c346708158c639f9662fc961c99ef6efc214eed76d0dc25508a08316af331ab4"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9582,
+        "epoch": 200,
+        "nll": 0.1867704642534256
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "grid-sgd-06",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-188f2e248d51-seed-1",
+      "attempt_ids": [
+        "followup-sgd-188f2e248d51-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9582,
+        "epoch": 168,
+        "nll": 0.1931845141172409
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 168,
+          "sha256": "912fe88cf8627e79e83e604b18010208c1507c3087d2444e01075cc9c88c4f3a"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9568,
+        "epoch": 200,
+        "nll": 0.19279485691785814
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "followup-sgd-188f2e248d51-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-188f2e248d51-seed-2",
+      "attempt_ids": [
+        "followup-sgd-188f2e248d51-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9592,
+        "epoch": 189,
+        "nll": 0.1990726125359535
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 189,
+          "sha256": "4a4c4f718aba5b6ccd2c8a16ce23afc0e0ee43a57f152b6e015452ab24595788"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9572,
+        "epoch": 200,
+        "nll": 0.19807798656821252
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "followup-sgd-188f2e248d51-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-7aa36ee28bf5-seed-0",
+      "attempt_ids": [
+        "grid-sgd-08-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9412,
+        "epoch": 113,
+        "nll": 0.37523924112319945
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 113,
+          "sha256": "f4c0054bd1fc5fb9ae7787a83fcb147d9cad5ff7752535f97cf500facc6287cd"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "21f530202ed6bd9442ed9f75f10553e882b813f0e65251e9c2ea12bd83732abf"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9384,
+        "epoch": 200,
+        "nll": 0.3848750257015228
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "source_trial_id": "grid-sgd-08",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-7aa36ee28bf5-seed-1",
+      "attempt_ids": [
+        "followup-sgd-7aa36ee28bf5-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9396,
+        "epoch": 151,
+        "nll": 0.386961382484436
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 151,
+          "sha256": "f63db9108d144fe53f4c0026027574cfef638551d8435d15f9e7a32a6cc8448c"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "0bc45121f18855203225932b731cefa87a947cddf6253b02558c4622237aa22f"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9388,
+        "epoch": 200,
+        "nll": 0.38453448605537416
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "source_trial_id": "followup-sgd-7aa36ee28bf5-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-7aa36ee28bf5-seed-2",
+      "attempt_ids": [
+        "followup-sgd-7aa36ee28bf5-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9402,
+        "epoch": 124,
+        "nll": 0.3612772647291422
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 124,
+          "sha256": "985ae98b2b251f0a951483856a066f8b33f29ebf9f7174ae32466584816efd70"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "7dc59233d53dd4b723aa4e84897c3410ac12ea329c23909db442b978eda6ea1e"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9376,
+        "epoch": 200,
+        "nll": 0.36954155489206314
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "source_trial_id": "followup-sgd-7aa36ee28bf5-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-86af0abedd46-seed-0",
+      "attempt_ids": [
+        "grid-sgd-09-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9592,
+        "epoch": 189,
+        "nll": 0.1907357521057129
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 189,
+          "sha256": "60e765b0a65e40179d12fb981f048a80c7a3d05bae43262712bb94c143f9c40a"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9582,
+        "epoch": 200,
+        "nll": 0.19200074803829192
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "grid-sgd-09",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-86af0abedd46-seed-1",
+      "attempt_ids": [
+        "followup-sgd-86af0abedd46-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9586,
+        "epoch": 175,
+        "nll": 0.20995278015136717
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 175,
+          "sha256": "38bcbd72b0f99a9740d8b9b640909b0adb6e2454f1286de24aeb1bff8c6b78cc"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9574,
+        "epoch": 200,
+        "nll": 0.2106610979795456
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "followup-sgd-86af0abedd46-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-86af0abedd46-seed-2",
+      "attempt_ids": [
+        "followup-sgd-86af0abedd46-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9542,
+        "epoch": 157,
+        "nll": 0.22788781101703645
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 157,
+          "sha256": "cd4e9148d51d1d773703b2b8d581eed6bbd7dbf3e5e0607b5d4a220f2345e1d8"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.952,
+        "epoch": 200,
+        "nll": 0.22461594423651696
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "followup-sgd-86af0abedd46-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-f315d560c588-seed-0",
+      "attempt_ids": [
+        "grid-sgd-04-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9484,
+        "epoch": 102,
+        "nll": 0.3106706784486771
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 102,
+          "sha256": "6b85b53bf413d0fe410d0ea685b504150f13cf44cb598ca8b4979bbe153b0e9b"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "da7cd6870e394035903bb506e00afdb6427eb414b4b6a0eaf52be250918dc7fb"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9458,
+        "epoch": 200,
+        "nll": 0.3173420382022858
+      },
+      "git_sha": "0d30054b38f0dc7a513c3eacc5c4e5435670fc4d",
+      "host_id": "lise",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "grid",
+      "provenance_hash": "89ec7831148733257bb2ef94c7c560068c5e54fe52e22de0a6638207c5fdc32d",
+      "source": "seed0_grid_reuse",
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "source_trial_id": "grid-sgd-04",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-f315d560c588-seed-1",
+      "attempt_ids": [
+        "followup-sgd-f315d560c588-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9494,
+        "epoch": 175,
+        "nll": 0.29799195825457575
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 175,
+          "sha256": "a9ac9d8521f6c6cd24aa24067526dc29887e5dbc0594ebc1689ef58c41cad18f"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "6df16772205df057cfdef1137c8730d38eb9609ead2cb851034d15f3d0d90be7"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9488,
+        "epoch": 200,
+        "nll": 0.30065278897285463
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "source_trial_id": "followup-sgd-f315d560c588-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgd-f315d560c588-seed-2",
+      "attempt_ids": [
+        "followup-sgd-f315d560c588-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9488,
+        "epoch": 115,
+        "nll": 0.29151340101957324
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 115,
+          "sha256": "04723a7ad70208080e26860128bd04577e07413173e1877b92ab0b1eb7127127"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "dad449f58d35fb28bc6cad9b61bca72d612888c35d108c1deb198723c771d8d2"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9478,
+        "epoch": 200,
+        "nll": 0.28998627430200574
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgd",
+        "nesterov": true,
+        "weight_decay": 0.0,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgd",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "source_trial_id": "followup-sgd-f315d560c588-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-2f7b24bb35f8-seed-0",
+      "attempt_ids": [
+        "followup-sgdw-2f7b24bb35f8-seed-0-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9448,
+        "epoch": 88,
+        "nll": 0.282574060491845
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 88,
+          "sha256": "ee1771d90518fb95f792d3ed0b0150c85b62f7ea7c3723b106b5c176d9ef7496"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "c1e0ab6141924055eabf8a3f12ae7fb05cc4c9c18b1d8d009d0dec680cbdfd29"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.943,
+        "epoch": 200,
+        "nll": 0.29555316040739416
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "followup-sgdw-2f7b24bb35f8-seed-0",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-2f7b24bb35f8-seed-1",
+      "attempt_ids": [
+        "followup-sgdw-2f7b24bb35f8-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9434,
+        "epoch": 144,
+        "nll": 0.3450263569831848
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 144,
+          "sha256": "2eb8ac7db30e6c656c22bd4b4d9973a578915891fb412b3b77ad4dc41cc8a674"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "42cdf634e0fe15b72701dee39a0e9bb4e5998a0fb1bac2bf2014e590ea4b5e97"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9414,
+        "epoch": 200,
+        "nll": 0.3505908968448639
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "followup-sgdw-2f7b24bb35f8-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-2f7b24bb35f8-seed-2",
+      "attempt_ids": [
+        "followup-sgdw-2f7b24bb35f8-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.942,
+        "epoch": 89,
+        "nll": 0.3092699808895588
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 89,
+          "sha256": "3a39befdaafa1fef6e36e61ec57f500a4c3b1ce2a696934327ac91b6c193e5fc"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "0819d1508778c5c63ba2818485d95996259ef8616387e160e314f7ac741951c2"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "2f7b24bb35f89ca29f7f08838388c900b76b4d34758fc95d8c32c9e8c1bad34f",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9388,
+        "epoch": 200,
+        "nll": 0.32642512605190277
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:sgd_sgdw:B"
+      ],
+      "optimizer": {
+        "lr": 0.3,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0001,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "source_trial_id": "followup-sgdw-2f7b24bb35f8-seed-2",
+      "training_seed": 2
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-99f6ea026047-seed-0",
+      "attempt_ids": [
+        "followup-sgdw-99f6ea026047-seed-0-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9522,
+        "epoch": 160,
+        "nll": 0.2459865884542465
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 160,
+          "sha256": "0e0b56bfe678b427cb327c060fda76175ecc63035efcb88a27ac784350755eee"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "16ed03f71ef46c346d13a094cc8e4d6309c07773fca7176bfbcc796fe40376b6"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9496,
+        "epoch": 200,
+        "nll": 0.2462009024143219
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "precision_medicine",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "followup-sgdw-99f6ea026047-seed-0",
+      "training_seed": 0
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-99f6ea026047-seed-1",
+      "attempt_ids": [
+        "followup-sgdw-99f6ea026047-seed-1-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9528,
+        "epoch": 96,
+        "nll": 0.24349370260238648
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 96,
+          "sha256": "8e2b11b71fba52f49cce85de74732e7a78c007ca430f60cea7c21a35b2e0e3ce"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "eaa9c19af66610d08157b77831e87817ef72c485273615b6a22e5a7b72b298a9"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9514,
+        "epoch": 200,
+        "nll": 0.24057860889434815
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "curie",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "followup-sgdw-99f6ea026047-seed-1",
+      "training_seed": 1
+    },
+    {
+      "aggregate_trial_id": "followup-sgdw-99f6ea026047-seed-2",
+      "attempt_ids": [
+        "followup-sgdw-99f6ea026047-seed-2-attempt-001"
+      ],
+      "best_validation": {
+        "accuracy": 0.9536,
+        "epoch": 112,
+        "nll": 0.23206812495291232
+      },
+      "checkpoints": {
+        "best_val": {
+          "completed_epoch": 112,
+          "sha256": "e56bdce7e8be4ef2bc38efddd2a57eba9d9f5d8989c2581ee0911db8536fd7bf"
+        },
+        "last": {
+          "completed_epoch": 200,
+          "sha256": "c22e17b5ff485b66a27419ec7fd84ecc23249d3d8133aaa7b5d8f21cd181766d"
+        }
+      },
+      "completed_epoch": 200,
+      "config_hash": "99f6ea02604796c2ba92dd637daaa1de57b08d60b46c9e79b127942f739b69c4",
+      "dataset_membership_hashes": {
+        "membership_manifest": "7101ea2a8e637d72385b2e5b1aadde1f4b99ee34d0ede4753169715ab8ed4056",
+        "test": "4178c1a97951afab348d63734d426d7e3cb0d13ddf3c0aebae331467d723fd73",
+        "train": "54fae08d35de5be7239b8fc35413531335a71858288f00c5583de44d759bfbc6",
+        "validation": "fe74684d1211a92eaccba00957ca308b43bff286f230cd62db89412fb753b488"
+      },
+      "final_validation": {
+        "accuracy": 0.9516,
+        "epoch": 200,
+        "nll": 0.23268108665198087
+      },
+      "git_sha": "3556841340e6f6b92782af045ed4a468e6e271bd",
+      "host_id": "lise",
+      "labels": [
+        "pair:sgd_sgdw:A"
+      ],
+      "optimizer": {
+        "lr": 0.1,
+        "momentum": 0.9,
+        "name": "sgdw",
+        "nesterov": true,
+        "weight_decay": 0.0005,
+        "weight_decay_policy": "weights_only_no_bias_norm"
+      },
+      "optimizer_family": "sgdw",
+      "phase": "followup",
+      "provenance_hash": "6d650b4cb5e2fc2c0d953a9d827a76e5bcbbb15e89a69aac3179b2cc27ae99fa",
+      "source": "followup_execution",
+      "source_grid_config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "source_trial_id": "followup-sgdw-99f6ea026047-seed-2",
+      "training_seed": 2
+    }
+  ],
+  "reporting_caveats": [
+    "Seed 0 selected the frozen roles, so role-bundle summaries retain selection bias toward seed 0.",
+    "All seed values are retained; no seed was dropped, replaced, or rerun to improve a mean.",
+    "n=3 summaries are descriptive and are not strong significance evidence.",
+    "Pair controls are diagnostic and do not promote pair-only configurations to primary role evidence."
+  ],
+  "role_freeze_hash": "fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa",
+  "schema_version": "1.0"
+}

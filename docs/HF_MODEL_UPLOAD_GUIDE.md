@@ -200,3 +200,22 @@ terminal 상태가 된 뒤 업로드한다. 모든 업로드는
 `C1`-`C4` freeze는 네 artifact 집합
 (`precision_medicine/canary`와 세 서버의 `remaining`)에서 36개 고유
 `trial.json`이 모두 terminal임을 확인한 뒤에만 수행한다.
+
+## 8. Issue #49 role/pair follow-up
+
+Issue #49의 서버별 전체 study artifact 경로는 다음과 같다.
+
+```text
+hf://buckets/contra333/ICLR_RUN/servers/<host_id>/role_pair_followup_20260730
+```
+
+서버별 detached supervisor는 배정된 모든 trial이 epoch 200
+`completed`이고 checkpoint, validation metric, Git/config/seed identity,
+deferred ID-test 상태가 독립 검증된 경우에만 업로드한다. 전체 artifact
+tree의 SHA-256 manifest를 만든 뒤 `hf buckets sync --dry-run
+--no-delete`, saved plan, plan apply 순서로 실행한다. 원격 path/size와
+Xet hash를 기록하고 마지막에 `REMOTE_COMPLETE.json`을 올린다.
+
+`REMOTE_COMPLETE.json`이 없으면 일부 파일이 보이더라도 완료된 서버
+업로드로 해석하지 않는다. 충돌 파일이나 크기 불일치가 있으면 기존
+원격 파일을 덮어쓰거나 삭제하지 않고 `BLOCKED`로 남긴다.
