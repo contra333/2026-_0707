@@ -8,11 +8,11 @@ feature extraction, read protected ID-test or OOD samples, calculate research
 metrics, or upload evaluation results.
 
 Planning verdict on 2026-08-04: **PASS** for deterministic inventory
-construction, schema validation, focused tests, and read-only source
-availability. The plan imports the checksum-sealed 42-row Issue #49 aggregate,
-authorizes only its 30 frozen role identities, creates 60 separate checkpoint
-jobs, and retains the other 12 pair-control-only identities as explicit
-exclusions.
+construction, schema validation, focused and complete Curie CPU tests, and
+read-only source availability. The plan imports the checksum-sealed 42-row
+Issue #49 aggregate, authorizes only its 30 frozen role identities, creates 60
+separate checkpoint jobs, and retains the other 12 pair-control-only identities
+as explicit exclusions.
 
 Protected execution remains **NOT_RUN** and requires a separate active Issue
 after this plan is reviewed and merged.
@@ -112,10 +112,38 @@ PYTHONPATH=src \
 
 Result: **FAILED**, `252 passed, 3 failed`. All three failures are in the
 pre-existing AURC path because NumPy 2.5 removed `np.trapz`; no planning test
-failed. The production Curie environment validated for Issue #53 uses the
-project runtime and must run the complete suite on the clean planning commit
-before merge. Until that clean run is recorded, the complete-suite gate is
-**PENDING**.
+failed. This is recorded as a local environment incompatibility rather than a
+passing complete-suite result.
+
+The clean pushed commit was then validated in the Issue-authorized disposable
+Curie checkout
+`/home/ghjin/0707_exp/2026-_0707-issue55-validation`:
+
+```bash
+env -u LD_LIBRARY_PATH -u PYTHONPATH \
+  PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONPATH="$PWD/src" \
+  /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python \
+  scripts/build_metric_evaluation_plan.py --check
+env -u LD_LIBRARY_PATH -u PYTHONPATH \
+  PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONPATH="$PWD/src" \
+  /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python \
+  -m pytest -q tests/test_metric_evaluation_planning_v1_2.py
+env -u LD_LIBRARY_PATH -u PYTHONPATH \
+  PYTHONNOUSERSITE=1 PYTHONDONTWRITEBYTECODE=1 \
+  PYTHONPATH="$PWD/src" \
+  /home/ghjin/miniconda3/envs/oge-wrn-v1.2-a2/candidate-venv/bin/python \
+  -m pytest -q
+```
+
+Observed environment: Python 3.11.9, NumPy 1.26.4, PyTorch 2.5.1+cu121,
+scikit-learn 1.5.2, PyYAML 6.0.2, and pytest 9.1.1. Result at clean Git
+`3e34076efc83daf5e2ed5bc3a5e7c451bc911904`: **PASS**, inventory parity hash
+`35a1a66f78dfd6255c4d804586ee6863969be78d21acec5cd0ccf00476ddaa5c`,
+`17 passed in 2.58s`, complete suite `255 passed in 12.06s`, and clean worktree
+after tests. The checkout did not load a checkpoint, traverse a dataset, or use
+a GPU.
 
 The following read-only Hugging Face query shape was applied to all 60 source
 checkpoint URIs in parallel:

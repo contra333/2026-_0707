@@ -151,7 +151,10 @@ the seed-0 selection-bias disclosure.
   retains 12 pair-control-only identities as explicit exclusions, and creates
   60 separate `last`/`best_val` checkpoint jobs. Source-local assignment is
   exactly 20 jobs on each of `curie`, `lise`, and `precision_medicine`; see
-  `docs/validation/issue55_metric_evaluation_plan.md`.
+  `docs/validation/issue55_metric_evaluation_plan.md`. At clean pushed Git
+  `3e34076efc83daf5e2ed5bc3a5e7c451bc911904`, Curie passed deterministic
+  regeneration, the 17 focused planning tests, and the complete 255-test CPU
+  suite without accessing a checkpoint or dataset.
 
 ## Documented but not executed
 
