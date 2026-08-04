@@ -58,24 +58,31 @@ Implemented foundation:
   C1-C4 role freeze and deduplicated follow-up plan;
 - completed 30-row seed 1/2 role-replication and pair-control execution,
   three independently verified no-delete uploads, and the checksum-sealed
-  12-reused-plus-30-new aggregate with per-seed and sample-SD summaries.
+  12-reused-plus-30-new aggregate with per-seed and sample-SD summaries;
+- Metric Contract v1.2 evaluation modules for deterministic checkpoint feature
+  extraction, ID/calibration metrics, OOD scores, representation geometry,
+  explicit numerical status, canonical artifact records, and bounded cache
+  execution, with tiny-fixture/parity/failure/invariance tests and a clean
+  non-protected Curie checkpoint smoke recorded in
+  `docs/validation/issue53_metric_runtime_curie.md`.
 
-Documented or prepared, but not yet implemented or executed:
+Documented and implemented, but not yet executed on protected research splits:
 
 - `GDA-ClassDensity` as the SN-off class-wise full-covariance Gaussian density
   readout using the pinned adaptive jitter and class-prior-weighted `logsumexp`;
 - the complete DDU name reserved for a future spectral-normalization training
   ablation, with optional post-hoc variants outside metric-contract v1.2;
-- the WRN-28-10/CIFAR-10 metric-contract v1.2 formulas, paper names, artifact
-  keys, numerical failure semantics, and validation oracles.
+- the WRN-28-10/CIFAR-10 Metric Contract v1.2 formulas, paper names, artifact
+  keys, numerical failure semantics, validation oracles, and runtime entrypoints.
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- feature extraction pipelines;
-- geometry metrics;
-- feature-based OOD detector implementations such as Mahalanobis, kNN, generic
-  GMM baselines, GDA-ClassDensity, future DDU, CTM, ViM, and NECO;
-- research-result OOD evaluation beyond the bounded MSP infrastructure smoke.
+- protected feature extraction for the 10k ID-test and OOD datasets;
+- full frozen-checkpoint execution, multi-server sharding, external result
+  upload, seed aggregation, and paper analysis;
+- spectral-normalization training and any future DDU ablation;
+- research-result OOD evaluation beyond bounded non-protected infrastructure
+  smokes.
 
 ## Document roles
 
@@ -101,6 +108,8 @@ Not yet part of the validated foundation unless added by a later merged pull req
   reporting tiers, artifact keys, degeneracy states, and implementation tests.
 - `docs/validation/issue37_practical_runtime_status.md`: completed three-host
   practical runtime, data, and one-epoch smoke evidence.
+- `docs/validation/issue53_metric_runtime_curie.md`: Metric Contract v1.2
+  implementation checks and clean bounded non-protected Curie checkpoint smoke.
 - `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid
   integrity, validation metrics, and immutable C1-C4 selection evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.

@@ -134,6 +134,17 @@ the seed-0 selection-bias disclosure.
   and zero-delete uploads. The committed 42-row aggregate contains 12 reused
   seed-0 rows and 30 new rows without duplicate identities; see
   `docs/validation/issue49_followup_execution.md`.
+- Issue #53 implements the Metric Contract v1.2 runtime: deterministic
+  checkpoint feature/logit extraction, checkpoint-addressed raw caches,
+  ID/calibration/failure-ranking metrics, logit controls, Gaussian/distance,
+  neighbor/prototype/subspace detectors, OOD metric aggregation,
+  representation geometry/Neural Collapse, explicit numerical status, and
+  canonical result records. At clean Git
+  `14609a4d0c7498c77d59b0e5dbd825f341961e28`, Curie passed the complete
+  238-test suite and a real-checkpoint smoke using only 500 class-balanced
+  `id_train` and 500 `id_validation` samples. All 18 score arrays were finite,
+  raw/metric checksums passed, `git_dirty=false`, and no protected split was
+  accessed; see `docs/validation/issue53_metric_runtime_curie.md`.
 
 ## Documented but not executed
 
@@ -146,10 +157,10 @@ the seed-0 selection-bias disclosure.
   `GDA-ClassDensity` name, class-wise full unbiased covariance, official
   adaptive-jitter ladder, empirical-prior `logsumexp` score, and the boundary
   that reserves `DDU` for a future spectral-normalization training ablation.
-- `docs/reference_cards/08_raw_feature_artifact_contract.md` fixes the future
+- `docs/reference_cards/08_raw_feature_artifact_contract.md` fixes the
   deterministic checkpoint-feature cache, provenance, checksum, and
   protected-split authorization contract.
-- `docs/reference_cards/09_core_representation_metrics.md` freezes the future
+- `docs/reference_cards/09_core_representation_metrics.md` freezes the
   confirmatory geometry, logit-control, and low-complexity distance/angle
   panel, including Moore-Penrose NC1 and separate covariance entropy-rank,
   trace-to-top-rank, and participation-ratio definitions.
@@ -165,33 +176,37 @@ the seed-0 selection-bias disclosure.
 - `docs/reference_cards/11_metric_contract_v1_2.md` is the authoritative
   WRN-28-10/CIFAR-10 metric dictionary. It fixes the paper formulas, reporting
   tiers, checkpoint/split roles, artifact keys, degeneracy rules, source pins,
-  and validation oracles before implementation.
-- These decisions are documentation only. No GDA-ClassDensity, DDU, expanded
-  metric code, checkpoint evaluation, or OOD result has been implemented or
-  validated by the metric-contract task.
+  and validation oracles. Issue #53 provides their canonical implementation
+  entrypoints and bounded non-protected validation.
+- No protected ID-test/OOD production result, DDU/SN ablation, multi-seed
+  metric aggregate, or paper conclusion has been produced by Issue #53.
 
 ## Still missing
 
-- Penultimate feature extraction pipeline
-- Geometry and Neural Collapse metrics
-- Feature-based OOD detector implementations, including GDA-ClassDensity and
-  any future DDU/SN ablation
+- Reviewed production execution over the frozen `last.pt` primary and
+  `best_val.pt` control checkpoint identities
+- Protected 10k ID-test and near/far OOD feature extraction and scoring
+- Multi-server sharding, Hugging Face result upload, per-checkpoint/seed
+  aggregation, plots, statistical analysis, and paper tables
+- Any future DDU/SN training ablation
 
 ## Active next phase
 
-Issue #49's role replication and pair controls are complete. The next phase
-requires a separately bounded task for protected feature extraction and
-checkpoint evaluation using only the frozen role config/seed identities.
-ID-test, OOD, geometry/Neural Collapse, and detector evaluation were not
-executed by Issue #49. Issue #37 and PR #38 remain readiness evidence rather
-than production evidence.
+Issue #49's role replication and pair controls are complete, and Issue #53
+implements the frozen evaluation definitions with non-protected Curie
+evidence. After review and merge, the next phase requires a separately bounded
+task for protected feature extraction and checkpoint evaluation using only the
+frozen role config/seed identities. ID-test and OOD evaluation have not been
+executed. Issue #37/PR #38 and the Issue #53 bounded smoke remain readiness
+evidence rather than production research evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
 Neural Collapse, or OOD-detector evidence.
 
-The metric-contract and GDA/DDU naming decisions do not replace that next-phase
-Issue and do not authorize detector implementation without a separately
-bounded task.
+The Metric Contract implementation does not itself authorize protected
+execution, external upload, aggregation, or scientific claims. GDA SN-off
+outputs remain named `GDA-ClassDensity`; `DDU` remains reserved for a future
+SN ablation.
 
 ## Known workflow maintenance
 
@@ -200,8 +215,9 @@ bounded task.
 
 ## Blockers and unknowns
 
-- Protected feature extraction and checkpoint evaluation remain unimplemented
-  and require their own bounded Issue and validation evidence.
+- Protected feature extraction and checkpoint evaluation remain unexecuted and
+  require their own bounded Issue and validation evidence after review of the
+  Issue #53 runtime.
 - DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
   and require a separately bounded future ablation if the project retains them.
 
