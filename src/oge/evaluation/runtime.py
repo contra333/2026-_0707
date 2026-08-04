@@ -46,6 +46,7 @@ from .geometry import (
     all_covariance_spectra,
     cdnv,
     class_pair_geometry,
+    exact_self_neighbor_distances,
     feature_norm_distribution,
     fit_geometry_statistics,
     hypersphere_alignment_uniformity,
@@ -301,11 +302,21 @@ class FittedMetricRuntime:
             ),
         }
         if include_neighbors:
+            neighbor_distances, neighbor_ids = exact_self_neighbor_distances(
+                self.train["features"],
+                k=100,
+                sample_ids=self.train["sample_ids"],
+                include_neighbor_ids=False,
+            )
             result["lid"] = local_intrinsic_dimensionality(
-                self.train["features"], sample_ids=self.train["sample_ids"]
+                self.train["features"],
+                sample_ids=self.train["sample_ids"],
+                precomputed_neighbors=(neighbor_distances, neighbor_ids),
             )
             result["twonn"] = twonn(
-                self.train["features"], sample_ids=self.train["sample_ids"]
+                self.train["features"],
+                sample_ids=self.train["sample_ids"],
+                precomputed_neighbors=(neighbor_distances, neighbor_ids),
             )
         return result
 

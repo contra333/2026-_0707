@@ -15,6 +15,7 @@ from .common import (
     linear_quantiles,
     normalize_rows,
 )
+from .detectors import exact_neighbor_distances
 
 
 @dataclass(frozen=True)
@@ -432,29 +433,29 @@ def all_covariance_spectra(statistics: GeometryStatistics) -> dict[str, Any]:
     }
 
 
-def _exact_self_neighbor_distances(
+def exact_self_neighbor_distances(
     features: np.ndarray,
     *,
     k: int,
     sample_ids: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]:
+    query_chunk_size: int = 64,
+    bank_chunk_size: int | None = None,
+    include_neighbor_ids: bool = True,
+) -> tuple[np.ndarray, np.ndarray | None]:
     if k >= len(features):
         raise ValueError("neighbor k must be smaller than sample count")
-    distances = np.empty((len(features), k), dtype=np.float64)
-    neighbor_ids = np.empty((len(features), k), dtype=sample_ids.dtype)
-    for index, query in enumerate(features):
-        all_distances = np.linalg.norm(features - query, axis=1)
-        all_distances[index] = np.inf
-        candidate = np.argpartition(all_distances, k - 1)[:k]
-        boundary = float(np.max(all_distances[candidate]))
-        strict = np.flatnonzero(all_distances < boundary)
-        tied = np.flatnonzero(all_distances == boundary)
-        tied = tied[np.argsort(sample_ids[tied], kind="stable")]
-        chosen = np.concatenate([strict, tied[: k - len(strict)]])
-        chosen = chosen[np.lexsort((sample_ids[chosen], all_distances[chosen]))]
-        distances[index] = all_distances[chosen]
-        neighbor_ids[index] = sample_ids[chosen]
-    return distances, neighbor_ids
+    squared, neighbor_ids = exact_neighbor_distances(
+        features,
+        features,
+        fit_sample_ids=sample_ids,
+        query_sample_ids=sample_ids,
+        exclude_matching_sample_id=True,
+        k=k,
+        query_chunk_size=query_chunk_size,
+        bank_chunk_size=bank_chunk_size,
+        return_neighbor_ids=include_neighbor_ids,
+    )
+    return np.sqrt(squared), neighbor_ids
 
 
 def local_intrinsic_dimensionality(
@@ -462,15 +463,27 @@ def local_intrinsic_dimensionality(
     *,
     sample_ids: Any,
     k_values: Iterable[int] = (10, 25, 50, 100),
+    precomputed_neighbors: tuple[np.ndarray, np.ndarray | None] | None = None,
+    query_chunk_size: int = 64,
+    bank_chunk_size: int | None = None,
 ) -> dict[str, Any]:
     values = finite_float64(features, name="features", ndim=2)
     ids = np.asarray(sample_ids, dtype=str).reshape(-1)
     if len(ids) != len(values) or len(set(ids.tolist())) != len(ids):
         raise ValueError("sample IDs must be unique and match features")
     k_values = tuple(sorted(set(int(k) for k in k_values)))
-    distances, neighbor_ids = _exact_self_neighbor_distances(
-        values, k=max(k_values), sample_ids=ids
-    )
+    if precomputed_neighbors is None:
+        distances, neighbor_ids = exact_self_neighbor_distances(
+            values,
+            k=max(k_values),
+            sample_ids=ids,
+            query_chunk_size=query_chunk_size,
+            bank_chunk_size=bank_chunk_size,
+        )
+    else:
+        distances, neighbor_ids = precomputed_neighbors
+        if distances.shape != (len(values), max(k_values)):
+            raise ValueError("precomputed LID neighbor shape mismatch")
     output: dict[str, Any] = {"neighbor_ids": neighbor_ids}
     for k in k_values:
         selected = distances[:, :k]
@@ -515,10 +528,28 @@ def twonn(
     *,
     sample_ids: Any,
     mu_fraction: float = 0.9,
+    precomputed_neighbors: tuple[np.ndarray, np.ndarray | None] | None = None,
+    query_chunk_size: int = 64,
+    bank_chunk_size: int | None = None,
 ) -> dict[str, Any]:
     values = finite_float64(features, name="features", ndim=2)
     ids = np.asarray(sample_ids, dtype=str).reshape(-1)
-    distances, neighbor_ids = _exact_self_neighbor_distances(values, k=2, sample_ids=ids)
+    if precomputed_neighbors is None:
+        distances, neighbor_ids = exact_self_neighbor_distances(
+            values,
+            k=2,
+            sample_ids=ids,
+            query_chunk_size=query_chunk_size,
+            bank_chunk_size=bank_chunk_size,
+        )
+    else:
+        all_distances, all_neighbor_ids = precomputed_neighbors
+        if all_distances.shape[0] != len(values) or all_distances.shape[1] < 2:
+            raise ValueError("precomputed TwoNN neighbor shape mismatch")
+        distances = all_distances[:, :2]
+        neighbor_ids = (
+            None if all_neighbor_ids is None else all_neighbor_ids[:, :2]
+        )
     if np.any(distances[:, 0] <= EPSILON_NORM):
         return {
             "metric": MetricValue(

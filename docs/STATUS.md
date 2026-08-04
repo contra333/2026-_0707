@@ -37,6 +37,16 @@ Together with 12 reused seed-0 rows, they form 42 unique `(config_hash, seed)`
 identities across 14 configurations. The checksum-sealed aggregate retains
 per-seed validation values, mean/sample SD, paired-control differences, and
 the seed-0 selection-bias disclosure.
+Issue #57 and PR #58 then completed the frozen protected Metric Contract v1.2
+evaluation at scientific evaluator SHA
+`c38b09694be88aa74de0741b39e9d3ba0d6ff61a`. Curie, Lise, and
+precision_medicine each reached 20/20 checkpoint-level `REMOTE_VERIFIED`.
+All 60 checkpoint bundles, three operational shards, and the central aggregate
+were uploaded and independently read back. The aggregate contains 95,160
+successful per-checkpoint scalar records, 31,720 successful seed aggregates,
+40 successful detector rank-concordance records, and zero non-success seed
+aggregates. See
+`docs/validation/issue57_metric_evaluation_execution.md`.
 
 ## Validated or implemented
 
@@ -155,14 +165,23 @@ the seed-0 selection-bias disclosure.
   `3e34076efc83daf5e2ed5bc3a5e7c451bc911904`, Curie passed deterministic
   regeneration, the 17 focused planning tests, and the complete 255-test CPU
   suite without accessing a checkpoint or dataset.
+- Issue #57 implements and executes the production evaluator, exact
+  memory-bounded detector kernels, source-local host supervisor, no-delete
+  upload/readback, operational-shard collector, and deterministic seed
+  aggregation. Exactly 60 authorized `last`/`best_val` checkpoint jobs reached
+  `REMOTE_VERIFIED` as `20/20/20`; the checksum-verified aggregate is available
+  on Hugging Face and in a local non-Git analysis directory. A post-pilot
+  supervisor-only terminal-state hotfix is separately identified as
+  `1af220bbdcac99f4c762613a7556ce2e1901e8da`; every scientific scalar retains
+  the single clean evaluator SHA `c38b09694be88aa74de0741b39e9d3ba0d6ff61a`.
 
 ## Documented but not executed
 
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
   deterministic grid, C1-C4 selection, pairwise coupling controls, budget,
   seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid,
-  C1-C4 freeze, role replication, and pair controls are complete; downstream
-  protected evaluation has not been executed.
+  C1-C4 freeze, role replication, pair controls, and downstream protected
+  Metric Contract v1.2 evaluation are complete.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the SN-off
   `GDA-ClassDensity` name, class-wise full unbiased covariance, official
   adaptive-jitter ladder, empirical-prior `logsumexp` score, and the boundary
@@ -187,38 +206,34 @@ the seed-0 selection-bias disclosure.
   WRN-28-10/CIFAR-10 metric dictionary. It fixes the paper formulas, reporting
   tiers, checkpoint/split roles, artifact keys, degeneracy rules, source pins,
   and validation oracles. Issue #53 provides their canonical implementation
-  entrypoints and bounded non-protected validation. Issue #55 provides the
-  frozen 60-job launch inventory while leaving every launch state `not_started`.
-- No protected ID-test/OOD production result, DDU/SN ablation, multi-seed
-  metric aggregate, or paper conclusion has been produced by Issues #53/#55.
+  entrypoints and bounded non-protected validation, Issue #55 provides the
+  frozen 60-job launch inventory, and Issue #57 provides the completed
+  protected execution and checksum-verified multi-seed aggregate.
+- No DDU/SN ablation, plot, statistical interpretation, or paper conclusion
+  has been produced from the Issue #57 aggregate.
 
 ## Still missing
 
-- Reviewed production execution over the frozen `last.pt` primary and
-  `best_val.pt` control checkpoint identities
-- Protected 10k ID-test and near/far OOD feature extraction and scoring
-- Multi-server sharding, Hugging Face result upload, per-checkpoint/seed
-  aggregation, plots, statistical analysis, and paper tables
+- Plots, statistical analysis, optimizer/geometry/OOD interpretation, and
+  paper tables from the completed protected aggregate
 - Any future DDU/SN training ablation
 
 ## Active next phase
 
-Issue #49's role replication and pair controls are complete, Issue #53
-implements the frozen evaluation definitions with non-protected Curie
-evidence, and Issue #55 freezes the 30-identity/60-checkpoint source-local
-launch plan. After review and merge, the next phase requires a separately
-bounded task to synchronize all three hosts to the merged plan SHA and execute
-only those jobs. ID-test and OOD evaluation have not been executed. Issue
-#37/PR #38, the Issue #53 bounded smoke, and the Issue #55 inventory remain
-readiness evidence rather than production research evidence.
-The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
-the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
-Neural Collapse, or OOD-detector evidence.
+Issue #57 completed protected feature extraction, metric evaluation, no-delete
+Hugging Face publication, three-host readback, and deterministic seed
+aggregation for the 30 authorized identities and 60 checkpoints. The next
+phase is local analysis of the checksum-verified aggregate: quality-control
+tables first, then prespecified `last` primary comparisons, `best_val` control
+comparisons, geometry/OOD association, sensitivity results, plots, and paper
+tables. The Issue #10 CUDA runs remain infrastructure validation, and the
+Issue #14 run is the single-seed historical SGD baseline; neither is
+optimizer-comparison, geometry, Neural Collapse, or OOD-detector evidence.
 
-The Metric Contract implementation does not itself authorize protected
-execution, external upload, aggregation, or scientific claims. GDA SN-off
-outputs remain named `GDA-ClassDensity`; `DDU` remains reserved for a future
-SN ablation.
+The completed Issue #57 authorization does not extend to another protected
+population, rerun, external upload, or scientific claim. GDA SN-off outputs
+remain named `GDA-ClassDensity`; `DDU` remains reserved for a future SN
+ablation.
 
 ## Known workflow maintenance
 
@@ -227,9 +242,8 @@ SN ablation.
 
 ## Blockers and unknowns
 
-- Protected feature extraction and checkpoint evaluation remain unexecuted and
-  require their own bounded execution Issue and validation evidence after
-  review and merge of the Issue #55 launch plan.
+- The protected run has no remaining execution blocker. Its aggregate still
+  requires local statistical analysis before any paper claim.
 - DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
   and require a separately bounded future ablation if the project retains them.
 

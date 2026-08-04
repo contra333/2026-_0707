@@ -381,7 +381,8 @@ def _remote_file_map(
     result = run(
         [str(hf_cli), "buckets", "list", destination, "--json", "-R"]
     )
-    rows = json.loads(result.stdout) if result.stdout.strip() else []
+    output = result.stdout.strip()
+    rows = [] if output in {"", "(empty)"} else json.loads(output)
     if not isinstance(rows, list):
         raise ValueError("HF remote listing is not a JSON array")
     return {

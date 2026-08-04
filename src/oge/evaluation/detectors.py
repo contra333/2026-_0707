@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from scipy.linalg import solve_triangular
 from sklearn.covariance import EmpiricalCovariance
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -38,9 +39,18 @@ def _quadratic_distances(
     queries: np.ndarray,
     means: np.ndarray,
     precision: np.ndarray,
+    *,
+    query_chunk_size: int = 2048,
 ) -> np.ndarray:
-    delta = queries[:, None, :] - means[None, :, :]
-    distances = np.einsum("ncp,pq,ncq->nc", delta, precision, delta, optimize=True)
+    if query_chunk_size <= 0:
+        raise ValueError("query_chunk_size must be positive")
+    distances = np.empty((len(queries), len(means)), dtype=np.float64)
+    for start in range(0, len(queries), query_chunk_size):
+        stop = min(start + query_chunk_size, len(queries))
+        delta = queries[start:stop, None, :] - means[None, :, :]
+        distances[start:stop] = np.einsum(
+            "ncp,pq,ncq->nc", delta, precision, delta, optimize=True
+        )
     if not np.isfinite(distances).all():
         raise ValueError("quadratic distances must be finite")
     return distances
@@ -109,7 +119,12 @@ def fit_tied_gaussians(
     )
 
 
-def score_tied_gaussians(fit: TiedGaussianFit, queries: Any) -> dict[str, Any]:
+def score_tied_gaussians(
+    fit: TiedGaussianFit,
+    queries: Any,
+    *,
+    query_chunk_size: int = 2048,
+) -> dict[str, Any]:
     values = finite_float64(queries, name="query_features", ndim=2)
     status = fit.normalization_status
     reasons = list(fit.normalization_reasons)
@@ -124,9 +139,17 @@ def score_tied_gaussians(fit: TiedGaussianFit, queries: Any) -> dict[str, Any]:
             raise ValueError("query features contain exact-zero norms")
         if query_status == "degenerate":
             status = "degenerate"
-    class_distances = _quadratic_distances(values, fit.class_means, fit.within_precision)
+    class_distances = _quadratic_distances(
+        values,
+        fit.class_means,
+        fit.within_precision,
+        query_chunk_size=query_chunk_size,
+    )
     global_distances = _quadratic_distances(
-        values, fit.global_mean[None, :], fit.global_precision
+        values,
+        fit.global_mean[None, :],
+        fit.global_precision,
+        query_chunk_size=query_chunk_size,
     )[:, 0]
     nearest = np.argmin(class_distances, axis=1)
     return {
@@ -184,21 +207,44 @@ def fit_gda_class_density(
     if covariances.ndim == 1:
         covariances = covariances[:, None, None]
     identity = np.eye(values.shape[1], dtype=np.float64)
-    selected: float | None = None
-    cholesky: np.ndarray | None = None
-    for candidate in gda_jitter_candidates():
+    candidates = gda_jitter_candidates()
+
+    def attempt(index: int) -> np.ndarray | None:
+        candidate = candidates[index]
         try:
             candidate_cholesky = np.linalg.cholesky(
                 covariances + candidate * identity[None, :, :]
             )
         except np.linalg.LinAlgError:
-            continue
-        if np.isfinite(candidate_cholesky).all():
-            selected = candidate
-            cholesky = candidate_cholesky
+            return None
+        return candidate_cholesky if np.isfinite(candidate_cholesky).all() else None
+
+    cholesky = None
+    selected_index = 0
+    for early_index in range(3):
+        cholesky = attempt(early_index)
+        if cholesky is not None:
+            selected_index = early_index
             break
-    if selected is None or cholesky is None:
+    if cholesky is None:
+        upper = len(candidates) - 1
+        upper_cholesky = attempt(upper)
+        if upper_cholesky is None:
+            raise ValueError("GDA-ClassDensity exhausted the shared jitter ladder")
+        lower = 2
+        while upper - lower > 1:
+            middle = (lower + upper) // 2
+            candidate_cholesky = attempt(middle)
+            if candidate_cholesky is None:
+                lower = middle
+            else:
+                upper = middle
+                upper_cholesky = candidate_cholesky
+        selected_index = upper
+        cholesky = upper_cholesky
+    if cholesky is None:
         raise ValueError("GDA-ClassDensity exhausted the shared jitter ladder")
+    selected = candidates[selected_index]
     log_determinants = 2.0 * np.sum(
         np.log(np.diagonal(cholesky, axis1=1, axis2=2)), axis=1
     )
@@ -213,19 +259,33 @@ def fit_gda_class_density(
     )
 
 
-def score_gda_class_density(fit: GDAClassDensityFit, queries: Any) -> dict[str, Any]:
+def score_gda_class_density(
+    fit: GDAClassDensityFit,
+    queries: Any,
+    *,
+    query_chunk_size: int = 2048,
+) -> dict[str, Any]:
     values = finite_float64(queries, name="query_features", ndim=2)
     if values.shape[1] != fit.class_means.shape[1]:
         raise ValueError("GDA query feature width does not match fit")
+    if query_chunk_size <= 0:
+        raise ValueError("query_chunk_size must be positive")
     class_log_density = np.empty((len(values), len(fit.class_means)), dtype=np.float64)
     constant = fit.class_means.shape[1] * np.log(2.0 * np.pi)
     for class_index in range(len(fit.class_means)):
-        delta = (values - fit.class_means[class_index]).T
-        solved = np.linalg.solve(fit.cholesky[class_index], delta)
-        quadratic = np.sum(solved * solved, axis=0)
-        class_log_density[:, class_index] = -0.5 * (
-            constant + fit.log_determinants[class_index] + quadratic
-        )
+        for start in range(0, len(values), query_chunk_size):
+            stop = min(start + query_chunk_size, len(values))
+            delta = (values[start:stop] - fit.class_means[class_index]).T
+            solved = solve_triangular(
+                fit.cholesky[class_index],
+                delta,
+                lower=True,
+                check_finite=False,
+            )
+            quadratic = np.sum(solved * solved, axis=0)
+            class_log_density[start:stop, class_index] = -0.5 * (
+                constant + fit.log_determinants[class_index] + quadratic
+            )
     mixture_terms = class_log_density + fit.log_priors[None, :]
     maximum = np.max(mixture_terms, axis=1, keepdims=True)
     score = np.squeeze(maximum, axis=1) + np.log(
@@ -257,12 +317,99 @@ def _stable_k_smallest(
     return chosen[np.lexsort((sample_ids[chosen], distances[chosen]))]
 
 
+def exact_neighbor_distances(
+    fit_features: Any,
+    query_features: Any,
+    *,
+    fit_sample_ids: Any,
+    k: int,
+    query_sample_ids: Any | None = None,
+    exclude_matching_sample_id: bool = False,
+    query_chunk_size: int = 64,
+    bank_chunk_size: int | None = None,
+    return_neighbor_ids: bool = True,
+) -> tuple[np.ndarray, np.ndarray | None]:
+    """Return exact float64 squared-L2 neighbors with stable sample-ID ties."""
+    bank = finite_float64(fit_features, name="fit_features", ndim=2)
+    queries = finite_float64(query_features, name="query_features", ndim=2)
+    if bank.shape[1] != queries.shape[1]:
+        raise ValueError("fit/query feature widths differ")
+    if k <= 0 or k > len(bank) - int(exclude_matching_sample_id):
+        raise ValueError("k is invalid for the reference bank")
+    if query_chunk_size <= 0:
+        raise ValueError("query_chunk_size must be positive")
+    if bank_chunk_size is None:
+        bank_chunk_size = len(bank)
+    if bank_chunk_size <= 0:
+        raise ValueError("bank_chunk_size must be positive")
+    fit_ids = np.asarray(fit_sample_ids, dtype=str).reshape(-1)
+    if len(fit_ids) != len(bank) or len(set(fit_ids.tolist())) != len(fit_ids):
+        raise ValueError("fit_sample_ids must be unique and match the bank")
+    query_ids: np.ndarray | None = None
+    if exclude_matching_sample_id:
+        if query_sample_ids is None:
+            raise ValueError("self exclusion requires query_sample_ids")
+        query_ids = np.asarray(query_sample_ids, dtype=str).reshape(-1)
+        if len(query_ids) != len(queries):
+            raise ValueError("query_sample_ids must match the query count")
+        if not set(query_ids.tolist()).issubset(set(fit_ids.tolist())):
+            raise ValueError("self-excluded query IDs must exist in the bank")
+
+    output_distances = np.empty((len(queries), k), dtype=np.float64)
+    output_ids = (
+        np.empty((len(queries), k), dtype=fit_ids.dtype)
+        if return_neighbor_ids
+        else None
+    )
+    bank_norm = np.sum(bank * bank, axis=1)
+    for query_start in range(0, len(queries), query_chunk_size):
+        query_stop = min(query_start + query_chunk_size, len(queries))
+        query_block = queries[query_start:query_stop]
+        query_norm = np.sum(query_block * query_block, axis=1)
+        best_distances = np.full((len(query_block), k), np.inf, dtype=np.float64)
+        best_ids = np.full((len(query_block), k), "", dtype=fit_ids.dtype)
+        for bank_start in range(0, len(bank), bank_chunk_size):
+            bank_stop = min(bank_start + bank_chunk_size, len(bank))
+            candidate_distances = (
+                query_norm[:, None]
+                + bank_norm[None, bank_start:bank_stop]
+                - 2.0 * (query_block @ bank[bank_start:bank_stop].T)
+            )
+            np.maximum(candidate_distances, 0.0, out=candidate_distances)
+            candidate_ids = fit_ids[bank_start:bank_stop]
+            if query_ids is not None:
+                candidate_distances[
+                    query_ids[query_start:query_stop, None] == candidate_ids[None, :]
+                ] = np.inf
+            merged_distances = np.concatenate(
+                [best_distances, candidate_distances], axis=1
+            )
+            merged_ids = np.concatenate(
+                [best_ids, np.broadcast_to(candidate_ids, candidate_distances.shape)],
+                axis=1,
+            )
+            for row_index in range(len(query_block)):
+                selected = _stable_k_smallest(
+                    merged_distances[row_index], merged_ids[row_index], k
+                )
+                best_distances[row_index] = merged_distances[row_index, selected]
+                best_ids[row_index] = merged_ids[row_index, selected]
+        if not np.isfinite(best_distances).all():
+            raise ValueError("exact neighbor search did not find k finite distances")
+        output_distances[query_start:query_stop] = best_distances
+        if output_ids is not None:
+            output_ids[query_start:query_stop] = best_ids
+    return output_distances, output_ids
+
+
 def exact_knn_l2_scores(
     fit_features: Any,
     query_features: Any,
     *,
     fit_sample_ids: Any,
     k: int = 50,
+    query_chunk_size: int = 64,
+    bank_chunk_size: int | None = None,
 ) -> dict[str, Any]:
     bank, fit_status, fit_reasons, fit_diagnostics = normalize_rows(
         fit_features,
@@ -279,14 +426,18 @@ def exact_knn_l2_scores(
     sample_ids = np.asarray(fit_sample_ids, dtype=str).reshape(-1)
     if len(sample_ids) != len(bank) or len(set(sample_ids.tolist())) != len(sample_ids):
         raise ValueError("fit_sample_ids must be unique and match the bank")
-    distances_out = np.empty(len(queries), dtype=np.float64)
-    neighbor_ids = np.empty(len(queries), dtype=sample_ids.dtype)
-    for query_index, query in enumerate(queries):
-        distances = np.sum((bank - query) ** 2, axis=1)
-        ordered = _stable_k_smallest(distances, sample_ids, k)
-        neighbor = ordered[-1]
-        distances_out[query_index] = distances[neighbor]
-        neighbor_ids[query_index] = sample_ids[neighbor]
+    neighbor_distances, neighbor_id_matrix = exact_neighbor_distances(
+        bank,
+        queries,
+        fit_sample_ids=sample_ids,
+        k=k,
+        query_chunk_size=query_chunk_size,
+        bank_chunk_size=bank_chunk_size,
+    )
+    if neighbor_id_matrix is None:
+        raise AssertionError("kNN scoring requires returned neighbor sample IDs")
+    distances_out = neighbor_distances[:, -1]
+    neighbor_ids = neighbor_id_matrix[:, -1]
     status: MetricStatus = (
         "degenerate" if "degenerate" in (fit_status, query_status) else "success"
     )
@@ -296,6 +447,8 @@ def exact_knn_l2_scores(
         "kth_neighbor_sample_id": neighbor_ids,
         "k": k,
         "exact_search": True,
+        "query_chunk_size": query_chunk_size,
+        "bank_chunk_size": len(bank) if bank_chunk_size is None else bank_chunk_size,
         "status": status,
         "reason_codes": sorted(set(fit_reasons + query_reasons)),
         "normalization_diagnostics": {
@@ -313,12 +466,20 @@ def prototype_scores(
     *,
     classifier_weight: Any | None = None,
     num_classes: int | None = None,
+    query_chunk_size: int = 2048,
 ) -> dict[str, Any]:
     _, _, means, _ = _class_statistics(
         fit_features, fit_labels, num_classes=num_classes
     )
     queries = finite_float64(query_features, name="query_features", ndim=2)
-    euclidean = np.linalg.norm(queries[:, None, :] - means[None, :, :], axis=2)
+    if query_chunk_size <= 0:
+        raise ValueError("query_chunk_size must be positive")
+    euclidean = np.empty((len(queries), len(means)), dtype=np.float64)
+    for start in range(0, len(queries), query_chunk_size):
+        stop = min(start + query_chunk_size, len(queries))
+        euclidean[start:stop] = np.linalg.norm(
+            queries[start:stop, None, :] - means[None, :, :], axis=2
+        )
     nearest = np.argmin(euclidean, axis=1)
     normalized_queries, query_status, query_reasons, query_diagnostics = normalize_rows(
         queries, name="query_features"

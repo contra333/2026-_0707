@@ -6,6 +6,7 @@ from oge.evaluation.geometry import (
     cdnv,
     class_pair_geometry,
     covariance_spectrum,
+    exact_self_neighbor_distances,
     feature_norm_distribution,
     fit_geometry_statistics,
     hypersphere_alignment_uniformity,
@@ -136,6 +137,35 @@ def test_lid_and_twonn_duplicate_failure_semantics():
     assert duplicate_lid["2"]["metric"]["status"] == "degenerate"
     assert duplicate_twonn["metric"]["status"] == "degenerate"
     assert duplicate_twonn["metric"]["value"] is None
+
+
+def test_lid_and_twonn_precomputed_exact_neighbors_match_independent_calls():
+    rng = np.random.default_rng(21)
+    features = rng.normal(size=(18, 4))
+    ids = np.asarray([f"sample-{index:02d}" for index in range(len(features))])
+    neighbors = exact_self_neighbor_distances(
+        features,
+        k=5,
+        sample_ids=ids,
+        query_chunk_size=3,
+        bank_chunk_size=4,
+    )
+    independent_lid = local_intrinsic_dimensionality(
+        features, sample_ids=ids, k_values=(2, 5), query_chunk_size=7, bank_chunk_size=8
+    )
+    cached_lid = local_intrinsic_dimensionality(
+        features, sample_ids=ids, k_values=(2, 5), precomputed_neighbors=neighbors
+    )
+    for k in ("2", "5"):
+        assert cached_lid[k]["metric"] == independent_lid[k]["metric"]
+        np.testing.assert_allclose(cached_lid[k]["per_sample"], independent_lid[k]["per_sample"])
+
+    independent_twonn = twonn(
+        features, sample_ids=ids, query_chunk_size=7, bank_chunk_size=8
+    )
+    cached_twonn = twonn(features, sample_ids=ids, precomputed_neighbors=neighbors)
+    assert cached_twonn["metric"] == independent_twonn["metric"]
+    np.testing.assert_allclose(cached_twonn["mu"], independent_twonn["mu"])
 
 
 def test_hypersphere_alignment_and_uniformity_are_fixed_seed_deterministic():

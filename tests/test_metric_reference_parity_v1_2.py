@@ -62,7 +62,10 @@ def test_fd_shifts_tie_grouped_aurc_parity_after_removing_display_scale():
     confidence = actual["thresholds"]
     coverage = actual["coverage"]
     risk = actual["risk"]
-    pinned_display_value = -1000.0 * np.trapz(risk, coverage)
+    trapezoid = getattr(np, "trapezoid", None)
+    if trapezoid is None:
+        trapezoid = np.trapz
+    pinned_display_value = -1000.0 * trapezoid(risk, coverage)
 
     assert FD_SHIFTS_COMMIT.startswith("c4467aec")
     assert confidence.size == 3

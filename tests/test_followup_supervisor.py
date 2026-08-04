@@ -179,3 +179,78 @@ def test_upload_uses_no_delete_plan_apply_listing_and_last_marker(tmp_path):
     assert "--plan" in sync_commands[1]
     assert "--no-delete" in sync_commands[1]
     assert "--apply" in sync_commands[2]
+
+
+def test_upload_accepts_legacy_hf_empty_listing_before_dry_run(tmp_path):
+    study = tmp_path / "study"
+    study.mkdir()
+    atomic_write_json(study / "trial.json", {"status": "completed"})
+    build_artifact_manifest(study)
+    destination = "hf://buckets/contra333/ICLR_RUN/evaluations/empty-fixture"
+    prefix = "evaluations/empty-fixture"
+    remote = {}
+
+    def fake_run(command, **kwargs):
+        command = list(command)
+        if command[1:3] == ["buckets", "list"]:
+            if not remote:
+                return subprocess.CompletedProcess(command, 0, stdout="(empty)\n", stderr="")
+            return subprocess.CompletedProcess(
+                command,
+                0,
+                stdout=json.dumps(
+                    [
+                        {"type": "file", "path": path, **metadata}
+                        for path, metadata in sorted(remote.items())
+                    ]
+                ),
+                stderr="",
+            )
+        local_files = [path for path in study.rglob("*") if path.is_file()]
+        rows = [
+            {
+                "type": "header",
+                "summary": {
+                    "uploads": len(local_files),
+                    "downloads": 0,
+                    "deletes": 0,
+                    "skips": 0,
+                },
+            }
+        ]
+        rows.extend(
+            {
+                "type": "operation",
+                "action": "upload",
+                "path": path.relative_to(study).as_posix(),
+            }
+            for path in local_files
+        )
+        text = "\n".join(json.dumps(row) for row in rows) + "\n"
+        if "--dry-run" in command:
+            return subprocess.CompletedProcess(command, 0, stdout=text, stderr="")
+        if "--plan" in command:
+            Path(command[command.index("--plan") + 1]).write_text(text)
+        elif "--apply" in command:
+            for path in local_files:
+                remote[f"{prefix}/{path.relative_to(study).as_posix()}"] = {
+                    "size": path.stat().st_size,
+                    "xet_hash": "fake",
+                }
+        elif command[1:3] == ["buckets", "cp"]:
+            marker = Path(command[3])
+            remote[f"{prefix}/REMOTE_COMPLETE.json"] = {
+                "size": marker.stat().st_size,
+                "xet_hash": "marker",
+            }
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    result = upload_artifact_tree(
+        study,
+        hf_cli="/fake/hf",
+        bucket="contra333/ICLR_RUN",
+        destination=destination,
+        control_root=tmp_path / "control",
+        run=fake_run,
+    )
+    assert result["status"] == "REMOTE_VERIFIED"

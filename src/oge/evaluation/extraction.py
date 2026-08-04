@@ -190,6 +190,8 @@ def build_extraction_loader(
     )
     item_record = dict(item)
     item_record["smoke_selection"] = smoke_selection
+    item_record["observed_imglist_sha256"] = sha256_file(imglist_path)
+    item_record["observed_imglist_count"] = len(base_dataset)
     return loader, expected_ids, item_record
 
 
@@ -329,6 +331,8 @@ def write_raw_feature_artifact(
                 "sample_count": int(len(arrays["sample_ids"])),
                 "ordered_sample_id_sha256": ordered_sample_id_digest(arrays["sample_ids"]),
                 "expected_imglist_sha256": dataset_item.get("expected_sha256"),
+                "observed_imglist_sha256": dataset_item["observed_imglist_sha256"],
+                "observed_imglist_count": int(dataset_item["observed_imglist_count"]),
                 "array_shapes": {key: list(value.shape) for key, value in arrays.items()},
                 "array_dtypes": {key: str(value.dtype) for key, value in arrays.items()},
                 "relative_directory": split_dir.relative_to(temporary).as_posix(),
