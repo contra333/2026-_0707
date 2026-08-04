@@ -147,7 +147,6 @@ def execute_host_jobs(
     if blas_threads <= 0:
         raise ValueError("blas_threads must be positive")
     verify_clean_git(repository, expected_git_sha)
-    validate_dataset_policy(inventory, dataset_config_path=dataset_config_path)
     if not Path(data_root).is_dir():
         raise SupervisorBlockedError(f"data root is absent: {data_root}")
     artifact.mkdir(parents=True, exist_ok=True)
@@ -179,6 +178,11 @@ def execute_host_jobs(
             "checkpoint_path": str(checkpoint),
             "checkpoint_sha256": job["checkpoint_sha256"],
         }
+    validate_dataset_policy(
+        inventory,
+        dataset_config_path=dataset_config_path,
+        data_root=data_root,
+    )
     atomic_write_json(state_path, state)
     state = wait_for_idle_gpus(
         gpu_uuids,

@@ -1,6 +1,8 @@
 import json
 
 import numpy as np
+import pytest
+import yaml
 
 from oge.evaluation.extraction import sha256_file
 from oge.evaluation.production import (
@@ -8,6 +10,7 @@ from oge.evaluation.production import (
     OOD_SPLITS,
     PROTECTED_AUTHORIZATION,
     evaluate_raw_feature_cache_production,
+    validate_dataset_policy,
     verify_production_bundle,
 )
 
@@ -172,3 +175,80 @@ def test_production_cache_writes_complete_checkpoint_bundle_and_scalar_panel(tmp
         sources_lock_path=sources_lock,
     )
     assert resumed == root
+
+
+def test_dataset_policy_preflight_reads_ood_imglist_count_and_hash_from_data_root(tmp_path):
+    config_root = tmp_path / "configs"
+    data_root = tmp_path / "data"
+    config_root.mkdir()
+    data_root.mkdir()
+    membership = config_root / "membership.jsonl"
+    membership.write_text('{"record_type":"header"}\n')
+    datasets = {}
+    id_keys = {"id_train", "id_validation", "id_test"}
+    policy_id = {}
+    policy_ood = {}
+    for index, split_key in enumerate(EXECUTABLE_SPLITS, start=1):
+        is_id = split_key in id_keys
+        imglist_root = config_root if is_id else data_root
+        imglist = imglist_root / f"{split_key}.txt"
+        imglist.write_text("".join(f"image-{row}.png {row % 10}\n" for row in range(index)))
+        dataset_name = "cifar10" if is_id else split_key
+        item = {
+            "dataset_name": dataset_name,
+            "split": "test",
+            "is_id": is_id,
+            "group": "id" if is_id else ("near" if split_key in {"cifar100", "tin"} else "far"),
+            "imglist": imglist.name,
+        }
+        if is_id:
+            item["imglist_location"] = "dataset_config"
+            item["expected_count"] = index
+            item["expected_sha256"] = sha256_file(imglist)
+            policy_id[split_key] = {
+                "count": index,
+                "imglist_sha256": sha256_file(imglist),
+                "dataset_name": dataset_name,
+            }
+        else:
+            policy_ood[split_key] = {
+                "count": index,
+                "imglist_sha256": sha256_file(imglist),
+                "dataset_name": dataset_name,
+                "group": item["group"],
+            }
+        datasets[split_key] = item
+    config = {
+        "membership_manifest": {
+            "path": membership.name,
+            "sha256": sha256_file(membership),
+            "row_count": 1,
+        },
+        "datasets": datasets,
+    }
+    config_path = config_root / "dataset.yaml"
+    config_path.write_text(yaml.safe_dump(config, sort_keys=False))
+    inventory = {
+        "dataset_policy": {
+            "dataset_config_sha256": sha256_file(config_path),
+            "membership_manifest": {
+                "sha256": sha256_file(membership),
+                "row_count": 1,
+            },
+            "id_splits": policy_id,
+            "ood_splits": policy_ood,
+        }
+    }
+
+    validate_dataset_policy(
+        inventory,
+        dataset_config_path=config_path,
+        data_root=data_root,
+    )
+    (data_root / "cifar100.txt").write_text("drift.png 0\n")
+    with pytest.raises(ValueError, match="cifar100.*(count|imglist)"):
+        validate_dataset_policy(
+            inventory,
+            dataset_config_path=config_path,
+            data_root=data_root,
+        )

@@ -16,7 +16,7 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 import yaml
 
-from oge.data.openood_cifar10 import load_dataset_config
+from oge.data.openood_cifar10 import load_dataset_config, resolve_imglist_path
 from oge.studies.hashing import scientific_config_hash
 
 from .analysis import restoration_gaps
@@ -123,6 +123,7 @@ def validate_dataset_policy(
     inventory: Mapping[str, Any],
     *,
     dataset_config_path: str | Path,
+    data_root: str | Path,
 ) -> None:
     config_path = Path(dataset_config_path)
     policy = inventory["dataset_policy"]
@@ -134,6 +135,12 @@ def validate_dataset_policy(
         raise ValueError("dataset membership manifest identity drift")
     if int(membership["row_count"]) != int(policy["membership_manifest"]["row_count"]):
         raise ValueError("dataset membership manifest count drift")
+    membership_path = config_path.parent / membership["path"]
+    if sha256_file(membership_path) != membership["sha256"]:
+        raise ValueError("dataset membership manifest file SHA256 drift")
+    membership_rows = sum(1 for _ in membership_path.open(encoding="utf-8"))
+    if membership_rows != int(membership["row_count"]):
+        raise ValueError("dataset membership manifest file count drift")
     expected: dict[str, Mapping[str, Any]] = {
         **policy["id_splits"],
         **policy["ood_splits"],
@@ -143,12 +150,30 @@ def validate_dataset_policy(
     for split_key in EXECUTABLE_SPLITS:
         item = config["datasets"][split_key]
         planned = expected[split_key]
-        if int(item["expected_count"]) != int(planned["count"]):
+        imglist_path = resolve_imglist_path(
+            item,
+            data_root=data_root,
+            config_root=config_path.parent,
+        )
+        observed_count = sum(
+            1 for line in imglist_path.open(encoding="utf-8") if line.strip()
+        )
+        observed_sha = sha256_file(imglist_path)
+        if observed_count != int(planned["count"]):
             raise ValueError(f"{split_key} count differs from the frozen inventory")
-        if item["expected_sha256"] != planned["imglist_sha256"]:
+        if observed_sha != planned["imglist_sha256"]:
             raise ValueError(f"{split_key} imglist differs from the frozen inventory")
+        if "expected_count" in item and int(item["expected_count"]) != observed_count:
+            raise ValueError(f"{split_key} configured count differs from its imglist")
+        if "expected_sha256" in item and item["expected_sha256"] != observed_sha:
+            raise ValueError(f"{split_key} configured SHA256 differs from its imglist")
         if item["dataset_name"] != planned["dataset_name"]:
             raise ValueError(f"{split_key} dataset identity drift")
+        expected_group = "id" if split_key.startswith("id_") else planned["group"]
+        if item["group"] != expected_group:
+            raise ValueError(f"{split_key} dataset group drift")
+        if bool(item["is_id"]) is not split_key.startswith("id_"):
+            raise ValueError(f"{split_key} ID/OOD identity drift")
 
 
 def validate_job_checkpoint(
@@ -944,7 +969,11 @@ def run_production_job(
     inventory = load_frozen_inventory(inventory_path)
     job = inventory_job(inventory, job_id=job_id, host_id=host_id)
     validate_job_checkpoint(job, checkpoint_path=checkpoint_path)
-    validate_dataset_policy(inventory, dataset_config_path=dataset_config_path)
+    validate_dataset_policy(
+        inventory,
+        dataset_config_path=dataset_config_path,
+        data_root=data_root,
+    )
     checkpoint_root = Path(artifact_root) / job["checkpoint_sha256"]
     if checkpoint_root.is_dir():
         if (checkpoint_root / "JOB_COMPLETE.json").is_file():
