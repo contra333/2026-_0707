@@ -55,7 +55,10 @@ Implemented foundation:
   approved host;
 - completed execution and metadata-integrity validation of all 36 seed-0
   protocol-v1.2 grid cells across the three approved hosts, plus the immutable
-  C1-C4 role freeze and deduplicated follow-up plan.
+  C1-C4 role freeze and deduplicated follow-up plan;
+- completed 30-row seed 1/2 role-replication and pair-control execution,
+  three independently verified no-delete uploads, and the checksum-sealed
+  12-reused-plus-30-new aggregate with per-seed and sample-SD summaries.
 
 Documented or prepared, but not yet implemented or executed:
 
@@ -67,10 +70,6 @@ Documented or prepared, but not yet implemented or executed:
 
 Not yet part of the validated foundation unless added by a later merged pull request:
 
-- completed multi-seed optimizer-comparison results;
-- completed role-replication and pair-control study runs; Issue #49 and draft
-  PR #50 have started the frozen 30-row execution, but running jobs are not
-  terminal research evidence;
 - feature extraction pipelines;
 - geometry metrics;
 - feature-based OOD detector implementations such as Mahalanobis, kNN, generic

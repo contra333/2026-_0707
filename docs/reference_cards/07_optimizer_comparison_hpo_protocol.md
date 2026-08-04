@@ -269,6 +269,10 @@ once as `curie=13`, `lise=10`, and `precision_medicine=7`, rotates every
 configuration across all three hosts over seeds 0/1/2, and preserves the
 declared pair co-locations. Production uses clean Git SHA
 `3556841340e6f6b92782af045ed4a468e6e271bd` and detached host supervisors.
-This running execution does not become multi-seed evidence until every row is
-terminal, independently validated, uploaded without delete, and combined with
-the 12 reused seed-0 records.
+All 30 rows completed epoch 200, passed independent artifact validation, and
+were uploaded without delete. The final checksum-sealed aggregate combines
+them with the 12 reused seed-0 records as 42 unique `(config_hash, seed)`
+identities, retains all per-seed values and sample SDs, and reports paired
+differences as decoupled minus coupled. The completion evidence and
+interpretation boundary are recorded in
+`docs/validation/issue49_followup_execution.md`.
