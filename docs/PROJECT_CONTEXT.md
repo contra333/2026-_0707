@@ -65,6 +65,10 @@ Implemented foundation:
   execution, with tiny-fixture/parity/failure/invariance tests and a clean
   non-protected Curie checkpoint smoke recorded in
   `docs/validation/issue53_metric_runtime_curie.md`.
+- checksum-addressed planning for the protected Metric Contract v1.2 run:
+  42 source config/seed identities, 30 authorized role identities, 12 explicit
+  pair-control-only exclusions, 60 separate checkpoint jobs, and deterministic
+  source-local 20/20/20 assignment with execution still `not_started`.
 
 Documented and implemented, but not yet executed on protected research splits:
 
@@ -110,6 +114,9 @@ Not yet part of the validated foundation unless added by a later merged pull req
   practical runtime, data, and one-epoch smoke evidence.
 - `docs/validation/issue53_metric_runtime_curie.md`: Metric Contract v1.2
   implementation checks and clean bounded non-protected Curie checkpoint smoke.
+- `docs/validation/issue55_metric_evaluation_plan.md`: checksum-sealed
+  checkpoint inventory, protected-evaluation exclusions, and deterministic
+  three-host launch plan; it is planning evidence, not a research result.
 - `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid
   integrity, validation metrics, and immutable C1-C4 selection evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.

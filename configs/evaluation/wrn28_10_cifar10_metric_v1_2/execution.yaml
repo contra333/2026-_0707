@@ -1,0 +1,112 @@
+schema_version: '1.0'
+protocol_version: wrn28_10_cifar10_metric_v1.2
+definition_version: metric_contract_v1.2
+execution_id: metric_contract_v1_2_protected_eval_planned_20260804
+planning_issue: 55
+runtime_merge_git_sha: e22070ed436c772888e08ca1a4cb5a21760812a9
+inventory:
+  path: configs/evaluation/wrn28_10_cifar10_metric_v1_2/checkpoint_inventory.json
+  file_sha256: 39c89b30aecbea0984cafd1ac75cf8f8676808ee12b4728fb4fb21e845f6e7a1
+  inventory_hash: 35a1a66f78dfd6255c4d804586ee6863969be78d21acec5cd0ccf00476ddaa5c
+  checkpoint_job_count: 60
+launch_authorization:
+  status: pending_separate_execution_issue
+  planning_issue_authorizes_protected_access: false
+  required_execution_git_sha: merged_commit_containing_this_plan
+state:
+  execution_started: false
+  protected_accessed: false
+  server_sync: not_started
+  hf_upload: not_started
+coordinator_host: curie
+assignment_policy: source_local_checkpoint_no_transfer
+hosts:
+  curie:
+    coordinator: true
+    concurrency: 4
+    checkpoint_job_count: 20
+    checkpoint_job_ids:
+    - eval-followup-adam-3e2bac6d488d-seed-2-last
+    - eval-followup-adam-3e2bac6d488d-seed-2-best_val
+    - eval-followup-adam-b701f780ad99-seed-2-last
+    - eval-followup-adam-b701f780ad99-seed-2-best_val
+    - eval-followup-adam-db137e7d3c71-seed-2-last
+    - eval-followup-adam-db137e7d3c71-seed-2-best_val
+    - eval-followup-adamw-4039a31891b5-seed-1-last
+    - eval-followup-adamw-4039a31891b5-seed-1-best_val
+    - eval-followup-adamw-5742764ef3bd-seed-0-last
+    - eval-followup-adamw-5742764ef3bd-seed-0-best_val
+    - eval-followup-adamw-61d7d1f20bc5-seed-2-last
+    - eval-followup-adamw-61d7d1f20bc5-seed-2-best_val
+    - eval-followup-sgd-188f2e248d51-seed-1-last
+    - eval-followup-sgd-188f2e248d51-seed-1-best_val
+    - eval-followup-sgd-7aa36ee28bf5-seed-2-last
+    - eval-followup-sgd-7aa36ee28bf5-seed-2-best_val
+    - eval-followup-sgd-86af0abedd46-seed-2-last
+    - eval-followup-sgd-86af0abedd46-seed-2-best_val
+    - eval-followup-sgd-f315d560c588-seed-1-last
+    - eval-followup-sgd-f315d560c588-seed-1-best_val
+  lise:
+    coordinator: false
+    concurrency: 2
+    checkpoint_job_count: 20
+    checkpoint_job_ids:
+    - eval-followup-adam-3e2bac6d488d-seed-0-last
+    - eval-followup-adam-3e2bac6d488d-seed-0-best_val
+    - eval-followup-adam-b701f780ad99-seed-0-last
+    - eval-followup-adam-b701f780ad99-seed-0-best_val
+    - eval-followup-adam-db137e7d3c71-seed-1-last
+    - eval-followup-adam-db137e7d3c71-seed-1-best_val
+    - eval-followup-adamw-4039a31891b5-seed-2-last
+    - eval-followup-adamw-4039a31891b5-seed-2-best_val
+    - eval-followup-adamw-5742764ef3bd-seed-2-last
+    - eval-followup-adamw-5742764ef3bd-seed-2-best_val
+    - eval-followup-adamw-61d7d1f20bc5-seed-1-last
+    - eval-followup-adamw-61d7d1f20bc5-seed-1-best_val
+    - eval-followup-sgd-188f2e248d51-seed-2-last
+    - eval-followup-sgd-188f2e248d51-seed-2-best_val
+    - eval-followup-sgd-7aa36ee28bf5-seed-1-last
+    - eval-followup-sgd-7aa36ee28bf5-seed-1-best_val
+    - eval-followup-sgd-86af0abedd46-seed-1-last
+    - eval-followup-sgd-86af0abedd46-seed-1-best_val
+    - eval-followup-sgd-f315d560c588-seed-0-last
+    - eval-followup-sgd-f315d560c588-seed-0-best_val
+  precision_medicine:
+    coordinator: false
+    concurrency: 4
+    checkpoint_job_count: 20
+    checkpoint_job_ids:
+    - eval-followup-adam-3e2bac6d488d-seed-1-last
+    - eval-followup-adam-3e2bac6d488d-seed-1-best_val
+    - eval-followup-adam-b701f780ad99-seed-1-last
+    - eval-followup-adam-b701f780ad99-seed-1-best_val
+    - eval-followup-adam-db137e7d3c71-seed-0-last
+    - eval-followup-adam-db137e7d3c71-seed-0-best_val
+    - eval-followup-adamw-4039a31891b5-seed-0-last
+    - eval-followup-adamw-4039a31891b5-seed-0-best_val
+    - eval-followup-adamw-5742764ef3bd-seed-1-last
+    - eval-followup-adamw-5742764ef3bd-seed-1-best_val
+    - eval-followup-adamw-61d7d1f20bc5-seed-0-last
+    - eval-followup-adamw-61d7d1f20bc5-seed-0-best_val
+    - eval-followup-sgd-188f2e248d51-seed-0-last
+    - eval-followup-sgd-188f2e248d51-seed-0-best_val
+    - eval-followup-sgd-7aa36ee28bf5-seed-0-last
+    - eval-followup-sgd-7aa36ee28bf5-seed-0-best_val
+    - eval-followup-sgd-86af0abedd46-seed-0-last
+    - eval-followup-sgd-86af0abedd46-seed-0-best_val
+    - eval-followup-sgd-f315d560c588-seed-2-last
+    - eval-followup-sgd-f315d560c588-seed-2-best_val
+dataset_policy_hash: f80984d28ef9a7550633fb3aea514f783f3db1fa655a6d3f49850b10857e6afc
+output:
+  layout: evaluations/metric_contract_v1.2/{checkpoint_sha256}/
+  hf_template: hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract_v1.2/{checkpoint_sha256}
+  identity: checkpoint_sha256
+  upload_policy: dry_run_then_no_delete
+  completion_marker: REMOTE_COMPLETE.json
+  coordinator_validation_required: true
+counts:
+  authorized_training_identities: 30
+  checkpoint_jobs: 60
+  jobs_per_host: 20
+  excluded_pair_only_training_identities: 12
+execution_hash: 04645b9af91732cfd79a417b41236325b470ba239d84e9be05246f8a6c7cf105
