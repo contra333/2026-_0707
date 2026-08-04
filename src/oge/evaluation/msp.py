@@ -12,7 +12,7 @@ import yaml
 from torch import nn
 from torch.utils.data import DataLoader
 
-from .metrics import METRIC_DEFINITIONS, compute_ood_metrics
+from .metrics import METRIC_DEFINITIONS, compute_ood_metrics, macro_average_ood_metrics
 
 OPENOOD_SOURCE_COMMIT = "3c35632ee91b54b09d1f085d04f94744cece7d0b"
 SCHEMA_VERSION = "1.0"
@@ -57,16 +57,6 @@ def _save_scores(path: Path, scores: Mapping[str, np.ndarray]) -> None:
     np.savez(path, **scores)
 
 
-def _mean_metrics(per_dataset: dict[str, dict[str, float]], names: list[str]) -> dict[str, float]:
-    if not names:
-        raise ValueError("metric group must contain at least one dataset")
-    metric_names = per_dataset[names[0]].keys()
-    return {
-        metric_name: float(np.mean([per_dataset[name][metric_name] for name in names]))
-        for metric_name in metric_names
-    }
-
-
 def evaluate_msp_protocol(
     model: nn.Module,
     loaders: dict[str, object],
@@ -100,10 +90,16 @@ def evaluate_msp_protocol(
             )
             group_names[group].append(dataset_key)
 
+    macro = macro_average_ood_metrics(
+        per_dataset,
+        near_datasets=tuple(group_names["near"]),
+        far_datasets=tuple(group_names["far"]),
+    )
     metrics_payload: dict[str, object] = {
         "per_dataset": per_dataset,
-        "near_mean": _mean_metrics(per_dataset, group_names["near"]),
-        "far_mean": _mean_metrics(per_dataset, group_names["far"]),
+        "near_mean": macro["near_macro_mean"],
+        "far_mean": macro["far_macro_mean"],
+        "overall_mean": macro["overall_macro_mean"],
         "metric_definitions": METRIC_DEFINITIONS,
         "smoke_only": bool(model_is_random_or_untrained),
     }

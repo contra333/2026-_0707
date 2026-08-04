@@ -108,6 +108,10 @@ def test_msp_evaluator_writes_minimum_artifacts_and_averages_dataset_metrics(tmp
         [payload["per_dataset"][name]["auroc"] for name in ("cifar100", "tin")]
     )
     assert payload["near_mean"]["auroc"] == near_auroc
+    all_auroc = np.mean(
+        [payload["per_dataset"][name]["auroc"] for name in payload["per_dataset"]]
+    )
+    assert payload["overall_mean"]["auroc"] == all_auroc
 
     expected_score_files = {
         "cifar10.npz",
