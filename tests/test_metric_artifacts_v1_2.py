@@ -139,6 +139,11 @@ def test_extraction_writes_card08_arrays_manifest_and_checksums(tmp_path):
     sample_ids = np.load(train_dir / "sample_ids.npy", allow_pickle=False)
     assert sample_ids.tolist() == ["cifar10:cifar10/train/a.png", "cifar10:cifar10/train/b.png"]
     assert manifest["dataset"]["splits"]["id_train"]["ordered_sample_id_sha256"] == ordered_sample_id_digest(sample_ids)
+    assert (
+        manifest["dataset"]["splits"]["id_train"]["observed_imglist_sha256"]
+        == manifest["dataset"]["splits"]["id_train"]["expected_imglist_sha256"]
+    )
+    assert manifest["dataset"]["splits"]["id_train"]["observed_imglist_count"] == 2
     assert "manifest.json" in verified["verified_files"]
 
 

@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from oge.evaluation.detectors import (
+    exact_neighbor_distances,
     exact_knn_l2_scores,
     fit_gda_class_density,
     fit_neco,
@@ -99,6 +100,79 @@ def test_knn_is_negative_exact_kth_squared_distance_with_sample_id_tie_break():
     assert payload["kth_squared_distance"][0] == pytest.approx(2.0)
     assert payload["score"][0] == pytest.approx(-2.0)
     assert payload["kth_neighbor_sample_id"][0] == "a"
+
+
+def test_exact_neighbor_chunks_match_direct_reference_with_ties_and_self_exclusion():
+    bank = np.array(
+        [[0.0, 0.0], [1.0, 0.0], [-1.0, 0.0], [0.0, 2.0], [3.0, 1.0]]
+    )
+    sample_ids = np.array(["center", "right", "left", "up", "far"])
+    queries = np.array([[0.0, 0.0], [0.5, 0.0], [2.0, 1.0]])
+    expected_distances = []
+    expected_ids = []
+    for query in queries:
+        distances = np.sum((bank - query) ** 2, axis=1)
+        order = np.lexsort((sample_ids, distances))[:3]
+        expected_distances.append(distances[order])
+        expected_ids.append(sample_ids[order])
+
+    for query_chunk_size, bank_chunk_size in ((1, 1), (2, 3), (7, 99)):
+        distances, ids = exact_neighbor_distances(
+            bank,
+            queries,
+            fit_sample_ids=sample_ids,
+            k=3,
+            query_chunk_size=query_chunk_size,
+            bank_chunk_size=bank_chunk_size,
+        )
+        np.testing.assert_allclose(distances, expected_distances, atol=1e-12, rtol=1e-10)
+        np.testing.assert_array_equal(ids, expected_ids)
+
+    distances, ids = exact_neighbor_distances(
+        bank,
+        bank,
+        fit_sample_ids=sample_ids,
+        query_sample_ids=sample_ids,
+        exclude_matching_sample_id=True,
+        k=2,
+        query_chunk_size=2,
+        bank_chunk_size=2,
+    )
+    for row, query in enumerate(bank):
+        direct = np.sum((bank - query) ** 2, axis=1)
+        direct[row] = np.inf
+        order = np.lexsort((sample_ids, direct))[:2]
+        np.testing.assert_allclose(distances[row], direct[order])
+        np.testing.assert_array_equal(ids[row], sample_ids[order])
+
+
+def test_chunked_gaussian_gda_and_prototype_scores_match_single_chunk():
+    rng = np.random.default_rng(13)
+    labels = np.repeat(np.arange(3), 12)
+    features = rng.normal(size=(36, 5)) + np.eye(3, 5)[labels]
+    queries = rng.normal(size=(9, 5))
+
+    tied = fit_tied_gaussians(features, labels, num_classes=3)
+    tied_reference = score_tied_gaussians(tied, queries, query_chunk_size=len(queries))
+    tied_chunked = score_tied_gaussians(tied, queries, query_chunk_size=2)
+    for key in ("mahalanobis", "marginal_mahalanobis", "relative_mahalanobis"):
+        np.testing.assert_allclose(tied_chunked[key], tied_reference[key], atol=1e-12, rtol=1e-10)
+
+    gda = fit_gda_class_density(features, labels, num_classes=3)
+    gda_reference = score_gda_class_density(gda, queries, query_chunk_size=len(queries))
+    gda_chunked = score_gda_class_density(gda, queries, query_chunk_size=2)
+    np.testing.assert_allclose(gda_chunked["score"], gda_reference["score"], atol=1e-12, rtol=1e-10)
+
+    prototype_reference = prototype_scores(
+        features, labels, queries, num_classes=3, query_chunk_size=len(queries)
+    )
+    prototype_chunked = prototype_scores(
+        features, labels, queries, num_classes=3, query_chunk_size=2
+    )
+    for key in ("ncp_score", "ctm_score"):
+        np.testing.assert_allclose(
+            prototype_chunked[key], prototype_reference[key], atol=1e-12, rtol=1e-10
+        )
 
 
 def test_prototype_cosine_and_weight_cosine_keep_sources_distinct():

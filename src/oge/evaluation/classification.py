@@ -19,6 +19,13 @@ def _logsumexp(values: np.ndarray, *, axis: int = 1) -> np.ndarray:
     )
 
 
+def _trapezoid(y: np.ndarray, x: np.ndarray) -> float:
+    implementation = getattr(np, "trapezoid", None)
+    if implementation is None:
+        implementation = np.trapz
+    return float(implementation(y, x))
+
+
 def softmax_probabilities(logits: Any) -> np.ndarray:
     values = finite_float64(logits, name="logits", ndim=2)
     shifted = values - np.max(values, axis=1, keepdims=True)
@@ -176,7 +183,7 @@ def aurc_tie_grouped(logits: Any, labels: Any) -> dict[str, Any]:
         current_coverage = float(np.mean(accepted))
         coverage.append(current_coverage)
         risk.append(float(np.mean(errors[accepted])) if np.any(accepted) else risk[-1])
-    area = -float(np.trapz(np.asarray(risk), np.asarray(coverage)))
+    area = -_trapezoid(np.asarray(risk), np.asarray(coverage))
     return {
         "metric": MetricValue(area).to_dict(),
         "thresholds": thresholds,
