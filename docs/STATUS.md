@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-07-30
+Last updated: 2026-08-04
 
 ## Current phase
 
@@ -30,6 +30,13 @@ blocking gate; all 36 cells remain pinned to production Git SHA
 `0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`. The 36 cells subsequently
 completed, their uploaded metadata and checksums passed the Issue #47 integrity
 gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
+Issue #49 and PR #50 completed the exact-once 13/10/7 follow-up at production
+Git SHA `3556841340e6f6b92782af045ed4a468e6e271bd`. All 30 new rows are
+epoch-200 terminal, independently validated, and uploaded with zero deletes.
+Together with 12 reused seed-0 rows, they form 42 unique `(config_hash, seed)`
+identities across 14 configurations. The checksum-sealed aggregate retains
+per-seed validation values, mean/sample SD, paired-control differences, and
+the seed-0 selection-bias disclosure.
 
 ## Validated or implemented
 
@@ -121,14 +128,20 @@ gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
   `fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa`;
   see
   `docs/validation/seed0_20260728_grid_role_freeze.md`.
+- Issue #49 verified 30/30 epoch-200 follow-up records as `curie=13`,
+  `lise=10`, and `precision_medicine=7`, including checkpoint and metadata
+  checksums, deferred protected fields, three `REMOTE_COMPLETE.json` markers,
+  and zero-delete uploads. The committed 42-row aggregate contains 12 reused
+  seed-0 rows and 30 new rows without duplicate identities; see
+  `docs/validation/issue49_followup_execution.md`.
 
 ## Documented but not executed
 
 - `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
   deterministic grid, C1-C4 selection, pairwise coupling controls, budget,
-  seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid and
-  C1-C4 freeze are complete; role replication, pair controls, and downstream
-  protected evaluation have not been executed.
+  seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid,
+  C1-C4 freeze, role replication, and pair controls are complete; downstream
+  protected evaluation has not been executed.
 - `docs/reference_cards/06_feature_ood_detectors.md` fixes the planned DDU
   name, class-wise full unbiased covariance, official adaptive-jitter ladder,
   `logsumexp` ID-like score, and explicit PCA/Diag/L2/Shrinkage post-hoc variant
@@ -155,7 +168,6 @@ gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
 
 ## Still missing
 
-- Three-seed role replication and the pair controls
 - Penultimate feature extraction pipeline
 - Geometry and Neural Collapse metrics
 - Feature-based OOD detector implementations, including DDU and its planned
@@ -163,11 +175,11 @@ gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
 
 ## Active next phase
 
-The next separately authorized execution phase is seed 1/2 replication of the
-unique frozen role configurations and the predeclared pair controls. Issue #47
-records the deduplicated follow-up plan but does not authorize or execute it.
-Protected ID-test, OOD, geometry/Neural Collapse, and detector evaluation also
-remain outside Issue #47. Issue #37 and PR #38 remain readiness evidence rather
+Issue #49's role replication and pair controls are complete. The next phase
+requires a separately bounded task for protected feature extraction and
+checkpoint evaluation using only the frozen role config/seed identities.
+ID-test, OOD, geometry/Neural Collapse, and detector evaluation were not
+executed by Issue #49. Issue #37 and PR #38 remain readiness evidence rather
 than production evidence.
 The Issue #10 CUDA runs remain infrastructure validation; the Issue #14 run is
 the single-seed SGD baseline. Neither is optimizer-comparison, geometry,
@@ -183,13 +195,8 @@ not authorize detector implementation without a separately bounded task.
 
 ## Blockers and unknowns
 
-- The complete seed-0 configuration landscape and C1-C4 roles are available,
-  but no multi-seed optimizer-comparison conclusion is currently supported.
-- Optimizer-comparison production execution is authorized only for the
-  committed `seed0_20260728` assignment; later role replication, pair controls,
-  or a different production study require separate authorization.
-- Follow-up GPU availability and artifact retention remain dynamic and must be
-  checked by the separately authorized replication/pair-control task.
+- Protected feature extraction and checkpoint evaluation remain unimplemented
+  and require their own bounded Issue and validation evidence.
 - The canonical DDU shrinkage estimator and PCA component-selection rule remain
   literature-backed decisions for a later implementation Issue.
 
