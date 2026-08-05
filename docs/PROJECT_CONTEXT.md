@@ -75,6 +75,13 @@ Implemented foundation:
   central aggregate contains separate `last` primary and `best_val` control
   rows for all 30 authorized training identities and seeds `{0,1,2}`. See
   `docs/validation/issue57_metric_evaluation_execution.md`.
+- completed checksum-bounded local C1-C4 analysis of that aggregate, with
+  `last.pt` primary and `best_val.pt` control kept separate, all central
+  seed-0 and three-seed scalars exported, six OOD datasets partitioned into
+  independent tables, 19-detector appendix coverage, 11-detector paper panels,
+  seed-matched descriptive deltas, and dataset-specific exploratory
+  geometry-OOD associations. See
+  `docs/analysis/metric_contract_v1_2_c1_c4/`.
 
 Documented and implemented result boundaries:
 
@@ -85,10 +92,11 @@ Documented and implemented result boundaries:
 - the WRN-28-10/CIFAR-10 Metric Contract v1.2 formulas, paper names, artifact
   keys, numerical failure semantics, validation oracles, and runtime entrypoints.
 
-Not yet part of the validated foundation unless added by a later merged pull request:
+Not part of the validated foundation unless added by a later bounded task:
 
-- plots, statistical interpretation, optimizer-effect conclusions, and paper
-  tables derived from the completed protected aggregate;
+- confirmatory causal optimizer-effect conclusions or a dataset-pooled
+  geometry-OOD association;
+- final manuscript prose and final main/appendix table selection;
 - spectral-normalization training and any future DDU ablation;
 - protected research-result evaluation for any architecture, dataset, or
   checkpoint population outside the completed WRN-28-10/CIFAR-10 inventory.
@@ -126,6 +134,13 @@ Not yet part of the validated foundation unless added by a later merged pull req
   20/20/20 protected execution, checkpoint-centric Hugging Face publication,
   operational-shard readback, deterministic seed aggregation, and local
   checksum-verified analysis handoff.
+- `docs/analysis/metric_contract_v1_2_c1_c4/`: reproducible Issue #59 C1-C4
+  technical report, Methods-ready English text, numerical CSV/Markdown/LaTeX
+  tables, seed-0 audit, and SVG/PDF figures generated only from the verified
+  central aggregate.
+- `docs/validation/issue59_metric_contract_v1_2_analysis.md`: Issue #59 input
+  hashes, analysis population, validation commands, deterministic rerun, and
+  claim-boundary evidence.
 - `docs/validation/seed0_20260728_grid_role_freeze.md`: completed seed-0 grid
   integrity, validation metrics, and immutable C1-C4 selection evidence.
 - GitHub Issues: one-time task scope and acceptance criteria.

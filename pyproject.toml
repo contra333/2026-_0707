@@ -17,6 +17,12 @@ dependencies = [
     "pytest",
 ]
 
+[project.optional-dependencies]
+analysis = [
+    "matplotlib>=3.8",
+    "scipy>=1.10",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

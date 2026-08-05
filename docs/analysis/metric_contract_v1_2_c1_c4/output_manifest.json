@@ -1,0 +1,1066 @@
+{
+  "analysis_dtype": "float64",
+  "analysis_summary": {
+    "all_status": "success",
+    "association_record_count": 8448,
+    "configuration_count": 10,
+    "paired_delta_record_count": 5700,
+    "per_checkpoint_record_count": 95160,
+    "seed0_record_count": 31720,
+    "seed_aggregate_count": 31720,
+    "table_partition_count": 34
+  },
+  "analysis_version": "metric_contract_v1.2_c1_c4_analysis_v1",
+  "comparison_tolerance": {
+    "atol": 1e-12,
+    "rtol": 1e-12
+  },
+  "dataset_policy_hash": "f80984d28ef9a7550633fb3aea514f783f3db1fa655a6d3f49850b10857e6afc",
+  "definition_version": "metric_contract_v1.2",
+  "evaluation_git_sha": "c38b09694be88aa74de0741b39e9d3ba0d6ff61a",
+  "figures_generated": true,
+  "file_count": 203,
+  "files": [
+    {
+      "path": "METHODS_READY_EN.md",
+      "sha256": "df2b9992e03b69ec01a3844470cf40973cb5b854b3c9c79c51a65fd140062202",
+      "size": 3642
+    },
+    {
+      "path": "README.md",
+      "sha256": "10f7c27a651f106bced5fff514b969d9689aa38246b4e36be2e0792a5dcffa1b",
+      "size": 7866
+    },
+    {
+      "path": "chart_map.md",
+      "sha256": "0ae977d373800bdd00312024cf71ea1b12114e8ec057c59d0520c69d20ae53eb",
+      "size": 920
+    },
+    {
+      "path": "figures/associations/best_val/cifar100_auroc.pdf",
+      "sha256": "c88ef1e620f5d2d6d1a6c45b2f27d025e1fec45c5f0350e75f6e7ed8cac4c623",
+      "size": 34056
+    },
+    {
+      "path": "figures/associations/best_val/cifar100_auroc.svg",
+      "sha256": "66bc49b99e3d5f200ce3b8cd0f48f3dcb810b3906f482d9e18f212c93de86ed7",
+      "size": 171031
+    },
+    {
+      "path": "figures/associations/best_val/cifar100_fpr95_performance.pdf",
+      "sha256": "e7686e6d46565c35e0d3d395ec501ab48805975cc4a543421441412ba8361eef",
+      "size": 34403
+    },
+    {
+      "path": "figures/associations/best_val/cifar100_fpr95_performance.svg",
+      "sha256": "702823318f0e7a45c6cf463a7f466095bcc1c472a79fae4f9cb2939b5b67a58e",
+      "size": 173739
+    },
+    {
+      "path": "figures/associations/best_val/mnist_auroc.pdf",
+      "sha256": "92de7bab3e78144db3960a0da773aeb1dc62ef7cea8797eb294c65fc1be2b18d",
+      "size": 34052
+    },
+    {
+      "path": "figures/associations/best_val/mnist_auroc.svg",
+      "sha256": "343b9fc830de96608e732b159b6c63ed2ffd2fa426d2bd15b67db5df8bda5a46",
+      "size": 173610
+    },
+    {
+      "path": "figures/associations/best_val/mnist_fpr95_performance.pdf",
+      "sha256": "f583ba4cea4e31ad8e505d2b4c851e812c4dab3c76432c51d32d6c0ed7f0b71c",
+      "size": 34248
+    },
+    {
+      "path": "figures/associations/best_val/mnist_fpr95_performance.svg",
+      "sha256": "9e363e7972ae6eb698d9b033500b3b180e552ddb4a62e3336aae52bd557973d7",
+      "size": 175851
+    },
+    {
+      "path": "figures/associations/best_val/places365_auroc.pdf",
+      "sha256": "b87855a9fba12c925bb83eb9d1a894fc5b2f7a1c0ab1c40f807b7d0ec1cc3100",
+      "size": 33912
+    },
+    {
+      "path": "figures/associations/best_val/places365_auroc.svg",
+      "sha256": "924ebc9a393d8c43575dfd1c11321e66ad0860e3c9b89937f369ee2487042c4b",
+      "size": 170307
+    },
+    {
+      "path": "figures/associations/best_val/places365_fpr95_performance.pdf",
+      "sha256": "ab2d9da88945b8f5a9c7db1f3b33114878d074e55639047945ad89bb221f3fee",
+      "size": 34134
+    },
+    {
+      "path": "figures/associations/best_val/places365_fpr95_performance.svg",
+      "sha256": "fe375e659af7d58791e060713638d232fd961bee9e256b6d37762047da7a3c1d",
+      "size": 171056
+    },
+    {
+      "path": "figures/associations/best_val/svhn_auroc.pdf",
+      "sha256": "9285a59bf6b43fd2cf2b3ae135d640fc1d82721bd3481c445066a5dba0004750",
+      "size": 33848
+    },
+    {
+      "path": "figures/associations/best_val/svhn_auroc.svg",
+      "sha256": "21b6eca92174022d7e63f6e1bbfc06e1d2aea9838baebd071b5dd4ddba7b6973",
+      "size": 169910
+    },
+    {
+      "path": "figures/associations/best_val/svhn_fpr95_performance.pdf",
+      "sha256": "d00f4e8fb045c593692a9bd363612c09c90f9a1ed94fa43289cb168e360d62ae",
+      "size": 34110
+    },
+    {
+      "path": "figures/associations/best_val/svhn_fpr95_performance.svg",
+      "sha256": "cfce5c7e5a39a29efe8327faa128f5ea970f3c70d1e055bedbdf5016ba11fa6c",
+      "size": 172005
+    },
+    {
+      "path": "figures/associations/best_val/texture_auroc.pdf",
+      "sha256": "7a2133d50c36b2b12724365d32f6f76e9bf8d0a08b9c9cada91472bef7c10da3",
+      "size": 33988
+    },
+    {
+      "path": "figures/associations/best_val/texture_auroc.svg",
+      "sha256": "488c295bcf9401a99815a39903472aa03a53cefa3a6ab9615db6e0a0046fc5fd",
+      "size": 171433
+    },
+    {
+      "path": "figures/associations/best_val/texture_fpr95_performance.pdf",
+      "sha256": "e31f70bd7279604b163fd81338b6d3e984d91d56ac01d675fd63e6ba9de1ab09",
+      "size": 34247
+    },
+    {
+      "path": "figures/associations/best_val/texture_fpr95_performance.svg",
+      "sha256": "12df1f3a55a4fb374192bd6c02accc252fed39b75bc17a6acfe500d4e36eea47",
+      "size": 172079
+    },
+    {
+      "path": "figures/associations/best_val/tin_auroc.pdf",
+      "sha256": "0bb1f47bda1a60599860f590ec72932ac7ef85ce1dfea896bfeb97a1ead302b8",
+      "size": 33876
+    },
+    {
+      "path": "figures/associations/best_val/tin_auroc.svg",
+      "sha256": "3722183a898a416bb4285e30ebe0d001cf71b4886c04fbe0d873f8e6e3fca3c2",
+      "size": 171109
+    },
+    {
+      "path": "figures/associations/best_val/tin_fpr95_performance.pdf",
+      "sha256": "0ad9e436b14d4546e2419c057262199dda79226b48f767349eda518ff5f98f81",
+      "size": 34156
+    },
+    {
+      "path": "figures/associations/best_val/tin_fpr95_performance.svg",
+      "sha256": "cbe253db223c7f575a636cd4b0d4dc29eb1c11a0bce216b146568d377280af5e",
+      "size": 172571
+    },
+    {
+      "path": "figures/associations/last/cifar100_auroc.pdf",
+      "sha256": "89d622b71dfb06ef6357a54fd35b614dbf274e27dc3112ebe2521e8dd4e9398f",
+      "size": 34131
+    },
+    {
+      "path": "figures/associations/last/cifar100_auroc.svg",
+      "sha256": "559c499f3b5df836b604ef608421a6dbc9448a2f30ea040b3fc51a4ddcbdee30",
+      "size": 170002
+    },
+    {
+      "path": "figures/associations/last/cifar100_fpr95_performance.pdf",
+      "sha256": "73daaa55cf04111d682c921798d5e45cbf172c3ada630e6abbfb203966a8a80a",
+      "size": 34414
+    },
+    {
+      "path": "figures/associations/last/cifar100_fpr95_performance.svg",
+      "sha256": "2961d22562a1a1cad07b0ba47e4b0f8780de14c3c673afe589fdf5a68766d9ae",
+      "size": 172697
+    },
+    {
+      "path": "figures/associations/last/mnist_auroc.pdf",
+      "sha256": "209e4c4b13577f2c19c02130d77939f13d0b4537f9f0a76fdfac4bbfb83d65e0",
+      "size": 34104
+    },
+    {
+      "path": "figures/associations/last/mnist_auroc.svg",
+      "sha256": "434a0abfd3c6d96e2ff00ec7403542b82a64df8c90db2a2df777772302bce286",
+      "size": 173767
+    },
+    {
+      "path": "figures/associations/last/mnist_fpr95_performance.pdf",
+      "sha256": "ec874c7730f7aa1a2e5149e5326cebaa1c6a59bcbec07a3676538dac73bc5852",
+      "size": 34326
+    },
+    {
+      "path": "figures/associations/last/mnist_fpr95_performance.svg",
+      "sha256": "169b870ecdf4347e64e02417c63f308ca602fc6c671b62f0d5fcec13bf49accf",
+      "size": 175681
+    },
+    {
+      "path": "figures/associations/last/places365_auroc.pdf",
+      "sha256": "79a2be8929fd339685cac331d6245897ea81fe8377fce10afbd10f4c567e81d0",
+      "size": 33876
+    },
+    {
+      "path": "figures/associations/last/places365_auroc.svg",
+      "sha256": "3774d016ffdc786c1748f43161cebd91a011604e5b32663f1dc51f98d056f98c",
+      "size": 169475
+    },
+    {
+      "path": "figures/associations/last/places365_fpr95_performance.pdf",
+      "sha256": "561a4a0a802c0149283b69ce9f577be20db47de81bf632f69e2e1483019a2624",
+      "size": 34115
+    },
+    {
+      "path": "figures/associations/last/places365_fpr95_performance.svg",
+      "sha256": "e87fcd1263793ecf236806a11fbceee822ead88dbe815b8926d50378750a3f02",
+      "size": 170630
+    },
+    {
+      "path": "figures/associations/last/svhn_auroc.pdf",
+      "sha256": "73a7b605517a2761ceaebf2c5f1375735015e33ca20f8c49daeab52f0bbfc3d1",
+      "size": 33948
+    },
+    {
+      "path": "figures/associations/last/svhn_auroc.svg",
+      "sha256": "4273ee1bd44e81008acf60274863c5a3bc335b7f78209a0484baa3ddf880e11c",
+      "size": 169533
+    },
+    {
+      "path": "figures/associations/last/svhn_fpr95_performance.pdf",
+      "sha256": "2a3afe51913215ca9d0f51d1ef84c7fec36c6b1c77ee073e220f8983ec86849b",
+      "size": 34204
+    },
+    {
+      "path": "figures/associations/last/svhn_fpr95_performance.svg",
+      "sha256": "97359f0ef68938a8aaad13ac31dc1505aba90469f80cb832f18261b993f63cd2",
+      "size": 171030
+    },
+    {
+      "path": "figures/associations/last/texture_auroc.pdf",
+      "sha256": "d1856841417d955ac9767e56443d19434ad3bfb231e553279f01e3e344c7e98d",
+      "size": 34008
+    },
+    {
+      "path": "figures/associations/last/texture_auroc.svg",
+      "sha256": "05f78f6838ad439523815ccab1e1044612845bc40cd039494a25ded9619fd5ae",
+      "size": 171106
+    },
+    {
+      "path": "figures/associations/last/texture_fpr95_performance.pdf",
+      "sha256": "1e8363804b969321d01b4c3ff88d0b90bcd95534e882eea9c90a2a36e5374931",
+      "size": 34232
+    },
+    {
+      "path": "figures/associations/last/texture_fpr95_performance.svg",
+      "sha256": "402bd9dc0836b9e2989b815542d88e1071b76a34a965534caf4d128789f2f673",
+      "size": 172021
+    },
+    {
+      "path": "figures/associations/last/tin_auroc.pdf",
+      "sha256": "5f36ece7338e7f4c97be597477368d261ba656c04289b4d34a0c931b2ce920a4",
+      "size": 33921
+    },
+    {
+      "path": "figures/associations/last/tin_auroc.svg",
+      "sha256": "13e6787e35bd6cb107efb046507fb505b40d3f2581184107b0e34ad38ca8b3ed",
+      "size": 170791
+    },
+    {
+      "path": "figures/associations/last/tin_fpr95_performance.pdf",
+      "sha256": "a3e0bb71db0c4826e5f24721e30b5806bac909f0e60b7728ad6642598f0ebd29",
+      "size": 34198
+    },
+    {
+      "path": "figures/associations/last/tin_fpr95_performance.svg",
+      "sha256": "68203aedca4b8b76070b6ad9f6261ba1d6a69fd16a39a7442faddc0e124cc036",
+      "size": 172463
+    },
+    {
+      "path": "figures/role_summary_best_val.pdf",
+      "sha256": "c2fb4a45b09a346b03f9bd97d465f1c3ca99d9ef5617e4bcb399da3b3e5093b1",
+      "size": 37268
+    },
+    {
+      "path": "figures/role_summary_best_val.svg",
+      "sha256": "7d3172d7f3dd9fb2cf21b8aff770bc4abd63035eb5041911e6a4c0e8e10d0e6d",
+      "size": 109547
+    },
+    {
+      "path": "figures/role_summary_last.pdf",
+      "sha256": "55beebf8a48be7222fdbdbed015840ffcdbd906decacedb055bbe8152e393ac1",
+      "size": 37027
+    },
+    {
+      "path": "figures/role_summary_last.svg",
+      "sha256": "f129f18254b2bdd0b3039b6d573217d7e2c9f9cb2db7453950c170b8a50f615f",
+      "size": 108277
+    },
+    {
+      "path": "tables/associations/best_val/cifar100_aupr_in_appendix.csv",
+      "sha256": "56e7e6627844b384228b2535775cdea9cc14e94f95b8184dcd1607539f134faf",
+      "size": 124144
+    },
+    {
+      "path": "tables/associations/best_val/cifar100_aupr_out_appendix.csv",
+      "sha256": "caa3452de04e0ccd3134d2454d937df4febe93d7744786edb527441c04f83605",
+      "size": 124141
+    },
+    {
+      "path": "tables/associations/best_val/cifar100_auroc.csv",
+      "sha256": "86eb69d4722e86c85140c2495c10f48dd7c7b5d63171c6db75fb10604d8c8d77",
+      "size": 121740
+    },
+    {
+      "path": "tables/associations/best_val/cifar100_fpr95_performance.csv",
+      "sha256": "99d36fc8948c25f6ab332084494eed969d1ac04b3541a9578598e7a5259279e8",
+      "size": 123052
+    },
+    {
+      "path": "tables/associations/best_val/mnist_aupr_in_appendix.csv",
+      "sha256": "522e198ad5c00dc692a2becf7a135e353ca97a22a54fb226d5e7b80621d2c160",
+      "size": 123005
+    },
+    {
+      "path": "tables/associations/best_val/mnist_aupr_out_appendix.csv",
+      "sha256": "f66288ec7ffe2f0794f811ae8d75a412ec99e14df0cd359d8726c2b2b6bc5bcc",
+      "size": 123406
+    },
+    {
+      "path": "tables/associations/best_val/mnist_auroc.csv",
+      "sha256": "d0fd9da8d27b1469e7bd76cb6104b019f6f858a2f16dc5bb42340175418ca50d",
+      "size": 120814
+    },
+    {
+      "path": "tables/associations/best_val/mnist_fpr95_performance.csv",
+      "sha256": "a7f4a7f3a5e4a1ac0e3b7997f2d276ddd1fd6598b9d8ecd46c46223e6953147d",
+      "size": 122097
+    },
+    {
+      "path": "tables/associations/best_val/places365_aupr_in_appendix.csv",
+      "sha256": "cc0522042252ec5c70e789a3f07cdf05eff7460e3f2ca6dbdbcf463a60fb92cf",
+      "size": 124391
+    },
+    {
+      "path": "tables/associations/best_val/places365_aupr_out_appendix.csv",
+      "sha256": "2c70eccd409458484665b3aa53f5fbbd17302fde3250e01e591cf56a19de058f",
+      "size": 124043
+    },
+    {
+      "path": "tables/associations/best_val/places365_auroc.csv",
+      "sha256": "aee730be0e40fa5b6ca273cebc760d71a4a85ecd4f95ecdbc4ddd04be1ca7460",
+      "size": 122143
+    },
+    {
+      "path": "tables/associations/best_val/places365_fpr95_performance.csv",
+      "sha256": "1cbc88b634cf25b6c290c0e5137c32c99242f50536dc203a202e813baf6f318c",
+      "size": 123298
+    },
+    {
+      "path": "tables/associations/best_val/svhn_aupr_in_appendix.csv",
+      "sha256": "736b9f20661048ee89b10420b84934231bce83d85347618e42a04e47749b5e02",
+      "size": 122516
+    },
+    {
+      "path": "tables/associations/best_val/svhn_aupr_out_appendix.csv",
+      "sha256": "5f06b788720fa138adba920f35925a5f6cd8f4bc58c26420a947c4dd671db5ee",
+      "size": 122833
+    },
+    {
+      "path": "tables/associations/best_val/svhn_auroc.csv",
+      "sha256": "9fdf9843ed5bf08cdf9c5210df971d876364c48af7a5f8d16ea34c9d1cc01ab6",
+      "size": 120010
+    },
+    {
+      "path": "tables/associations/best_val/svhn_fpr95_performance.csv",
+      "sha256": "a6d3096b013fc0079fab16b6281084c148ed99bd0502f2ca387735b46a7bfcad",
+      "size": 120803
+    },
+    {
+      "path": "tables/associations/best_val/texture_aupr_in_appendix.csv",
+      "sha256": "5a607c477e3c319e6694553a9d3cdef810d29ba248585bb04b4243838829feb1",
+      "size": 123690
+    },
+    {
+      "path": "tables/associations/best_val/texture_aupr_out_appendix.csv",
+      "sha256": "f54b1ebd4965171680eaaae585cc2e916e0985720dac2f467ff1136fb3a550bb",
+      "size": 123990
+    },
+    {
+      "path": "tables/associations/best_val/texture_auroc.csv",
+      "sha256": "c7316232e62af0823b096b9f2cb89dc9f5c562845dddab99ffc5a1fa84e43466",
+      "size": 121449
+    },
+    {
+      "path": "tables/associations/best_val/texture_fpr95_performance.csv",
+      "sha256": "c3f1ea652cbb1a53d3cca2a91420987bb64081de76cbc171e11515d0784adc5d",
+      "size": 122672
+    },
+    {
+      "path": "tables/associations/best_val/tin_aupr_in_appendix.csv",
+      "sha256": "5154e9be83b3c20664aeb71cdb6baf72af192bf371c45f56abb42236b7981109",
+      "size": 122286
+    },
+    {
+      "path": "tables/associations/best_val/tin_aupr_out_appendix.csv",
+      "sha256": "f759b51ca76868b1c793130ac6ac8e1ddd9066ddc87a93430efbce3476d66712",
+      "size": 122471
+    },
+    {
+      "path": "tables/associations/best_val/tin_auroc.csv",
+      "sha256": "c9cb85d91b0af49f677644f1deb82b5a46a5c72095bb30328f2d7c3c87d70792",
+      "size": 120017
+    },
+    {
+      "path": "tables/associations/best_val/tin_fpr95_performance.csv",
+      "sha256": "1f9bed74ad319c9edd9aa823d08e470b6e9d7bd03a51ea82d79dab2ade62b4f9",
+      "size": 121207
+    },
+    {
+      "path": "tables/associations/last/cifar100_aupr_in_appendix.csv",
+      "sha256": "7b7b32e7c640dea7832dbc4705486b9c1627c920c53dba672783897796d168d9",
+      "size": 123328
+    },
+    {
+      "path": "tables/associations/last/cifar100_aupr_out_appendix.csv",
+      "sha256": "a7becf0daa462eb097c37fb49865b7fb124fe499caa7096301a19239027438c7",
+      "size": 123790
+    },
+    {
+      "path": "tables/associations/last/cifar100_auroc.csv",
+      "sha256": "a40d5fea61c067e475cd0f82c95197aa87bcf8fc30655309cca803fab5646253",
+      "size": 121020
+    },
+    {
+      "path": "tables/associations/last/cifar100_fpr95_performance.csv",
+      "sha256": "e403cc09b8db7958fe5d858589a23c2225c3b670e7d00a0958b58142f5676581",
+      "size": 122045
+    },
+    {
+      "path": "tables/associations/last/mnist_aupr_in_appendix.csv",
+      "sha256": "f229eca16c8f20071efa959f179771f9806e31b90146ffede2b9ddabae806982",
+      "size": 122311
+    },
+    {
+      "path": "tables/associations/last/mnist_aupr_out_appendix.csv",
+      "sha256": "463178b3f84df1fd06ee46998de2a3ff114d348431ec215e7a5a90cfb997568d",
+      "size": 122849
+    },
+    {
+      "path": "tables/associations/last/mnist_auroc.csv",
+      "sha256": "98188f691ca0ddc78352ba08a78060f5cd983df23918584eca3ea4c7dae8ab0d",
+      "size": 120106
+    },
+    {
+      "path": "tables/associations/last/mnist_fpr95_performance.csv",
+      "sha256": "d8f847bdf8e4067fc6b4f21d0057ef4cbb8f1e4c46f043d4c94c9815a5a637a3",
+      "size": 121388
+    },
+    {
+      "path": "tables/associations/last/places365_aupr_in_appendix.csv",
+      "sha256": "fb45fc14880b5f1f3610a239f201523fbf4f39e7f2ed217b25f393881868cdac",
+      "size": 123596
+    },
+    {
+      "path": "tables/associations/last/places365_aupr_out_appendix.csv",
+      "sha256": "a43d471068300451d90b8296fd1e253f304eee1d0dbff1e69382b964c6b18cab",
+      "size": 123979
+    },
+    {
+      "path": "tables/associations/last/places365_auroc.csv",
+      "sha256": "d395729da6ea3070d0a0882ab17fb83ae52da17d595d22e06bb4f3077d7524f1",
+      "size": 121222
+    },
+    {
+      "path": "tables/associations/last/places365_fpr95_performance.csv",
+      "sha256": "ab0d59c47a90656fec4c489f62dcba57efa11ef0d866f9147fc2cc9d797f1103",
+      "size": 122595
+    },
+    {
+      "path": "tables/associations/last/svhn_aupr_in_appendix.csv",
+      "sha256": "acf64a199a211379f51bb5541af2b6a3ea689019c9bd5c2dc264226eccc97145",
+      "size": 121997
+    },
+    {
+      "path": "tables/associations/last/svhn_aupr_out_appendix.csv",
+      "sha256": "34f1b1b8111a9a2ecdeb682c4539af5e3fcfbf8d22865501526764d6f08adb67",
+      "size": 122120
+    },
+    {
+      "path": "tables/associations/last/svhn_auroc.csv",
+      "sha256": "0aabc2fdce9b12dafb9e26b6e405600af00c95047c023e40a8cc713d27717a24",
+      "size": 119542
+    },
+    {
+      "path": "tables/associations/last/svhn_fpr95_performance.csv",
+      "sha256": "2b7ac19844ef72fb16aefdec257ce27338f27019148cf5733dcb8a74f91f2733",
+      "size": 120951
+    },
+    {
+      "path": "tables/associations/last/texture_aupr_in_appendix.csv",
+      "sha256": "8470c1ff8024f0ea9c42b06a86020f66cca5719bd24c894d7fc342ca6fc1a01b",
+      "size": 123002
+    },
+    {
+      "path": "tables/associations/last/texture_aupr_out_appendix.csv",
+      "sha256": "950981ca14d1eb69087086108b1155d536c20262abd79702a52a289ba7cc4c91",
+      "size": 123373
+    },
+    {
+      "path": "tables/associations/last/texture_auroc.csv",
+      "sha256": "91932e2dfc63e9cbe3cd08ceddc41639702de995f403902f11a38aef2c616462",
+      "size": 120716
+    },
+    {
+      "path": "tables/associations/last/texture_fpr95_performance.csv",
+      "sha256": "2280b63d048ed3985d1b4143ad857623a57a1bb6ae680855fa770003f2640d4f",
+      "size": 121987
+    },
+    {
+      "path": "tables/associations/last/tin_aupr_in_appendix.csv",
+      "sha256": "47add38f044e7c52a214080355253820619f6d174a1053312c933610d0b103b1",
+      "size": 121526
+    },
+    {
+      "path": "tables/associations/last/tin_aupr_out_appendix.csv",
+      "sha256": "3570a222a65b88997b6d596bee4e1fa9bf2cfdf53a465d888bd27461a9cbd40b",
+      "size": 121949
+    },
+    {
+      "path": "tables/associations/last/tin_auroc.csv",
+      "sha256": "65da4a529e5baf8f280151dbf544f36becf2a3da7eb5e7d7b58cdb70a98dd128",
+      "size": 119318
+    },
+    {
+      "path": "tables/associations/last/tin_fpr95_performance.csv",
+      "sha256": "408350174c3e5584eb67c52a30d07d6460c9ea3017a3adc85bad16b750ab79cc",
+      "size": 120543
+    },
+    {
+      "path": "tables/cross_dataset_macro_audit/all_seed0.csv",
+      "sha256": "8593310e16e3b99a9991b61932376bd73979db0b7a2972fee6b85506d74770b3",
+      "size": 4197965
+    },
+    {
+      "path": "tables/cross_dataset_macro_audit/all_three_seed.csv",
+      "sha256": "0b5ff8023a74157938fda5c36e035f3658b2adb1f4daa9bb781d0023baddd450",
+      "size": 5735433
+    },
+    {
+      "path": "tables/deltas/geometry/best_val.csv",
+      "sha256": "d62dc6492209005f2d4b897b8661126ffea0ada4177cd35656b71ba8c2b997f8",
+      "size": 102331
+    },
+    {
+      "path": "tables/deltas/geometry/last.csv",
+      "sha256": "f503566d728c318c54dda3b780a1fe354260cbfbb4e0c9bb948563ace008676b",
+      "size": 101663
+    },
+    {
+      "path": "tables/deltas/id/best_val.csv",
+      "sha256": "76e3a6d9dabb3ffd001506c801fa7dcc29fed5484d85640e6d47a6353590ba06",
+      "size": 30918
+    },
+    {
+      "path": "tables/deltas/id/last.csv",
+      "sha256": "ce43f9a9f273c8bb4b2f1bb6a9f7cd7f24301f423858472045421f5c4b7b7cbb",
+      "size": 30735
+    },
+    {
+      "path": "tables/deltas/ood/cifar100/best_val.csv",
+      "sha256": "b6ee39c63f819bd4356bd8346a17ba613e906d54e4576d094e1225110e474d36",
+      "size": 298307
+    },
+    {
+      "path": "tables/deltas/ood/cifar100/last.csv",
+      "sha256": "0ffd88867fd64079890b7f3597eaef9dac3af1334dabadda176b9ad93836acd8",
+      "size": 296518
+    },
+    {
+      "path": "tables/deltas/ood/mnist/best_val.csv",
+      "sha256": "23cd097fbe4eee8bcf564149157370afca985209611d372120804cf7ce530d44",
+      "size": 294689
+    },
+    {
+      "path": "tables/deltas/ood/mnist/last.csv",
+      "sha256": "990a001e987f5c560243ac071f676d3ced4a4e9045203552d6dc665ce7c72a5c",
+      "size": 292953
+    },
+    {
+      "path": "tables/deltas/ood/places365/best_val.csv",
+      "sha256": "d9fda68c99340c5170c983474e94b997dff01ac03d9a0889000f0184c0449aee",
+      "size": 298933
+    },
+    {
+      "path": "tables/deltas/ood/places365/last.csv",
+      "sha256": "db5bc8bbac0d8385e7a07d2d91b4517e0f57e7155e13e5e0f443df833fef70c6",
+      "size": 297179
+    },
+    {
+      "path": "tables/deltas/ood/svhn/best_val.csv",
+      "sha256": "af3be45924520304dd114ff282768dcf5a951e0b1533b20fc6a6d36ded4df301",
+      "size": 293902
+    },
+    {
+      "path": "tables/deltas/ood/svhn/last.csv",
+      "sha256": "b8edb9859454b160cf91e94e2515129e54a8ed9b9a079ad562af2e300689e507",
+      "size": 292110
+    },
+    {
+      "path": "tables/deltas/ood/texture/best_val.csv",
+      "sha256": "d5690f43d29923220a9dd3d61c7320a7969dc602c3a8f687bb06a9b1e1cda6e5",
+      "size": 296729
+    },
+    {
+      "path": "tables/deltas/ood/texture/last.csv",
+      "sha256": "d5b37ab5ac56f2bacf2fcbd717004db1ff5973732e7b2eee7d8fabf984d0f48f",
+      "size": 295044
+    },
+    {
+      "path": "tables/deltas/ood/tin/best_val.csv",
+      "sha256": "b45257d7ad18e0225e60094270c47472dcc34419803de0f2c5e433cd78e2d0aa",
+      "size": 293679
+    },
+    {
+      "path": "tables/deltas/ood/tin/last.csv",
+      "sha256": "9f5981201cf94f8424bcc8047b5cb5270354823f38ed017ae2e012cf12f50f91",
+      "size": 291905
+    },
+    {
+      "path": "tables/detector_panel.csv",
+      "sha256": "ba3b1dacf4ce98430fbdff451d69dd838a219dd973bcedaa2d9c16656a370612",
+      "size": 942
+    },
+    {
+      "path": "tables/detector_panel.md",
+      "sha256": "d19aca1e4d8b3bd48e9f796a8a77b067a9caf1c85ee686cbf8878cd73df17953",
+      "size": 1160
+    },
+    {
+      "path": "tables/geometry/all_seed0_best_val.csv",
+      "sha256": "72489f65a59bca3e7ad285640bf245ece16cc3170e28f16cbdd79d3ab028ff3f",
+      "size": 746502
+    },
+    {
+      "path": "tables/geometry/all_seed0_last.csv",
+      "sha256": "555dcc9a2bd7cf0a48e0cc781fc51b3c6ea1d9e2adb818b11d305cbb5908115f",
+      "size": 738161
+    },
+    {
+      "path": "tables/geometry/all_three_seed_best_val.csv",
+      "sha256": "35aeeca6e711d0039dbfd258d2202b37e5e11da39a609f5b19ae4e24fff01e54",
+      "size": 1065208
+    },
+    {
+      "path": "tables/geometry/all_three_seed_last.csv",
+      "sha256": "ce51bc6022aa0b34797393221b502f8e83ffc8e0619ef5514570e982ea5654eb",
+      "size": 1057199
+    },
+    {
+      "path": "tables/geometry/paper_best_val.md",
+      "sha256": "c6c72760330e33ba92bc66f2ea83d5f4d0c76f23b1d6137b8528cbb0d8a4c897",
+      "size": 22677
+    },
+    {
+      "path": "tables/geometry/paper_best_val.tex",
+      "sha256": "f861d529fc38a5db47eb08872162599a25de2ce025186be249b5d260dd384cfa",
+      "size": 23471
+    },
+    {
+      "path": "tables/geometry/paper_last.md",
+      "sha256": "b29926a4888aa595f4dd0e3952dc9952c63e0d01d59a26574be5976638c8772e",
+      "size": 22671
+    },
+    {
+      "path": "tables/geometry/paper_last.tex",
+      "sha256": "8876aa8b2b3304aa8ef2658fdd61463646f85e0149babf7852ca45ea6f809f4e",
+      "size": 23464
+    },
+    {
+      "path": "tables/id/all_seed0_best_val.csv",
+      "sha256": "0f62bf75967154a467c949f353275c3e25cfc8cc88c8203dafcde2783403767a",
+      "size": 39148
+    },
+    {
+      "path": "tables/id/all_seed0_last.csv",
+      "sha256": "fb8274d6014766e1db2e351fefb268bc180279ad12f9abe8ae6668bb57de8fbd",
+      "size": 38699
+    },
+    {
+      "path": "tables/id/all_three_seed_best_val.csv",
+      "sha256": "1fb511cd949b9216998fab200bb1821907814b545f95da6be58c7da485754256",
+      "size": 58104
+    },
+    {
+      "path": "tables/id/all_three_seed_last.csv",
+      "sha256": "51298b54012d9b3f53ffd8cf33b8e698e6190c72a041e68fd326202bb57a52df",
+      "size": 57699
+    },
+    {
+      "path": "tables/id/paper_best_val.md",
+      "sha256": "8e2bd6c98067afef24e7d30bf669907f068f55b638be9299016fb4b1d6e6dbeb",
+      "size": 1889
+    },
+    {
+      "path": "tables/id/paper_best_val.tex",
+      "sha256": "a1283a5ff616db22395eeb40c0ddd0efa8e13c1d6ff69525ebfeb733d05a84a3",
+      "size": 2130
+    },
+    {
+      "path": "tables/id/paper_last.md",
+      "sha256": "c4283807059da77e655224e847fbb0c0e108f1143a388a64ecc1299aa8a43fc9",
+      "size": 1885
+    },
+    {
+      "path": "tables/id/paper_last.tex",
+      "sha256": "338960f35b929e52abe5f6cc5b295a420e9d17797b8a07e5e3f8cc4d0f46aa09",
+      "size": 2125
+    },
+    {
+      "path": "tables/methods_crosswalk.csv",
+      "sha256": "dc12ce35dfba354a15323e1f33074099be90c773f74d1078f26231f7d3cbe2d3",
+      "size": 25651
+    },
+    {
+      "path": "tables/methods_crosswalk.md",
+      "sha256": "c41347d9b4b021b12ca85ee6ab2db670b8ae126565f501632625a2e8591d769e",
+      "size": 17367
+    },
+    {
+      "path": "tables/ood/cifar100/all_seed0_best_val.csv",
+      "sha256": "b8f0d24b6537b3311a4979ebc9490cb4cc5308b836a80ce2518046dbaf0b6317",
+      "size": 657105
+    },
+    {
+      "path": "tables/ood/cifar100/all_seed0_last.csv",
+      "sha256": "604b5ea3020e8cb779f34255e2e8104e07a98ff0aeedba2bfc80b346c5aa71af",
+      "size": 650207
+    },
+    {
+      "path": "tables/ood/cifar100/all_three_seed_best_val.csv",
+      "sha256": "b759aebb759954cccc6fd6e1fdef353dafb35f7a99e5d1573db501a723cf87ea",
+      "size": 917269
+    },
+    {
+      "path": "tables/ood/cifar100/all_three_seed_last.csv",
+      "sha256": "c29487d3792c6c452996d70367ee60ff5ee3fea48bc96ab274474d9c49427ef2",
+      "size": 910606
+    },
+    {
+      "path": "tables/ood/cifar100/paper_best_val.csv",
+      "sha256": "7c289e9532501ad683b9c67230ac8cffc5a8259ff084cb778838ca536d67b8bd",
+      "size": 99028
+    },
+    {
+      "path": "tables/ood/cifar100/paper_best_val.md",
+      "sha256": "2236022271bd19aa4be0d4bb56dd2b03b6e7186d696462727a337bf46f6cee37",
+      "size": 16339
+    },
+    {
+      "path": "tables/ood/cifar100/paper_best_val.tex",
+      "sha256": "985abc937b19ed248509dfb5df7dc00494f68217c632ea4a911e76787547dc70",
+      "size": 17954
+    },
+    {
+      "path": "tables/ood/cifar100/paper_last.csv",
+      "sha256": "001893c2b70eb6b5bdec2611e0f1267f1ce258b5053201d942be0caf93cd1d17",
+      "size": 98619
+    },
+    {
+      "path": "tables/ood/cifar100/paper_last.md",
+      "sha256": "d63022a30290adbcbd89524dd895b2e8fb3bbe89eed681d905cd64b06dd87e62",
+      "size": 16335
+    },
+    {
+      "path": "tables/ood/cifar100/paper_last.tex",
+      "sha256": "b4c12ced43e86b0d63bbf8526913078df96c6ddeb0d12d3333f3ec880985e5a3",
+      "size": 17949
+    },
+    {
+      "path": "tables/ood/mnist/all_seed0_best_val.csv",
+      "sha256": "efe1d1b275bfa27f647b764c1c105448d4d951b868a9ea36671e0b5d4dbeca1b",
+      "size": 645326
+    },
+    {
+      "path": "tables/ood/mnist/all_seed0_last.csv",
+      "sha256": "d21c364215cd1e5b735cd56e89a9aaf8bf5b6067c23e0dfad8b5921842b0b5c0",
+      "size": 638414
+    },
+    {
+      "path": "tables/ood/mnist/all_three_seed_best_val.csv",
+      "sha256": "6976364bb3ffe549f77f793d196eb6f1a874249d8b830dfc70c7c899adaeacc3",
+      "size": 904734
+    },
+    {
+      "path": "tables/ood/mnist/all_three_seed_last.csv",
+      "sha256": "f48cdd86c1e8b3ab042da41ad27da9d92e15974fbcf0de108e5e127f0d4ac194",
+      "size": 897944
+    },
+    {
+      "path": "tables/ood/mnist/paper_best_val.csv",
+      "sha256": "da74ac5519b4ee91b4c20bbb631be07013f7f5a40e08cbf1b72005e9cffb7817",
+      "size": 97046
+    },
+    {
+      "path": "tables/ood/mnist/paper_best_val.md",
+      "sha256": "ecbc098741ceb230f46b5a9926c4588e13c847d41e62cfcca6302fe29c962151",
+      "size": 16336
+    },
+    {
+      "path": "tables/ood/mnist/paper_best_val.tex",
+      "sha256": "0f8fecabc9b2632bd81ffeb9146b2af219bebbfa4104203b306e58e6744c03be",
+      "size": 17950
+    },
+    {
+      "path": "tables/ood/mnist/paper_last.csv",
+      "sha256": "8d31be183a281ce7309ce53997ba8fc9e9ffaf28167f1fb5134c47a82973709c",
+      "size": 96534
+    },
+    {
+      "path": "tables/ood/mnist/paper_last.md",
+      "sha256": "7109090affde0560c1b290fc101fa3b77c626d068627e201d7f9853fecb61f26",
+      "size": 16332
+    },
+    {
+      "path": "tables/ood/mnist/paper_last.tex",
+      "sha256": "90bc483c760b3e897507fae72a8fafa633420db46c45cecb191707ca3d9cef79",
+      "size": 17945
+    },
+    {
+      "path": "tables/ood/places365/all_seed0_best_val.csv",
+      "sha256": "753007bbf55b30678f2bb06e12e5c02f025cf28b29c9db8b0861939c6067da12",
+      "size": 659340
+    },
+    {
+      "path": "tables/ood/places365/all_seed0_last.csv",
+      "sha256": "ebfb1589dbbdbbc145a3e419f36be4f4b8d19b20414db606764613296c058582",
+      "size": 652495
+    },
+    {
+      "path": "tables/ood/places365/all_three_seed_best_val.csv",
+      "sha256": "d9e7eff057e3b1811cc9f2e846cc3650173c0d189b2e2e893ff4119a63e2ca45",
+      "size": 920404
+    },
+    {
+      "path": "tables/ood/places365/all_three_seed_last.csv",
+      "sha256": "85794735de935d36890b7949f8e54ec3306a70536848e8d7fa4001a7fa8f283b",
+      "size": 913549
+    },
+    {
+      "path": "tables/ood/places365/paper_best_val.csv",
+      "sha256": "280f0ec2344d173461e8e836b6395dbc5e1330f58728c690dd7ca034508e395a",
+      "size": 99667
+    },
+    {
+      "path": "tables/ood/places365/paper_best_val.md",
+      "sha256": "9048bbf6c55fb3883a4a933352b1e9fabfb7c19641259edb25b312038dab3d83",
+      "size": 16340
+    },
+    {
+      "path": "tables/ood/places365/paper_best_val.tex",
+      "sha256": "9485b50bb6342950cc2a1707304198ba8eb5457d8597d21055ec3681606015c3",
+      "size": 17954
+    },
+    {
+      "path": "tables/ood/places365/paper_last.csv",
+      "sha256": "6de5ac0eacb3218f5c83d911656149568e3d61ace95fbab6ad89e206216be4fd",
+      "size": 99213
+    },
+    {
+      "path": "tables/ood/places365/paper_last.md",
+      "sha256": "bc5435f8e6f1638744bb6bf0db888c258144e74502e5c8f0999991e2cc6a2117",
+      "size": 16336
+    },
+    {
+      "path": "tables/ood/places365/paper_last.tex",
+      "sha256": "af4331f4f2fc291b4743b6890e0c5154c1a333c888295660b0837b8efa4bd928",
+      "size": 17949
+    },
+    {
+      "path": "tables/ood/svhn/all_seed0_best_val.csv",
+      "sha256": "6fddd1bb480ca19e76553d09ab56a95ab5f6331a8132419852dd8cbf8769fe65",
+      "size": 642306
+    },
+    {
+      "path": "tables/ood/svhn/all_seed0_last.csv",
+      "sha256": "9384e0eb66e1ddd31f9bde6a6c74f9d9819bb1f24d52329abdb509b0b2e60dbc",
+      "size": 635504
+    },
+    {
+      "path": "tables/ood/svhn/all_three_seed_best_val.csv",
+      "sha256": "a789da777d1968b2a7a3b2e240df1420d74c916571c06a6b6d59a7cbcf22db9f",
+      "size": 902829
+    },
+    {
+      "path": "tables/ood/svhn/all_three_seed_last.csv",
+      "sha256": "934816b5ec39ac5333c8d71c8935b74dc93aa1dab00a52afadf7e0f1beb4b24a",
+      "size": 896180
+    },
+    {
+      "path": "tables/ood/svhn/paper_best_val.csv",
+      "sha256": "6f4a0421a9c7604a2b6a94f8be474f718d451dd1d75e59055fa2cc015e8217bd",
+      "size": 96450
+    },
+    {
+      "path": "tables/ood/svhn/paper_best_val.md",
+      "sha256": "386c5aad709423d943df16184a424d84f76dfc720b692ca8a1b8eed1f52365f5",
+      "size": 16335
+    },
+    {
+      "path": "tables/ood/svhn/paper_best_val.tex",
+      "sha256": "7c5f212df50feb66e94daa98993e7272281b53b6114e282ddaf7b3ad1a0cf845",
+      "size": 17949
+    },
+    {
+      "path": "tables/ood/svhn/paper_last.csv",
+      "sha256": "5aeec9761cc9c6c30e5378290f07779b08a009055b8c4db229476bd65b7603b0",
+      "size": 96000
+    },
+    {
+      "path": "tables/ood/svhn/paper_last.md",
+      "sha256": "807ee181802c23ae85f3379be1d3c42a63b2e9de9abeceed0f4b999abc9370ae",
+      "size": 16331
+    },
+    {
+      "path": "tables/ood/svhn/paper_last.tex",
+      "sha256": "bef76bed019501b43553704b6c19d4e382b85725c59e6d2d5004314523c70689",
+      "size": 17944
+    },
+    {
+      "path": "tables/ood/texture/all_seed0_best_val.csv",
+      "sha256": "4ddf290d03811c103c4f4b2d7a50b4a983550916cdb7d8737f983a91ca867cea",
+      "size": 652528
+    },
+    {
+      "path": "tables/ood/texture/all_seed0_last.csv",
+      "sha256": "95615b326ef31170f1291dfce036ae519c177aaf5bf69befea5e70ace3df26e1",
+      "size": 645713
+    },
+    {
+      "path": "tables/ood/texture/all_three_seed_best_val.csv",
+      "sha256": "f57a2d1a2931665ca4bf64872276d23a3a4f02df89a081929b75cb4a6359b6bd",
+      "size": 913465
+    },
+    {
+      "path": "tables/ood/texture/all_three_seed_last.csv",
+      "sha256": "be33e606896d91df28d9f7cddb6dba659049aa5715b0be697bea0353f81cad06",
+      "size": 906723
+    },
+    {
+      "path": "tables/ood/texture/paper_best_val.csv",
+      "sha256": "a97c57ef8c6c576898724aaf97be070d0baa6c6a85e99e74fe5f0e091864c415",
+      "size": 98395
+    },
+    {
+      "path": "tables/ood/texture/paper_best_val.md",
+      "sha256": "194f792e5d8bd9306b9ee8737aa720257018101c9c62ad189f0cbb09b4699a60",
+      "size": 16338
+    },
+    {
+      "path": "tables/ood/texture/paper_best_val.tex",
+      "sha256": "d84862e745e1711687aaad4174cb5e26adbbe0a38e480ae00a841e069504eec5",
+      "size": 17953
+    },
+    {
+      "path": "tables/ood/texture/paper_last.csv",
+      "sha256": "ddbc02636f98d0cba49e26e618a440225b42e1f9e875348cd135ba4b7adce75f",
+      "size": 97978
+    },
+    {
+      "path": "tables/ood/texture/paper_last.md",
+      "sha256": "287996fffd95193c0bdb1ba1ba479cc15fc7d84d2ffa4cd9c78a79b47d287355",
+      "size": 16334
+    },
+    {
+      "path": "tables/ood/texture/paper_last.tex",
+      "sha256": "0089d1529826603ae28ad1eacda919867635e9759cb2f3bb89e5a6bb88f4a81b",
+      "size": 17948
+    },
+    {
+      "path": "tables/ood/tin/all_seed0_best_val.csv",
+      "sha256": "1b8d7cf9b88d0ffe6cd21cb2ada37cc8b16ffa53f7087678e9a3abac6cd41b88",
+      "size": 640533
+    },
+    {
+      "path": "tables/ood/tin/all_seed0_last.csv",
+      "sha256": "6b3886f55fd6edc43d33163bb3874fd81094a441392f3ce9287ff9271441d51f",
+      "size": 633659
+    },
+    {
+      "path": "tables/ood/tin/all_three_seed_best_val.csv",
+      "sha256": "b6319953872658562c09a051b4edd31d965b68479e5764834c02605ea555aa82",
+      "size": 901585
+    },
+    {
+      "path": "tables/ood/tin/all_three_seed_last.csv",
+      "sha256": "c6f78b65f4c0ece042c041ab132355afbf7f65e7264266ae0f6cbe86146423d4",
+      "size": 894671
+    },
+    {
+      "path": "tables/ood/tin/paper_best_val.csv",
+      "sha256": "f0c2734b5ddf7966ae3d6843e0f227d8f7655d0bc191cd6e2de330d9d0ae5697",
+      "size": 96074
+    },
+    {
+      "path": "tables/ood/tin/paper_best_val.md",
+      "sha256": "75459876e77784fcc41b6afdb1c338672a2703a658a03d81d7f76c12080b6593",
+      "size": 16334
+    },
+    {
+      "path": "tables/ood/tin/paper_best_val.tex",
+      "sha256": "9ab85c30e070d6a59d6bc7e2c3c83823e302c9261f6dba7aee12ef343f0284dd",
+      "size": 17957
+    },
+    {
+      "path": "tables/ood/tin/paper_last.csv",
+      "sha256": "bef0a5bb79fc27f0b82a67a61f1e30c11ffbd69ed3b86d188bd9554d77580871",
+      "size": 95606
+    },
+    {
+      "path": "tables/ood/tin/paper_last.md",
+      "sha256": "ad6c168c2a2066637069795cd8175a71a5b6e446e33f0b2369b8284d779a9561",
+      "size": 16330
+    },
+    {
+      "path": "tables/ood/tin/paper_last.tex",
+      "sha256": "3afb0b59651583befed864aa28a8fd726355c5ba0c9c98be8a77ff0e4b9f770d",
+      "size": 17952
+    },
+    {
+      "path": "tables/role_hyperparameters.csv",
+      "sha256": "bdf4e239b0ed9d595205182bf7e973374b8d4ec8b3ae282d47bfcb21059d6cf0",
+      "size": 1109
+    },
+    {
+      "path": "tables/role_hyperparameters.md",
+      "sha256": "cab6d02f4cb893fdcf0d48196078c3287809e778671edca0ca6080e8736ba94c",
+      "size": 557
+    }
+  ],
+  "inventory_hash": "35a1a66f78dfd6255c4d804586ee6863969be78d21acec5cd0ccf00476ddaa5c",
+  "random_seed": 20260805,
+  "resamples": 10000,
+  "schema_version": "1.0",
+  "source_payloads": [
+    {
+      "path": "aggregate.json",
+      "sha256": "d9e51acedadaf532e5cd37fe06d745f962bc036d61234ce1c819de0d855e4cac",
+      "size": 33594
+    },
+    {
+      "path": "detector_rank_concordance.jsonl",
+      "sha256": "3f22c203f41bbb5e2dc90d0fda1653b504a6e8dbfc8af23d89f39f06f2234be1",
+      "size": 30210
+    },
+    {
+      "path": "per_checkpoint_records.jsonl",
+      "sha256": "c845ba8734d03ba170a48da121fec7a4fd0ccbbebb5e54c3442bc32156ad85cc",
+      "size": 104646790
+    },
+    {
+      "path": "seed_aggregates.jsonl",
+      "sha256": "8d0891051fc719455364602652932a8cadd2308552ec266963cf9e74b54197d2",
+      "size": 54097229
+    }
+  ]
+}

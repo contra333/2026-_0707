@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-08-04
+Last updated: 2026-08-05
 
 ## Current phase
 
@@ -47,6 +47,14 @@ successful per-checkpoint scalar records, 31,720 successful seed aggregates,
 40 successful detector rank-concordance records, and zero non-success seed
 aggregates. See
 `docs/validation/issue57_metric_evaluation_execution.md`.
+Issue #59 then completed the checksum-bounded local C1-C4 analysis without
+checkpoint reevaluation, server execution, or Hugging Face mutation. The
+repository analysis artifact separates `last.pt` primary from `best_val.pt`
+control, preserves six independent OOD dataset partitions, reports all central
+seed-0 and three-seed scalars, and provides dataset-specific exploratory
+geometry-OOD associations with 10,000 configuration-block resamples. See
+`docs/analysis/metric_contract_v1_2_c1_c4/` and
+`docs/validation/issue59_metric_contract_v1_2_analysis.md`.
 
 ## Validated or implemented
 
@@ -174,6 +182,14 @@ aggregates. See
   supervisor-only terminal-state hotfix is separately identified as
   `1af220bbdcac99f4c762613a7556ce2e1901e8da`; every scientific scalar retains
   the single clean evaluator SHA `c38b09694be88aa74de0741b39e9d3ba0d6ff61a`.
+- Issue #59 implements a reproducible local-only analysis CLI and validated
+  result package for the Issue #57 aggregate. It rechecks all four aggregate
+  payload hashes, recomputes 31,720 means/sample SDs and seed-0 parity, fixes
+  the 10 unique-config analysis population, exports 5,700 seed-matched
+  descriptive deltas, and produces separate canonical/appendix tables and
+  SVG/PDF figures. Its 8,448 geometry-OOD rows keep all six OOD datasets and
+  both checkpoint roles separate; all association claims are explicitly
+  exploratory and non-causal.
 
 ## Documented but not executed
 
@@ -209,26 +225,25 @@ aggregates. See
   entrypoints and bounded non-protected validation, Issue #55 provides the
   frozen 60-job launch inventory, and Issue #57 provides the completed
   protected execution and checksum-verified multi-seed aggregate.
-- No DDU/SN ablation, plot, statistical interpretation, or paper conclusion
-  has been produced from the Issue #57 aggregate.
+- No DDU/SN ablation or confirmatory causal interpretation is part of the
+  completed local analysis.
 
 ## Still missing
 
-- Plots, statistical analysis, optimizer/geometry/OOD interpretation, and
-  paper tables from the completed protected aggregate
+- Final manuscript narrative and final main/appendix table selection from the
+  completed descriptive analysis package
 - Any future DDU/SN training ablation
 
 ## Active next phase
 
-Issue #57 completed protected feature extraction, metric evaluation, no-delete
-Hugging Face publication, three-host readback, and deterministic seed
-aggregation for the 30 authorized identities and 60 checkpoints. The next
-phase is local analysis of the checksum-verified aggregate: quality-control
-tables first, then prespecified `last` primary comparisons, `best_val` control
-comparisons, geometry/OOD association, sensitivity results, plots, and paper
-tables. The Issue #10 CUDA runs remain infrastructure validation, and the
-Issue #14 run is the single-seed historical SGD baseline; neither is
-optimizer-comparison, geometry, Neural Collapse, or OOD-detector evidence.
+Issue #59 completed the first local analysis pass over the checksum-verified
+Issue #57 aggregate. The next phase is manuscript assembly: choose the final
+main and appendix layouts from the frozen dataset-specific tables, connect the
+reported rows to Card 11 Methods wording, and write conclusions within the
+documented exploratory-association boundary. The Issue #10 CUDA runs remain
+infrastructure validation, and the Issue #14 run is the single-seed historical
+SGD baseline; neither is optimizer-comparison, geometry, Neural Collapse, or
+OOD-detector evidence.
 
 The completed Issue #57 authorization does not extend to another protected
 population, rerun, external upload, or scientific claim. GDA SN-off outputs
@@ -242,8 +257,9 @@ ablation.
 
 ## Blockers and unknowns
 
-- The protected run has no remaining execution blocker. Its aggregate still
-  requires local statistical analysis before any paper claim.
+- The protected run and bounded local analysis have no remaining execution
+  blocker. Manuscript claims must still respect `n=3`, the ten-config
+  association population, multiplicity, and seed-0 role-selection bias.
 - DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
   and require a separately bounded future ablation if the project retains them.
 
