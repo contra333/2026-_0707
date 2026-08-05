@@ -316,6 +316,10 @@ def test_notion_primary_markdown_is_import_safe_and_strictly_partitioned():
     assert len(c2_adamw_rows) == 16
     assert all("NA — protocol absent" in line for line in c2_adamw_rows)
 
+    assert text.count("NC0 raw ↓") == 4
+    assert "NC0 Eq12" not in text
+    assert "NC0 theory" not in text
+
     for detector in (
         "CTM",
         "kNN-L2",

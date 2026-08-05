@@ -148,6 +148,11 @@ NOTION_GEOMETRY_COLLAPSE = (
         None,
     ),
     ("CDNV ↓", GeometrySpec("CDNV", "geometry/cdnv/mean"), "down"),
+    (
+        "NC0 raw ↓",
+        GeometrySpec("NC0 raw", "geometry/nc0_row_sum_raw"),
+        "down",
+    ),
     ("NC1 ↓", GeometrySpec("NC1", "geometry/nc1_pinv"), "down"),
     (
         "NC2 equinorm ↓",

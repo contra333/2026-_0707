@@ -298,8 +298,8 @@
     },
     {
       "path": "notion_c1_c4_primary_comparison.md",
-      "sha256": "0a691f981fcc682ff454cfdd2f31edb670f034cf829df4c1f8b845d32feda54d",
-      "size": 60601
+      "sha256": "3793ad7656f86ffe150fe41b0e80a74416152e8656e3a5d3259805c40e1e347f",
+      "size": 60985
     },
     {
       "path": "tables/associations/best_val/cifar100_aupr_in_appendix.csv",

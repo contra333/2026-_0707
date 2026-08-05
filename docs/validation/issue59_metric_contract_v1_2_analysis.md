@@ -25,8 +25,10 @@ The package also contains
 a UTF-8, plain-Markdown import document for Notion `Text & Markdown`. It keeps
 `last.pt` only, places optimizers on rows, reports mean ± `ddof=1` sample SD,
 and partitions all six OOD datasets before displaying the canonical 11-detector
-AUROC/FPR@95 panel. `best_val`, seed-0 audit rows, AUPR, and the eight appendix
-detectors are intentionally absent from this focused view.
+AUROC/FPR@95 panel. The geometry table includes the Card 11 primary `NC0 raw`
+row; `NC0 Eq12` and `NC0 theory` remain appendix audits outside this focused
+view. `best_val`, seed-0 audit rows, AUPR, and the eight appendix detectors are
+intentionally absent from this focused view.
 
 ## Frozen input identity
 
@@ -110,12 +112,12 @@ checkpoint provenance. No causal or universal-detector conclusion is made.
 
 ## Output inventory and reproducibility
 
-The generated tree contains 206 files and 49,115,007 bytes. Its manifest lists
+The generated tree contains 206 files and 49,115,391 bytes. Its manifest lists
 204 payloads plus the manifest and SHA-256 sidecar. The output-manifest
 SHA-256 is:
 
 ```text
-844d206b6246a0c1073e06259fcc1bef4495b8083828566c51060c7f3efd16f2
+e0509aeb4288915f0b5222d6c5ec9fcace03b71777060b091c5902b1adb721b1
 ```
 
 A second complete 10,000-resample run was written to an independent temporary
@@ -126,7 +128,8 @@ salt and date-free PDF metadata.
 The committed package provides:
 
 - a Korean technical report and Methods-ready English text;
-- a Notion-import-safe C1–C4 `last.pt` primary comparison in one Markdown file;
+- a Notion-import-safe C1–C4 `last.pt` primary comparison in one Markdown file,
+  including the Card 11 `NC0 raw` primary geometry metric;
 - numeric CSV plus Markdown/LaTeX paper tables;
 - all central scalar seed-0 and three-seed tables;
 - independent OOD dataset directories and a separate macro audit;
@@ -142,10 +145,10 @@ other non-central intermediates are **not included** and were not recomputed.
 
 | Check | Result |
 | --- | --- |
-| Analysis-focused and affected-contract tests | `18 passed in 4.32s` |
-| Complete local CPU suite | `277 passed, 1 warning in 12.78s` |
+| Analysis-focused and affected-contract tests | `18 passed in 4.22s` |
+| Complete local CPU suite | `277 passed, 1 warning in 13.22s` |
 | Deterministic full rerun | `PASS`; byte-identical tree and manifest |
-| Notion import/value parity | `PASS`; generated text equals committed aggregate-derived reference; 64 tables with consistent rows; C2 AdamW remains absent |
+| Notion import/value parity | `PASS`; generated text equals committed aggregate-derived reference; 64 tables with `NC0 raw` in all four C sections; C2 AdamW remains absent |
 | Markdown links | `PASS`; 29 generated-package local links resolved |
 | LaTeX table structure | `PASS`; 16 longtables, no non-finite cells |
 | PDF render structure | `PASS`; role figures and six primary AUROC heatmaps are single-page |
@@ -176,12 +179,12 @@ TMPDIR=/tmp PYTHONPATH=src \
   scripts/analyze_metric_contract_v1_2.py \
   --aggregate-dir /home/contra333/2026여름방학실험코드/issue57_metric_results/c38b09694be88aa74de0741b39e9d3ba0d6ff61a/aggregate \
   --inventory configs/evaluation/wrn28_10_cifar10_metric_v1_2/checkpoint_inventory.json \
-  --output-dir /tmp/issue59_analysis_determinism_notion_final \
+  --output-dir /tmp/issue61_notion_nc0_determinism \
   --resamples 10000
 
 diff -qr \
   docs/analysis/metric_contract_v1_2_c1_c4 \
-  /tmp/issue59_analysis_determinism_notion_final
+  /tmp/issue61_notion_nc0_determinism
 
 TMPDIR=/tmp \
   /home/contra333/2026여름방학실험코드/2026-_0707/.venv/bin/python \
