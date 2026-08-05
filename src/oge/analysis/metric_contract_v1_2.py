@@ -39,6 +39,7 @@ OOD_DISPLAY = {
     "texture": "Textures",
     "places365": "Places365",
 }
+OPTIMIZER_DISPLAY = {"sgd": "SGD", "adam": "Adam", "adamw": "AdamW"}
 
 CANONICAL_DETECTORS = (
     "detector/ctm_prototype_cosine",
@@ -90,6 +91,42 @@ OOD_TABLE_METRICS = (
     ("aupr_out", "ood_metric/aupr_out_openood_auc"),
 )
 
+NOTION_ID_PREDICTIVE_METRICS = (
+    ("Accuracy ↑", "id/accuracy", "up"),
+    ("NLL ↓", "id/nll_raw", "down"),
+    ("ECE-M15 ↓", "id/ece_raw_m15", "down"),
+    ("TS NLL ↓", "id/nll_ts", "down"),
+    ("TS ECE-M15 ↓", "id/ece_ts_m15", "down"),
+)
+NOTION_ID_FAILURE_METRICS = (
+    ("Misclassification AUROC ↑", "id/misclassification_auroc_msp_raw", "up"),
+    ("AUGRC ↓", "id/augrc_msp_raw", "down"),
+    ("AURC ↓", "id/aurc_msp_raw", "down"),
+)
+NOTION_DETECTOR_GROUPS = (
+    (
+        "Distance·prototype detectors",
+        (
+            ("CTM", "detector/ctm_prototype_cosine"),
+            ("kNN-L2", "detector/knn_l2_k50"),
+            ("Mahalanobis++", "detector/mahalanobis_pp"),
+            ("Mahalanobis raw", "detector/mahalanobis_raw"),
+            ("Relative Mahalanobis++", "detector/relative_mahalanobis_pp"),
+            ("Relative Mahalanobis raw", "detector/relative_mahalanobis_raw"),
+        ),
+    ),
+    (
+        "Subspace·logit detectors",
+        (
+            ("NECO", "detector/neco_author_std_dim100"),
+            ("ViM", "detector/vim_author_dim"),
+            ("Energy-T1", "ood_score/energy_t1"),
+            ("Maximum Logit", "ood_score/max_logit"),
+            ("MSP", "ood_score/msp"),
+        ),
+    ),
+)
+
 
 @dataclass(frozen=True)
 class GeometrySpec:
@@ -97,6 +134,78 @@ class GeometrySpec:
     artifact_key: str
     statistic: str | None = None
     query_split: str | None = None
+
+
+NOTION_GEOMETRY_COLLAPSE = (
+    (
+        "Feature norm mean",
+        GeometrySpec("Feature norm mean", "geometry/feature_norm/global", "mean"),
+        None,
+    ),
+    (
+        "Feature norm CV",
+        GeometrySpec("Feature norm CV", "geometry/feature_norm/global", "cv"),
+        None,
+    ),
+    ("CDNV ↓", GeometrySpec("CDNV", "geometry/cdnv/mean"), "down"),
+    ("NC1 ↓", GeometrySpec("NC1", "geometry/nc1_pinv"), "down"),
+    (
+        "NC2 equinorm ↓",
+        GeometrySpec("NC2 equinorm", "geometry/nc2_equinorm"),
+        "down",
+    ),
+    (
+        "NC2 equiangular ↓",
+        GeometrySpec("NC2 equiangular", "geometry/nc2_equiangular"),
+        "down",
+    ),
+    ("NC2 ETF ↓", GeometrySpec("NC2 ETF", "geometry/nc2_etf_raw"), "down"),
+    ("NC3 ↓", GeometrySpec("NC3", "geometry/nc3_self_duality_raw"), "down"),
+    (
+        "NC4 ↑",
+        GeometrySpec(
+            "NC4",
+            "geometry/nc4_agreement_with_bias",
+            query_split="id_test",
+        ),
+        "up",
+    ),
+)
+NOTION_GEOMETRY_SPECTRUM = (
+    ("RankMe", GeometrySpec("RankMe", "geometry/rankme_uncentered"), None),
+    (
+        "SW entropy rank",
+        GeometrySpec("SW entropy rank", "geometry/spectrum/sw_entropy_rank"),
+        None,
+    ),
+    (
+        "SW trace/top rank",
+        GeometrySpec("SW trace/top rank", "geometry/spectrum/sw_trace_top_rank"),
+        None,
+    ),
+    (
+        "SW participation ratio",
+        GeometrySpec(
+            "SW participation ratio",
+            "geometry/spectrum/sw_participation_ratio",
+        ),
+        None,
+    ),
+    (
+        "SW numerical rank",
+        GeometrySpec("SW numerical rank", "geometry/spectrum/sw_numerical_rank"),
+        None,
+    ),
+    (
+        "SW condition number",
+        GeometrySpec(
+            "SW condition number",
+            "geometry/spectrum/sw_condition_number_retained",
+        ),
+        None,
+    ),
+    ("LID-50", GeometrySpec("LID-50", "geometry/lid_k50"), None),
+)
 
 
 GEOMETRY_PANEL = (
@@ -635,6 +744,325 @@ def _select(
         matches.append(row)
     _require(len(matches) == 1, f"expected one row, found {len(matches)} for {artifact_key}")
     return matches[0]
+
+
+def _notion_number(value: float) -> str:
+    magnitude = abs(float(value))
+    if magnitude >= 1_000_000 or (0.0 < magnitude < 0.0001):
+        return f"{value:.6e}"
+    return f"{value:.6f}"
+
+
+def _notion_mean_sd(row: Mapping[str, Any], *, bold: bool = False) -> str:
+    text = (
+        f"{_notion_number(float(row['mean']))} ± "
+        f"{_notion_number(float(row['sample_sd_ddof1']))}"
+    )
+    return f"**{text}**" if bold else text
+
+
+def _notion_best_optimizers(
+    rows: Mapping[str, Mapping[str, Any]],
+    direction: str | None,
+) -> set[str]:
+    if direction is None or not rows:
+        return set()
+    values = {optimizer: float(row["mean"]) for optimizer, row in rows.items()}
+    target = max(values.values()) if direction == "up" else min(values.values())
+    return {
+        optimizer
+        for optimizer, value in values.items()
+        if math.isclose(value, target, rel_tol=1e-12, abs_tol=1e-12)
+    }
+
+
+def _notion_id_table(
+    aggregates: Sequence[Mapping[str, Any]],
+    role_configs: Mapping[tuple[str, str], ConfigInfo],
+    role: str,
+    metric_specs: Sequence[tuple[str, str, str]],
+    *,
+    include_hyperparameters: bool,
+) -> str:
+    headers = ["Optimizer"]
+    if include_hyperparameters:
+        headers.extend(["LR", "WD"])
+    headers.extend(name for name, _, _ in metric_specs)
+
+    metric_rows: dict[str, dict[str, Mapping[str, Any]]] = {}
+    metric_best: dict[str, set[str]] = {}
+    for _, artifact_key, direction in metric_specs:
+        by_optimizer = {}
+        for optimizer in OPTIMIZER_ORDER:
+            config = role_configs.get((role, optimizer))
+            if config is not None:
+                by_optimizer[optimizer] = _select(
+                    aggregates,
+                    config_hash=config.config_hash,
+                    checkpoint_role="last",
+                    artifact_key=artifact_key,
+                )
+        metric_rows[artifact_key] = by_optimizer
+        metric_best[artifact_key] = _notion_best_optimizers(
+            by_optimizer,
+            direction,
+        )
+
+    rows = []
+    for optimizer in OPTIMIZER_ORDER:
+        config = role_configs.get((role, optimizer))
+        output = [OPTIMIZER_DISPLAY[optimizer]]
+        if include_hyperparameters:
+            output.extend(
+                ["NA", "NA"]
+                if config is None
+                else [f"{config.lr:g}", f"{config.weight_decay:g}"]
+            )
+        if config is None:
+            output.extend("NA — protocol absent" for _ in metric_specs)
+        else:
+            for _, artifact_key, _ in metric_specs:
+                output.append(
+                    _notion_mean_sd(
+                        metric_rows[artifact_key][optimizer],
+                        bold=optimizer in metric_best[artifact_key],
+                    )
+                )
+        rows.append(output)
+    return _markdown_table(headers, rows).rstrip()
+
+
+def _notion_geometry_table(
+    aggregates: Sequence[Mapping[str, Any]],
+    role_configs: Mapping[tuple[str, str], ConfigInfo],
+    role: str,
+    metric_specs: Sequence[tuple[str, GeometrySpec, str | None]],
+) -> str:
+    headers = ["Optimizer", *(name for name, _, _ in metric_specs)]
+    metric_rows: dict[str, dict[str, Mapping[str, Any]]] = {}
+    metric_best: dict[str, set[str]] = {}
+    for name, spec, direction in metric_specs:
+        by_optimizer = {}
+        for optimizer in OPTIMIZER_ORDER:
+            config = role_configs.get((role, optimizer))
+            if config is not None:
+                by_optimizer[optimizer] = _select(
+                    aggregates,
+                    config_hash=config.config_hash,
+                    checkpoint_role="last",
+                    artifact_key=spec.artifact_key,
+                    statistic=spec.statistic,
+                    query_split=spec.query_split,
+                )
+        metric_rows[name] = by_optimizer
+        metric_best[name] = _notion_best_optimizers(by_optimizer, direction)
+
+    rows = []
+    for optimizer in OPTIMIZER_ORDER:
+        config = role_configs.get((role, optimizer))
+        output = [OPTIMIZER_DISPLAY[optimizer]]
+        if config is None:
+            output.extend("NA — protocol absent" for _ in metric_specs)
+        else:
+            for name, _, _ in metric_specs:
+                output.append(
+                    _notion_mean_sd(
+                        metric_rows[name][optimizer],
+                        bold=optimizer in metric_best[name],
+                    )
+                )
+        rows.append(output)
+    return _markdown_table(headers, rows).rstrip()
+
+
+def _notion_ood_table(
+    aggregates: Sequence[Mapping[str, Any]],
+    role_configs: Mapping[tuple[str, str], ConfigInfo],
+    role: str,
+    dataset: str,
+    detector_specs: Sequence[tuple[str, str]],
+) -> str:
+    headers = ["Optimizer", *(name for name, _ in detector_specs)]
+    detector_rows: dict[str, dict[str, tuple[Mapping[str, Any], Mapping[str, Any]]]] = {}
+    detector_best: dict[str, tuple[set[str], set[str]]] = {}
+    for _, detector in detector_specs:
+        by_optimizer = {}
+        auroc_rows = {}
+        fpr_rows = {}
+        for optimizer in OPTIMIZER_ORDER:
+            config = role_configs.get((role, optimizer))
+            if config is None:
+                continue
+            auroc = _select(
+                aggregates,
+                config_hash=config.config_hash,
+                checkpoint_role="last",
+                artifact_key="ood_metric/auroc_id_positive",
+                detector=detector,
+                ood_dataset=dataset,
+            )
+            fpr = _select(
+                aggregates,
+                config_hash=config.config_hash,
+                checkpoint_role="last",
+                artifact_key="ood_metric/fpr95_id_tpr",
+                detector=detector,
+                ood_dataset=dataset,
+            )
+            by_optimizer[optimizer] = (auroc, fpr)
+            auroc_rows[optimizer] = auroc
+            fpr_rows[optimizer] = fpr
+        detector_rows[detector] = by_optimizer
+        detector_best[detector] = (
+            _notion_best_optimizers(auroc_rows, "up"),
+            _notion_best_optimizers(fpr_rows, "down"),
+        )
+
+    rows = []
+    for optimizer in OPTIMIZER_ORDER:
+        config = role_configs.get((role, optimizer))
+        output = [OPTIMIZER_DISPLAY[optimizer]]
+        if config is None:
+            output.extend("NA — protocol absent" for _ in detector_specs)
+        else:
+            for _, detector in detector_specs:
+                auroc, fpr = detector_rows[detector][optimizer]
+                best_auroc, best_fpr = detector_best[detector]
+                output.append(
+                    f"{_notion_mean_sd(auroc, bold=optimizer in best_auroc)} / "
+                    f"{_notion_mean_sd(fpr, bold=optimizer in best_fpr)}"
+                )
+        rows.append(output)
+    return _markdown_table(headers, rows).rstrip()
+
+
+def build_notion_primary_markdown(
+    aggregates: Sequence[Mapping[str, Any]],
+    configs: Mapping[str, ConfigInfo],
+) -> str:
+    role_configs = _role_configs(configs)
+    lines = [
+        "# C1–C4 optimizer 비교 — Notion용 primary 결과",
+        "",
+        "## 문서 범위와 읽는 법",
+        "",
+        "이 문서는 WRN-28-10 × CIFAR-10 Metric Contract v1.2의 3-seed 결과를 C1부터 C4까지 같은 형식으로 비교한다. 단일 optimizer 우승을 주장하기보다 ID 성능, representation geometry, OOD detector 성능이 함께 어떻게 달라지는지 확인하기 위한 표 중심 문서다.",
+        "",
+        "- 모든 값은 seed 0, 1, 2의 산술평균 ± sample standard deviation이다.",
+        "- confirmatory primary인 last.pt만 사용한다. best_val.pt control은 섞지 않는다.",
+        "- ↑는 클수록, ↓는 작을수록 해당 지표상 유리하다는 뜻이다.",
+        "- 굵은 값은 같은 C 안에서 방향 기준으로 가장 좋은 optimizer의 기술통계다. 통계적 유의성을 의미하지 않는다.",
+        "- 방향을 지정하지 않은 geometry 지표는 우열을 굵게 표시하지 않는다.",
+        "- OOD cell은 AUROC ↑ / FPR@95 ↓ 순서다. ID는 positive class이며 FPR@95는 ID score의 linear 5th percentile threshold를 사용한다.",
+        "- OOD에는 canonical 11 detectors만 포함한다. Appendix detector variants와 AUPR-In/Out은 이 문서에서 제외한다.",
+        "- C2 AdamW는 protocol-defined absent이므로 임의로 채우지 않는다.",
+        "- Adam C1과 C3은 동일한 scientific configuration이다. 역할별 비교를 위해 두 section에 모두 표시한다.",
+        "",
+        "## Metric 범위",
+        "",
+        "ID 성능은 frozen CIFAR-10 id_test 10,000장에 대해 계산했다. Geometry는 NC4를 제외하고 raw id_train feature를 사용하며, NC4는 id_test에서 affine classifier와 nearest class mean의 agreement를 측정한다. Temperature scaling은 id_validation에서 fit한 뒤 id_test에 적용한다. Temperature-scaled logits는 OOD score에 사용하지 않는다.",
+        "",
+    ]
+
+    for role in ROLE_ORDER:
+        lines.extend(
+            [
+                f"## {role}",
+                "",
+                "### 학습 설정과 ID 예측 성능",
+                "",
+                _notion_id_table(
+                    aggregates,
+                    role_configs,
+                    role,
+                    NOTION_ID_PREDICTIVE_METRICS,
+                    include_hyperparameters=True,
+                ),
+                "",
+                "### ID failure ranking",
+                "",
+                _notion_id_table(
+                    aggregates,
+                    role_configs,
+                    role,
+                    NOTION_ID_FAILURE_METRICS,
+                    include_hyperparameters=False,
+                ),
+                "",
+                "### Representation geometry — collapse·prototype",
+                "",
+                _notion_geometry_table(
+                    aggregates,
+                    role_configs,
+                    role,
+                    NOTION_GEOMETRY_COLLAPSE,
+                ),
+                "",
+                "### Representation geometry — spectrum·dimension",
+                "",
+                _notion_geometry_table(
+                    aggregates,
+                    role_configs,
+                    role,
+                    NOTION_GEOMETRY_SPECTRUM,
+                ),
+                "",
+                "### OOD dataset별 canonical detector 성능",
+                "",
+                "아래 모든 cell은 AUROC ↑ / FPR@95 ↓ 순서다.",
+                "",
+            ]
+        )
+        for dataset in OOD_DATASETS:
+            lines.extend([f"#### {OOD_DISPLAY[dataset]}", ""])
+            for group_name, detector_specs in NOTION_DETECTOR_GROUPS:
+                lines.extend(
+                    [
+                        f"**{group_name}**",
+                        "",
+                        _notion_ood_table(
+                            aggregates,
+                            role_configs,
+                            role,
+                            dataset,
+                            detector_specs,
+                        ),
+                        "",
+                    ]
+                )
+
+    lines.extend(
+        [
+            "## 해석 경계와 다음 단계",
+            "",
+            "이 표들은 n=3 descriptive comparison이다. Optimizer causality, 통계적 우월성, universal best detector를 확립하지 않는다. OOD dataset 간 값은 합치지 않았고 각 dataset 안에서만 읽어야 한다.",
+            "",
+            "다음 단계에서는 이 primary 3-seed 비교와 분리하여 seed=0 전체 결과를 selection audit, per-checkpoint diagnostic, appendix lookup 중 어떤 구조로 읽을지 결정한다.",
+            "",
+            "## 재현성 정보",
+            "",
+            f"- Definition version: {DEFINITION_VERSION}",
+            f"- Scientific evaluator SHA: {EXPECTED_EVALUATION_SHA}",
+            f"- Inventory hash: {EXPECTED_INVENTORY_HASH}",
+            f"- Dataset-policy hash: {EXPECTED_DATASET_POLICY_HASH}",
+            "- Checkpoint role: last only",
+            "- Seed aggregation: arithmetic mean and sample SD with ddof=1",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def write_notion_primary_comparison(
+    output_dir: Path,
+    aggregates: Sequence[Mapping[str, Any]],
+    configs: Mapping[str, ConfigInfo],
+) -> None:
+    path = output_dir / "notion_c1_c4_primary_comparison.md"
+    path.write_text(
+        build_notion_primary_markdown(aggregates, configs),
+        encoding="utf-8",
+    )
 
 
 def _paper_role_rows(
@@ -1808,7 +2236,7 @@ Adam C1과 C3은 같은 scientific configuration이다. 역할 해석을 위해 
 
 ## C1–C4 ID·geometry 비교
 
-논문용 ID 표는 [`last` primary](tables/id/paper_last.md)와 [`best_val` control](tables/id/paper_best_val.md), geometry 표는 [`last` primary](tables/geometry/paper_last.md)와 [`best_val` control](tables/geometry/paper_best_val.md)이다. 그림은 각 seed 값과 mean ± sample SD를 함께 보인다.
+논문용 ID 표는 [`last` primary](tables/id/paper_last.md)와 [`best_val` control](tables/id/paper_best_val.md), geometry 표는 [`last` primary](tables/geometry/paper_last.md)와 [`best_val` control](tables/geometry/paper_best_val.md)이다. 그림은 각 seed 값과 mean ± sample SD를 함께 보인다. Notion의 `Text & Markdown` 가져오기용 primary 비교 문서는 [`notion_c1_c4_primary_comparison.md`](notion_c1_c4_primary_comparison.md)이다.
 
 - [`last.pt` role comparison](figures/role_summary_last.svg)
 - [`best_val.pt` role comparison](figures/role_summary_best_val.svg)
@@ -1928,6 +2356,7 @@ def run_analysis(
     write_ood_paper_tables(output_dir, aggregates, configs)
     write_detector_panel(output_dir)
     paired_delta_count = write_paired_delta_tables(output_dir, aggregates, configs)
+    write_notion_primary_comparison(output_dir, aggregates, configs)
     associations, heatmaps = compute_associations(
         output_dir,
         aggregates,

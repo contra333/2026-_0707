@@ -20,6 +20,14 @@ MNIST, SVHN, Textures, and Places365 remain in separate files and figures.
 Near/far/overall macro rows are isolated in a cross-dataset audit and are not
 used for dataset-specific conclusions.
 
+The package also contains
+[`notion_c1_c4_primary_comparison.md`](../analysis/metric_contract_v1_2_c1_c4/notion_c1_c4_primary_comparison.md),
+a UTF-8, plain-Markdown import document for Notion `Text & Markdown`. It keeps
+`last.pt` only, places optimizers on rows, reports mean ± `ddof=1` sample SD,
+and partitions all six OOD datasets before displaying the canonical 11-detector
+AUROC/FPR@95 panel. `best_val`, seed-0 audit rows, AUPR, and the eight appendix
+detectors are intentionally absent from this focused view.
+
 ## Frozen input identity
 
 | Item | Value |
@@ -102,12 +110,12 @@ checkpoint provenance. No causal or universal-detector conclusion is made.
 
 ## Output inventory and reproducibility
 
-The generated tree contains 205 files and 49,054,086 bytes. Its manifest lists
-203 payloads plus the manifest and SHA-256 sidecar. The output-manifest
+The generated tree contains 206 files and 49,115,007 bytes. Its manifest lists
+204 payloads plus the manifest and SHA-256 sidecar. The output-manifest
 SHA-256 is:
 
 ```text
-debdc06ae2ce9b499caa41d3fabd8b57e80c8a60847c7f42bc97a9bc4ecb2271
+844d206b6246a0c1073e06259fcc1bef4495b8083828566c51060c7f3efd16f2
 ```
 
 A second complete 10,000-resample run was written to an independent temporary
@@ -118,6 +126,7 @@ salt and date-free PDF metadata.
 The committed package provides:
 
 - a Korean technical report and Methods-ready English text;
+- a Notion-import-safe C1–C4 `last.pt` primary comparison in one Markdown file;
 - numeric CSV plus Markdown/LaTeX paper tables;
 - all central scalar seed-0 and three-seed tables;
 - independent OOD dataset directories and a separate macro audit;
@@ -133,16 +142,20 @@ other non-central intermediates are **not included** and were not recomputed.
 
 | Check | Result |
 | --- | --- |
-| Analysis-focused and affected-contract tests | `16 passed in 2.83s` |
-| Complete local CPU suite | `275 passed, 1 warning in 12.19s` |
+| Analysis-focused and affected-contract tests | `18 passed in 4.32s` |
+| Complete local CPU suite | `277 passed, 1 warning in 12.78s` |
 | Deterministic full rerun | `PASS`; byte-identical tree and manifest |
-| Markdown links | `PASS`; 30 relevant local links resolved |
+| Notion import/value parity | `PASS`; generated text equals committed aggregate-derived reference; 64 tables with consistent rows; C2 AdamW remains absent |
+| Markdown links | `PASS`; 29 generated-package local links resolved |
 | LaTeX table structure | `PASS`; 16 longtables, no non-finite cells |
 | PDF render structure | `PASS`; role figures and six primary AUROC heatmaps are single-page |
 | Visual inspection | `PASS`; role summary and MNIST AUROC heatmap rendered and inspected |
 | `git diff --check` | `PASS` |
 
-The single full-suite warning is the existing local PyTorch CUDA-driver
+The first focused pytest invocation omitted `TMPDIR=/tmp` and failed before
+test collection while pytest cleaned a capture file under the Korean worktree
+path. Repeating the exact suite with the repository's established `TMPDIR`
+setting passed. The single full-suite warning is the existing local PyTorch CUDA-driver
 initialization warning in the CPU temperature-scaling test; it did not fail or
 skip the test. No CUDA, server, protected checkpoint, dataset, or Hugging Face
 operation was requested or run for Issue #59.
@@ -163,12 +176,12 @@ TMPDIR=/tmp PYTHONPATH=src \
   scripts/analyze_metric_contract_v1_2.py \
   --aggregate-dir /home/contra333/2026여름방학실험코드/issue57_metric_results/c38b09694be88aa74de0741b39e9d3ba0d6ff61a/aggregate \
   --inventory configs/evaluation/wrn28_10_cifar10_metric_v1_2/checkpoint_inventory.json \
-  --output-dir /tmp/issue59_analysis_determinism_svg_final \
+  --output-dir /tmp/issue59_analysis_determinism_notion_final \
   --resamples 10000
 
 diff -qr \
   docs/analysis/metric_contract_v1_2_c1_c4 \
-  /tmp/issue59_analysis_determinism_svg_final
+  /tmp/issue59_analysis_determinism_notion_final
 
 TMPDIR=/tmp \
   /home/contra333/2026여름방학실험코드/2026-_0707/.venv/bin/python \

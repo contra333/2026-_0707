@@ -8,11 +8,13 @@ import numpy as np
 import pytest
 
 from oge.analysis.metric_contract_v1_2 import (
+    IndexedAggregateRows,
     _bh_adjust,
     _bootstrap_correlations,
     _corr_columns,
     _paired_delta,
     _role_configs,
+    build_notion_primary_markdown,
     load_authorized_configs,
     run_analysis,
 )
@@ -140,7 +142,7 @@ def test_committed_analysis_manifest_and_payload_checksums_match():
     assert manifest["analysis_summary"]["seed0_record_count"] == 31_720
     assert manifest["analysis_summary"]["association_record_count"] == 8_448
     assert manifest["analysis_summary"]["paired_delta_record_count"] == 5_700
-    assert manifest["file_count"] == 203
+    assert manifest["file_count"] == 204
     assert manifest["file_count"] == len(manifest["files"])
     for entry in manifest["files"]:
         path = ANALYSIS_DIR / entry["path"]
@@ -225,3 +227,115 @@ def test_committed_detector_panel_and_methods_crosswalk_are_complete():
         assert row["authoritative_source"] == (
             "docs/reference_cards/11_metric_contract_v1_2.md"
         )
+
+
+def _committed_primary_rows() -> IndexedAggregateRows:
+    paths = [
+        ANALYSIS_DIR / "tables/id/all_three_seed_last.csv",
+        ANALYSIS_DIR / "tables/geometry/all_three_seed_last.csv",
+        *(
+            ANALYSIS_DIR / f"tables/ood/{dataset}/all_three_seed_last.csv"
+            for dataset in ("cifar100", "tin", "mnist", "svhn", "texture", "places365")
+        ),
+    ]
+    identity_fields = (
+        "config_hash",
+        "checkpoint_role",
+        "artifact_key",
+        "detector",
+        "ood_dataset",
+        "ood_group",
+        "class_index",
+        "statistic",
+        "quantile_probability",
+        "query_split",
+    )
+    unique_rows = {}
+    for path in paths:
+        with path.open(encoding="utf-8", newline="") as handle:
+            for csv_row in csv.DictReader(handle):
+                row = dict(csv_row)
+                row["mean"] = float(row["mean"])
+                row["sample_sd_ddof1"] = float(row["sample_sd_ddof1"])
+                identity = tuple(row[field] for field in identity_fields)
+                if identity in unique_rows:
+                    assert row["mean"] == unique_rows[identity]["mean"]
+                    assert (
+                        row["sample_sd_ddof1"]
+                        == unique_rows[identity]["sample_sd_ddof1"]
+                    )
+                else:
+                    unique_rows[identity] = row
+    return IndexedAggregateRows(unique_rows.values())
+
+
+def test_notion_primary_markdown_matches_committed_aggregate_tables():
+    configs = load_authorized_configs(INVENTORY_PATH)
+    expected = build_notion_primary_markdown(_committed_primary_rows(), configs)
+    observed = (ANALYSIS_DIR / "notion_c1_c4_primary_comparison.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert observed == expected
+
+
+def test_notion_primary_markdown_is_import_safe_and_strictly_partitioned():
+    text = (ANALYSIS_DIR / "notion_c1_c4_primary_comparison.md").read_text(
+        encoding="utf-8"
+    )
+
+    assert all(text.count(f"## C{role}") == 1 for role in range(1, 5))
+    assert "[" not in text and "](" not in text
+    assert "<table" not in text and "<br" not in text
+    assert "$$" not in text and "\\begin" not in text
+    assert "http://" not in text and "https://" not in text
+
+    tables = []
+    current = []
+    for line in text.splitlines():
+        if line.startswith("|"):
+            current.append(line)
+        elif current:
+            tables.append(current)
+            current = []
+    if current:
+        tables.append(current)
+
+    assert len(tables) == 64
+    for table in tables:
+        assert len(table) == 5
+        assert len({line.count("|") for line in table}) == 1
+        assert table[2].startswith("| SGD |")
+        assert table[3].startswith("| Adam |")
+        assert table[4].startswith("| AdamW |")
+
+    c2_section = text.split("## C2", maxsplit=1)[1].split("## C3", maxsplit=1)[0]
+    c2_adamw_rows = [
+        line for line in c2_section.splitlines() if line.startswith("| AdamW |")
+    ]
+    assert len(c2_adamw_rows) == 16
+    assert all("NA — protocol absent" in line for line in c2_adamw_rows)
+
+    for detector in (
+        "CTM",
+        "kNN-L2",
+        "Mahalanobis++",
+        "Relative Mahalanobis++",
+        "NECO",
+        "ViM",
+        "Energy-T1",
+        "Maximum Logit",
+        "MSP",
+    ):
+        assert detector in text
+    for appendix_detector in (
+        "GDA-ClassDensity",
+        "Nearest Class Prototype",
+        "Marginal Mahalanobis",
+        "Weight-Cosine",
+        "ViM dim64",
+        "ViM dim128",
+        "ViM dim256",
+        "ViM dim320",
+    ):
+        assert appendix_detector not in text

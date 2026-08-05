@@ -19,7 +19,7 @@
   "definition_version": "metric_contract_v1.2",
   "evaluation_git_sha": "c38b09694be88aa74de0741b39e9d3ba0d6ff61a",
   "figures_generated": true,
-  "file_count": 203,
+  "file_count": 204,
   "files": [
     {
       "path": "METHODS_READY_EN.md",
@@ -28,8 +28,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "10f7c27a651f106bced5fff514b969d9689aa38246b4e36be2e0792a5dcffa1b",
-      "size": 7866
+      "sha256": "d5057106ef9581a9826b8f0e3c5285dd667f4e7c7b9a2846ab579299466b78cc",
+      "size": 8017
     },
     {
       "path": "chart_map.md",
@@ -295,6 +295,11 @@
       "path": "figures/role_summary_last.svg",
       "sha256": "f129f18254b2bdd0b3039b6d573217d7e2c9f9cb2db7453950c170b8a50f615f",
       "size": 108277
+    },
+    {
+      "path": "notion_c1_c4_primary_comparison.md",
+      "sha256": "0a691f981fcc682ff454cfdd2f31edb670f034cf829df4c1f8b845d32feda54d",
+      "size": 60601
     },
     {
       "path": "tables/associations/best_val/cifar100_aupr_in_appendix.csv",

@@ -27,7 +27,7 @@ Adam C1과 C3은 같은 scientific configuration이다. 역할 해석을 위해 
 
 ## C1–C4 ID·geometry 비교
 
-논문용 ID 표는 [`last` primary](tables/id/paper_last.md)와 [`best_val` control](tables/id/paper_best_val.md), geometry 표는 [`last` primary](tables/geometry/paper_last.md)와 [`best_val` control](tables/geometry/paper_best_val.md)이다. 그림은 각 seed 값과 mean ± sample SD를 함께 보인다.
+논문용 ID 표는 [`last` primary](tables/id/paper_last.md)와 [`best_val` control](tables/id/paper_best_val.md), geometry 표는 [`last` primary](tables/geometry/paper_last.md)와 [`best_val` control](tables/geometry/paper_best_val.md)이다. 그림은 각 seed 값과 mean ± sample SD를 함께 보인다. Notion의 `Text & Markdown` 가져오기용 primary 비교 문서는 [`notion_c1_c4_primary_comparison.md`](notion_c1_c4_primary_comparison.md)이다.
 
 - [`last.pt` role comparison](figures/role_summary_last.svg)
 - [`best_val.pt` role comparison](figures/role_summary_best_val.svg)
