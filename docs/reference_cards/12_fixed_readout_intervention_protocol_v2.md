@@ -13,7 +13,8 @@ Status on 2026-08-10:
 ```text
 contract: frozen at Stage 1
 Stage 2 protected-artifact reuse: authorized by the owner fast-path task;
-  selection manifest and checksum verification still required
+  selection, retrieval, and gate progress are recorded in
+  configs/evaluation/fixed_readout_stage2/ and docs/STATUS.md
 shared-prefix fork runtime: not implemented or validated
 fresh paired confirmation: not executed
 ResNet-18/CIFAR-100 replication: not executed; dataset/OOD contract pending

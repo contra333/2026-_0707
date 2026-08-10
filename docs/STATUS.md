@@ -5,10 +5,11 @@ Last updated: 2026-08-10
 ## Current phase
 
 Research Contract v2 is the active paper protocol. The repository has finished
-the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis;
-the next executable phase is the **Stage 2 existing-artifact mechanism gate**.
-Fresh shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not
-started.
+the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis.
+The **Stage 2 existing-artifact mechanism gate** now has a frozen candidate and
+decision policy plus an exact checksum-addressed reuse manifest; selective
+payload retrieval and the scientific gate computation are next. Fresh
+shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not started.
 
 The active claim is deliberately narrower than “optimizer X is better”:
 
@@ -114,9 +115,20 @@ owner's 2026-08-10 fast-path authorization. It may not reevaluate checkpoints,
 traverse protected datasets, overwrite/mutate remote artifacts, or upload a new
 result population.
 
-Before retrieval, Stage 2 must commit a checksum-addressed selection manifest
-for the exact `last.pt` discovery population, datasets, file allowlist, remote
-identities, and non-Git destination. It must then:
+The pre-retrieval freeze selects the exact 30 `last.pt` /
+`confirmatory_primary` bundles (10 configurations x seeds 0--2), all six OOD
+datasets, and 184 files per bundle. The resulting exact allowlist contains
+5,520 files and 19,620,378,841 bytes. Its remote checksum catalog, reuse
+manifest, candidate registry, and gate policy are stored under
+[`configs/evaluation/fixed_readout_stage2/`](../configs/evaluation/fixed_readout_stage2/).
+The destination is fixed outside every Git worktree, existing matching files
+may only be checksum-verified and skipped, and mismatched or unexpected files
+fail closed. The exact construction and validation evidence is in
+[`validation/fast_path_20260810_stage2_preretrieval_freeze.md`](validation/fast_path_20260810_stage2_preretrieval_freeze.md).
+
+Only metadata needed to establish that catalog was downloaded while freezing
+it. No selected raw score, feature, or logit array has yet been retrieved or
+opened. The next execution must:
 
 1. verify every selected file and identity;
 2. reproduce existing AUROC/FPR95 from raw scores;
@@ -124,7 +136,9 @@ identities, and non-Git destination. It must then:
    targeted-transform, and invariant-control analyses;
 4. keep all six OOD datasets separate and use all selected discovery
    configurations rather than a favorable subset;
-5. freeze one focal channel/transform and the Stage 3 addendum before any
+5. apply the prespecified all-configuration, six-dataset, seed-stability,
+   LODO/LOCO, null, witness, and practical-margin gate;
+6. freeze one focal channel/transform and the Stage 3 addendum before any
    fresh paired OOD result is opened.
 
 Stage 2 is discovery only. A failed gate stops or reframes Stage 3.
@@ -150,19 +164,27 @@ frozen separately.
 
 - The shared-prefix operation does not exist. It must be implemented as a new
   `fork_from_prefix` path; ordinary resume must remain strict and unchanged.
-- Raw kNN and the v2 Pure Residual key/registry do not yet exist.
-- The Stage 2 reuse selection manifest and local raw-array cache do not yet
-  exist; substantial non-Git working space is required.
+- Raw kNN has a tested exact K=50 analysis/cache path, but its production cache
+  has not been computed. Pure Residual remains a Stage 2 diagnostic that must be
+  materialized in the final gate outputs.
+- The committed analyzer is a selective bundle/pair evidence extractor only.
+  The deterministic all-configuration reducer that emits the seven required
+  policy artifacts and the scientific `PASS` / `NO_GO` / `INCONCLUSIVE` /
+  `FAILED` decision is not yet implemented.
+- The Stage 2 selective payload is not yet present at the frozen non-Git
+  destination. Consequently scalar parity, raw-kNN production computation,
+  all-configuration aggregation, focal selection, and the gate decision are
+  `NOT_RUN`.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
 
 The numerical items above are stage-gated design choices rather than blockers
 to Stage 2 discovery.
 
-## Explicitly not run by Stage 1
+## Explicitly not run through the pre-retrieval Stage 2 freeze
 
 - no GPU, server training, checkpoint inference, or protected dataset traversal;
-- no raw artifact download or external upload;
+- no selected raw score/feature/logit payload download and no external upload;
 - no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
 - no new scientific result.
 
