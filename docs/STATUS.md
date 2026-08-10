@@ -6,13 +6,16 @@ Last updated: 2026-08-10
 
 Research Contract v2 is the active paper protocol. The repository has finished
 the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis.
-The **Stage 2 existing-artifact mechanism gate** now has a frozen candidate and
-decision policy plus an exact checksum-addressed reuse manifest. The complete
-5,520-file selective payload has been retrieved to the frozen non-Git
-destination and checksum-verified, and the exact cache/evidence/reducer tooling
-has been implemented and tested. Production raw-kNN caching, evidence
-extraction, and the scientific gate decision are next. Fresh shared-prefix
-confirmation and ResNet-18/CIFAR-100 replication have not started.
+The **Stage 2 existing-artifact mechanism gate** was executed at tooling SHA
+`b433c13ad6ec736fcfbca4c6c7ff0d876ddf0a03`. Its 30-bundle, 210-variant
+raw-kNN cache completed and passed the committed full-cache status rehash. The
+full evidence build then failed closed on the prespecified exact targeted
+witness for `radial_l2_mahalanobis:cifar100`; no 720/360 evidence package was
+published. The reducer's checksum-bound preflight package has status `FAILED`,
+with no selected candidate and `scientific_launch_allowed=false`. Stage 3 is
+stopped pending an explicitly versioned contract/tooling revision. Fresh
+shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not
+started.
 
 The active claim is deliberately narrower than “optimizer X is better”:
 
@@ -111,7 +114,7 @@ The old local drafts and ZIP handoffs remain untouched and untracked. Their
 hash-addressed historical/superseded status is recorded in
 [`history/local_research_draft_manifest.md`](history/local_research_draft_manifest.md).
 
-## Active next phase: Stage 2 mechanism gate
+## Stage 2 mechanism gate result: `FAILED`
 
 Stage 2 may reuse the already produced Issue #57 protected artifacts under the
 owner's 2026-08-10 fast-path authorization. It may not reevaluate checkpoints,
@@ -135,25 +138,40 @@ and independently size/SHA-256 verified. The immutable retrieval receipt has
 status `CHECKSUM_VERIFIED_EXACT_ALLOWLIST`, 5,520 files,
 19,620,378,841 bytes, and verified catalog SHA-256
 `1691467f5a054ac29fb2e6a18068e965d63ebc17f856b40eb074e7bb0e86f410`.
-Retrieval and hashing copied/read file bytes, but no selected `.npy` payload has
-yet been parsed with NumPy or used to compute a scientific result. Tooling and
-retrieval validation are recorded in
+At that retrieval boundary, hashing had copied/read file bytes but no selected
+`.npy` payload had yet been parsed with NumPy or used to compute a scientific
+result. Tooling and retrieval validation are recorded in
 [`validation/fast_path_20260810_stage2_gate_tooling.md`](validation/fast_path_20260810_stage2_gate_tooling.md).
 
-The production execution must:
+The production cache completed as 30/30 bundles and 210/210 variants. The
+committed `status` command rehashed the complete 2,730-file cache tree and
+returned `PASS`; its completion catalog binds 30 completion records to 30
+checksum-verified materialization receipts.
 
-1. verify every selected file and identity;
-2. reproduce existing AUROC/FPR95 from raw scores;
-3. add tested raw-kNN, Pure Residual, score-overlap, component-decomposition,
-   targeted-transform, and invariant-control analyses;
-4. keep all six OOD datasets separate and use all selected discovery
-   configurations rather than a favorable subset;
-5. apply the prespecified all-configuration, six-dataset, seed-stability,
-   LODO/LOCO, null, witness, and practical-margin gate;
-6. freeze one focal channel/transform and the Stage 3 addendum before any
-   fresh paired OOD result is opened.
+The evidence extractor then loaded the selected arrays in the frozen Lise
+runtime and stopped on the first bundle. Row L2 normalization removed the
+positive sample-wise scale to float64 closeness, but roughly `1e-16`
+normalization differences were amplified by the covariance precision path and
+broke exact score ties. Scores remained within the frozen mixed
+absolute/relative tolerance, while 6/19,000 weak-rank signatures changed and
+AUROC drifted by `5.56e-9`. The policy requires zero rank disagreement and
+AUROC drift at most `1e-12`, so the required witness failed and atomic evidence
+publication did not occur.
 
-Stage 2 is discovery only. A failed gate stops or reframes Stage 3.
+The reducer was invoked on the expected absent evidence paths and emitted its
+intentional preflight `FAILED` package: four empty JSONLs, one gate decision,
+and five checksum bindings. This is not a candidate-level `NO_GO` or a
+scientific disproof of radial invariance; no scientific estimand was reduced.
+It is a hard numerical-oracle failure that prohibits Stage 3 under the frozen
+v2 policy. Exact identities, commands, diagnostics, hashes, and the verified
+local metadata archive are recorded in
+[`validation/fast_path_20260810_stage2_gate_execution.md`](validation/fast_path_20260810_stage2_gate_execution.md).
+
+The next permissible repository-changing research task is a versioned
+contract/tooling revision. It must not relax the observed result after the
+fact, reuse partial evidence for selection, or overwrite this execution. A new
+committed SHA, analysis ID, and fresh cache/evidence/gate roots are required
+before any rerun. Stage 3 remains stopped.
 
 ## Stage-gated decisions still open
 
@@ -174,36 +192,33 @@ frozen separately.
 
 ## Implementation and execution blockers
 
-- The shared-prefix operation does not exist. It must be implemented as a new
-  `fork_from_prefix` path; ordinary resume must remain strict and unchanged.
-- Raw kNN has a tested exact K=50 backend, seven-variant resumable cache, and
-  one-host supervisor with concurrent same-filesystem staging and a portable,
-  checksum-fixed v1.2 baseline root, but the production 30-bundle cache has
-  not been computed. Pure Residual remains a Stage 2 diagnostic that must be
-  materialized in the final gate outputs.
-- The analyzer now emits the complete 720-row candidate
-  formula/overlap/geometry population plus 360 diagnostic-only CTM/Pure
-  Residual rows. The fail-closed all-configuration reducer keeps diagnostics
-  outside ranking, emits 12 separate diagnostic summaries, and produces the
-  frozen `PASS` / `NO_GO` / `INCONCLUSIVE` / `FAILED` decision artifacts.
-  Their production execution is still `NOT_RUN`.
-- The Stage 2 selective payload is present and checksum-verified at the frozen
-  non-Git destination. Scalar parity, raw-kNN production computation,
-  all-configuration aggregation, focal selection, and the gate decision remain
-  `NOT_RUN` until the committed tooling is executed in one locked runtime.
+- The current v2 numerical witness is terminally `FAILED`. A retry under the
+  same frozen policy is not authorized; a versioned remediation must first
+  define a numerically exact witness implementation and align worker/reducer
+  tolerance semantics without using partial outcomes for candidate selection.
+- The production raw-kNN cache is complete and reusable only under its frozen
+  SHA/analysis identity. The successful 720-row candidate and 360-row
+  diagnostic evidence populations do not exist because fail-closed extraction
+  stopped before atomic publication.
+- The shared-prefix operation does not exist. It must eventually be
+  implemented as a new `fork_from_prefix` path while ordinary resume remains
+  strict, but implementation and fresh training are blocked until a revised
+  Stage 2 gate passes.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
 
-The numerical items above are stage-gated design choices rather than blockers
-to Stage 2 discovery.
+The later experiment-design items above remain stage-gated. The numerical
+witness remediation is now a blocker to any revised Stage 2 execution.
 
-## Explicitly not run through the Stage 2 tooling freeze
+## Explicitly not run after the Stage 2 execution
 
-- no GPU, server training, checkpoint inference, or protected dataset traversal;
-- no selected `.npy` scientific load, production raw-kNN cache, full evidence
-  extraction, reducer decision, or external upload;
+- no GPU work, server training, checkpoint inference, feature re-extraction,
+  or new protected dataset traversal;
+- no successful 720/360 evidence publication, candidate ranking, focal
+  selection, or preconfirmation freeze;
 - no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
-- no new scientific result.
+- no Hugging Face upload, source mutation, overwrite, or deletion;
+- no comparable-ID, causal decay-coupling, or replication conclusion.
 
 ## Update rule
 
