@@ -41,7 +41,23 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
 | `vit_small` | `src/oge/models/vit.py` | `ViTSmall` | Modern transformer research backbone | Planned | Dosovitskiy et al., An Image is Worth 16x16 Words; Lee, Lee, and Song, Vision Transformer for Small-Size Datasets |
 
-## Research lineup decision (2026-07-23)
+## Active Research Contract v2 lineup (2026-08-10)
+
+[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md)
+supersedes the earlier future-lineup priority for the minimum paper design. It
+does not change any architecture implementation or completed v1.2 result.
+
+| Role | Backbone | Dataset | Model implementation | Experiment status |
+| --- | --- | --- | --- | --- |
+| Main | `wrn28_10` | CIFAR-10 | implemented | v1.2 discovery complete; fresh paired v2 confirmation not run |
+| Replication | `resnet18` (`cifar`) | CIFAR-100 | implemented | dataset/OOD contract and v2 replication pending |
+
+VGG-16-BN, ViT-Small, and ConvNeXt-Tiny are outside the minimum v2 paper. They
+remain possible later extensions and are not prerequisites for the main claim.
+The replication row cannot execute until its CIFAR-100 membership,
+preprocessing, OOD roles, and validation are frozen in a versioned addendum.
+
+## Historical v1.2 planning lineup (2026-07-23)
 
 This section fixes which backbones and datasets form the optimizer-geometry
 study lineup, at which protocol level, and in which execution order. Grid
@@ -49,8 +65,10 @@ values, role rules, and seed policy are normative in
 [`07_optimizer_comparison_hpo_protocol.md`](07_optimizer_comparison_hpo_protocol.md)
 protocol v1.2; literature anchors are in
 [`10_optimizer_grid_literature_anchors.md`](10_optimizer_grid_literature_anchors.md).
-This is a planning decision: rows marked "planned" have no implementation,
-and no lineup run has been executed.
+This is preserved planning provenance. Rows marked "planned" have no
+implementation. The WRN-28-10/CIFAR-10 v1.2 grid, role replication, protected
+evaluation, and descriptive analysis later completed; the other lineup
+experiments below were not executed. Active v2 priority is defined above.
 
 | Priority | Backbone | Dataset | Variation axis covered | Protocol level | Status |
 | --- | --- | --- | --- | --- | --- |

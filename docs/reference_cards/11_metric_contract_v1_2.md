@@ -13,7 +13,7 @@ model: WRN-28-10
 dataset: CIFAR-10
 feature endpoint: model(x, return_features=True)의 640차원 raw penultimate feature
 definition_version: metric_contract_v1.2
-implementation_status: frozen definition; runtime implementation pending
+implementation_status: frozen and implemented; protected execution and descriptive analysis complete
 ```
 
 ImageNet-200과 OpenOOD의 9,000-image ID compatibility 평가는 이 버전의
@@ -28,9 +28,14 @@ grouping, deterministic preprocessing만 사용한다. 이 문서는 metric 이�
 함께 읽되, 서로 다른 수식이나 이름을 허용하지 않는다. Pinned paper와
 repository는 [`docs/sources.lock.yaml`](../sources.lock.yaml)에 기록한다.
 
-이 문서가 정의를 동결했다는 사실은 구현이나 실험 결과가 존재한다는
-뜻이 아니다. protected split 접근, feature extraction, detector 실행과
-연구 결과 생성은 별도 Issue의 명시적 승인이 필요하다.
+이 문서의 정의는 Issue #53에서 구현·검증되었고, Issue #57의 protected
+evaluation과 Issue #59의 checksum-bounded descriptive analysis가 완료되었다.
+그 완료 사실은 새 protected population이나 재평가를 자동 승인하지 않으며,
+v1.2 결과를 shared-prefix causal confirmation으로 바꾸지도 않는다.
+
+[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md)는
+후속 논문의 detector tier와 paired intervention을 별도 version으로 정의한다.
+그 문서는 이 v1.2 formula, key, tier, bundle 또는 결과를 소급 수정하지 않는다.
 
 ## 1. 공통 평가 계약
 
@@ -1179,7 +1184,7 @@ checkpoint/split/membership identity mismatch
 
 실패 fixture에서 scalar를 정상 숫자로 반환하면 acceptance failure다.
 
-## 11. Definition of Done for the later implementation
+## 11. Completed implementation Definition of Done and evidence
 
 - 모든 formula ID가 정확히 하나의 canonical artifact key와 구현 entrypoint에
   매핑된다.
@@ -1199,7 +1204,19 @@ checkpoint/split/membership identity mismatch
 - 이 기준을 통과하기 전에는 metric 값이나 optimizer 차이를 논문 결과로
   해석하지 않는다.
 
+Issue #53의 구현/fixture/actual-checkpoint smoke, Issue #57의 60-checkpoint
+protected execution, Issue #59의 deterministic analysis가 위 요구사항의
+완료 증거다. 자세한 명령과 hash는 각 validation record에 있으며, future
+population은 별도 authorization과 재검증이 필요하다.
+
 ## 12. Revision record
+
+### v1.2.1 — 2026-08-10 status synchronization only
+
+- 구현, protected execution, descriptive analysis의 완료 상태를 현재 사실과
+  동기화했다.
+- Research Contract v2의 별도 권위 경계를 연결했다.
+- formula, artifact key, reporting tier, split, 수치 결과는 변경하지 않았다.
 
 ### v1.2 — 2026-08-04
 

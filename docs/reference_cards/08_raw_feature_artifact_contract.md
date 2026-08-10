@@ -7,9 +7,11 @@ later geometry, calibration, and feature-based OOD measurement tasks. It fixes
 what is extracted, which dataset view is permitted, how sample identity is
 preserved, and which provenance must accompany a cache.
 
-This card does not implement extraction, authorize protected-split access, or
-turn a smoke artifact into research evidence. Later implementation Issues must
-also follow:
+The contract was implemented and bounded-smoke validated by Issue #53, then
+used for the completed Issue #57 protected evaluation. This card by itself does
+not authorize a new protected population, turn smoke output into research
+evidence, or authorize reuse beyond a later bounded task. Implementations also
+follow:
 
 - [`02_architectures.md`](02_architectures.md) for the model and penultimate
   feature API;
@@ -64,8 +66,8 @@ The frozen project imglist order and stable `sample_id` are preserved for
 `id_train`, `id_validation`, and full `id_test`. Metric-contract v1.2 does not
 extract `id_test_openood`; its released order remains provenance for a future
 compatibility protocol. The released order is preserved for every OOD dataset. No sample may be
-silently skipped, duplicated, re-ordered, or augmented. A later implementation
-must reject a mismatch between the observed sample sequence and the configured
+silently skipped, duplicated, re-ordered, or augmented. The implementation
+rejects a mismatch between the observed sample sequence and the configured
 manifest.
 
 The permitted roles are:
@@ -171,9 +173,9 @@ checkpoint or changed provenance produces a new artifact identity.
 checksum set are published only after every array has been written and
 validated.
 
-## Later implementation validation requirements
+## Implemented validation requirements
 
-A later code Issue must test:
+The implementation is required to test:
 
 - ordinary-forward and `return_features=True` logits parity;
 - deterministic repeated extraction and stable sample ordering;
@@ -185,5 +187,10 @@ A later code Issue must test:
 - protected-split refusal without explicit authorization;
 - clear `smoke_only` boundaries for random or historical validation artifacts.
 
-This card is documentation only. No raw-feature cache has been implemented or
-validated by this Issue.
+Issue #53 records the implementation and non-protected actual-checkpoint smoke;
+Issue #57 records 60 completed protected checkpoint bundles and checksum
+verification. See
+[`../validation/issue53_metric_runtime_curie.md`](../validation/issue53_metric_runtime_curie.md)
+and
+[`../validation/issue57_metric_evaluation_execution.md`](../validation/issue57_metric_evaluation_execution.md).
+Neither record authorizes a new protected population automatically.

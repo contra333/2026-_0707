@@ -2,8 +2,8 @@
 
 ## Purpose and authority boundary
 
-This card freezes the confirmatory representation and low-complexity detector
-panel used to study:
+This card freezes the predeclared Metric Contract v1.2 representation and
+low-complexity detector measurement panel used to study:
 
 ```text
 optimizer -> penultimate geometry -> detector score -> ID/OOD reliability
@@ -19,10 +19,14 @@ The self-contained paper notation, expanded metric dictionary, artifact keys,
 and validation oracles are fixed in
 [`11_metric_contract_v1_2.md`](11_metric_contract_v1_2.md).
 
+The v1.2 implementation, protected execution, and descriptive analysis are
+complete. Their geometry--OOD associations remain exploratory and do not become
+causal merely because this panel was frozen before measurement.
+
 The audit evidence paths below refer to the reviewed
 `OOD_metric_audit_handoff.zip` supplied for Issue #24. This card, not that local
-ZIP, is the repository authority after merge. A later implementation must
-verify formulas against the pinned upstream commits in
+ZIP, is the repository authority after merge. The implementation verifies
+formulas against the pinned upstream commits in
 `docs/sources.lock.yaml`.
 
 ## Common rules
@@ -32,8 +36,8 @@ verify formulas against the pinned upstream commits in
 - Do not use ID test or any OOD sample to fit a detector or select a
   hyperparameter.
 - Every detector score is ID-like: larger means more ID-like.
-- The later implementation Issue must update
-  `src/oge/evaluation/metrics.py::compute_ood_metrics` to card 11 and retain one
+- The implementation uses
+  `src/oge/evaluation/metrics.py::compute_ood_metrics` under card 11 and retains one
   shared AUROC/AUPR/FPR95 implementation; it must not add a second metric path
   or negate an already ID-like score.
 - Record exact-zero and near-zero (`0 < norm <= 1e-12`) counts before every
@@ -219,8 +223,10 @@ base detector and must not overwrite the raw result.
 - set `K = 50` with no sweep and no OOD-validation APS;
 - return the negative 50th-neighbor squared distance, not a sum or mean.
 
-The score is ID-like. This is the only project kNN definition; a raw/L2-off
-kNN variant is forbidden. Evidence: `evidence/B3_knn-ood.md`, audited commit
+The score is ID-like. This is the only **Metric Contract v1.2** kNN definition;
+a raw/L2-off kNN variant is forbidden within v1.2. Research Contract v2 adds a
+separately versioned `detector/knn_raw_k50` and does not alter this historical
+key, formula, or output. Evidence: `evidence/B3_knn-ood.md`, audited commit
 `2afb2bbed60a8d69384dc9b28e5637711345222b`. The project follows the official
 denominator-inside epsilon placement rather than OpenOOD's audited
 denominator-outside port difference.
@@ -292,16 +298,17 @@ distribution details needed to reproduce aggregates.
 
 ## Freeze and exclusions
 
-The confirmatory panel is frozen before comparative results are inspected.
+The v1.2 panel was frozen before comparative results were inspected.
 Result-dependent method addition, sign changes, normalization switches, or
 hyperparameter sweeps require a new Issue and explicitly exploratory result
 names.
 
 ViM, NECO, Relative Mahalanobis, GDA-ClassDensity, advanced calibration, LID,
-TwoNN, and spectrum diagnostics are defined by card 11. Inclusion in that
-dictionary freezes definitions but does not claim that code or research
-results exist.
+TwoNN, and spectrum diagnostics are defined by card 11. Their v1.2 code and
+protected results exist under Issues #53 and #57; reporting tiers and claim
+boundaries remain those frozen by card 11 and the Issue #59 analysis.
 
-This card is documentation only. It does not claim that extraction, geometry,
-Energy, distance/angle detectors, GDA-ClassDensity, or DDU are implemented or
-validated.
+Research Contract v2 defines a different paper panel and two new score keys in
+[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md).
+It does not relabel historical v1.2 outputs. Full DDU/SN training remains
+unimplemented and unvalidated.

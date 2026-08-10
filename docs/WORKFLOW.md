@@ -220,79 +220,27 @@ Not every task needs the full nine-stage route.
 
 ### Prompt-only owner fast path
 
-The only trigger is the exact lowercase prompt prefix `fast path`. The first
-non-empty line must start with those exact words, followed by whitespace or
-end-of-line. The task text follows the prefix.
+`AGENTS.md` is the single authority for the exact case-sensitive trigger,
+authorization, exclusions, and evidence requirements. This workflow document
+does not duplicate that grammar or create aliases.
 
-Apply this case-sensitive conceptual regular expression to the first non-empty
-line before choosing a workflow:
-
-```text
-^fast path(?:[ \t]|$)
-```
-
-Do not use a broad string-prefix check. A colon immediately after `path` fails
-the expression and uses the standard Issue workflow.
-
-| First non-empty line | Fast path |
-| --- | --- |
-| `fast path do the task` | yes |
-| `fast path` | yes; ask for the missing task |
-| `fast path: do the task` | no |
-| `FAST PATH do the task` | no |
-| `/fast do the task` | no |
-| `fast-path do the task` | no |
+At the process level, a triggered bounded task follows:
 
 ```text
-fast path seed=0 run을 서버별로 분배하고 main에 반영한 뒤
-학습과 Hugging Face 업로드까지 끝내
+safely synchronize main
+-> perform only the named work
+-> update affected authoritative documents
+-> validate in proportion to risk
+-> stage only task files
+-> commit and push main
+-> complete explicitly requested execution/transfer steps
+-> report PASS / FAILED / NOT_RUN / BLOCKED evidence
 ```
 
-`FAST PATH`, `fast path:`, `/fast`, `fast-path`, and `FAST:` do not trigger
-this workflow. There is no shell command, alias, executable, environment
-variable, configuration toggle, or persistent activation state.
-
-The fast path is a per-task workflow authorization:
-
-- skip Issue creation, task-branch creation, Pull Request, and merge;
-- work directly on a safely synchronized `main`;
-- allow the explicit task to change documentation, configuration, scripts,
-  core code, tests, and durable research protocol;
-- update any affected authoritative repository documents in the same task;
-- run validation proportional to the change;
-- stage only task files, commit intentionally, and push `main`;
-- synchronize requested servers to the exact commit SHA;
-- perform explicitly requested training, transfer, and Hugging Face upload
-  steps without an extra project-workflow confirmation;
-- report exact `PASS`, `FAILED`, `NOT_RUN`, and `BLOCKED` evidence.
-
-```text
-fast path <bounded task>
-→ inspect and fast-forward main
-→ edit only the task scope
-→ validate proportionally
-→ commit and push main
-→ synchronize requested servers to the same SHA
-→ complete requested training, transfer, and upload
-→ report evidence
-```
-
-The authorization remains active for follow-up corrections needed to finish
-the same unfinished task. It expires at completion, and a new unrelated task
-requires a new `fast path` prefix. If no task follows the prefix, ask for the
-task without creating persistent state.
-
-The prefix does not infer unrequested destructive actions, protected-split
-access, secret disclosure, artifact overwrite, force-push, or termination of
-another user's process. Such actions must be explicit and remain subject to
-the applicable safety and evidence rules. Unrelated worktree files must be
-preserved and excluded from staging.
-
-For multi-server execution, use `git pull --ff-only origin main` and verify the
-exact commit SHA before starting. Record the Git SHA, resolved configuration,
-seed, host/GPU, environment, and artifact path. For Hugging Face transfer,
-confirm the source and remote path, inspect a dry run, upload without
-unrequested deletion, and verify the remote listing.
+Protected-data authorization, no-overwrite/no-delete rules, provenance,
+server-SHA checks, and preservation of unrelated worktree files still apply as
+defined in `AGENTS.md` and the relevant reference card. A fast-path task does
+not turn infrastructure checks into research evidence.
 
 ### Trivial documentation maintenance
 

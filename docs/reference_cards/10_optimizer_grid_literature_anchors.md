@@ -4,7 +4,7 @@
 
 This card maps every numeric choice in protocol v1.2
 ([`07_optimizer_comparison_hpo_protocol.md`](07_optimizer_comparison_hpo_protocol.md))
-and the research lineup
+and the historical v1.2 planning lineup
 ([`02_architectures.md`](02_architectures.md)) to pinned external sources or
 to an explicitly labeled project judgment. It also records how this project
 sits relative to the closest prior work found in the 2026-07-23 literature
@@ -192,7 +192,12 @@ planning note's illustrative pair `(3e-3, 5e-4)` was not adopted because `5e-4` 
 not an AdamW grid value; forcing it in would have broken the AdamW decade
 ladder or cost a 13th cell.
 
-## Architecture lineup anchors
+## Historical v1.2 architecture-lineup anchors
+
+This section preserves the 2026-07-23 planning rationale. It is not the active
+minimum paper lineup. Research Contract v2 now fixes WRN-28-10/CIFAR-10 as main
+and ResNet-18/CIFAR-100 as replication; see
+[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md).
 
 | Lineup row | Anchor and comparability | Sources |
 | --- | --- | --- |
@@ -227,7 +232,7 @@ geometry-shaping training rules that would confound the optimizer effect.
   reflecting documented SGD difficulty on ViTs
   (`vit_early_convolutions_paper`); to be frozen only after the pilot.
 
-## Prior-work positioning (2026-07-23 pass)
+## Historical prior-work positioning (2026-07-23 pass; superseded for v2)
 
 | Prior work | What it covers | What this project adds beyond it |
 | --- | --- | --- |
@@ -236,12 +241,13 @@ geometry-shaping training rules that would confound the optimizer effect.
 | Naganuma et al. 2023, `optimizer_ood_generalization_paper` | Large-scale evidence that adaptive optimizers underperform non-adaptive ones on out-of-distribution *generalization* (accuracy under shift) | Different task: OOD generalization is not OOD *detection*. Cited to delimit the claim boundary, not as detection evidence |
 | He et al. 2024, `outlier_features_paper` | Adam produces stronger outlier features (higher kurtosis) than SGD; normalization layers amplify outlier features | Mechanism-adjacent: supports treating feature-norm/outlier statistics as optimizer-sensitive, but targets quantization/training stability, not OOD detection or collapse geometry |
 
-Positioning summary for the paper draft: the optimizer-to-geometry link and
-the optimizer-to-OOD-sensitivity link each exist separately in prior work;
-the identified gap is the controlled chain from optimizer/update-rule
-components through penultimate geometry to fixed-readout OOD reliability
-and its L2-normalization repair, under accuracy-matched, seed-replicated
-conditions.
+Historical positioning summary: the optimizer-to-geometry link and the
+optimizer-to-OOD-sensitivity link each existed separately in this pass. The
+former wording about an “L2-normalization repair” is no longer an active
+novelty claim: Mahalanobis++ and later geometry-based Mahalanobis work occupy
+that ground. Card 12 owns the current gap statement: shared-prefix
+coupling-rule intervention, detector-formula-linked score-overlap diagnosis,
+selective gap attenuation, and second-regime replication.
 
 ## Unverified assumptions and decision log
 

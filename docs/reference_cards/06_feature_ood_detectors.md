@@ -5,8 +5,10 @@
 This card defines durable naming, fitting, scoring, and artifact semantics for
 feature-based OOD detectors in this repository. The first detector fixed here is
 the class-wise Gaussian density kernel shared by `GDA-ClassDensity` and a future
-DDU ablation. The implementation status remains **planned** until a later
-bounded Issue adds code, tests, configuration, and real-environment validation.
+DDU ablation. `GDA-ClassDensity` was implemented and fixture-validated by Issue
+#53 and evaluated in the completed Issue #57 Metric Contract v1.2 population.
+Spectral-normalization training, the `DDU` name, and DDU post-hoc variants remain
+future work.
 
 The following cards remain authoritative for adjacent concerns:
 
@@ -127,7 +129,8 @@ Then attempt to construct one class-batched
 matrices. Select the first candidate for which construction, including its
 positive-definiteness/Cholesky checks, succeeds.
 
-The later implementation must preserve these semantics:
+The implemented GDA path and every future DDU path must preserve these
+semantics:
 
 - one shared candidate `epsilon` per fit attempt, not a separately selected
   jitter for each class;
@@ -257,7 +260,8 @@ fixed coefficient; that decision requires a cited later Issue.
 
 ## Required configuration and artifact metadata
 
-A later implementation must record at least:
+The implemented v1.2 records, and every future extension, record at least the
+applicable fields below:
 
 ```text
 score_name
@@ -291,9 +295,13 @@ Per-sample artifacts use the common `id_like_score` field from the OpenOOD
 protocol card. Aggregate metrics remain the already pinned project metrics and
 per-dataset near/far arithmetic-mean policy.
 
-## Later implementation validation requirements
+## Validation status and future extension requirements
 
-The future code Issue must include focused tests for:
+Issue #53 added focused tests for the implemented GDA kernel, including class
+statistics, jitter order/selection, log-density aggregation, score orientation,
+and finite-state handling; Issue #57 supplies completed protected-checkpoint
+execution evidence. Any future DDU/SN or post-hoc variant implementation must
+also cover the applicable requirements below:
 
 - class means and unbiased covariance against a direct float64 calculation;
 - the exact official jitter candidate order;
@@ -307,6 +315,8 @@ The future code Issue must include focused tests for:
   and query features;
 - complete finite-score and metadata validation.
 
-A bounded actual-checkpoint CUDA or CPU evaluation is also required in that
-later Issue. This documentation card alone is not implementation or detector
-performance evidence.
+The completed implementation and execution evidence is recorded in
+[`../validation/issue53_metric_runtime_curie.md`](../validation/issue53_metric_runtime_curie.md)
+and
+[`../validation/issue57_metric_evaluation_execution.md`](../validation/issue57_metric_evaluation_execution.md).
+Those records do not validate or authorize a future DDU/SN ablation.

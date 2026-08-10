@@ -27,19 +27,22 @@ sources:
     role: architecture_implementation_reference
   local_feature_ood_detector_reference_card:
     path: docs/reference_cards/06_feature_ood_detectors.md
-    role: feature_detector_semantics_reference; documentation only until a later implementation PR
+    role: feature-detector semantics reference; Metric Contract v1.2 implementation and evaluation complete, future DDU/SN variants still pending
   local_optimizer_hpo_protocol_reference_card:
     path: docs/reference_cards/07_optimizer_comparison_hpo_protocol.md
-    role: implemented WRN-28-10 protocol-v1.2 HPO and comparison authority; production grid not executed
+    role: completed WRN-28-10 protocol-v1.2 HPO, role-freeze, replication, and pair-control authority
   local_raw_feature_artifact_reference_card:
     path: docs/reference_cards/08_raw_feature_artifact_contract.md
     role: raw checkpoint-feature artifact, provenance, checksum, and protected-split reference
   local_core_representation_metrics_reference_card:
     path: docs/reference_cards/09_core_representation_metrics.md
-    role: frozen confirmatory representation-metric and low-complexity detector reference; documentation only until later implementation PRs
+    role: frozen Metric Contract v1.2 representation and detector reference; implementation and protected evaluation complete
   local_metric_contract_v1_2_reference_card:
     path: docs/reference_cards/11_metric_contract_v1_2.md
-    role: authoritative WRN-28-10/CIFAR-10 metric definition dictionary, paper notation, artifact naming, and validation oracle; implementation pending
+    role: authoritative completed WRN-28-10/CIFAR-10 v1.2 metric dictionary, implementation, artifact naming, and validation oracle
+  local_fixed_readout_intervention_v2_reference_card:
+    path: docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md
+    role: active fixed-readout mechanism, shared-prefix intervention, detector-tier, and replication protocol; fresh confirmation pending
   local_optimizer_grid_literature_anchors_reference_card:
     path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
     role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
@@ -311,6 +314,13 @@ sources:
     url: https://arxiv.org/abs/2505.18032
     accessed: 2026-08-04
     role: L2-normalized Mahalanobis detector reference
+  geometry_based_mahalanobis_ood_paper:
+    title: "Dissecting Mahalanobis: How Feature Geometry and Normalization Shape OOD Detection"
+    authors: Janiak, Binkowski, and Kajdanowicz
+    stable_source: arXiv:2510.15202
+    url: https://arxiv.org/abs/2510.15202
+    accessed: 2026-08-10
+    role: geometry, intrinsic-dimension, ID-only compatibility-prediction, and radial-transformation prior work; bounds the v2 novelty claim
   mahalanobis_pp_official_repository:
     repository: mueller-mp/maha-norm
     url: https://github.com/mueller-mp/maha-norm
@@ -378,6 +388,27 @@ sources:
     url: https://arxiv.org/abs/2602.16642
     accessed: 2026-07-23
     role: closest known prior work on optimizer and weight-decay-coupling effects on Neural Collapse; no OOD detection; abstract-level audit only, re-audit required before related-work writing
+  flavors_of_margin_paper:
+    title: "Flavors of Margin: Implicit Bias of Steepest Descent in Homogeneous Neural Networks"
+    authors: Tsilivis, Vardi, and Kempe
+    stable_source: ICLR 2025
+    url: https://proceedings.iclr.cc/paper_files/paper/2025/hash/1c9ee8c9e1a0c7de49e15720c4ce6f78-Abstract-Conference.html
+    accessed: 2026-08-10
+    role: optimizer-trajectory and switch-style intervention precedent; not OOD or coupled-versus-decoupled evidence
+  szyc_ood_reliability_paper:
+    title: Why Out-of-Distribution detection experiments are not reliable - subtle experimental details muddle the OOD detector rankings
+    authors: Szyc, Walkowiak, and Maciejewski
+    stable_source: UAI 2023, PMLR 216
+    url: https://proceedings.mlr.press/v216/szyc23a.html
+    accessed: 2026-08-10
+    role: evidence that training details can change representation-based OOD results and detector rankings without materially changing closed-set accuracy
+  training_induced_ood_wacv2026_paper:
+    title: "One Model, Many Behaviors: Training-Induced Effects on Out-of-Distribution Detection"
+    authors: Krumpl, Avenhaus, and Possegger
+    stable_source: WACV 2026
+    url: https://openaccess.thecvf.com/content/WACV2026/html/Krumpl_One_Model_Many_Behaviors_Training-Induced_Effects_on_Out-of-Distribution_Detection_WACV_2026_paper.html
+    accessed: 2026-08-10
+    role: modern evidence that training strategy, detector choice, and OOD performance interact non-monotonically with ID accuracy; no shared-prefix causal isolation
   optimization_ood_detection_sensitivity_paper:
     title: The Effect of Optimization Methods on the Robustness of Out-of-Distribution Detection Approaches
     authors: Abdelzad, Czarnecki, and Salay

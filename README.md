@@ -20,28 +20,27 @@ The repository currently contains:
 - a practical three-server runtime, numerical-policy, committed-data,
   bounded-loader, and actual-data one-epoch smoke gate completed by Issue #37;
 - an AI-assisted research and implementation workflow;
-- durable DDU fitting, adaptive-jitter, score, naming, and post-hoc variant
-  semantics documented for a later implementation task;
-- durable raw-feature artifact and frozen core representation-metric contracts
-  documented for later bounded implementation tasks;
-- a documented WRN-28-10 optimizer HPO and comparison protocol whose
-  orchestration foundation has passed bounded department-server validation.
+- implemented Metric Contract v1.2 raw-feature extraction, geometry,
+  calibration, feature/logit OOD detectors, checkpoint-centric bundles, and
+  validation oracles;
+- completed 36-cell WRN-28-10/CIFAR-10 seed-0 grid, C1--C4 freeze, fresh-seed
+  role replication, coupled/decoupled pair controls, and protected evaluation;
+- a checksum-verified C1--C4 descriptive analysis package with all six OOD
+  datasets kept separate;
+- Research Contract v2 for a fixed-readout mechanism study using shared-prefix
+  paired interventions and a second ResNet-18/CIFAR-100 regime.
 
 The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and
-`wrn28_10` are implemented research backbones. The current research lineup
-adds planned VGG-16-BN/CIFAR-10 and pilot-gated `vit_small`/CIFAR-10 arms;
-`convnext_tiny` remains a documented ViT fallback and later extension. None of
-`vgg16`, `vit_small`, or `convnext_tiny` is implemented.
+`wrn28_10` are implemented research backbones. The active v2 minimum design is
+WRN-28-10/CIFAR-10 main plus ResNet-18/CIFAR-100 replication. VGG, ViT, and
+ConvNeXt remain outside that minimum design and are not implemented.
 
-This repository does **not** yet include learned-feature extraction, geometry
-or Neural Collapse metrics, feature-based OOD detector implementations,
-executed grid or multi-seed optimizer studies, or completed
-optimizer-comparison research runs. The orchestration code and frozen trial
-tables implement protocol v1.2, but no v1.2 production cell has run. The
-current MSP, training, orchestration, and three-server CUDA runs validate
-infrastructure only; they are not optimizer-comparison research results. The
-DDU reference card fixes future semantics but does not mean DDU or any DDU
-variant is implemented or validated.
+The completed v1.2 population is descriptive/exploratory evidence; it is not a
+shared-prefix causal intervention. Still missing are the v2 fork runtime, the
+fresh paired confirmation, a frozen CIFAR-100 data/OOD contract and replication,
+and any resulting causal or cross-regime conclusion. `GDA-ClassDensity` is
+implemented and evaluated, while full DDU remains reserved for a future
+spectral-normalization training ablation.
 
 ## Start here
 
@@ -51,7 +50,7 @@ Repository-aware humans and AI agents should read in this order:
 2. `docs/PROJECT_CONTEXT.md`
 3. `docs/WORKFLOW.md`
 4. `docs/STATUS.md`
-5. the active GitHub Issue
+5. the active GitHub Issue, or the explicit bounded task when `AGENTS.md` fast path applies
 6. task-specific reference cards
 
 The repository is the source of truth. ChatGPT Projects, Work sessions, Codex sessions, and copied Markdown files are temporary interfaces or snapshots, not independent masters.
@@ -71,6 +70,9 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - Raw checkpoint-feature artifact contract: `docs/reference_cards/08_raw_feature_artifact_contract.md`
 - Frozen core representation metrics: `docs/reference_cards/09_core_representation_metrics.md`
 - Optimizer grid literature anchors: `docs/reference_cards/10_optimizer_grid_literature_anchors.md`
+- Metric Contract v1.2 dictionary and completed historical scope: `docs/reference_cards/11_metric_contract_v1_2.md`
+- Active fixed-readout intervention protocol v2: `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`
+- Local historical/superseded material manifest: `docs/history/local_research_draft_manifest.md`
 - OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
 - CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`
 - Optimizer-HPO orchestration server validation: `docs/validation/issue22_optimizer_hpo_orchestration_server_validation.md`

@@ -17,6 +17,13 @@ its metadata-integrity validation and C1-C4 role freeze are recorded in
 `docs/validation/seed0_20260728_grid_role_freeze.md`. Local tests and server
 smoke runs remain infrastructure evidence rather than research results.
 
+Research Contract v2 treats this completed population as immutable
+descriptive/discovery evidence. Its static grid and pair controls are not the
+fresh shared-prefix causal intervention. The v2 fork, optimizer roles, and
+confirmation/replication rules are defined separately in
+[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md);
+they do not change any v1.2 row, role, seed, or result.
+
 ## Superseded-study decision log
 
 An earlier random-search study was executed outside this repository on the

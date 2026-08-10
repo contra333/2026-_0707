@@ -11,7 +11,12 @@ optimizer / training rule
 → ID/OOD reliability
 ```
 
-The primary research question is whether changes in optimization alter learned representation geometry and whether those geometric changes help explain differences in out-of-distribution performance.
+The active v2 question is whether a fixed feature-based OOD readout is
+practically non-invariant to a paired training-rule change at comparable ID
+utility, which detector-formula-relevant geometry channel changes ID--OOD score
+overlap, and whether that chain reproduces in a second dataset--architecture
+regime. The target evidence is paired intervention and score-level diagnosis,
+not an optimizer leaderboard or a scalar geometry--AUROC correlation alone.
 
 ## Repository as the source of truth
 
@@ -92,10 +97,26 @@ Documented and implemented result boundaries:
 - the WRN-28-10/CIFAR-10 Metric Contract v1.2 formulas, paper names, artifact
   keys, numerical failure semantics, validation oracles, and runtime entrypoints.
 
+Active but not yet executed research contract:
+
+- [`reference_cards/12_fixed_readout_intervention_protocol_v2.md`](reference_cards/12_fixed_readout_intervention_protocol_v2.md)
+  freezes WRN-28-10/CIFAR-10 as the main regime and
+  ResNet-18/CIFAR-100 as replication;
+- Adam/AdamW is the primary shared-prefix family, SGDM/SGDW is the
+  conventional-family control, and the replication adds a conventional SGDM
+  reference;
+- the v2 detector panel and score-overlap mechanism requirements are fixed,
+  while switch epoch, decay dose, practical margins, power, and the focal
+  channel/transform are explicitly Stage-2-gated decisions;
+- the completed v1.2 artifacts are discovery inputs only and are never
+  retroactively labeled causal confirmation.
+
 Not part of the validated foundation unless added by a later bounded task:
 
-- confirmatory causal optimizer-effect conclusions or a dataset-pooled
-  geometry-OOD association;
+- a completed shared-prefix fork implementation or paired causal optimizer-rule
+  conclusion;
+- the CIFAR-100 dataset/OOD contract and ResNet-18 replication result;
+- a dataset-pooled geometry-OOD association;
 - final manuscript prose and final main/appendix table selection;
 - spectral-normalization training and any future DDU ablation;
 - protected research-result evaluation for any architecture, dataset, or
@@ -123,6 +144,12 @@ Not part of the validated foundation unless added by a later bounded task:
 - `docs/reference_cards/11_metric_contract_v1_2.md`: authoritative
   WRN-28-10/CIFAR-10 metric definition dictionary for paper notation,
   reporting tiers, artifact keys, degeneracy states, and implementation tests.
+- `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`: active
+  claim hierarchy, mechanism gate, shared-prefix intervention, v2 detector
+  roles, statistics boundary, and replication protocol.
+- `docs/history/local_research_draft_manifest.md`: metadata-only inventory of
+  preserved local historical/superseded drafts and handoff archives; those
+  untracked files are never repository authorities.
 - `docs/validation/issue37_practical_runtime_status.md`: completed three-host
   practical runtime, data, and one-epoch smoke evidence.
 - `docs/validation/issue53_metric_runtime_curie.md`: Metric Contract v1.2

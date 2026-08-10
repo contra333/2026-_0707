@@ -26,7 +26,7 @@ def test_metric_contract_has_frozen_scope_and_decision_complete_markers():
         "covariance_trace_top_rank",
         "covariance_participation_ratio",
         "`success | degenerate | failed`",
-        "runtime implementation pending",
+        "implementation_status: frozen and implemented; protected execution and descriptive analysis complete",
     )
     for marker in required:
         assert marker in contract

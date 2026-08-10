@@ -1,268 +1,173 @@
 # Project Status
 
-Last updated: 2026-08-05
+Last updated: 2026-08-10
 
 ## Current phase
 
-The first optimizer, model, OpenOOD v1.5-aligned CIFAR-10 data/MSP, and
-reproducible classifier-training foundations are merged and validated. The
-first completed WRN-28-10 SGD seed-0 200-epoch baseline has also been run and
-independently validated at pinned training commit
-`d3fb1db222e755fe721c78efd0eb52915dcef7fd`. See the
-[Issue #14 server validation report](validation/issue14_wrn200_sgd_seed0_server_validation.md).
-Issue #22 and merged PR #23 added the deterministic optimizer-HPO orchestration
-foundation and completed its bounded department-server smoke. Issue #35 and merged PR #36
-replaced the current-tree v1.1 random-search path with the v1.2 deterministic grid,
-`C1`-`C4` role freeze, seed/pair-control reuse plan, and protected-evidence
-gate. The active classifier data configuration uses
-`oge_cifar10_holdout_v1`; its practical runtime, numerical-policy,
-actual-data loader, and one-epoch smoke checks passed on `curie`,
-`precision_medicine`, and `lise` at clean execution SHA
-`e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. Issue #37 and merged PR #38
-completed the three-host practical acceptance ledger. Benchmark-grade Conda/cache parity,
-DataLoader throughput experiments, cross-GPU parity gates, and immutable UUID
-shards are not production prerequisites. On 2026-07-28, an owner-authorized
-`fast path` task bounded the seed-0 production execution directly on `main`.
-The committed exact-once assignment uses `curie` 14 cells, `lise` 8 cells, and
-`precision_medicine` 14 cells. A follow-up owner `fast path` fixes
-`grid-sgd-06` as a concurrently running operational sentinel rather than a
-blocking gate; all 36 cells remain pinned to production Git SHA
-`0d30054b38f0dc7a513c3eacc5c4e5435670fc4d`. The 36 cells subsequently
-completed, their uploaded metadata and checksums passed the Issue #47 integrity
-gate, and C1-C4 were frozen from epoch-200 `last.pt` ID-validation metrics.
-Issue #49 and PR #50 completed the exact-once 13/10/7 follow-up at production
-Git SHA `3556841340e6f6b92782af045ed4a468e6e271bd`. All 30 new rows are
-epoch-200 terminal, independently validated, and uploaded with zero deletes.
-Together with 12 reused seed-0 rows, they form 42 unique `(config_hash, seed)`
-identities across 14 configurations. The checksum-sealed aggregate retains
-per-seed validation values, mean/sample SD, paired-control differences, and
-the seed-0 selection-bias disclosure.
-Issue #57 and PR #58 then completed the frozen protected Metric Contract v1.2
-evaluation at scientific evaluator SHA
-`c38b09694be88aa74de0741b39e9d3ba0d6ff61a`. Curie, Lise, and
-precision_medicine each reached 20/20 checkpoint-level `REMOTE_VERIFIED`.
-All 60 checkpoint bundles, three operational shards, and the central aggregate
-were uploaded and independently read back. The aggregate contains 95,160
-successful per-checkpoint scalar records, 31,720 successful seed aggregates,
-40 successful detector rank-concordance records, and zero non-success seed
-aggregates. See
-`docs/validation/issue57_metric_evaluation_execution.md`.
-Issue #59 then completed the checksum-bounded local C1-C4 analysis without
-checkpoint reevaluation, server execution, or Hugging Face mutation. The
-repository analysis artifact separates `last.pt` primary from `best_val.pt`
-control, preserves six independent OOD dataset partitions, reports all central
-seed-0 and three-seed scalars, and provides dataset-specific exploratory
-geometry-OOD associations with 10,000 configuration-block resamples. See
-`docs/analysis/metric_contract_v1_2_c1_c4/` and
-`docs/validation/issue59_metric_contract_v1_2_analysis.md`.
+Research Contract v2 is the active paper protocol. The repository has finished
+the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis;
+the next executable phase is the **Stage 2 existing-artifact mechanism gate**.
+Fresh shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not
+started.
 
-## Validated or implemented
+The active claim is deliberately narrower than “optimizer X is better”:
 
-- Optimizer reference semantics are documented.
-- Shared weight-decay parameter-group policy is implemented.
-- Optimizer and parameter-group tests exist.
-- Common model API for logits and penultimate features is documented.
-- `toy_cifar_cnn` is implemented as an API smoke-test fixture only.
-- `resnet18` is implemented as a research backbone.
-- `wrn28_10` is implemented as a research backbone.
-- The OpenOOD v1.5-aligned CIFAR-10 dataset and evaluation contract is documented and implemented.
-- Issue #33 and merged PR #34 implement the deterministic project CIFAR-10 ID
-  membership: official train is split into class-balanced 45k/5k using the
-  frozen SHA-256 rule, official test is reconstructed as the verified
-  OpenOOD 1k/9k union, and all three imglists plus a 60,000-row provenance
-  manifest are committed. The active training config uses
-  `oge_cifar10_holdout_v1`, WRN `msr_fan_in`, and train-only reflection
-  padding. The committed membership, image paths, and bounded loaders passed on
-  all three approved hosts at the clean Issue #37 execution SHA.
-- Official released OpenOOD imglists and all eight required archives were validated on the department server.
-- Actual-data manifest validation confirmed fixed split counts, image-path existence, sample-ID uniqueness, and label ranges.
-- A bounded CUDA WRN-28-10 MSP vertical slice completed with random-model output marked as infrastructure-only.
-- Pull Request #11 merged the Issue #10 WRN-28-10 training protocol,
-  deterministic loader state, scheduler boundaries, checkpoints, resume, and
-  run artifacts. Complete tests and bounded actual-data CUDA SGD, resume,
-  Adam, and AdamW validation passed on the department server.
-- Issue #14 produced and independently revalidated the first complete
-  WRN-28-10 SGD seed-0 200-epoch classifier baseline, including all fixed
-  snapshots and full ID validation/test recomputation. That run predates the
-  2026-07-27 initialization correction and used `fan_out`; its checkpoints and
-  report are retained unchanged as a historical single-seed baseline under the
-  prior protocol and are excluded from protocol-v1.2 aggregation.
-- WRN-28-10 convolution initialization was audited against the pinned official
-  repository on 2026-07-27 and corrected from `fan_out` to `fan_in`, matching
-  both `models/utils.lua` `MSRinit` and `pytorch/utils.py`. The policy is now
-  carried by the `init_policy` model-config field, materialized into the
-  resolved config, and included in the canonical scientific config hash.
-  Reference card 02 records the full architecture-side deviation audit.
-- Issue #22 and PR #23 implemented versioned study/trial/attempt records,
-  canonical configuration hashing, deterministic ranking and freeze records,
-  code-enforced deferred ID-test selection mode, independent single-GPU trial
-  scheduling, and attempt-preserving failure/retry accounting.
-- The Issue #22 department-server validation passed the complete 167-test suite,
-  actual OpenOOD membership verification, and a bounded two-GPU/two-trial,
-  one-epoch smoke with checkpoint, checksum, GPU-identity, and deferred-ID-test
-  validation. The smoke consumed no production study slot.
-- Issue #35 and merged PR #36 implement protocol v1.2 as three deterministic
-  12-cell tables, with no sampler. The frozen manifest binds row/table/grid hashes to the
-  45k/5k/10k membership and split-manifest hashes. Selection requires all 36
-  seed-0 cells to be terminal, implements C1-C4 including widening and
-  absent/unresolved states, freezes the result identity, deduplicates role and
-  pair-control follow-ups, and gates protected evidence to frozen role
-  config/seed identities.
-- Historical decision log: an earlier 64-run random-search study exists only
-  on the department server, used the old 50k/1k/9k split, and is not imported
-  or used for v1.2 selection, baseline, table, ranking, analysis, or numeric
-  justification. Its executable config, tables, sampler, default path, and
-  golden hashes are absent from the current tree.
-- Issue #37 and merged PR #38 record the practical runtime contract and add the
-  effective FP32/TF32/cuDNN policy, Python executable, hostname, driver, and
-  GPU metadata to each training run's `environment.json`. The existing study
-  runner remains responsible for bounded one-epoch smokes; no new
-  preflight/throughput/shard gate is inserted into production execution. See
-  `docs/validation/issue37_practical_runtime_status.md`.
-- Issue #37's `precision_medicine` runtime candidate passed `pip check`, the
-  complete 175-test suite, bounded CUDA/cuDNN probes, and the required numerical
-  policy checks. Its committed-holdout, bounded-loader, and actual-data
-  one-epoch smoke then passed at clean Git
-  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`, with ID-test deferred and no
-  protected-evidence artifact.
-- Issue #37's `lise` validation passed at clean Git
-  `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`: the hash-locked Python 3.11.9,
-  PyTorch `2.5.1+cu121`, TorchVision `0.20.1+cu121`, and CUDA 12.1 runtime
-  passed `pip check`, the complete 175-test suite, bounded A5000 CUDA/cuDNN
-  probes, committed 45k/5k/10k holdout path and loader checks, and one
-  existing-runner actual-data epoch on an idle GPU. The smoke deferred ID-test
-  and created no protected-evidence artifact.
-- Issue #37 current-scope `curie` validation passed at the same clean Git SHA
-  with the same 35-entry runtime/test lock surface and effective numerical
-  policy: `pip check`, the complete 175-test suite, bounded A5000 CUDA/cuDNN
-  probes, committed holdout and bounded loaders, and one actual-data epoch all
-  passed on idle GPU 0. The smoke completed 352 optimizer steps, strict-reloaded
-  both checkpoints, deferred ID-test, and created no evaluation artifact.
-- Issue #47 verified 12/12 stage-level metadata sidecars and 36/36 trial-record
-  sidecars from `contra333/ICLR_RUN`, exact-once host assignment, schema,
-  grid/dataset/config identities, production Git SHA, terminal epoch-200
-  metrics, deferred ID-test state, and protected-field absence. The official
-  C1-C4 freeze hash is
-  `fdf67c1184abc489542ca64cad2410ff38aa816acb1e9e5289d60461600373fa`;
-  see
-  `docs/validation/seed0_20260728_grid_role_freeze.md`.
-- Issue #49 verified 30/30 epoch-200 follow-up records as `curie=13`,
-  `lise=10`, and `precision_medicine=7`, including checkpoint and metadata
-  checksums, deferred protected fields, three `REMOTE_COMPLETE.json` markers,
-  and zero-delete uploads. The committed 42-row aggregate contains 12 reused
-  seed-0 rows and 30 new rows without duplicate identities; see
-  `docs/validation/issue49_followup_execution.md`.
-- Issue #53 implements the Metric Contract v1.2 runtime: deterministic
-  checkpoint feature/logit extraction, checkpoint-addressed raw caches,
-  ID/calibration/failure-ranking metrics, logit controls, Gaussian/distance,
-  neighbor/prototype/subspace detectors, OOD metric aggregation,
-  representation geometry/Neural Collapse, explicit numerical status, and
-  canonical result records. At clean Git
-  `14609a4d0c7498c77d59b0e5dbd825f341961e28`, Curie passed the complete
-  238-test suite and a real-checkpoint smoke using only 500 class-balanced
-  `id_train` and 500 `id_validation` samples. All 18 score arrays were finite,
-  raw/metric checksums passed, `git_dirty=false`, and no protected split was
-  accessed; see `docs/validation/issue53_metric_runtime_curie.md`.
-- Issue #55 freezes the protected-evaluation launch population without starting
-  evaluation. Its checksum-addressed inventory imports all 42 completed
-  config/seed identities, authorizes only the 30 frozen role identities,
-  retains 12 pair-control-only identities as explicit exclusions, and creates
-  60 separate `last`/`best_val` checkpoint jobs. Source-local assignment is
-  exactly 20 jobs on each of `curie`, `lise`, and `precision_medicine`; see
-  `docs/validation/issue55_metric_evaluation_plan.md`. At clean pushed Git
-  `3e34076efc83daf5e2ed5bc3a5e7c451bc911904`, Curie passed deterministic
-  regeneration, the 17 focused planning tests, and the complete 255-test CPU
-  suite without accessing a checkpoint or dataset.
-- Issue #57 implements and executes the production evaluator, exact
-  memory-bounded detector kernels, source-local host supervisor, no-delete
-  upload/readback, operational-shard collector, and deterministic seed
-  aggregation. Exactly 60 authorized `last`/`best_val` checkpoint jobs reached
-  `REMOTE_VERIFIED` as `20/20/20`; the checksum-verified aggregate is available
-  on Hugging Face and in a local non-Git analysis directory. A post-pilot
-  supervisor-only terminal-state hotfix is separately identified as
-  `1af220bbdcac99f4c762613a7556ce2e1901e8da`; every scientific scalar retains
-  the single clean evaluator SHA `c38b09694be88aa74de0741b39e9d3ba0d6ff61a`.
-- Issue #59 implements a reproducible local-only analysis CLI and validated
-  result package for the Issue #57 aggregate. It rechecks all four aggregate
-  payload hashes, recomputes 31,720 means/sample SDs and seed-0 parity, fixes
-  the 10 unique-config analysis population, exports 5,700 seed-matched
-  descriptive deltas, and produces separate canonical/appendix tables and
-  SVG/PDF figures. Its 8,448 geometry-OOD rows keep all six OOD datasets and
-  both checkpoint roles separate; all association claims are explicitly
-  exploratory and non-causal.
+```text
+paired training-rule change
+-> detector-relevant representation channel
+-> ID/OOD score-overlap change under a fixed readout
+-> fresh main confirmation
+-> second-regime replication
+```
 
-## Documented but not executed
+[`reference_cards/12_fixed_readout_intervention_protocol_v2.md`](reference_cards/12_fixed_readout_intervention_protocol_v2.md)
+is authoritative for that sequence. It does not retroactively change v1.2.
 
-- `docs/reference_cards/07_optimizer_comparison_hpo_protocol.md` fixes the
-  deterministic grid, C1-C4 selection, pairwise coupling controls, budget,
-  seeds, checkpoints, provenance, and rerun rules. The seed-0 v1.2 grid,
-  C1-C4 freeze, role replication, pair controls, and downstream protected
-  Metric Contract v1.2 evaluation are complete.
-- `docs/reference_cards/06_feature_ood_detectors.md` fixes the SN-off
-  `GDA-ClassDensity` name, class-wise full unbiased covariance, official
-  adaptive-jitter ladder, empirical-prior `logsumexp` score, and the boundary
-  that reserves `DDU` for a future spectral-normalization training ablation.
-- `docs/reference_cards/08_raw_feature_artifact_contract.md` fixes the
-  deterministic checkpoint-feature cache, provenance, checksum, and
-  protected-split authorization contract.
-- `docs/reference_cards/09_core_representation_metrics.md` freezes the
-  confirmatory geometry, logit-control, and low-complexity distance/angle
-  panel, including Moore-Penrose NC1 and separate covariance entropy-rank,
-  trace-to-top-rank, and participation-ratio definitions.
-- `docs/reference_cards/02_architectures.md` now fixes the research lineup
-  (2026-07-23): WRN-28-10/CIFAR-10 main (full protocol), ResNet-18 on
-  CIFAR-10 and CIFAR-100 plus VGG-16-BN/CIFAR-10 (reduced protocol), and a
-  pilot-gated from-scratch `vit_small`/CIFAR-10 arm with recorded fallbacks.
-  `vgg16` and `vit_small` remain unimplemented.
-- `docs/reference_cards/10_optimizer_grid_literature_anchors.md` maps every
-  v1.2 grid value and lineup row to pinned sources or labeled project
-  judgment, and records prior-work positioning found in the 2026-07-23
-  literature pass.
-- `docs/reference_cards/11_metric_contract_v1_2.md` is the authoritative
-  WRN-28-10/CIFAR-10 metric dictionary. It fixes the paper formulas, reporting
-  tiers, checkpoint/split roles, artifact keys, degeneracy rules, source pins,
-  and validation oracles. Issue #53 provides their canonical implementation
-  entrypoints and bounded non-protected validation, Issue #55 provides the
-  frozen 60-job launch inventory, and Issue #57 provides the completed
-  protected execution and checksum-verified multi-seed aggregate.
-- No DDU/SN ablation or confirmatory causal interpretation is part of the
-  completed local analysis.
+## Completed and validated foundation
 
-## Still missing
+### Training and optimizer infrastructure
 
-- Final manuscript narrative and final main/appendix table selection from the
-  completed descriptive analysis package
-- Any future DDU/SN training ablation
+- Optimizer semantics, shared `weights_only_no_bias_norm` parameter groups,
+  SGD/SGDW, Adam/AdamW, and coupled/decoupled endpoints are implemented and
+  tested.
+- `toy_cifar_cnn`, CIFAR `resnet18`, and `wrn28_10` expose the common logits /
+  penultimate-feature API. The toy model remains infrastructure-only.
+- The classifer runner implements resolved configuration, deterministic loader
+  state, scheduling, atomic `last.pt`/`best_val.pt`/snapshot artifacts, strict
+  loading, and same-run epoch-boundary resume.
+- The three approved department hosts passed the practical runtime, data, and
+  bounded actual-CUDA gate recorded in
+  [`validation/issue37_practical_runtime_status.md`](validation/issue37_practical_runtime_status.md).
 
-## Active next phase
+### Protocol v1.2 optimizer population
 
-Issue #59 completed the first local analysis pass over the checksum-verified
-Issue #57 aggregate. The next phase is manuscript assembly: choose the final
-main and appendix layouts from the frozen dataset-specific tables, connect the
-reported rows to Card 11 Methods wording, and write conclusions within the
-documented exploratory-association boundary. The Issue #10 CUDA runs remain
-infrastructure validation, and the Issue #14 run is the single-seed historical
-SGD baseline; neither is optimizer-comparison, geometry, Neural Collapse, or
-OOD-detector evidence.
+- All 36 seed-0 WRN-28-10/CIFAR-10 grid cells completed and passed metadata
+  integrity checks.
+- C1--C4 were frozen using only epoch-200 `last.pt` ID-validation evidence.
+- All 30 new role-replication/pair-control rows completed; combined with 12
+  reused seed-0 rows, the aggregate contains 42 unique `(config_hash, seed)`
+  identities across 14 configurations.
+- Per-seed results, sample SD, attempt history, checksums, and the seed-0
+  selection-bias disclosure are preserved. See
+  [`validation/seed0_20260728_grid_role_freeze.md`](validation/seed0_20260728_grid_role_freeze.md)
+  and [`validation/issue49_followup_execution.md`](validation/issue49_followup_execution.md).
 
-The completed Issue #57 authorization does not extend to another protected
-population, rerun, external upload, or scientific claim. GDA SN-off outputs
-remain named `GDA-ClassDensity`; `DDU` remains reserved for a future SN
-ablation.
+### Metric Contract v1.2
 
-## Known workflow maintenance
+- Deterministic raw-feature extraction, ID/calibration metrics, logit and
+  feature OOD detectors, representation geometry, explicit numerical states,
+  checkpoint-centric records, and checksum validation are implemented.
+- The protected evaluation completed 60/60 checkpoint bundles at scientific
+  evaluator SHA `c38b09694be88aa74de0741b39e9d3ba0d6ff61a` with three host
+  shards `REMOTE_VERIFIED` as 20/20/20.
+- The central aggregate contains 95,160 successful per-checkpoint scalar
+  records, 31,720 successful seed aggregates, 40 detector-rank-concordance
+  records, and zero non-success seed aggregates. See
+  [`validation/issue53_metric_runtime_curie.md`](validation/issue53_metric_runtime_curie.md),
+  [`validation/issue55_metric_evaluation_plan.md`](validation/issue55_metric_evaluation_plan.md),
+  and [`validation/issue57_metric_evaluation_execution.md`](validation/issue57_metric_evaluation_execution.md).
+- The checksum-bounded C1--C4 package separates `last.pt` primary from
+  `best_val.pt` control, preserves all six OOD datasets, exports every central
+  scalar, and labels geometry--OOD associations exploratory. See
+  [`analysis/metric_contract_v1_2_c1_c4/`](analysis/metric_contract_v1_2_c1_c4/)
+  and [`validation/issue59_metric_contract_v1_2_analysis.md`](validation/issue59_metric_contract_v1_2_analysis.md).
 
-- `docs/reference_cards/03_architecture_implementation_checklist.md` describes a historical first implementation task whose listed models are now implemented. Treat its durable API and validation rules as useful context, but do not treat its one-time scope as the current active task.
-- New one-time implementation tasks should be created as GitHub Issues rather than new permanent checklists under `docs/reference_cards/`.
+## Evidence boundary of completed v1.2 work
 
-## Blockers and unknowns
+The v1.2 grid, frozen roles, pair controls, protected metrics, and local
+analysis are valid descriptive/discovery evidence. They do **not** establish:
 
-- The protected run and bounded local analysis have no remaining execution
-  blocker. Manuscript claims must still respect `n=3`, the ten-config
-  association population, multiplicity, and seed-0 role-selection bias.
-- DDU post-hoc shrinkage and PCA choices remain outside metric-contract v1.2
-  and require a separately bounded future ablation if the project retains them.
+- a shared-prefix causal effect of decay coupling;
+- comparable-ID equivalence under a prespecified margin;
+- a detector-formula mechanism from scalar association alone;
+- a universal detector ranking or dataset-pooled generalization;
+- ResNet-18/CIFAR-100 replication.
+
+`GDA-ClassDensity` is implemented and evaluated for SN-off checkpoints. `DDU`
+remains reserved for an unexecuted spectral-normalization training ablation.
+
+## Research Contract v2 decisions frozen
+
+- Main regime: WRN-28-10/CIFAR-10.
+- Replication regime: ResNet-18/CIFAR-100.
+- Main optimizer design: Adam/AdamW primary paired family plus SGDM/SGDW
+  conventional-family control, each from its own zero-decay prefix and each
+  with a zero-decay continuation.
+- Replication optimizer design: Adam/AdamW paired family plus an independent
+  conventional SGDM reference.
+- Main detector panel: Mahalanobis-Raw, Mahalanobis++, kNN-Raw K=50, kNN-L2
+  K=50, CTM, Pure Residual, and Energy-T1.
+- Secondary: Relative Mahalanobis-Raw/++, MSP. Appendix: ViM and components.
+  ReAct is excluded.
+- The contribution is fixed-readout practical non-invariance plus
+  formula-linked score-overlap mechanism and replication, not optimizer
+  ranking, detector SOTA, L2-normalization novelty, or an ID-only audit rule.
+
+The old local drafts and ZIP handoffs remain untouched and untracked. Their
+hash-addressed historical/superseded status is recorded in
+[`history/local_research_draft_manifest.md`](history/local_research_draft_manifest.md).
+
+## Active next phase: Stage 2 mechanism gate
+
+Stage 2 may reuse the already produced Issue #57 protected artifacts under the
+owner's 2026-08-10 fast-path authorization. It may not reevaluate checkpoints,
+traverse protected datasets, overwrite/mutate remote artifacts, or upload a new
+result population.
+
+Before retrieval, Stage 2 must commit a checksum-addressed selection manifest
+for the exact `last.pt` discovery population, datasets, file allowlist, remote
+identities, and non-Git destination. It must then:
+
+1. verify every selected file and identity;
+2. reproduce existing AUROC/FPR95 from raw scores;
+3. add tested raw-kNN, Pure Residual, score-overlap, component-decomposition,
+   targeted-transform, and invariant-control analyses;
+4. keep all six OOD datasets separate and use all selected discovery
+   configurations rather than a favorable subset;
+5. freeze one focal channel/transform and the Stage 3 addendum before any
+   fresh paired OOD result is opened.
+
+Stage 2 is discovery only. A failed gate stops or reframes Stage 3.
+
+## Stage-gated decisions still open
+
+These are intentional pre-confirmation decisions, not unresolved permission to
+tune on fresh OOD outcomes:
+
+- focal geometry channel, targeted transform, and exact invariant/null control;
+- switch epoch or prespecified switch-epoch set;
+- family-specific nominal decay dose or dose set;
+- ID accuracy equivalence margin and NLL/ECE guardrails;
+- per-outcome practical OOD margins;
+- fresh prefix count/power rule and multiplicity handling;
+- main go/no-go criterion.
+
+Before Stage 4, the CIFAR-100 membership/preprocessing/OOD contract, exact SGDM
+reference recipe, replication seed count, and replication success rule must be
+frozen separately.
+
+## Implementation and execution blockers
+
+- The shared-prefix operation does not exist. It must be implemented as a new
+  `fork_from_prefix` path; ordinary resume must remain strict and unchanged.
+- Raw kNN and the v2 Pure Residual key/registry do not yet exist.
+- The Stage 2 reuse selection manifest and local raw-array cache do not yet
+  exist; substantial non-Git working space is required.
+- ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
+  actual-data validation are pending.
+
+The numerical items above are stage-gated design choices rather than blockers
+to Stage 2 discovery.
+
+## Explicitly not run by Stage 1
+
+- no GPU, server training, checkpoint inference, or protected dataset traversal;
+- no raw artifact download or external upload;
+- no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
+- no new scientific result.
 
 ## Update rule
 
-Update this file only when the project phase, validated foundation, major blocker, or next-phase priority changes. Do not use it as a daily log or duplicate Pull Request descriptions.
+Update this file only when the active phase, validated foundation, major gate,
+or next priority changes. Detailed command logs and immutable evidence belong
+in a bounded validation record rather than this status summary.
