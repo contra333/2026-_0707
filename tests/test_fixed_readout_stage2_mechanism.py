@@ -255,6 +255,11 @@ def _write_real_bundle(
                 f"{score_root}/detector__ctm_prototype_cosine.npy",
                 prototype["ctm_score"],
             ),
+            "detector/vim_author_dim": _reference(
+                metrics_root,
+                f"{score_root}/detector__vim_author_dim.npy",
+                vim["score"],
+            ),
             "ood_score/energy_t1": _reference(
                 metrics_root,
                 f"{score_root}/ood_score__energy_t1.npy",

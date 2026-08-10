@@ -70,6 +70,7 @@ STORED_SCORE_KEYS = (
     "detector/mahalanobis_pp",
     "detector/knn_l2_k50",
     "detector/ctm_prototype_cosine",
+    "detector/vim_author_dim",
     "ood_score/energy_t1",
 )
 DIAGNOSTIC_PATHS = {
@@ -1176,6 +1177,7 @@ def analyze_bundle(
             "detector/mahalanobis_pp": np.asarray(normalized["mahalanobis"]),
             "detector/knn_l2_k50": np.asarray(knn_l2["score"]),
             "detector/ctm_prototype_cosine": np.asarray(prototype["ctm_score"]),
+            "detector/vim_author_dim": np.asarray(vim["score"]),
             "detector/vim_residual_author_dim": -np.asarray(vim["residual"]),
             "ood_score/energy_t1": np.asarray(energy),
         }

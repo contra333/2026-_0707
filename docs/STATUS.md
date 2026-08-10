@@ -7,9 +7,12 @@ Last updated: 2026-08-10
 Research Contract v2 is the active paper protocol. The repository has finished
 the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis.
 The **Stage 2 existing-artifact mechanism gate** now has a frozen candidate and
-decision policy plus an exact checksum-addressed reuse manifest; selective
-payload retrieval and the scientific gate computation are next. Fresh
-shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not started.
+decision policy plus an exact checksum-addressed reuse manifest. The complete
+5,520-file selective payload has been retrieved to the frozen non-Git
+destination and checksum-verified, and the exact cache/evidence/reducer tooling
+has been implemented and tested. Production raw-kNN caching, evidence
+extraction, and the scientific gate decision are next. Fresh shared-prefix
+confirmation and ResNet-18/CIFAR-100 replication have not started.
 
 The active claim is deliberately narrower than “optimizer X is better”:
 
@@ -126,9 +129,18 @@ may only be checksum-verified and skipped, and mismatched or unexpected files
 fail closed. The exact construction and validation evidence is in
 [`validation/fast_path_20260810_stage2_preretrieval_freeze.md`](validation/fast_path_20260810_stage2_preretrieval_freeze.md).
 
-Only metadata needed to establish that catalog was downloaded while freezing
-it. No selected raw score, feature, or logit array has yet been retrieved or
-opened. The next execution must:
+After that freeze, all 5,520 allowlisted files were retrieved to
+`/home/contra333/2026여름방학실험코드/fixed_readout_stage2_reuse/fixed_readout_stage2_reuse_manifest_v1`
+and independently size/SHA-256 verified. The immutable retrieval receipt has
+status `CHECKSUM_VERIFIED_EXACT_ALLOWLIST`, 5,520 files,
+19,620,378,841 bytes, and verified catalog SHA-256
+`1691467f5a054ac29fb2e6a18068e965d63ebc17f856b40eb074e7bb0e86f410`.
+Retrieval and hashing copied/read file bytes, but no selected `.npy` payload has
+yet been parsed with NumPy or used to compute a scientific result. Tooling and
+retrieval validation are recorded in
+[`validation/fast_path_20260810_stage2_gate_tooling.md`](validation/fast_path_20260810_stage2_gate_tooling.md).
+
+The production execution must:
 
 1. verify every selected file and identity;
 2. reproduce existing AUROC/FPR95 from raw scores;
@@ -164,27 +176,32 @@ frozen separately.
 
 - The shared-prefix operation does not exist. It must be implemented as a new
   `fork_from_prefix` path; ordinary resume must remain strict and unchanged.
-- Raw kNN has a tested exact K=50 analysis/cache path, but its production cache
-  has not been computed. Pure Residual remains a Stage 2 diagnostic that must be
+- Raw kNN has a tested exact K=50 backend, seven-variant resumable cache, and
+  one-host supervisor with concurrent same-filesystem staging and a portable,
+  checksum-fixed v1.2 baseline root, but the production 30-bundle cache has
+  not been computed. Pure Residual remains a Stage 2 diagnostic that must be
   materialized in the final gate outputs.
-- The committed analyzer is a selective bundle/pair evidence extractor only.
-  The deterministic all-configuration reducer that emits the seven required
-  policy artifacts and the scientific `PASS` / `NO_GO` / `INCONCLUSIVE` /
-  `FAILED` decision is not yet implemented.
-- The Stage 2 selective payload is not yet present at the frozen non-Git
-  destination. Consequently scalar parity, raw-kNN production computation,
-  all-configuration aggregation, focal selection, and the gate decision are
-  `NOT_RUN`.
+- The analyzer now emits the complete 720-row candidate
+  formula/overlap/geometry population plus 360 diagnostic-only CTM/Pure
+  Residual rows. The fail-closed all-configuration reducer keeps diagnostics
+  outside ranking, emits 12 separate diagnostic summaries, and produces the
+  frozen `PASS` / `NO_GO` / `INCONCLUSIVE` / `FAILED` decision artifacts.
+  Their production execution is still `NOT_RUN`.
+- The Stage 2 selective payload is present and checksum-verified at the frozen
+  non-Git destination. Scalar parity, raw-kNN production computation,
+  all-configuration aggregation, focal selection, and the gate decision remain
+  `NOT_RUN` until the committed tooling is executed in one locked runtime.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
 
 The numerical items above are stage-gated design choices rather than blockers
 to Stage 2 discovery.
 
-## Explicitly not run through the pre-retrieval Stage 2 freeze
+## Explicitly not run through the Stage 2 tooling freeze
 
 - no GPU, server training, checkpoint inference, or protected dataset traversal;
-- no selected raw score/feature/logit payload download and no external upload;
+- no selected `.npy` scientific load, production raw-kNN cache, full evidence
+  extraction, reducer decision, or external upload;
 - no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
 - no new scientific result.
 
