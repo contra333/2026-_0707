@@ -27,19 +27,23 @@ The repository currently contains:
   role replication, coupled/decoupled pair controls, and protected evaluation;
 - a checksum-verified C1--C4 descriptive analysis package with all six OOD
   datasets kept separate;
-- Research Contract v2 for a fixed-readout mechanism study using shared-prefix
-  paired interventions and a second ResNet-18/CIFAR-100 regime.
+- Research Contract v4 for a fixed-readout mechanism study using paired
+  from-scratch training trajectories, exact component/pair attribution, and
+  ordered architecture/dataset/scale replication.
 
 The `toy_cifar_cnn` model is only for API smoke testing. `resnet18` and
-`wrn28_10` are implemented research backbones. The active v2 minimum design is
-WRN-28-10/CIFAR-10 main plus ResNet-18/CIFAR-100 replication. VGG, ViT, and
-ConvNeXt remain outside that minimum design and are not implemented.
+`wrn28_10` are implemented research backbones. The active v4 main is
+WRN-28-10/CIFAR-10, followed by ResNet-18/CIFAR-10 and CIFAR-100 replication;
+DenseNet-BC/CIFAR-10 and ConvNeXt-Tiny/ImageNet-200 are planned appendices and
+are not implemented.
 
-The completed v1.2 population is descriptive/exploratory evidence; it is not a
-shared-prefix causal intervention. Still missing are the v2 fork runtime, the
-fresh paired confirmation, a frozen CIFAR-100 data/OOD contract and replication,
-and any resulting causal or cross-regime conclusion. `GDA-ClassDensity` is
-implemented and evaluated, while full DDU remains reserved for a future
+The completed v1.2 population and v3 component analysis are
+descriptive/discovery evidence; they are not from-scratch paired confirmation.
+The `fork_from_prefix` runtime exists only as optional follow-up infrastructure.
+Still missing are the v4 training/trajectory implementation and execution,
+fresh paired confirmation, replication data/architecture contracts, and any
+resulting causal or cross-regime conclusion. `GDA-ClassDensity` is implemented
+and evaluated, while full DDU remains reserved for a future
 spectral-normalization training ablation.
 
 ## Start here
@@ -71,7 +75,9 @@ The repository is the source of truth. ChatGPT Projects, Work sessions, Codex se
 - Frozen core representation metrics: `docs/reference_cards/09_core_representation_metrics.md`
 - Optimizer grid literature anchors: `docs/reference_cards/10_optimizer_grid_literature_anchors.md`
 - Metric Contract v1.2 dictionary and completed historical scope: `docs/reference_cards/11_metric_contract_v1_2.md`
-- Active fixed-readout intervention protocol v2: `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`
+- Historical failed radial intervention protocol v2: `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`
+- Active paired-trajectory component-attribution protocol v4: `docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md`
+- Current manuscript skeleton: `docs/paper/intervention_supporting_theory_outline.md`
 - Local historical/superseded material manifest: `docs/history/local_research_draft_manifest.md`
 - OpenOOD dataset/MSP server validation: `docs/validation/issue6_openood_cifar10_server_validation.md`
 - CIFAR-10 training server validation: `docs/validation/issue10_cifar_training_server_validation.md`

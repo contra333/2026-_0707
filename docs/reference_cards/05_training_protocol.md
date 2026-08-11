@@ -60,13 +60,14 @@ and later extension. Resume uses the same run directory and its atomic
 override value and every other effective setting are written to
 `resolved_config.yaml`.
 
-## Shared-prefix fork versus ordinary resume
+## Optional prefix fork versus ordinary resume
 
 Ordinary `--resume` remains a same-run operation: it requires that run
 directory's own `checkpoints/last.pt` and rejects optimizer names or
 hyperparameter changes.
 
-The v3 intervention adds a separate operation:
+The repository also retains a separate operation implemented for the
+historical v3 plan:
 
 ```bash
 python scripts/train_cifar10.py \
@@ -77,10 +78,11 @@ python scripts/train_cifar10.py \
   --fork-from-prefix /path/to/zero-prefix/checkpoints/last.pt
 ```
 
-`--resume` and `--fork-from-prefix` are mutually exclusive. The fork path is
-authorized only by
-[`13_component_attribution_intervention_protocol_v3.md`](13_component_attribution_intervention_protocol_v3.md):
-it accepts an epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
+`--resume` and `--fork-from-prefix` are mutually exclusive. Under active
+[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md),
+the fork path is optional follow-up infrastructure rather than the main paper
+experiment. When a bounded follow-up authorizes it, the operation accepts an
+epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
 family, preserves model/optimizer tensor/scheduler/RNG/DataLoader-generator
 state, and changes only the decay endpoint/coupling plus future run length.
 The new run records `fork_manifest.json`, source SHA-256, and a sibling-
@@ -89,6 +91,11 @@ IDs, canonical full-config digests, and training seeds. A later pre-OOD pair
 manifest assigns sibling pair identities; the training runner does not infer a
 pair from directory names. A zero-decay fork must match uninterrupted
 zero-decay continuation. This operation does not relax ordinary resume.
+
+The v4 main experiment instead starts coupled, decoupled, and zero-decay runs
+at epoch 0 from the same initialization and data/RNG stream. The expanded v4
+snapshot and multi-depth requirements are not implemented by this historical
+fork contract and require their own bounded task.
 
 ## DataLoader contract
 

@@ -4,16 +4,18 @@ Last updated: 2026-08-11
 
 ## Current phase
 
-Research Contract v3 is the active paper protocol. It uses known
-MD--Marginal--RMD and size--stretch decompositions as measurement tools for a
-shared-prefix decay-coupling intervention and exact ID--OOD pair-order
-attribution. Contract v2 is historical: its radial Stage-2 failure remains
-immutable and is not being retried or tolerance-relaxed. The repository has
-finished the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive
-analysis.
+Research Contract v4 is the active paper protocol. It uses known
+MD--Marginal--RMD and size--stretch decompositions as measurement tools for
+paired from-scratch decay-coupling trajectories and exact ID--OOD pair-order
+attribution. Coupled, decoupled, and zero-decay siblings begin at epoch 0 from
+the same initialization and data stream. Contract v2 is historical: its radial
+Stage-2 failure remains immutable and is not being retried or
+tolerance-relaxed. The repository has finished the WRN-28-10/CIFAR-10 Metric
+Contract v1.2 foundation and descriptive analysis.
 
-Issue #63 implements the v3 foundation: a focused read-only 30-bundle
-component-attribution path and a separate `fork_from_prefix` operation. The
+Issue #63 implemented the historical v3 foundation: a focused read-only
+30-bundle component-attribution path and a separate `fork_from_prefix`
+operation. The
 implementation and post-review hardening passed the complete 477-test suite on
 Curie in a temporary Git snapshot. The production historical-discovery
 analysis also completed with `PASS`: 30 bundles, 360 bundle/component rows,
@@ -29,26 +31,27 @@ full evidence build then failed closed on the prespecified exact targeted
 witness for `radial_l2_mahalanobis:cifar100`; no 720/360 evidence package was
 published. The reducer's checksum-bound preflight package has status `FAILED`,
 with no selected candidate and `scientific_launch_allowed=false`. Stage 3
-under v2 remains terminally stopped. Card 13 defines a new v3 question, schema,
-and execution path rather than resuming v2. Fresh shared-prefix confirmation
-and every replication/scale arm remain `NOT_RUN`.
+under v2 remains terminally stopped. Card 13 v4 defines a new from-scratch
+trajectory question and execution path rather than resuming v2. Fresh v4
+confirmation and every replication/scale arm remain `NOT_RUN`.
 
 The active conditional claim is deliberately narrower than “optimizer X is
 better”:
 
 ```text
-shared zero-decay training prefix
--> coupled / decoupled / zero continuation
--> MD additive score component and affected quadratic term
+same initialization and data stream at epoch 0
+-> coupled / decoupled / zero-decay training trajectories
+-> update dynamics, then representation geometry over time and depth
+-> MD additive component and affected quadratic term
 -> size / stretch, then spectrum / allocation diagnostic
--> exact ID/OOD pair-order transition under a fixed readout
--> fresh main confirmation
+-> exact same-image ID/OOD pair-order transition
+-> channel-matched attenuation
 -> ordered architecture / dataset / scale replication
 ```
 
-[`reference_cards/13_component_attribution_intervention_protocol_v3.md`](reference_cards/13_component_attribution_intervention_protocol_v3.md)
+[`reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md`](reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md)
 is authoritative for that sequence. It does not retroactively change v1.2 or
-the v2 failed execution.
+the v2/v3 completed evidence.
 
 ## Completed and validated foundation
 
@@ -104,7 +107,7 @@ the v2 failed execution.
 The v1.2 grid, frozen roles, pair controls, protected metrics, and local
 analysis are valid descriptive/discovery evidence. They do **not** establish:
 
-- a shared-prefix causal effect of decay coupling;
+- a from-scratch paired causal effect of decay coupling;
 - comparable-ID equivalence under a prespecified margin;
 - a detector-formula mechanism from scalar association alone;
 - a universal detector ranking or dataset-pooled generalization;
@@ -113,16 +116,29 @@ analysis are valid descriptive/discovery evidence. They do **not** establish:
 `GDA-ClassDensity` is implemented and evaluated for SN-off checkpoints. `DDU`
 remains reserved for an unexecuted spectral-normalization training ablation.
 
-## Research Contract v3 decisions frozen
+## Research Contract v4 decisions frozen
 
 - Paper type: intervention with supporting theory, not a new Mahalanobis
   decomposition or detector paper.
-- Main: WRN-28-10/CIFAR-10 with five Adam-family prefixes and three SGDM-family
-  control prefixes, each with coupled, decoupled, and zero continuations.
+- Main: WRN-28-10/CIFAR-10 from scratch, with coupled, decoupled, and
+  zero-decay siblings starting from the same initialization and data stream.
+- Adam primary: a 2 x 2 design over LR `{3e-4, 1e-3}` and nominal WD
+  `{1e-4, 1e-3}`. The `(1e-3, 1e-4)` zero/Adam/AdamW anchor uses five seeds
+  and full trajectories; the other cells use three seeds and focal endpoint
+  analysis, for 36 Adam-family runs total.
+- SGDM conventional control: LR `0.1`, nominal WD `5e-4`,
+  zero/SGDM/SGDW, three seeds, for nine runs.
+- Time/depth: candidate checkpoints `0,1,10,30,60,61,120,121,160,161,200`;
+  full OOD at `10,60,120,160,200`; penultimate time trajectories and an
+  epoch-200 stage1/stage2/stage3/penultimate depth scan.
+- Epoch-200 `last.pt` is primary; `best_val.pt` is a separate ID-only
+  model-selection control. An optional three-seed anchor extension to epoch
+  300 is a terminal-phase appendix.
 - Primary attribution: `MD = RMD + Marginal` at score and pair-margin level,
   tie-aware 3x3 pair transitions, and symmetric two-component AUROC accounting.
-- Diagnostic order: additive component -> quadratic term -> size/stretch ->
-  spectrum/allocation -> pair transition.
+- Mechanism order: update dynamics -> representation geometry -> additive
+  component -> quadratic term -> size/stretch -> spectrum/allocation -> exact
+  pair transition -> channel-matched attenuation.
 - Replication order: ResNet-18/CIFAR-10, ResNet-18/CIFAR-100,
   DenseNet-BC-100 k=12/CIFAR-10, ConvNeXt-Tiny/ImageNet-200.
 - ConvNeXt-Tiny is from scratch; ImageNet-1K pretrained weights are forbidden.
@@ -156,9 +172,9 @@ The immutable result directory is outside the Git worktree:
 /home/contra333/2026여름방학실험코드/fixed_readout_component_attribution_v3/28ba5a067c55ba1f7a57d8265f55b57057d54762
 ```
 
-Fresh shared-prefix training, ID-equivalence classification, protected-OOD
-confirmation, size--stretch branch attribution, and every architecture,
-dataset, and scale replication remain `NOT_RUN`.
+Fresh v4 from-scratch training, ID-equivalence classification, protected-OOD
+confirmation, update/geometry trajectories, size--stretch branch attribution,
+and every architecture, dataset, and scale replication remain `NOT_RUN`.
 
 ## Historical Research Contract v2 decisions
 
@@ -238,18 +254,18 @@ The v2 execution remains closed. Card 13 is the versioned revision, but it asks
 a different component-attribution question and does not turn the old radial
 failure into a pass. Stage 3 under v2 remains stopped.
 
-## V3 pre-protected-OOD decisions still open
+## V4 pre-protected-OOD decisions still open
 
 These are intentional pre-confirmation decisions, not unresolved permission to
 tune on fresh OOD outcomes:
 
-- switch epoch or prespecified switch-epoch set;
-- family-specific nominal decay dose or dose set;
 - ID accuracy equivalence margin and NLL/ECE guardrails;
 - per-outcome practical OOD margins;
-- power justification and multiplicity handling for the frozen 5/3 prefix
-  counts;
-- main go/no-go criterion and component-concentration rule.
+- power/minimum-detectable-effect justification for the fixed five/three seed
+  allocation;
+- onset noise bands, spectral-band boundaries, and multiplicity handling;
+- main go/no-go criterion, component-concentration rule, and exact protected
+  OOD evaluation schedule.
 
 Before their execution, CIFAR-100 and ImageNet-200 membership/preprocessing/OOD
 contracts, DenseNet/ConvNeXt architecture implementations, replication recipes,
@@ -258,28 +274,31 @@ and replication success rules must be frozen separately.
 ## Implementation and execution blockers
 
 - The v2 numerical witness is terminally `FAILED`; it is historical, not an
-  active v3 implementation blocker.
+  active v4 implementation blocker.
 - The production raw-kNN cache is complete and reusable only under its frozen
   SHA/analysis identity. The successful 720-row candidate and 360-row
   diagnostic evidence populations do not exist because fail-closed extraction
   stopped before atomic publication.
-- The minimal shared-prefix `fork_from_prefix` path exists and keeps ordinary
-  resume strict. It has CPU fixture validation but no production prefix or GPU
-  branch execution.
+- The minimal `fork_from_prefix` path exists and keeps ordinary resume strict.
+  It has CPU fixture validation but is optional follow-up infrastructure, not
+  the v4 main experiment.
+- The current runner does not yet implement the complete v4 snapshot set,
+  multi-depth feature taps, update-dynamics logging, or v4 run manifests.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
 - DenseNet-BC, ConvNeXt-Tiny, and ImageNet-200 are planned only.
 
-The later experiment-design items above remain stage-gated. Missing numerical
-values, not the historical v2 radial witness, block fresh v3 training launch.
+The later experiment-design items above remain stage-gated. Missing pre-OOD
+numerical rules and the bounded v4 implementation task, not the historical v2
+radial witness, block fresh v4 training launch.
 
-## Explicitly not run at the current v3 status boundary
+## Explicitly not run at the current v4 status boundary
 
-- no v3 GPU work, server training, checkpoint inference, feature
+- no v4 GPU work, server training, checkpoint inference, feature
   re-extraction, or new protected dataset traversal;
 - no successful 720/360 evidence publication, candidate ranking, focal
   selection, or preconfirmation freeze under the historical v2 gate;
-- no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
+- no from-scratch v4 paired trajectory, fresh seed, or CIFAR-100 experiment;
 - no Hugging Face upload, source mutation, overwrite, or deletion;
 - no comparable-ID, causal decay-coupling, or replication conclusion.
 
