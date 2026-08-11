@@ -316,7 +316,7 @@ also cover the applicable requirements below:
 - complete finite-score and metadata validation.
 
 The completed implementation and execution evidence is recorded in
-[`../validation/issue53_metric_runtime_curie.md`](../validation/issue53_metric_runtime_curie.md)
+[`issue53_metric_runtime_curie.md`](../history/validation/issue53_metric_runtime_curie.md)
 and
-[`../validation/issue57_metric_evaluation_execution.md`](../validation/issue57_metric_evaluation_execution.md).
+[`issue57_metric_evaluation_execution.md`](../history/validation/issue57_metric_evaluation_execution.md).
 Those records do not validate or authorize a future DDU/SN ablation.

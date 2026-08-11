@@ -78,8 +78,8 @@ python scripts/train_cifar10.py \
   --fork-from-prefix /path/to/zero-prefix/checkpoints/last.pt
 ```
 
-`--resume` and `--fork-from-prefix` are mutually exclusive. Under active
-[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md),
+`--resume` and `--fork-from-prefix` are mutually exclusive. Under the active
+paper protocol in [`13_active_paper_protocol.md`](13_active_paper_protocol.md),
 the fork path is optional follow-up infrastructure rather than the main paper
 experiment. When a bounded follow-up authorizes it, the operation accepts an
 epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
@@ -389,14 +389,14 @@ completed the required bounded batch, one epoch, last/best save, strict reload,
 validation, and one resumed epoch; Adam and AdamW each exercised one actual-data
 training batch through the same common engine. The environment, commands, and
 artifacts are recorded in
-[`issue10_cifar_training_server_validation.md`](../validation/issue10_cifar_training_server_validation.md).
+[`issue10_cifar_training_server_validation.md`](../history/validation/issue10_cifar_training_server_validation.md).
 These smokes validate infrastructure only; they are not research evidence.
 
 Issue #37 and merged PR #38 later completed the practical three-host
 runtime/data/one-epoch smoke gate for the active holdout and protocol-v1.2
 runner. The commands, execution SHA, numerical policy, and external artifacts
 are recorded in
-[`issue37_practical_runtime_status.md`](../validation/issue37_practical_runtime_status.md).
+[`issue37_practical_runtime_status.md`](../history/validation/issue37_practical_runtime_status.md).
 That gate does not authorize a 200-epoch canary or production grid.
 
 Future changes to training, checkpoint, resume, loader-state, or device

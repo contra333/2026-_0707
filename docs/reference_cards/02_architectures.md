@@ -42,11 +42,11 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
 | `vit_small` | `src/oge/models/vit.py` | `ViTSmall` | Modern transformer research backbone | Planned | Dosovitskiy et al., An Image is Worth 16x16 Words; Lee, Lee, and Song, Vision Transformer for Small-Size Datasets |
 
-## Active Research Contract v5 lineup (2026-08-11)
+## Paper-specific architecture plan
 
-[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md)
-supersedes the v2/v3 main-experiment plan for the active paper. The table is
-an execution plan, not a claim that planned model/data paths exist.
+The current lineup, depth taps, and execution order are governed only by
+[`13_active_paper_protocol.md`](13_active_paper_protocol.md). The table below
+is an implementation-status aid, not a second experiment contract.
 
 | Order | Role | Backbone | Dataset | Implementation status | Experiment status |
 | --- | --- | --- | --- | --- | --- |
@@ -70,8 +70,7 @@ not silently treated as implemented.
 
 ## Historical Research Contract v2 lineup (2026-08-10)
 
-[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md)
-supersedes the earlier future-lineup priority for the minimum paper design. It
+The superseded v2 lineup is indexed in [`../history/`](../history/README.md). It
 does not change any architecture implementation or completed v1.2 result.
 
 | Role | Backbone | Dataset | Model implementation | Experiment status |

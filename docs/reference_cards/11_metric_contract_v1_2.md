@@ -33,8 +33,8 @@ evaluation과 Issue #59의 checksum-bounded descriptive analysis가 완료되었
 그 완료 사실은 새 protected population이나 재평가를 자동 승인하지 않으며,
 v1.2 결과를 fresh from-scratch paired-trajectory confirmation으로 바꾸지도 않는다.
 
-[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md)는
-후속 논문의 detector 역할과 paired trajectory를 별도 version으로 정의한다.
+[`13_active_paper_protocol.md`](13_active_paper_protocol.md)는 후속 논문의
+detector 역할과 paired trajectory를 별도로 정의한다.
 그 문서는 이 v1.2 formula, key, tier, bundle 또는 결과를 소급 수정하지 않는다.
 
 ## 1. 공통 평가 계약

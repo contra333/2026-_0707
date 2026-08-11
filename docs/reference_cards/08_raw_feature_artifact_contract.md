@@ -190,7 +190,7 @@ The implementation is required to test:
 Issue #53 records the implementation and non-protected actual-checkpoint smoke;
 Issue #57 records 60 completed protected checkpoint bundles and checksum
 verification. See
-[`../validation/issue53_metric_runtime_curie.md`](../validation/issue53_metric_runtime_curie.md)
+[`issue53_metric_runtime_curie.md`](../history/validation/issue53_metric_runtime_curie.md)
 and
-[`../validation/issue57_metric_evaluation_execution.md`](../validation/issue57_metric_evaluation_execution.md).
+[`issue57_metric_evaluation_execution.md`](../history/validation/issue57_metric_evaluation_execution.md).
 Neither record authorizes a new protected population automatically.
