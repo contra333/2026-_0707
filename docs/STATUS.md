@@ -4,11 +4,13 @@ Last updated: 2026-08-11
 
 ## Current phase
 
-Research Contract v4 is the active paper protocol. It uses known
+Research Contract v5 is the active paper protocol. It uses known
 MD--Marginal--RMD and size--stretch decompositions as measurement tools for
 paired from-scratch decay-coupling trajectories and exact ID--OOD pair-order
-attribution. Coupled, decoupled, and zero-decay siblings begin at epoch 0 from
-the same initialization and data stream. Contract v2 is historical: its radial
+attribution. Affine-gauge invariance, local update-direction geometry, RMD
+low-rank curvature, and exact pair gain/loss balance constrain the empirical
+claims. Coupled, decoupled, and zero-decay siblings begin at epoch 0 from the
+same initialization and data stream. Contract v2 is historical: its radial
 Stage-2 failure remains immutable and is not being retried or
 tolerance-relaxed. The repository has finished the WRN-28-10/CIFAR-10 Metric
 Contract v1.2 foundation and descriptive analysis.
@@ -31,8 +33,8 @@ full evidence build then failed closed on the prespecified exact targeted
 witness for `radial_l2_mahalanobis:cifar100`; no 720/360 evidence package was
 published. The reducer's checksum-bound preflight package has status `FAILED`,
 with no selected candidate and `scientific_launch_allowed=false`. Stage 3
-under v2 remains terminally stopped. Card 13 v4 defines a new from-scratch
-trajectory question and execution path rather than resuming v2. Fresh v4
+under v2 remains terminally stopped. Card 13 v5 defines a new from-scratch
+trajectory question and execution path rather than resuming v2. Fresh v5
 confirmation and every replication/scale arm remain `NOT_RUN`.
 
 The active conditional claim is deliberately narrower than “optimizer X is
@@ -44,12 +46,12 @@ same initialization and data stream at epoch 0
 -> update dynamics, then representation geometry over time and depth
 -> MD additive component and affected quadratic term
 -> size / stretch, then spectrum / allocation diagnostic
--> exact same-image ID/OOD pair-order transition
+-> exact same-image ID/OOD pair gain, loss, and churn
 -> channel-matched attenuation
 -> ordered architecture / dataset / scale replication
 ```
 
-[`reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md`](reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md)
+[`reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md`](reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md)
 is authoritative for that sequence. It does not retroactively change v1.2 or
 the v2/v3 completed evidence.
 
@@ -116,7 +118,7 @@ analysis are valid descriptive/discovery evidence. They do **not** establish:
 `GDA-ClassDensity` is implemented and evaluated for SN-off checkpoints. `DDU`
 remains reserved for an unexecuted spectral-normalization training ablation.
 
-## Research Contract v4 decisions frozen
+## Research Contract v5 decisions frozen
 
 - Paper type: intervention with supporting theory, not a new Mahalanobis
   decomposition or detector paper.
@@ -135,7 +137,13 @@ remains reserved for an unexecuted spectral-normalization training ablation.
   model-selection control. An optional three-seed anchor extension to epoch
   300 is a terminal-phase appendix.
 - Primary attribution: `MD = RMD + Marginal` at score and pair-margin level,
-  tie-aware 3x3 pair transitions, and symmetric two-component AUROC accounting.
+  tie-aware 3x3 transitions, exact Gain/Loss/PairOrderChurn/AUROC balance, and
+  symmetric two-component AUROC accounting.
+- Theory constraints: global invertible affine changes are a negative control;
+  non-affine held-out residuals are measured after ID-only alignment; local
+  coupled/decoupled update directions are audited without treating the whole
+  WRN as scale-invariant; RMD curvature rank is bounded by `K-1` under the
+  stated full-rank convention.
 - Mechanism order: update dynamics -> representation geometry -> additive
   component -> quadratic term -> size/stretch -> spectrum/allocation -> exact
   pair transition -> channel-matched attenuation.
@@ -172,7 +180,7 @@ The immutable result directory is outside the Git worktree:
 /home/contra333/2026여름방학실험코드/fixed_readout_component_attribution_v3/28ba5a067c55ba1f7a57d8265f55b57057d54762
 ```
 
-Fresh v4 from-scratch training, ID-equivalence classification, protected-OOD
+Fresh v5 from-scratch training, ID-equivalence classification, protected-OOD
 confirmation, update/geometry trajectories, size--stretch branch attribution,
 and every architecture, dataset, and scale replication remain `NOT_RUN`.
 
@@ -254,7 +262,7 @@ The v2 execution remains closed. Card 13 is the versioned revision, but it asks
 a different component-attribution question and does not turn the old radial
 failure into a pass. Stage 3 under v2 remains stopped.
 
-## V4 pre-protected-OOD decisions still open
+## V5 pre-protected-OOD decisions still open
 
 These are intentional pre-confirmation decisions, not unresolved permission to
 tune on fresh OOD outcomes:
@@ -263,7 +271,8 @@ tune on fresh OOD outcomes:
 - per-outcome practical OOD margins;
 - power/minimum-detectable-effect justification for the fixed five/three seed
   allocation;
-- onset noise bands, spectral-band boundaries, and multiplicity handling;
+- standardized-divergence references, functional-trajectory uncertainty,
+  detectability summaries, spectral-band boundaries, and multiplicity handling;
 - main go/no-go criterion, component-concentration rule, and exact protected
   OOD evaluation schedule.
 
@@ -274,31 +283,31 @@ and replication success rules must be frozen separately.
 ## Implementation and execution blockers
 
 - The v2 numerical witness is terminally `FAILED`; it is historical, not an
-  active v4 implementation blocker.
+  active v5 implementation blocker.
 - The production raw-kNN cache is complete and reusable only under its frozen
   SHA/analysis identity. The successful 720-row candidate and 360-row
   diagnostic evidence populations do not exist because fail-closed extraction
   stopped before atomic publication.
 - The minimal `fork_from_prefix` path exists and keeps ordinary resume strict.
   It has CPU fixture validation but is optional follow-up infrastructure, not
-  the v4 main experiment.
-- The current runner does not yet implement the complete v4 snapshot set,
-  multi-depth feature taps, update-dynamics logging, or v4 run manifests.
+  the v5 main experiment.
+- The current runner does not yet implement the complete v5 snapshot set,
+  multi-depth feature taps, update-dynamics logging, or v5 run manifests.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
 - DenseNet-BC, ConvNeXt-Tiny, and ImageNet-200 are planned only.
 
 The later experiment-design items above remain stage-gated. Missing pre-OOD
-numerical rules and the bounded v4 implementation task, not the historical v2
-radial witness, block fresh v4 training launch.
+numerical rules and the bounded v5 implementation task, not the historical v2
+radial witness, block fresh v5 training launch.
 
-## Explicitly not run at the current v4 status boundary
+## Explicitly not run at the current v5 status boundary
 
-- no v4 GPU work, server training, checkpoint inference, feature
+- no v5 GPU work, server training, checkpoint inference, feature
   re-extraction, or new protected dataset traversal;
 - no successful 720/360 evidence publication, candidate ranking, focal
   selection, or preconfirmation freeze under the historical v2 gate;
-- no from-scratch v4 paired trajectory, fresh seed, or CIFAR-100 experiment;
+- no from-scratch v5 paired trajectory, fresh seed, or CIFAR-100 experiment;
 - no Hugging Face upload, source mutation, overwrite, or deletion;
 - no comparable-ID, causal decay-coupling, or replication conclusion.
 

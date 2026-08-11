@@ -225,7 +225,7 @@ base detector and must not overwrite the raw result.
 
 The score is ID-like. This is the only **Metric Contract v1.2** kNN definition;
 a raw/L2-off kNN variant is forbidden within v1.2. Research Contract v2 first
-added a separately versioned `detector/knn_raw_k50`; Card 13 v4 retains that
+added a separately versioned `detector/knn_raw_k50`; Card 13 v5 retains that
 control without altering this historical key, formula, or output. Evidence:
 `evidence/B3_knn-ood.md`, audited commit
 `2afb2bbed60a8d69384dc9b28e5637711345222b`. The project follows the official
@@ -309,7 +309,7 @@ TwoNN, and spectrum diagnostics are defined by card 11. Their v1.2 code and
 protected results exist under Issues #53 and #57; reporting tiers and claim
 boundaries remain those frozen by card 11 and the Issue #59 analysis.
 
-Research Contract v4 defines the active focal and control roles in
-[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md).
+Research Contract v5 defines the active focal and control roles in
+[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md).
 It does not relabel historical v1.2 outputs. Card 12 preserves the historical
 v2 panel decision. Full DDU/SN training remains unimplemented and unvalidated.

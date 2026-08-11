@@ -11,12 +11,13 @@ optimizer / training rule
 → ID/OOD reliability
 ```
 
-The active v4 question is how a controlled training-rule difference creates a
+The active v5 question is how a controlled training-rule difference creates a
 detector-relevant geometry. Coupled, decoupled, and zero-decay siblings start
 from the same initialization and data stream at epoch 0. Their paired update
 and representation trajectories are traced through a known Mahalanobis
-additive component, a quadratic size/stretch and spectrum/allocation channel,
-and exact tie-aware ID--OOD pair transitions. Comparable ID utility controls
+additive component, affine-gauge and non-affine residual diagnostics, a
+quadratic size/stretch and spectrum/allocation channel, and exact tie-aware
+ID--OOD pair gain, loss, and churn. Comparable ID utility controls
 interpretation; it is not the headline novelty or a checkpoint-matching rule.
 
 ## Repository as the source of truth
@@ -100,7 +101,7 @@ Documented and implemented result boundaries:
 
 Active but not yet executed scientific confirmation:
 
-- [`reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md`](reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md)
+- [`reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md`](reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md)
   is the active authority; Card 12 and its failed radial gate are historical;
 - known MD--Marginal--RMD and size--stretch decompositions are measurement
   tools, not novelty claims;
@@ -111,14 +112,15 @@ Active but not yet executed scientific confirmation:
   and selected checkpoints/depth taps trace formation over time and depth;
 - ResNet-18/CIFAR-10, ResNet-18/CIFAR-100, DenseNet-BC/CIFAR-10, and
   ConvNeXt-Tiny/ImageNet-200 are the ordered replication/scale plan;
-- ID/practical margins, onset thresholds, power justification, and inferential
-  success rules still require a pre-protected-OOD addendum;
+- ID/practical margins, standardized-divergence and functional-trajectory
+  rules, power justification, multiplicity, and inferential success rules
+  still require a pre-protected-OOD addendum;
 - completed v1.2 artifacts remain discovery inputs and are never relabeled
   causal confirmation.
 
 Not part of the validated foundation unless added by a later bounded task:
 
-- a validated production v4 from-scratch trajectory or paired causal
+- a validated production v5 from-scratch trajectory or paired causal
   optimizer-rule conclusion;
 - the CIFAR-100 dataset/OOD contract and ResNet-18 replication result;
 - a dataset-pooled geometry-OOD association;
@@ -152,9 +154,10 @@ Not part of the validated foundation unless added by a later bounded task:
   reporting tiers, artifact keys, degeneracy states, and implementation tests.
 - `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`:
   historical radial mechanism gate and its original shared-prefix plan.
-- `docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md`:
-  active paired-trajectory design, time/depth geometry, additive and pair
-  attribution, detector roles, claim gates, and replication/scale protocol.
+- `docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md`:
+  active theory-constrained paired-trajectory design, time/depth geometry,
+  affine-residual and update-direction diagnostics, additive component and
+  pair-churn accounting, claim gates, and replication/scale protocol.
 - `docs/paper/intervention_supporting_theory_outline.md`: manuscript section,
   figure, table, and conditional-results-language skeleton governed by Card 13.
 - `docs/history/local_research_draft_manifest.md`: metadata-only inventory of

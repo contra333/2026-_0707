@@ -42,15 +42,15 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
 | `vit_small` | `src/oge/models/vit.py` | `ViTSmall` | Modern transformer research backbone | Planned | Dosovitskiy et al., An Image is Worth 16x16 Words; Lee, Lee, and Song, Vision Transformer for Small-Size Datasets |
 
-## Active Research Contract v4 lineup (2026-08-11)
+## Active Research Contract v5 lineup (2026-08-11)
 
-[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md)
+[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md)
 supersedes the v2/v3 main-experiment plan for the active paper. The table is
 an execution plan, not a claim that planned model/data paths exist.
 
 | Order | Role | Backbone | Dataset | Implementation status | Experiment status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Main | `wrn28_10` | CIFAR-10 | penultimate endpoint implemented; v4 multi-depth taps pending | historical discovery complete; fresh from-scratch trajectories not run |
+| 1 | Main | `wrn28_10` | CIFAR-10 | penultimate endpoint implemented; v5 multi-depth taps pending | historical discovery complete; fresh from-scratch trajectories not run |
 | 2 | Architecture replication | `resnet18` | CIFAR-10 | implemented | not run |
 | 3 | Dataset/class-count replication | `resnet18` | CIFAR-100 | model implemented; data contract pending | not run |
 | 4 | Dense-connectivity appendix | `densenet_bc_100_k12` | CIFAR-10 | planned | not run |
@@ -61,7 +61,7 @@ ImageNet-1K pretrained weights are forbidden for the ImageNet-200 arm. Exact
 architecture and data semantics must be added by bounded implementation tasks
 before either planned row becomes executable.
 
-For the v4 WRN depth scan, the planned analysis taps are residual-group
+For the v5 WRN depth scan, the planned analysis taps are residual-group
 `stage1`, `stage2`, raw `stage3` before final BN/ReLU, and `penultimate` after
 final BN/ReLU plus global average pooling and before the classifier. These taps
 add no learned projection. The existing public model contract exposes only
@@ -95,7 +95,7 @@ protocol v1.2; literature anchors are in
 This is preserved planning provenance. Rows marked "planned" have no
 implementation. The WRN-28-10/CIFAR-10 v1.2 grid, role replication, protected
 evaluation, and descriptive analysis later completed; the other lineup
-experiments below were not executed. Active v4 priority is defined above.
+experiments below were not executed. Active v5 priority is defined above.
 
 | Priority | Backbone | Dataset | Variation axis covered | Protocol level | Status |
 | --- | --- | --- | --- | --- | --- |
