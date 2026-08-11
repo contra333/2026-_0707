@@ -246,7 +246,8 @@ tune on fresh OOD outcomes:
 - family-specific nominal decay dose or dose set;
 - ID accuracy equivalence margin and NLL/ECE guardrails;
 - per-outcome practical OOD margins;
-- fresh prefix count/power rule and multiplicity handling;
+- power justification and multiplicity handling for the frozen 5/3 prefix
+  counts;
 - main go/no-go criterion and component-concentration rule.
 
 Before their execution, CIFAR-100 and ImageNet-200 membership/preprocessing/OOD
@@ -271,14 +272,12 @@ and replication success rules must be frozen separately.
 The later experiment-design items above remain stage-gated. Missing numerical
 values, not the historical v2 radial witness, block fresh v3 training launch.
 
-## Explicitly not run after the Stage 2 execution
+## Explicitly not run at the current v3 status boundary
 
-- no GPU work, server training, checkpoint inference, feature re-extraction,
-  or new protected dataset traversal;
-- no production v3 30-bundle component-attribution output at this status
-  boundary;
+- no v3 GPU work, server training, checkpoint inference, feature
+  re-extraction, or new protected dataset traversal;
 - no successful 720/360 evidence publication, candidate ranking, focal
-  selection, or preconfirmation freeze;
+  selection, or preconfirmation freeze under the historical v2 gate;
 - no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
 - no Hugging Face upload, source mutation, overwrite, or deletion;
 - no comparable-ID, causal decay-coupling, or replication conclusion.
