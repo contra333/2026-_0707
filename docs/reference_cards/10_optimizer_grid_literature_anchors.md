@@ -195,10 +195,8 @@ ladder or cost a 13th cell.
 ## Historical v1.2 architecture-lineup anchors
 
 This section preserves the 2026-07-23 planning rationale. It is not the active
-paper lineup. Research Contract v2 later fixed WRN-28-10/CIFAR-10 as main and
-ResNet-18/CIFAR-100 as replication; Card 13 v5 now owns the active ordered
-lineup in
-[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md).
+paper lineup; current experiment order lives only in
+[`13_active_paper_protocol.md`](13_active_paper_protocol.md).
 
 | Lineup row | Anchor and comparability | Sources |
 | --- | --- | --- |
@@ -246,7 +244,7 @@ Historical positioning summary: the optimizer-to-geometry link and the
 optimizer-to-OOD-sensitivity link each existed separately in this pass. The
 former wording about an “L2-normalization repair” is no longer an active
 novelty claim: Mahalanobis++ and later geometry-based Mahalanobis work occupy
-that ground. Card 13 v5 owns the current gap statement: from-scratch paired
+that ground. The active paper protocol owns the current gap statement: from-scratch paired
 coupling trajectories, update-to-geometry-to-score formation, exact
 same-image pair attribution, selective channel attenuation, and ordered
 replication.

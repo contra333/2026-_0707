@@ -19,36 +19,6 @@ sources:
     url: https://docs.pytorch.org/docs/stable/generated/torch.nn.Module.html
     accessed: 2026-07-13
     role: model device transfer before optimizer construction
-  local_optimizer_reference_card:
-    path: docs/reference_cards/01_optimizers.md
-    role: optimizer_implementation_reference
-  local_architecture_reference_card:
-    path: docs/reference_cards/02_architectures.md
-    role: architecture_implementation_reference
-  local_feature_ood_detector_reference_card:
-    path: docs/reference_cards/06_feature_ood_detectors.md
-    role: feature-detector semantics reference; Metric Contract v1.2 implementation and evaluation complete, future DDU/SN variants still pending
-  local_optimizer_hpo_protocol_reference_card:
-    path: docs/reference_cards/07_optimizer_comparison_hpo_protocol.md
-    role: completed WRN-28-10 protocol-v1.2 HPO, role-freeze, replication, and pair-control authority
-  local_raw_feature_artifact_reference_card:
-    path: docs/reference_cards/08_raw_feature_artifact_contract.md
-    role: raw checkpoint-feature artifact, provenance, checksum, and protected-split reference
-  local_core_representation_metrics_reference_card:
-    path: docs/reference_cards/09_core_representation_metrics.md
-    role: frozen Metric Contract v1.2 representation and detector reference; implementation and protected evaluation complete
-  local_metric_contract_v1_2_reference_card:
-    path: docs/reference_cards/11_metric_contract_v1_2.md
-    role: authoritative completed WRN-28-10/CIFAR-10 v1.2 metric dictionary, implementation, artifact naming, and validation oracle
-  local_fixed_readout_intervention_v2_reference_card:
-    path: docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md
-    role: historical radial-mechanism and shared-prefix planning contract; its failed Stage-2 execution remains immutable
-  local_theory_constrained_paired_trajectory_v5_reference_card:
-    path: docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md
-    role: active theory-constrained from-scratch paired-trajectory, geometry, component/pair-churn, claim-gate, and replication protocol
-  local_optimizer_grid_literature_anchors_reference_card:
-    path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
-    role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
   cifar10_official_dataset_page:
     title: CIFAR-10 and CIFAR-100 datasets
     authors: Krizhevsky, Nair, and Hinton

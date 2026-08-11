@@ -123,7 +123,7 @@ Every referenced path existed, no duplicate sample IDs were found, ID labels
 were within `[0, 9]`, and every OOD label was `-1`. A bounded random WRN-28-10
 CUDA MSP vertical slice completed successfully. Exact archive and imglist
 checksums, runtime versions, commands, and artifact locations are recorded in
-the [Issue 6 department-server validation report](../validation/issue6_openood_cifar10_server_validation.md).
+the [Issue 6 department-server validation report](../history/validation/issue6_openood_cifar10_server_validation.md).
 
 ## Preprocessing
 
@@ -258,7 +258,7 @@ Issue #37 then verified the committed project holdout byte-for-byte, checked
 all 45k/5k/10k image paths, and passed bounded loaders on `curie`,
 `precision_medicine`, and `lise` at clean execution SHA
 `e9bfde43bb40f3ea2a6a11da9da86178049ecc40`. See the
-[Issue 37 practical runtime report](../validation/issue37_practical_runtime_status.md).
+[Issue 37 practical runtime report](../history/validation/issue37_practical_runtime_status.md).
 This is pre-execution readiness evidence, not production authorization; the
 later execution Issue must recheck that the final clean SHA and runtime data
 roots still match before launching a production cell.

@@ -14,16 +14,13 @@ whole-manifest hashes.
 
 The `seed0_20260728` v1.2 production grid completed all 36 assigned cells and
 its metadata-integrity validation and C1-C4 role freeze are recorded in
-`docs/validation/seed0_20260728_grid_role_freeze.md`. Local tests and server
+[`../history/validation/seed0_20260728_grid_role_freeze.md`](../history/validation/seed0_20260728_grid_role_freeze.md). Local tests and server
 smoke runs remain infrastructure evidence rather than research results.
 
-Research Contract v5 treats this completed population as immutable
-descriptive/discovery evidence. Its static grid and pair controls are not the
-fresh from-scratch paired-trajectory confirmation. The active optimizer roles,
-factorial design, and confirmation/replication rules are defined separately in
-[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md);
-they do not change any v1.2 row, role, seed, or result. Card 12 preserves the
-historical v2 intervention plan and failed gate.
+This completed population is immutable descriptive/discovery evidence, not a
+fresh paired-trajectory confirmation. Current paper experiments are governed
+only by [`13_active_paper_protocol.md`](13_active_paper_protocol.md); they do
+not change any v1.2 row, role, seed, or result.
 
 ## Superseded-study decision log
 
@@ -283,4 +280,4 @@ them with the 12 reused seed-0 records as 42 unique `(config_hash, seed)`
 identities, retains all per-seed values and sample SDs, and reports paired
 differences as decoupled minus coupled. The completion evidence and
 interpretation boundary are recorded in
-`docs/validation/issue49_followup_execution.md`.
+[`../history/validation/issue49_followup_execution.md`](../history/validation/issue49_followup_execution.md).

@@ -1,5 +1,10 @@
 # Where the Gap Lives: manuscript outline
 
+This is the human-readable manuscript narrative. Exact run counts, estimands,
+claim gates, and execution rules are governed only by
+[`../reference_cards/13_active_paper_protocol.md`](../reference_cards/13_active_paper_protocol.md).
+Changing this outline alone does not change the executable protocol.
+
 ## One-sentence paper
 
 Starting from the same initialization, we change decay coupling from epoch 0

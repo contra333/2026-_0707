@@ -9,3 +9,4 @@ build/
 .DS_Store
 env_check_*.txt
 server_logs/
+artifacts/
