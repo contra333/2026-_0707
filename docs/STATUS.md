@@ -14,11 +14,12 @@ analysis.
 
 Issue #63 implements the v3 foundation: a focused read-only 30-bundle
 component-attribution path and a separate `fork_from_prefix` operation. The
-implementation passed 56 focused tests and 471/472 tests in a remote full
-suite. The sole full-suite failure was an existing provenance test running in
-a tar snapshot without `.git`; that exact test passed after the temporary
-snapshot was initialized as a Git repository. The production 30-bundle v3
-analysis has not yet been run at this status boundary.
+implementation passed the complete 472-test suite on Curie in a temporary Git
+snapshot. The production historical-discovery analysis also completed with
+`PASS`: 30 bundles, 360 bundle/component rows, and 108 prespecified
+descriptive-pair rows. Its artifacts and interpretation boundary are recorded
+in
+[`validation/issue63_component_attribution_and_fork_foundation.md`](validation/issue63_component_attribution_and_fork_foundation.md).
 
 The **Stage 2 existing-artifact mechanism gate** was executed at tooling SHA
 `b433c13ad6ec736fcfbca4c6c7ff0d876ddf0a03`. Its 30-bundle, 210-variant
@@ -129,6 +130,34 @@ remains reserved for an unexecuted spectral-normalization training ablation.
 
 The manuscript skeleton is
 [`paper/intervention_supporting_theory_outline.md`](paper/intervention_supporting_theory_outline.md).
+
+## V3 historical discovery result: `PASS`
+
+The v3 analysis read only the exact checksum-allowlisted score arrays already
+present in the 19.6 GB Stage-2 reuse tree. It did not reevaluate a checkpoint,
+traverse a protected dataset, select a candidate, or mutate the v2 failure.
+All 30 `last.pt` bundles and six OOD datasets were analyzed for raw and L2
+MD--Marginal--RMD scores. Exact score reconstruction, pair-margin
+reconstruction, tie-aware pair counts, and symmetric two-component AUROC
+accounting passed.
+
+Across the six OOD datasets, the mean historical cross-model AUROC range was
+0.418 for raw MD, 0.449 for raw Marginal, and 0.050 for raw RMD. For L2 scores
+the corresponding ranges were 0.117, 0.181, and 0.053. Among the 54
+prespecified descriptive pair rows per transform, the absolute Marginal
+attribution exceeded the absolute RMD attribution in 43 rows for raw and 43
+rows for L2. This is discovery evidence that the planned component question is
+worth confirming; it is not evidence that decay coupling caused the gap.
+
+The immutable result directory is outside the Git worktree:
+
+```text
+/home/contra333/2026여름방학실험코드/fixed_readout_component_attribution_v3/28ba5a067c55ba1f7a57d8265f55b57057d54762
+```
+
+Fresh shared-prefix training, ID-equivalence classification, protected-OOD
+confirmation, size--stretch branch attribution, and every architecture,
+dataset, and scale replication remain `NOT_RUN`.
 
 ## Historical Research Contract v2 decisions
 
