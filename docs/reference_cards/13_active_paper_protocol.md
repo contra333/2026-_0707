@@ -5,13 +5,13 @@
 Protocol identifier:
 
 ```text
-fixed_readout_theory_constrained_paired_trajectory_v5
+fixed_readout_theory_constrained_paired_trajectory_v6
 ```
 
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v5`, and its fresh
+Card 13 filename. The current design version is `v6`, and its fresh
 experiments are `NOT_RUN`.
 
 This revision does not change completed evidence:
@@ -23,7 +23,7 @@ This revision does not change completed evidence:
   only;
 - the validated `fork_from_prefix` runtime remains available, but it is an
   optional follow-up tool rather than the main paper intervention;
-- no fresh v5 trajectory, protected-OOD confirmation, or replication has run.
+- no fresh v6 trajectory, protected-OOD confirmation, or replication has run.
 
 The known MD--Marginal--RMD relation, L2 feature normalization, RMD, and the
 size--stretch factorization are measurement tools. They are not claimed as
@@ -90,7 +90,7 @@ different practical question and is not part of the causal main contrast.
 
 Coupled Adam does not expose a unique additive `decay update`: the L2 term
 enters first and second moments and the coordinate-wise denominator. Therefore
-v5 does not place Adam and AdamW on a purported common realized-decay norm.
+v6 does not place Adam and AdamW on a purported common realized-decay norm.
 It uses an exact same-state, same-gradient one-step counterfactual operator
 difference, defined in Section 6.1, and reports its radial and tangential
 components. At each LR, the common zero reference plus nominal WD values
@@ -198,7 +198,7 @@ not a replacement for epoch 200. `best<=200` and `best<=300` are reported as
 separate selection windows.
 
 The update policies differ by construction at the first nonzero-decay step.
-Consequently, v5 does not use “update onset precedes geometry onset” as a
+Consequently, v6 does not use “update onset precedes geometry onset” as a
 mechanism gate. For every prespecified quantity, report the seed-level paired
 divergence curve, a standardized effect against same-policy natural training
 variability, the minimum detectable effect, an early divergence slope, and a
@@ -275,6 +275,36 @@ The hybrids are calculation devices, not trained detectors. Exactness holds
 inside this declared two-player replacement game; it is not claimed to be a
 unique physical or causal mediation decomposition.
 
+ID-side and OOD-side score motion receive a separate exact accounting. Let
+`a_00` use decoupled ID and OOD scores, `a_11` use coupled ID and OOD scores,
+and define the two hybrids:
+
+```text
+a_10 = a(s_C(i) - s_D(o))
+a_01 = a(s_D(i) - s_C(o))
+phi_ID  = 1/2 [(a_10-a_00) + (a_11-a_01)]
+phi_OOD = 1/2 [(a_01-a_00) + (a_11-a_10)]
+phi_ID + phi_OOD = a_11-a_00.
+```
+
+Their averages reconstruct `DeltaAUROC` exactly. The four hybrid transitions
+also show whether replacing only the ID or only the OOD side crosses the
+ordering boundary. Because threshold crossing is nonlinear, this is a declared
+counterfactual/Shapley accounting, not a unique causal decomposition of churn.
+
+To make churn interpretable, compare the same-seed policy contrast with
+same-policy natural training variability:
+
+```text
+R_churn = median_s Churn(C_s,D_s)
+          / median_{p in {C,D}, s<t} Churn(p_s,p_t).
+```
+
+Report numerator and denominator alongside the ratio for every OOD dataset;
+do not call the denominator a null or treat its overlapping seed pairs as
+independent replicates. If the denominator is below the frozen numerical or
+practical floor, report the ratio as undefined rather than inflating it.
+
 ## 6. How training recipe is linked to geometry and ordering
 
 The analysis follows the same fixed probe images through four levels. A scalar
@@ -293,11 +323,14 @@ At selected steps and for every depth block, record:
 - BatchNorm scale/shift and running-variance summaries, pre/post-normalization
   activation scale, and residual-branch versus shortcut norm ratios.
 
-At selected checkpoints, copy one model state, optimizer state, and minibatch
-loss gradient. For each optimizer family calculate, but apply neither, the
-exact update operator with the declared WD and the same operator with WD zero.
-Compare these counterfactual differences across coupled and decoupled policies
-and decompose them into radial and tangential components. This is a
+At selected checkpoints, copy model state, optimizer state, and one fixed
+minibatch loss gradient. Perform the audit at two kinds of state: the
+zero-decay sibling, which supplies a decay-free instantaneous reference, and
+each nonzero sibling, which reveals the state-conditioned marginal effect
+after decay history has accumulated. At the zero state, calculate coupled,
+decoupled, and zero-WD candidate operators. At each nonzero state, calculate
+the actual operator and its zero-WD counterfactual. Apply none of them.
+Decompose the differences into radial and tangential components. This is a
 manipulation check, not a separate long-running branch experiment and not a
 claim that coupled Adam has a uniquely separable physical decay vector.
 
@@ -311,6 +344,23 @@ residual/projection additions, the final classifier, and training dynamics
 break the blanket scale-invariance claim. A controlled small positive weight
 rescaling audit measures how closely each block satisfies the local
 approximation.
+
+WRN-28-10 supplies a prespecified parameter-location stratification. `conv0`
+and the 12 residual-block `conv1` weights are **rescaling-eligible** because
+their outputs next enter BatchNorm. The 12 `conv2` weights, three projection
+shortcuts, and final classifier are **scale-breaking** because their outputs
+enter an unnormalized residual addition or logits. This is an architectural
+classification, not an assertion of exact invariance: BatchNorm epsilon,
+running statistics, residual context, and later optimization can break the
+idealization. The small positive-rescaling audit quantifies the approximation.
+
+If the primary anchor shows a practical policy effect, a prespecified
+secondary parameter-location follow-up may train Adam and AdamW with decay
+restricted to each group (two groups x two policies x three shared seeds; the
+existing zero sibling is reused). It uses only the focal endpoint analysis.
+This tests where the coupling contrast is carried; it must not be described as
+a pure separation of “effective learning rate” and “functional regularization,”
+because both mechanisms can coexist in either arm.
 
 ### 6.2 Level B: representation geometry
 
@@ -337,10 +387,16 @@ Mahalanobis distances and pair orderings are identical when the covariance
 estimator transforms equivariantly. Global scale, rotation, or fixed channel
 rescaling is therefore an affine-gauge negative control, not an independent
 raw-Mahalanobis carrier. Fit the branch alignment using ID train only and write
-`z_C(x)=A z_D(x)+b+e(x)`; evaluate the residual `e(x)` on held-out ID and OOD
-probes together with class-mean and precision residuals. Pseudoinverse, ridge,
-rank deficiency, and finite-precision conditions must be recorded rather than
-silently extending the full-rank identity.
+`z_C(x)=A z_D(x)+b+e(x)`; evaluate the residual `e(x)` separately on held-out
+ID and every OOD dataset, together with class-mean and precision residuals.
+Held-out ID test residual is the generalization floor for the ID-trained affine
+fit. Report raw and feature-scale-normalized residuals plus each OOD dataset's
+excess over that floor. Pseudoinverse, ridge, rank deficiency, and
+finite-precision conditions must be recorded rather than silently extending
+the full-rank identity. If both ID and OOD residuals stay within the certified
+affine/numerical bound while a raw-MD gap exceeds its propagated score bound,
+treat that as an implementation or estimator-contract failure, not a
+scientific result.
 
 ### 6.3 Level C: Mahalanobis components and quadratic geometry
 
@@ -379,6 +435,12 @@ change from RMD and Marginal changes, then connect it to the transition table.
 Report which component carries correct-to-incorrect and
 incorrect-to-correct transitions, and report Gain, Loss, PairOrderChurn, and
 DeltaAUROC rather than only aggregate AUROC correlation.
+
+Also report the exact identity
+`Delta m(i,o)=Delta s_ID(i)-Delta s_OOD(o)` and the four ID/OOD replacement
+hybrids from Section 5. This determines whether ordering changes are exposed
+mainly because ID scores move, OOD scores move, or both are required to cross
+the boundary, while preserving the stated non-unique mediation boundary.
 
 For metric `G`, define the paired trajectory contrast
 `Delta G(t,l)=G_C(t,l)-G_D(t,l)`. Its curve, standardized effect, uncertainty,
@@ -445,6 +507,13 @@ residual, class-prototype residual, and precision residual; its terms and bound
 must reconstruct or upper-bound the observed distance change under the stated
 norm convention.
 
+The sharper empirical prediction is **differential deformation**. If the
+ID-trained affine map generalizes to held-out ID but fails on OOD, the fitted
+Gaussian geometry and ID query scores should remain near their affine floor
+while OOD queries expose the branch difference. If residuals are large on both
+sides, the evidence supports global non-affine deformation but not this cleaner
+query-side mechanism.
+
 ### 7.2 Local update-direction proposition
 
 For a locally positive-scale-invariant parameter block, the explicit AdamW
@@ -454,6 +523,11 @@ of `P_t w`. The exact implementation test is the same-state, same-gradient
 counterfactual operator difference from Section 6.1. The paper does not claim
 that all WRN trunk weights are scale-invariant or that every decay effect is a
 pure optimization-path effect.
+
+The architecture-defined rescaling-eligible/scale-breaking split in Section
+6.1 turns this proposition into a location-specific prediction. Its optional
+training ablation localizes the carrier but does not label either arm a pure
+mechanism.
 
 ### 7.3 RMD low-rank curvature proposition
 
@@ -476,10 +550,23 @@ s_RMD(z) = -z^T H z + max_c(a_c^T z + b_c)
 Thus RMD is a class-dependent affine envelope plus a shared low-rank quadratic
 correction. This complements the prior term-wise size--stretch view; it does
 not create a single shared RMD covariance or solve that distinct problem. Test
-the numerical rank, curvature mass, pair displacement allocation, and the
-quadratic-versus-affine contribution. CIFAR-10 (`K=10`) and CIFAR-100
-(`K=100`) provide a prespecified class-count prediction: the rank bound grows
-from 9 to 99, while effect magnitude remains an empirical allocation question.
+the numerical rank, positive-semidefinite residual, curvature mass, centered
+query allocation in `range(H)`, and the quadratic-versus-affine contribution.
+CIFAR-10 (`K=10`), CIFAR-100 (`K=100`), and ImageNet-200 (`K=200`) form a
+prespecified capacity ladder with bounds 9, 99, and 199. Interpret this
+relative to feature dimension using `min(K-1,d)/d` and measured effective
+curvature rank/mass; `199/768` is not “low-rank” in the same practical sense
+as `9/640`. The theorem predicts the bound, not a monotone OOD effect. Effect
+magnitude and stability remain empirical spectrum/allocation questions.
+
+Before fresh GPU training, use the existing verified 30-bundle raw-feature
+cache for a read-only historical preflight. Freeze the numerical-rank rule
+before inspecting its output, then measure the covariance identity residual,
+PSD/rank behavior of `H`, curvature mass, ID/OOD allocation, and exact
+quadratic-versus-affine RMD reconstruction. This mixed-recipe population is
+noncausal. The preflight gates whether low-rank allocation is promoted as a
+central mechanism prediction; it does **not** cancel CIFAR-100 replication,
+which remains independently valuable for dataset/class-count validity.
 
 ### 7.4 Pair-order balance proposition
 
@@ -487,6 +574,9 @@ The Gain/Loss/PairOrderChurn identities in Section 5 are exact and explain how
 large opposing ordering changes can be hidden by a small net AUROC difference.
 They constrain reporting: pair churn cannot be replaced by a thresholded
 deployment metric or treated as millions of independent replicates.
+The policy-to-natural-variability churn ratio supplies scale, while the
+ID/OOD hybrid accounting localizes signed score motion. Neither creates a
+unique causal partition of the nonlinear churn indicator.
 
 The paper also derives the exact MD--Marginal--RMD score and pair-margin
 identities, the symmetric size--stretch branch-change identity, and the
@@ -508,12 +598,15 @@ Primary outcome family:
 - WRN-28-10/CIFAR-10 primary anchor;
 - epoch 200, penultimate endpoint, Mahalanobis-Raw;
 - paired `DeltaAUROC` and `PairOrderChurn`;
+- policy-to-natural-variability `R_churn` as a descriptive standardized effect;
 - prespecified near/far summaries with per-seed effects.
 
 Primary mechanism family:
 
 - Marginal/RMD pair attribution;
-- affine-residual deformation with global-scale negative control;
+- held-out-ID versus per-OOD differential affine residual, with global-scale
+  negative control;
+- ID/OOD score-side replacement accounting;
 - sample/class-conditioned radial heterogeneity;
 - counterfactual tangential update;
 - channel-matched attenuation.
@@ -571,6 +664,11 @@ the ImageNet-200 ID subset. The planned OpenOOD v1.5 ImageNet-200 roles are:
 ConvNeXt is external-validity evidence, not a clean BN-versus-LN mechanism
 ablation. If ID equivalence fails at scale, report a Pareto result.
 
+Across the three class-count regimes, report the theoretical rank bound,
+feature dimension, normalized bound, measured numerical/effective rank,
+curvature mass, and ID/OOD allocation. Do not infer a monotone detector effect
+from `K` alone.
+
 ## 11. Historical discovery and optional shared-prefix follow-up
 
 The completed 30-model v3 analysis uses 30 frozen `last.pt` bundles and six
@@ -578,6 +676,12 @@ OOD datasets. It is valid for locating descriptive MD/Marginal/RMD variation,
 but optimizer, LR, and WD are mixed in that population. It cannot establish
 that decay coupling caused the gap. Nearest-accuracy matching is excluded from
 primary analysis and, if shown, is labeled selection-biased sensitivity.
+
+The same immutable cache supports the read-only RMD curvature preflight in
+Section 7.3 without new training or protected-data traversal. Its output must
+use a fresh external artifact directory and a compact committed summary only;
+do not recreate the retired Stage-2 gate, checksum catalog, or large generated
+tables in Git.
 
 The existing `fork_from_prefix` implementation may be used only as an optional
 follow-up if the from-scratch divergence curves produce a quantitative
@@ -590,7 +694,7 @@ from this optional fork operation.
 
 ## 12. Required artifacts and validation
 
-Every v5 result must identify seed, initialization, config, branch policy,
+Every v6 result must identify seed, initialization, config, branch policy,
 checkpoint epoch, depth tap, probe-image membership, Gaussian-fit population,
 and source code/config hashes. Required records include:
 
@@ -599,10 +703,13 @@ and source code/config hashes. Required records include:
 - score and pair-margin reconstruction residuals;
 - tie-aware pair-transition counts and component Shapley accounting;
 - Gain, Loss, PairOrderChurn, DeltaAUROC, and operating-point disagreement;
+- same-policy churn reference, `R_churn`, and ID/OOD replacement hybrids;
 - quadratic size/stretch and symmetric branch contributions;
 - spectrum/allocation spectral-band summaries;
-- exact counterfactual update differences and radial/tangential projections;
-- affine alignment, held-out residual, prototype residual, and precision residual;
+- exact zero-state and history-conditioned counterfactual update differences
+  and radial/tangential projections;
+- affine alignment, held-out-ID and per-OOD residuals, prototype residual, and
+  precision residual;
 - update-dynamics and standardized geometry trajectories;
 - numerical condition, ridge, failure, and leakage status.
 
@@ -611,6 +718,7 @@ Required checks include:
 - exact identity/reconstruction tests with scale-aware tolerances;
 - full-rank affine-gauge invariance plus deliberate rank/ridge boundary tests;
 - brute-force tie-aware Gain/Loss/PairOrderChurn/AUROC balance tests;
+- small-array ID/OOD replacement-Shapley reconstruction tests;
 - tie-aware AUROC parity that does not count a broken numerical tie as a
   scientific rank error;
 - ridge/full-rank-only Woodbury rank tests;
@@ -622,7 +730,7 @@ Required checks include:
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository has part of this infrastructure, but v5 training,
+The current repository has part of this infrastructure, but v6 training,
 multi-depth extraction, expanded trajectory snapshots, update logging, and
 scale regimes are `NOT_RUN`/not yet implemented until separately authorized.
 
@@ -636,6 +744,8 @@ Before protected OOD execution, freeze in a versioned addendum:
   five/three seed allocation;
 - standardized divergence references, functional trajectory uncertainty,
   detectability summaries, multiplicity handling, and spectral-band boundaries;
+- historical-preflight numerical-rank rule, propagated affine-score bound,
+  churn denominator floor, and ID/OOD residual normalization;
 - exact protected OOD evaluation schedule and go/no-go rule.
 
 Null and adverse results remain reportable. Do not rescue them by adding a

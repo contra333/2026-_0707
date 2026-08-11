@@ -106,14 +106,23 @@ raw MD score and pair order are unchanged. Therefore global scale, rotation,
 and fixed channel rescaling are negative controls. Fit an ID-only branch
 alignment `z_C=A z_D+b+e`; attribute the remaining quadratic difference to
 same-image residual `e`, class-prototype residual, and precision residual.
-Pseudoinverse/ridge/rank conditions are explicit.
+Fit on ID train, then report held-out ID and each OOD residual separately. The
+held-out ID residual is the floor: the cleanest mechanism is an affine map that
+still explains ID but breaks on OOD. If both sides are within the certified
+affine bound while raw MD changes materially, the implementation or estimator
+contract is wrong. Pseudoinverse/ridge/rank conditions are explicit.
 
 **Proposition 2: local update direction.** In a locally positive-scale-
 invariant parameter block, explicit decoupled decay is radial. Under a frozen
 diagonal preconditioner, coupled L2 can acquire a tangential component unless
 `P_t w` is parallel to `w`. Test the operational prediction with an exact
 same-state, same-gradient WD-versus-zero counterfactual update. Do not extend
-the premise to the whole residual WRN trunk.
+the premise to the whole residual WRN trunk. Run the audit both at the
+zero-decay state and at states with accumulated decay history. WRN's `conv0`
+and block `conv1` weights are rescaling-eligible; `conv2`, projection
+shortcuts, and the classifier are scale-breaking. An optional anchor-only
+parameter-location ablation asks where the effect is carried, but does not
+pretend these are pure “effective-LR” and “functional” mechanisms.
 
 **Proposition 3: RMD low-rank curvature.** With class-frequency-weighted
 between-class covariance and full-rank inverses,
@@ -127,9 +136,14 @@ s_RMD(z) = -z^T H z + max_c(a_c^T z + b_c).
 ```
 
 RMD is an affine envelope plus a shared low-rank quadratic correction. This
-complements, rather than replaces, the prior term-wise RMD analysis. It yields
-a class-count prediction: the bound grows from 9 on CIFAR-10 to 99 on
-CIFAR-100, while curvature mass and sample allocation remain empirical.
+complements, rather than replaces, the prior term-wise RMD analysis. The rank
+bound forms a three-regime ladder: 9 on CIFAR-10, 99 on CIFAR-100, and 199 on
+ImageNet-200. Compare the bound with feature dimension and measured curvature
+mass/allocation; the theorem does not predict monotone OOD performance. Before
+fresh training, use the existing 30-bundle raw-feature cache to test numerical
+rank, PSD behavior, ID/OOD allocation, and quadratic-versus-affine
+reconstruction. This decides whether low-rank allocation deserves a central
+mechanism claim, not whether CIFAR-100 replication should exist.
 
 **Proposition 4: pair-order balance.** For tie-aware pair correctness
 `a_r in {0,1/2,1}`, define Gain and Loss as the positive directions of
@@ -145,6 +159,13 @@ Without ties, Gain and Loss are recovered exactly from DeltaAUROC and churn.
 This formalizes aggregate cancellation and makes epoch-200 raw-MD
 DeltaAUROC plus PairOrderChurn co-primary outcomes. FPR95 operating-point
 disagreement is secondary.
+
+Give churn an interpretable scale by comparing same-seed coupled/decoupled
+churn with same-policy, different-seed natural variability. Report both values
+and their ratio, without treating overlapping seed pairs as independent.
+Separately use ID-only and OOD-only score-replacement hybrids to reconstruct
+the signed AUROC change. This shows which side moves the ordering, but is not a
+unique causal partition of the nonlinear churn indicator.
 
 Then cite and use the size--stretch factorization:
 
@@ -232,17 +253,20 @@ Follow the same deterministic probe images through four levels:
 
 1. **Update dynamics:** parameter/gradient/update norm, relative update,
    update--weight cosine, radial/tangential update, Adam moments, BN/running
-   statistics, residual/shortcut ratio, and exact one-step counterfactuals.
-2. **Representation geometry:** ID-only affine alignment and held-out residual;
-   global radial scale as a negative control; sample/class-conditioned radial
-   heterogeneity; class-mean geometry; global/within covariance; spectral-band
-   allocation; nearest versus full class-distance profile.
+   statistics, residual/shortcut ratio, and exact one-step counterfactuals at
+   both zero-decay and history-conditioned states.
+2. **Representation geometry:** ID-only affine alignment, with held-out ID as
+   the fit floor and every OOD dataset reported separately; global radial scale
+   as a negative control; sample/class-conditioned radial heterogeneity;
+   class-mean geometry; global/within covariance; spectral-band allocation;
+   nearest versus full class-distance profile.
 3. **Score geometry:** branch-specific ID-only Gaussian fits; raw/L2 MD,
    Marginal, and RMD; exact additive reconstruction; size/stretch and
    spectrum/allocation decomposition.
 4. **OOD ordering:** the same ID--OOD pairs classified as incorrect/tie/correct
    at every checkpoint, with exact component attribution, Gain, Loss,
-   PairOrderChurn, and net DeltaAUROC.
+   PairOrderChurn, net DeltaAUROC, policy/seed churn ratio, and ID/OOD-side
+   replacement accounting.
 
 For every seed and cell report coupled--decoupled, coupled--zero, and
 decoupled--zero. The update policies differ by construction at the first
@@ -272,8 +296,10 @@ but cannot replace, exact accounting and selective attenuation.
 ### Inferential hierarchy
 
 - Primary outcome: WRN anchor, epoch 200, penultimate, raw MD,
-  DeltaAUROC and PairOrderChurn, prespecified near/far summaries.
-- Primary mechanism: Marginal/RMD pair attribution, affine residual,
+  DeltaAUROC and PairOrderChurn, policy/seed churn ratio, prespecified near/far
+  summaries.
+- Primary mechanism: Marginal/RMD pair attribution, differential ID/OOD affine residual,
+  ID/OOD score-side accounting,
   global-scale negative control versus radial heterogeneity, counterfactual
   tangential update, and channel-matched attenuation.
 - Secondary: L2/size--stretch, functional time curves, within-stage depth,
@@ -298,6 +324,9 @@ OOD execution.
 | Sign reversal across cells | recipe interaction, not a universal coupling effect |
 | Geometry changes but OOD does not | detector-relevant versus irrelevant geometry distinction; central claim weakens |
 | Pair identities change but AUROC cancels | decision-level instability hidden by the aggregate |
+| Policy churn is much larger than seed churn | coupling changes pair decisions beyond ordinary training variability |
+| ID residual stays near floor while OOD residual grows | differential query-side deformation; cleanest affine mechanism |
+| ID and OOD residuals both grow | global non-affine deformation; query-side-specific claim is unavailable |
 | Branches are almost entirely related by one affine map | raw-MD gap should be absent; lower the non-affine mechanism claim |
 | Tangential counterfactual update and non-affine residual grow together | supports coupling-to-direction-to-representation pathway |
 | Difference disappears after epoch 200 | finite-time/epoch-budget interaction |
@@ -319,6 +348,9 @@ checkpoints, changing epoch 200, or expanding the detector panel.
 DenseNet and ConvNeXt use three Adam-family fresh seeds and the focal
 Mahalanobis family. ConvNeXt is external-validity evidence, not a clean
 BN-versus-LN mechanism test. ImageNet-1K pretrained weights are forbidden.
+For the class-count ladder, report rank bound divided by feature dimension,
+measured effective rank/mass, and ID/OOD allocation rather than assuming that
+larger `K` must monotonically change detector performance.
 
 ## 8. Discussion and conclusion
 
@@ -335,10 +367,12 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
 1. From-scratch paired design and the update -> geometry -> score -> ordering
    chain, including MD/RMD/Marginal pair-margin decomposition.
 2. Historical component localization across 30 bundles and six OOD datasets.
-3. Fresh trajectories: counterfactual tangential update, non-affine residual,
+3. Fresh trajectories: zero-state/history-conditioned counterfactual update,
+   differential ID/OOD affine residual,
    and representation geometry over time and within-stage depth.
-4. ID utility, DeltaAUROC versus PairOrderChurn, Gain/Loss transitions, and
-   component/size/stretch attribution at the primary endpoint.
+4. ID utility, DeltaAUROC versus PairOrderChurn, policy/seed churn ratio,
+   ID/OOD-side and Gain/Loss transitions, and component/size/stretch
+   attribution at the primary endpoint.
 5. Adam 2 x 2, SGDM control, and WRN--ResNet--DenseNet--ConvNeXt replication
    matrix.
 
