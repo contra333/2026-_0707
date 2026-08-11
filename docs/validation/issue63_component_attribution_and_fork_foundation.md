@@ -6,6 +6,8 @@ Issue: [#63](https://github.com/contra333/2026-_0707/issues/63)
 
 Implementation commit: `28ba5a067c55ba1f7a57d8265f55b57057d54762`
 
+Post-review hardening commit: `7fc32b7398b1206326612c544cfc8e4aacf88a10`
+
 ## Outcome
 
 `PASS` for the Contract-v3 implementation foundation and historical discovery
@@ -22,6 +24,12 @@ The implementation adds two independent paths:
 
 Ordinary same-run resume remains strict and unchanged. The fork path rejects a
 non-zero-decay prefix and an Adam/SGD cross-family branch.
+
+Post-review hardening adds explicit Adam/AdamW transfer coverage for populated
+`step`, `exp_avg`, and `exp_avg_sq` states; source/branch run, canonical config,
+and seed identities in the fork manifest; randomized brute-force pair and
+Shapley oracles; and the interpretation boundaries for computational hybrid
+readouts, nominal decay, and normalized-network effective-step dynamics.
 
 ## Evidence boundary
 
@@ -68,6 +76,10 @@ It contains:
 
 The summary reports `status=PASS`, `selection_performed=false`, and
 `fresh_shared_prefix_confirmation=NOT_RUN`. All four payload checksums passed.
+The historical cache CLI publishes score/component attribution only. The
+size--stretch API and reconstruction oracle are implemented, but actual
+size--stretch branch artifacts remain `NOT_RUN` until fresh forked quadratic
+inputs exist.
 
 ## Historical discovery result
 
@@ -132,10 +144,45 @@ git archive HEAD | ssh curie 'issue63_dir=$(mktemp -d /tmp/oge_issue63_validatio
 
 Result: `472 passed in 77.48s`.
 
-The local environment does not provide the project PyTorch/pytest runtime, so
-the full suite used the established Curie Python environment. The analysis
-itself ran locally because it only requires the verified cached score arrays
-and NumPy.
+### Post-review hardening validation
+
+The modified training, attribution, and Contract-v3 test files were run in the
+repository `.venv` with capture disabled because the default capture path
+failed before collection in the local WSL filesystem environment:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m pytest -q -s \
+  tests/test_training_resume.py \
+  tests/test_fixed_readout_component_attribution.py \
+  tests/test_research_contract_v3_docs.py
+```
+
+Result: `57 passed, 1 warning in 9.01s`. The warning was the local PyTorch
+build reporting that its CUDA build is newer than the installed WSL driver;
+the relevant fixtures ran on CPU.
+
+An attempted local full-suite run was stopped after `14 passed in 246.96s`
+because the process remained in uninterruptible filesystem-I/O wait. This is
+an environment-limited interrupted check, not a passing full-suite result.
+
+The exact pushed code-bearing hardening commit was then validated on Curie:
+
+```bash
+git archive 7fc32b7 | ssh curie 'issue63_dir=$(mktemp -d /tmp/oge_issue63_postreview.XXXXXX) && tar -xf - -C "$issue63_dir" && cd "$issue63_dir" && git init -q && git config user.name codex-validation && git config user.email codex-validation@example.invalid && git add -A && git commit -qm validation-snapshot && /home/ghjin/miniconda3/bin/python -m pytest -q; test_rc=$?; case "$issue63_dir" in /tmp/oge_issue63_postreview.*) rm -rf -- "$issue63_dir" ;; *) echo "refusing cleanup: $issue63_dir" >&2; exit 97 ;; esac; exit "$test_rc"'
+```
+
+Result: `477 passed in 78.36s`.
+
+The Issue's requested command
+`python scripts/validate_research_contract_v2_docs.py` is `NOT_RUN` because
+that script does not exist in the repository. Its intended v2/v3 document
+checks are present in the passing pytest suite. The component-attribution CLI
+`--help`, Python compilation, JSON/YAML parsing, and `git diff --check` passed.
+
+The repository `.venv` provides PyTorch and pytest, but the full local suite
+was not a valid completion because of the WSL filesystem-I/O stall. Curie
+therefore supplies the complete-suite result. The analysis itself ran locally
+because it only requires the verified cached score arrays and NumPy.
 
 ## Not run
 

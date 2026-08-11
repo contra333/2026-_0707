@@ -14,9 +14,10 @@ analysis.
 
 Issue #63 implements the v3 foundation: a focused read-only 30-bundle
 component-attribution path and a separate `fork_from_prefix` operation. The
-implementation passed the complete 472-test suite on Curie in a temporary Git
-snapshot. The production historical-discovery analysis also completed with
-`PASS`: 30 bundles, 360 bundle/component rows, and 108 prespecified
+implementation and post-review hardening passed the complete 477-test suite on
+Curie in a temporary Git snapshot. The production historical-discovery
+analysis also completed with `PASS`: 30 bundles, 360 bundle/component rows,
+and 108 prespecified
 descriptive-pair rows. Its artifacts and interpretation boundary are recorded
 in
 [`validation/issue63_component_attribution_and_fork_foundation.md`](validation/issue63_component_attribution_and_fork_foundation.md).
