@@ -224,9 +224,10 @@ base detector and must not overwrite the raw result.
 - return the negative 50th-neighbor squared distance, not a sum or mean.
 
 The score is ID-like. This is the only **Metric Contract v1.2** kNN definition;
-a raw/L2-off kNN variant is forbidden within v1.2. Research Contract v2 adds a
-separately versioned `detector/knn_raw_k50` and does not alter this historical
-key, formula, or output. Evidence: `evidence/B3_knn-ood.md`, audited commit
+a raw/L2-off kNN variant is forbidden within v1.2. Research Contract v2 first
+added a separately versioned `detector/knn_raw_k50`; Card 13 v4 retains that
+control without altering this historical key, formula, or output. Evidence:
+`evidence/B3_knn-ood.md`, audited commit
 `2afb2bbed60a8d69384dc9b28e5637711345222b`. The project follows the official
 denominator-inside epsilon placement rather than OpenOOD's audited
 denominator-outside port difference.
@@ -308,7 +309,7 @@ TwoNN, and spectrum diagnostics are defined by card 11. Their v1.2 code and
 protected results exist under Issues #53 and #57; reporting tiers and claim
 boundaries remain those frozen by card 11 and the Issue #59 analysis.
 
-Research Contract v2 defines a different paper panel and two new score keys in
-[`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md).
-It does not relabel historical v1.2 outputs. Full DDU/SN training remains
-unimplemented and unvalidated.
+Research Contract v4 defines the active focal and control roles in
+[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md).
+It does not relabel historical v1.2 outputs. Card 12 preserves the historical
+v2 panel decision. Full DDU/SN training remains unimplemented and unvalidated.
