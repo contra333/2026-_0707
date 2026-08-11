@@ -14,6 +14,8 @@ import numpy as np
 import torch
 from torch import nn
 
+from oge.studies.hashing import canonical_sha256
+
 from .checkpoint import CHECKPOINT_SCHEMA_VERSION, restore_rng_state
 
 
@@ -281,10 +283,14 @@ def restore_fork_checkpoint(
     return {
         "schema_version": FORK_SCHEMA_VERSION,
         "source_run_id": str(payload["run_id"]),
+        "source_config_sha256": canonical_sha256(payload["resolved_config"]),
+        "source_training_seed": int(payload["resolved_config"]["training"]["seed"]),
         "completed_epoch": completed_epoch,
         "global_step": int(payload["global_step"]),
         "optimizer_family": optimizer_family(resolved_config["optimizer"]["name"]),
         "branch_optimizer": copy.deepcopy(resolved_config["optimizer"]),
+        "branch_config_sha256": canonical_sha256(resolved_config),
+        "branch_training_seed": int(resolved_config["training"]["seed"]),
         "transferred_state_digest": digest,
     }
 

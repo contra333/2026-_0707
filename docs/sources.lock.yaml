@@ -73,6 +73,20 @@ sources:
     url: https://arxiv.org/abs/1711.05101
     accessed: 2026-07-14
     role: primary decoupled weight decay reference; does not imply equal effective regularization at shared numeric weight decay
+  l2_regularization_batch_weight_normalization_paper:
+    title: L2 Regularization versus Batch and Weight Normalization
+    authors: van Laarhoven
+    stable_source: arXiv:1706.05350
+    url: https://arxiv.org/abs/1706.05350
+    accessed: 2026-08-11
+    role: normalized-network weight-scale and effective-learning-rate alternative pathway; not evidence that this pathway explains the planned OOD effect
+  three_mechanisms_weight_decay_paper:
+    title: Three Mechanisms of Weight Decay Regularization
+    authors: Zhang, Wang, Xu, and Grosse
+    stable_source: arXiv:1810.12281
+    url: https://arxiv.org/abs/1810.12281
+    accessed: 2026-08-11
+    role: optimizer- and architecture-dependent weight-decay mechanisms, including effective-learning-rate changes; alternative-pathway boundary only
   random_search_hpo_paper:
     title: Random Search for Hyper-Parameter Optimization
     authors: Bergstra and Bengio

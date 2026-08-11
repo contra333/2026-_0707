@@ -8,12 +8,12 @@ for the active paper question and future scientific execution. Card 12 and its
 failed Stage-2 radial execution remain immutable historical evidence; v3 does
 not rewrite, relax, or resume that gate.
 
-Status at creation:
+Current status:
 
 ```text
 contract and manuscript outline: specified
-historical component-attribution implementation: implemented; production run pending
-shared-prefix fork runtime: minimally implemented; CPU tests pending
+historical component-attribution implementation and production run: PASS
+shared-prefix fork runtime and CPU fixture validation: PASS
 fresh WRN-28-10/CIFAR-10 intervention: NOT_RUN
 all replication and modern-scale arms: NOT_RUN
 ```
@@ -116,6 +116,10 @@ in RMD and Marginal pair margins. The RMD contribution is
 and the Marginal contribution swaps `R` and `M`. Their pairwise and aggregate
 sums reconstruct the exact tie-aware AUROC change. This is attribution of an
 additive score change, not a claim that RMD or Marginal AUROCs themselves add.
+The two mixed-component readouts are computational hybrids, not detectors
+produced by either training branch. Exactness holds inside this declared
+two-player replacement game; the accounting is not claimed to be the unique
+physical or causal mediation decomposition.
 
 ## 3. Supporting theory and its boundary
 
@@ -174,7 +178,18 @@ not presented as a new factorization. Spectrum and allocation are downstream
 diagnostics only after an affected quadratic term and size/stretch channel
 have been identified.
 
-### 3.4 What is proved and what is measured
+### 3.4 Effective-step alternative pathway
+
+The shared `weights_only_no_bias_norm` policy decays Conv/Linear weights while
+excluding BatchNorm/LayerNorm parameters and biases. In normalized networks,
+weight decay can change weight scale and effective optimization step size
+rather than acting only as direct function-space regularization. The planned
+fork therefore does not yet distinguish a direct representation-geometry path
+from an indirect path through normalized-network optimization dynamics. This
+is a prespecified alternative explanation, not a second contribution or an
+already established mechanism in this experiment.
+
+### 3.5 What is proved and what is measured
 
 | Supporting theory | Empirical question |
 | --- | --- |
@@ -244,6 +259,12 @@ Adam is primary with five fresh prefix seeds. SGDM is the conventional-family
 control with three fresh prefix seeds. Adam and SGDM prefix populations are
 independent experimental blocks.
 
+The primary estimand is the within-prefix algorithmic update-policy contrast
+at a common family-specific nominal decay dose. Equal numeric decay is not
+interpreted as matched effective shrinkage or matched effective
+regularization. A dose set or realized-decay diagnostic, if adopted, belongs
+in the pre-OOD addendum rather than being selected after branch outcomes.
+
 ### 6.2 Fork invariant
 
 `fork_from_prefix` is distinct from strict same-run resume. It requires an
@@ -258,8 +279,10 @@ epoch-boundary `last.pt` from an exact zero-decay prefix and preserves:
 Only optimizer endpoint/coupling and decay dose may change inside a family.
 Cross-family forks, a nonzero-decay prefix, parameter-order drift, scheduler
 drift, seed/data/model changes, and source-checkpoint inconsistency fail before
-training. A branch manifest records the source checksum and a digest over all
-transferred sibling-invariant state. Ordinary resume remains strict.
+training. A branch manifest records source/branch run IDs, source checksum,
+canonical source/branch config digests, training seeds, and a digest over all
+transferred sibling-invariant state. Pair identity is assigned separately by
+a pre-OOD branch-pair manifest. Ordinary resume remains strict.
 
 ### 6.3 Values still requiring a pre-OOD addendum
 
@@ -269,6 +292,8 @@ Before fresh protected OOD results are opened, a versioned addendum must freeze:
 - Adam- and SGDM-family nominal decay dose(s);
 - ID accuracy equivalence margin and NLL/ECE guardrails;
 - AUROC/FPR95 practical margins;
+- power or minimum-detectable-effect justification for the frozen five/three
+  prefix counts;
 - uncertainty interval, multiplicity, and main success rule.
 
 Failure of ID equivalence does not delete a branch. It changes interpretation
@@ -327,6 +352,12 @@ Versioned artifacts record:
   that diagnostic is run;
 - ID accuracy, NLL, ECE, AUROC, FPR95, and practical classification.
 
+The historical cache CLI consumes score and sample-identity arrays and does
+not publish size/stretch artifacts. The size/stretch API and reconstruction
+oracle are implementation foundation only at this boundary; actual
+size/stretch branch attribution is produced only after fresh forked branches
+and their required quadratic inputs exist.
+
 Mandatory tests are:
 
 - MD score and pair-margin reconstruction;
@@ -334,7 +365,10 @@ Mandatory tests are:
 - exact 3x3 pair-transition accounting;
 - symmetric component and size/stretch reconstruction;
 - Woodbury only under positive-ridge/full-rank assumptions;
+- randomized small-array brute-force pair-transition and Shapley parity;
 - fork model/optimizer/scheduler/RNG/DataLoader identity;
+- populated Adam `step`, `exp_avg`, and `exp_avg_sq` transfer into Adam/AdamW
+  siblings;
 - sibling first-minibatch identity;
 - uninterrupted zero-decay continuation parity;
 - ImageNet-200 membership and pretrained-leakage checks before that arm runs.

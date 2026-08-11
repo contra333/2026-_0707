@@ -85,7 +85,10 @@ identity, pair margin, and tie-aware AUROC.
 
 Define branch score change, the 3x3 `{incorrect,tie,correct}` transition table,
 and symmetric two-component Shapley accounting. Emphasize that AUROCs of the
-three detectors do not add; pair-margin changes do.
+three detectors do not add; pair-margin changes do. The two hybrid readouts
+are computational replacements rather than trained detectors. Exactness is
+limited to the declared two-player accounting game and is not unique causal
+mediation.
 
 ### 3.3 Formula expansion
 
@@ -102,9 +105,16 @@ and covariance-convention limitations beside the proposition.
 Introduce the cited `q=rw` factorization and the symmetric branch-change
 identity. Apply it separately to class and global-reference quadratic terms.
 
-### 3.6 Theory boundary table
+### 3.6 Effective-step alternative pathway
 
-Use Card 13 §3.4 verbatim in substance: algebraic identities are proved;
+State that the common parameter policy decays Conv/Linear weights but excludes
+normalization parameters and biases. Treat normalized-network effective-step
+dynamics as an alternative path between decay policy and representation
+geometry, not as a demonstrated mechanism or separate contribution.
+
+### 3.7 Theory boundary table
+
+Use Card 13 §3.5 verbatim in substance: algebraic identities are proved;
 training selectivity, AUROC magnitude, and replication are measured.
 
 ## 4. Historical discovery: where the existing gap lives
@@ -114,6 +124,8 @@ training selectivity, AUROC magnitude, and replication are measured.
 - scores: MD/Marginal/RMD raw and L2;
 - primary output: component-specific pair-outcome dispersion and the
   prespecified historical pair attribution;
+- size/stretch status: API/oracle implemented, but no historical cache output;
+  actual branch attribution waits for fresh forked quadratic inputs;
 - role: discovery only;
 - forbidden claim: optimizer, LR, or WD caused the historical difference;
 - sensitivity only: nearest-accuracy matching, if shown at all, is appendix
@@ -126,11 +138,18 @@ training selectivity, AUROC magnitude, and replication are measured.
 WRN-28-10/CIFAR-10. Five Adam-family prefixes and three SGDM-family prefixes.
 Each prefix produces coupled, decoupled, and zero continuations.
 
+The primary contrast fixes a family-specific nominal decay dose and changes
+the update policy. It is not described as matched effective shrinkage or
+matched effective regularization. Dose ladders and realized-decay diagnostics,
+if adopted, are frozen in the pre-OOD addendum.
+
 ### 5.2 Identity checks
 
 Report source SHA, transferred-state digest, parameter names/order, scheduler,
-RNG, DataLoader generator, and first minibatch. Show uninterrupted zero branch
-parity before interpreting any OOD result.
+RNG, DataLoader generator, first minibatch, source/branch run and config
+identity, and seed. The branch-pair manifest supplies pair identity. Show
+uninterrupted zero branch parity for both SGDM and Adam before interpreting
+any OOD result.
 
 ### 5.3 ID utility
 
@@ -165,6 +184,8 @@ external validity. ConvNeXt pretrained leakage is a hard failure.
 
 - distinguish controlled effect within tested families from universal
   optimizer claims;
+- discuss normalized-network effective-step dynamics as an unresolved
+  alternative pathway;
 - discuss ID-equivalence versus Pareto interpretation;
 - explain why component localization precedes size/stretch and spectral detail;
 - state limits of CIFAR discovery, from-scratch scale recipes, tied-Gaussian

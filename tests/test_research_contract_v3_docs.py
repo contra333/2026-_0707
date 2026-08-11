@@ -29,6 +29,13 @@ def test_v3_contract_freezes_intervention_attribution_and_novelty_boundary():
         "ImageNet-1K pretrained weights are",
         "forbidden because they expose",
         "Ordinary resume remains strict",
+        "computational hybrids",
+        "not claimed to be the unique",
+        "matched effective shrinkage",
+        "minimum-detectable-effect justification",
+        "historical cache CLI consumes score",
+        "not publish size/stretch artifacts",
+        "populated Adam `step`, `exp_avg`, and `exp_avg_sq`",
         "The v2 radial failure stays `FAILED`",
     )
     for marker in required:
@@ -58,6 +65,12 @@ def test_v3_sources_and_architecture_truth_are_registered():
     geometry = sources["geometry_based_mahalanobis_ood_paper"]
     assert geometry["stable_source"] == "arXiv:2510.15202v3"
     assert geometry["title"] == "A Geometry-Based View of Mahalanobis OOD Detection"
+    assert sources["l2_regularization_batch_weight_normalization_paper"][
+        "stable_source"
+    ] == "arXiv:1706.05350"
+    assert sources["three_mechanisms_weight_decay_paper"]["stable_source"] == (
+        "arXiv:1810.12281"
+    )
     architecture = (ROOT / "docs/reference_cards/02_architectures.md").read_text()
     assert "`densenet_bc_100_k12`" in architecture
     assert "| Planned |" in architecture
@@ -96,3 +109,11 @@ def test_v2_failure_record_and_v1_2_contract_remain_present():
     assert "Stage 2 mechanism gate result: `FAILED`" in status
     assert "fixed_readout_training_rule_intervention_v2" in v2
     assert "metric_contract_v1.2" in v1
+
+
+def test_v3_status_header_matches_completed_foundation_boundary():
+    text = CARD.read_text(encoding="utf-8")
+    assert "historical component-attribution implementation and production run: PASS" in text
+    assert "shared-prefix fork runtime and CPU fixture validation: PASS" in text
+    assert "production run pending" not in text
+    assert "CPU tests pending" not in text

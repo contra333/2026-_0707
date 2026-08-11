@@ -18,6 +18,28 @@ def _brute_pair_auroc(ids, oods):
     return float(np.mean((margins > 0.0) + 0.5 * (margins == 0.0)))
 
 
+def _brute_pair_transition(id0, ood0, id1, ood1):
+    output = np.zeros((3, 3), dtype=np.int64)
+    for left in range(len(id0)):
+        for right in range(len(ood0)):
+            state0 = 2 if id0[left] > ood0[right] else int(id0[left] == ood0[right])
+            state1 = 2 if id1[left] > ood1[right] else int(id1[left] == ood1[right])
+            output[state0, state1] += 1
+    return output
+
+
+def _transition_matrix(result):
+    return np.asarray(
+        [
+            [
+                result["transitions"][source][target]
+                for target in ("incorrect", "tie", "correct")
+            ]
+            for source in ("incorrect", "tie", "correct")
+        ]
+    )
+
+
 def test_mahalanobis_components_reconstruct_scores_and_pair_margins():
     class_distances = np.asarray([[1.0, 4.0], [2.5, 2.0], [8.0, 3.0]])
     global_distances = np.asarray([3.0, 1.5, 5.0])
@@ -57,19 +79,23 @@ def test_fast_pair_transition_table_matches_brute_force_with_ties():
     id1 = np.asarray([2.0, 1.0, 2.0])
     ood1 = np.asarray([0.0, 2.0, 2.0, 1.0])
     result = pair_transition_summary(id0, ood0, id1, ood1)
-    brute = np.zeros((3, 3), dtype=np.int64)
-    for left in range(id0.size):
-        for right in range(ood0.size):
-            state0 = 2 if id0[left] > ood0[right] else int(id0[left] == ood0[right])
-            state1 = 2 if id1[left] > ood1[right] else int(id1[left] == ood1[right])
-            brute[state0, state1] += 1
-    observed = np.asarray(
-        [
-            [result["transitions"][source][target] for target in ("incorrect", "tie", "correct")]
-            for source in ("incorrect", "tie", "correct")
-        ]
+    np.testing.assert_array_equal(
+        _transition_matrix(result), _brute_pair_transition(id0, ood0, id1, ood1)
     )
-    np.testing.assert_array_equal(observed, brute)
+
+
+def test_randomized_pair_transition_oracle_matches_brute_force_with_ties():
+    rng = np.random.default_rng(20260811)
+    for _ in range(64):
+        id0 = rng.integers(-3, 4, size=7).astype(np.float64)
+        ood0 = rng.integers(-3, 4, size=9).astype(np.float64)
+        id1 = rng.integers(-3, 4, size=7).astype(np.float64)
+        ood1 = rng.integers(-3, 4, size=9).astype(np.float64)
+        result = pair_transition_summary(id0, ood0, id1, ood1)
+        np.testing.assert_array_equal(
+            _transition_matrix(result),
+            _brute_pair_transition(id0, ood0, id1, ood1),
+        )
 
 
 def test_paired_component_shapley_exactly_accounts_for_pair_transitions():
@@ -117,6 +143,46 @@ def test_paired_component_shapley_exactly_accounts_for_pair_transitions():
         for source in result["pair_transitions"].values()
         for count in source.values()
     ) == 4
+
+
+def test_randomized_shapley_oracle_matches_four_brute_force_aurocs():
+    rng = np.random.default_rng(20260812)
+    for _ in range(64):
+        branch_0 = {"id": {}, "ood": {}}
+        branch_1 = {"id": {}, "ood": {}}
+        for split, size in (("id", 7), ("ood", 9)):
+            for branch in (branch_0, branch_1):
+                branch[split]["rmd"] = rng.integers(-3, 4, size=size).astype(
+                    np.float64
+                )
+                branch[split]["marginal"] = rng.integers(-3, 4, size=size).astype(
+                    np.float64
+                )
+                branch[split]["md"] = (
+                    branch[split]["rmd"] + branch[split]["marginal"]
+                )
+
+        result = paired_component_attribution(branch_0, branch_1)
+        a00 = _brute_pair_auroc(branch_0["id"]["md"], branch_0["ood"]["md"])
+        a11 = _brute_pair_auroc(branch_1["id"]["md"], branch_1["ood"]["md"])
+        a10 = _brute_pair_auroc(
+            branch_1["id"]["rmd"] + branch_0["id"]["marginal"],
+            branch_1["ood"]["rmd"] + branch_0["ood"]["marginal"],
+        )
+        a01 = _brute_pair_auroc(
+            branch_0["id"]["rmd"] + branch_1["id"]["marginal"],
+            branch_0["ood"]["rmd"] + branch_1["ood"]["marginal"],
+        )
+        attribution = result["component_auroc_attribution"]
+        assert attribution["rmd"] == pytest.approx(
+            0.5 * ((a10 - a00) + (a11 - a01))
+        )
+        assert attribution["marginal"] == pytest.approx(
+            0.5 * ((a01 - a00) + (a11 - a10))
+        )
+        assert attribution["rmd"] + attribution["marginal"] == pytest.approx(
+            a11 - a00
+        )
 
 
 def test_component_attribution_rejects_non_reconstructing_scores():

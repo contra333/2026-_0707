@@ -84,7 +84,10 @@ it accepts an epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
 family, preserves model/optimizer tensor/scheduler/RNG/DataLoader-generator
 state, and changes only the decay endpoint/coupling plus future run length.
 The new run records `fork_manifest.json`, source SHA-256, and a sibling-
-invariant transferred-state digest. A zero-decay fork must match uninterrupted
+invariant transferred-state digest. The manifest also binds source/branch run
+IDs, canonical full-config digests, and training seeds. A later pre-OOD pair
+manifest assigns sibling pair identities; the training runner does not infer a
+pair from directory names. A zero-decay fork must match uninterrupted
 zero-decay continuation. This operation does not relax ordinary resume.
 
 ## DataLoader contract
