@@ -17,11 +17,11 @@ its metadata-integrity validation and C1-C4 role freeze are recorded in
 `docs/validation/seed0_20260728_grid_role_freeze.md`. Local tests and server
 smoke runs remain infrastructure evidence rather than research results.
 
-Research Contract v4 treats this completed population as immutable
+Research Contract v5 treats this completed population as immutable
 descriptive/discovery evidence. Its static grid and pair controls are not the
 fresh from-scratch paired-trajectory confirmation. The active optimizer roles,
 factorial design, and confirmation/replication rules are defined separately in
-[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md);
+[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md);
 they do not change any v1.2 row, role, seed, or result. Card 12 preserves the
 historical v2 intervention plan and failed gate.
 

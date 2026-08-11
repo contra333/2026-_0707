@@ -79,7 +79,7 @@ python scripts/train_cifar10.py \
 ```
 
 `--resume` and `--fork-from-prefix` are mutually exclusive. Under active
-[`13_paired_trajectory_component_attribution_protocol_v4.md`](13_paired_trajectory_component_attribution_protocol_v4.md),
+[`13_paired_trajectory_component_attribution_protocol_v5.md`](13_paired_trajectory_component_attribution_protocol_v5.md),
 the fork path is optional follow-up infrastructure rather than the main paper
 experiment. When a bounded follow-up authorizes it, the operation accepts an
 epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
@@ -92,8 +92,8 @@ manifest assigns sibling pair identities; the training runner does not infer a
 pair from directory names. A zero-decay fork must match uninterrupted
 zero-decay continuation. This operation does not relax ordinary resume.
 
-The v4 main experiment instead starts coupled, decoupled, and zero-decay runs
-at epoch 0 from the same initialization and data/RNG stream. The expanded v4
+The v5 main experiment instead starts coupled, decoupled, and zero-decay runs
+at epoch 0 from the same initialization and data/RNG stream. The expanded v5
 snapshot and multi-depth requirements are not implemented by this historical
 fork contract and require their own bounded task.
 

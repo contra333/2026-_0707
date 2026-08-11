@@ -3,9 +3,9 @@
 ## One-sentence paper
 
 Starting from the same initialization, we change decay coupling from epoch 0
-and trace how the resulting update trajectories create different
-representation geometry, change known Mahalanobis score components, and
-reverse the ordering of the same ID--OOD image pairs.
+and trace how direction-changing updates produce non-affine representation
+deformation, alter known Mahalanobis score components, and change or churn the
+ordering of the same ID--OOD image pairs.
 
 This is an intervention paper with supporting theory. It is not a new
 Mahalanobis decomposition, a new detector, or an Adam-versus-AdamW leaderboard.
@@ -20,13 +20,14 @@ Mahalanobis decomposition, a new detector, or an Adam-versus-AdamW leaderboard.
 3. We train coupled, decoupled, and zero-decay siblings from the same
    initialization and data stream, then follow their update and representation
    trajectories across checkpoints and network depth.
-4. We use the exact MD--Marginal--RMD and size--stretch identities to connect
-   geometry changes to the score and to every tie-aware ID--OOD pair
-   transition.
-5. Channel-matched diagnostics test the explanation: L2 for radial change,
-   RMD for the global/Marginal channel, and fixed spectral controls for
-   stretch/allocation.
-6. The conclusion is conditional on practical OOD effect, component
+4. Affine-gauge invariance removes coordinate changes that a refitted raw MD
+   cannot see; local update-direction and RMD low-rank-curvature propositions
+   make training- and score-side predictions.
+5. Exact MD--Marginal--RMD, size--stretch, and Gain/Loss/PairOrderChurn
+   identities connect geometry to both net AUROC change and canceled
+   same-pair reversals.
+6. Channel-matched diagnostics test the explanation. The conclusion is
+   conditional on practical paired effect, non-affine residual, component
    concentration, attenuation, ID-equivalence/Pareto classification, and
    replication.
 
@@ -46,10 +47,11 @@ allocation. The missing link is formation:
 State contributions in this order:
 
 1. paired from-scratch training-to-geometry-to-score trajectories;
-2. exact pair-order and component accounting;
-3. controlled local factorial evidence for decay coupling and its interaction
-   with LR and nominal decay strength;
-4. architecture, dataset/class-count, connectivity, and scale replication.
+2. theory-constrained attribution using affine gauge, local update direction,
+   and RMD low-rank curvature;
+3. exact component and pair-order-churn accounting;
+4. controlled local factorial evidence plus architecture,
+   dataset/class-count, connectivity, and scale replication.
 
 Comparable ID accuracy/NLL/ECE qualifies interpretation. It is not used for
 post-hoc checkpoint selection.
@@ -91,10 +93,53 @@ Explain that AUROC is the tie-aware fraction of ID--OOD pairs with positive
 margin. This makes the same image pair, rather than an aggregate correlation,
 the bridge between the score formula and detector behavior.
 
-Expand the shared-covariance Mahalanobis score into its class-independent
-quadratic term and class-dependent affine envelope. Under explicit ridge or
-full-rank conditions, include the `rank(Sigma_B) <= K-1` Woodbury correction
-as a supporting proposition only.
+Organize the paper-specific supporting theory as one constraint chain.
+
+**Proposition 1: affine gauge and residual deformation.** Under a common
+invertible affine transformation and a full-rank, affine-equivariant refit,
+raw MD score and pair order are unchanged. Therefore global scale, rotation,
+and fixed channel rescaling are negative controls. Fit an ID-only branch
+alignment `z_C=A z_D+b+e`; attribute the remaining quadratic difference to
+same-image residual `e`, class-prototype residual, and precision residual.
+Pseudoinverse/ridge/rank conditions are explicit.
+
+**Proposition 2: local update direction.** In a locally positive-scale-
+invariant parameter block, explicit decoupled decay is radial. Under a frozen
+diagonal preconditioner, coupled L2 can acquire a tangential component unless
+`P_t w` is parallel to `w`. Test the operational prediction with an exact
+same-state, same-gradient WD-versus-zero counterfactual update. Do not extend
+the premise to the whole residual WRN trunk.
+
+**Proposition 3: RMD low-rank curvature.** With class-frequency-weighted
+between-class covariance and full-rank inverses,
+
+```text
+Sigma_0 = Sigma_W + Sigma_B
+rank(Sigma_B) <= K - 1
+H = Sigma_W^-1 - Sigma_0^-1 >= 0
+rank(H) <= K - 1
+s_RMD(z) = -z^T H z + max_c(a_c^T z + b_c).
+```
+
+RMD is an affine envelope plus a shared low-rank quadratic correction. This
+complements, rather than replaces, the prior term-wise RMD analysis. It yields
+a class-count prediction: the bound grows from 9 on CIFAR-10 to 99 on
+CIFAR-100, while curvature mass and sample allocation remain empirical.
+
+**Proposition 4: pair-order balance.** For tie-aware pair correctness
+`a_r in {0,1/2,1}`, define Gain and Loss as the positive directions of
+`a_C-a_D`. Then
+
+```text
+DeltaAUROC = Gain - Loss
+PairOrderChurn = Gain + Loss
+abs(DeltaAUROC) <= PairOrderChurn.
+```
+
+Without ties, Gain and Loss are recovered exactly from DeltaAUROC and churn.
+This formalizes aggregate cancellation and makes epoch-200 raw-MD
+DeltaAUROC plus PairOrderChurn co-primary outcomes. FPR95 operating-point
+disagreement is secondary.
 
 Then cite and use the size--stretch factorization:
 
@@ -111,9 +156,9 @@ The four computational RMD/Marginal hybrids provide symmetric Shapley
 accounting. They are not trained detectors and are not a unique causal
 mediation decomposition.
 
-Theory establishes identities and rank bounds. It does not establish which
-training rule moves which term, the AUROC effect size, or replication. Those
-are empirical questions.
+The theory removes impossible explanations and creates measurements; it does
+not establish the sign or size of the training effect, component
+concentration, ID equivalence, attenuation, or replication.
 
 ## 4. Discovery: where the historical gap lives
 
@@ -153,7 +198,11 @@ SGDM control: LR `0.1`, WD `5e-4`, zero/SGDM/SGDW, three seeds, nine runs.
 Analyze each cell first. Never average raw runs across LR/WD. Use a cell-equal
 summary only after showing sign and interaction patterns. Same nominal WD is a
 controlled numerical input, not matched effective regularization or a tuned
-optimizer comparison.
+optimizer comparison. Zero plus nominal WD `1e-4` and `1e-3` already give
+three prespecified dose points at each LR. Coupled Adam has no uniquely
+separable realized-decay vector because the L2 term changes its moments and
+denominator; compare exact same-state, same-gradient WD-versus-zero
+counterfactual operator differences instead.
 
 ### Time and depth
 
@@ -164,7 +213,9 @@ Epoch-200 `last.pt` is primary; ID-validation `best_val.pt` is secondary.
 Use the penultimate endpoint for the full time trajectory. At epoch 200,
 compare stage1, stage2, stage3, and penultimate features. Only trace one
 earlier stage over time if the final depth scan localizes the first large
-divergence.
+divergence. Because stage widths and spatial resolutions differ, do not compare
+raw norm, spectrum, effective-rank, or condition values across stages as one
+scale. Compare standardized coupled--decoupled effects within each stage.
 
 An optional three-seed primary-anchor extension to epochs 240 and 300 tests
 whether the epoch-200 difference grows, plateaus, or shrinks. It is a
@@ -175,28 +226,36 @@ runtime-by-decay-exposure appendix, not a new primary endpoint.
 Follow the same deterministic probe images through four levels:
 
 1. **Update dynamics:** parameter/gradient/update norm, relative update,
-   update--weight cosine, radial/tangential update, and Adam moment summaries.
-2. **Representation geometry:** feature norms; class-mean distances/angles and
-   CDNV; global and within-class covariance spectrum, effective rank, and
-   condition; spectral-band allocation; nearest versus full class-distance
-   profile.
+   update--weight cosine, radial/tangential update, Adam moments, BN/running
+   statistics, residual/shortcut ratio, and exact one-step counterfactuals.
+2. **Representation geometry:** ID-only affine alignment and held-out residual;
+   global radial scale as a negative control; sample/class-conditioned radial
+   heterogeneity; class-mean geometry; global/within covariance; spectral-band
+   allocation; nearest versus full class-distance profile.
 3. **Score geometry:** branch-specific ID-only Gaussian fits; raw/L2 MD,
    Marginal, and RMD; exact additive reconstruction; size/stretch and
    spectrum/allocation decomposition.
 4. **OOD ordering:** the same ID--OOD pairs classified as incorrect/tie/correct
-   at every checkpoint, with exact component attribution of pair flips.
+   at every checkpoint, with exact component attribution, Gain, Loss,
+   PairOrderChurn, and net DeltaAUROC.
 
 For every seed and cell report coupled--decoupled, coupled--zero, and
-decoupled--zero. A mechanism claim requires the update difference to precede
-the geometry difference, the geometry to reconstruct a named score component,
-and the named channel to account for and selectively attenuate pair changes.
-
-Use two-consecutive-checkpoint onset after freezing seed-noise/practical
-thresholds. Treat seed, not image pair, as the independent statistical unit.
+decoupled--zero. The update policies differ by construction at the first
+nonzero-decay step, so “update onset precedes geometry onset” is not a claim.
+Report standardized divergence curves, minimum detectable effects, early
+slopes, and functional/cumulative summaries. A practical-threshold crossing is
+called detectability time and is descriptive, not a causal onset. A mechanism
+claim requires an
+exact update manipulation check, repeatable non-affine representation
+divergence, formula-level score/pair reconstruction, Gain/Loss attribution,
+and selective channel attenuation. Treat seed, not image pair, as the
+independent statistical unit; same-policy different-seed variation is a
+natural-variability reference, not a null.
 
 ### Channel-matched confirmation
 
-- radial difference -> L2 normalization and refitting;
+- sample/class-conditioned radial difference -> L2 normalization and refitting;
+- non-affine deformation -> ID-only affine alignment plus residual/precision accounting;
 - global/Marginal difference -> RMD;
 - spectrum/stretch difference -> prespecified ID-only spectral-band ablation,
   clipping, or whitening diagnostic;
@@ -205,11 +264,28 @@ thresholds. Treat seed, not image pair, as the independent statistical unit.
 Do not add a detector after seeing results. Scalar correlations can support,
 but cannot replace, exact accounting and selective attenuation.
 
+### Inferential hierarchy
+
+- Primary outcome: WRN anchor, epoch 200, penultimate, raw MD,
+  DeltaAUROC and PairOrderChurn, prespecified near/far summaries.
+- Primary mechanism: Marginal/RMD pair attribution, affine residual,
+  global-scale negative control versus radial heterogeneity, counterfactual
+  tangential update, and channel-matched attenuation.
+- Secondary: L2/size--stretch, functional time curves, within-stage depth,
+  Adam LR/WD interaction, SGDM control, best-validation, epoch 300.
+- Exploratory/appendix: external detector panel, individual eigenvectors,
+  extra geometry scalars, and optional fork.
+
+Do not perform an unadjusted test for every checkpoint by depth by metric by
+OOD dataset. Freeze family-wise uncertainty, practical margins, minimum
+detectable effects, spectral bands, and multiplicity handling before protected
+OOD execution.
+
 ## 6. Result map
 
 | Observation | Allowed interpretation |
 | --- | --- |
-| Practical OOD gap, localized component, correct temporal order, selective attenuation | strongest mechanism result |
+| Practical OOD gap/churn, non-affine residual, localized component, selective attenuation | strongest mechanism result |
 | OOD gap with failed ID equivalence | training-rule Pareto result; remove comparable-ID wording |
 | Same direction across four Adam cells | locally robust coupling effect |
 | Larger effect at stronger WD | coupling-by-decay-strength response |
@@ -217,6 +293,8 @@ but cannot replace, exact accounting and selective attenuation.
 | Sign reversal across cells | recipe interaction, not a universal coupling effect |
 | Geometry changes but OOD does not | detector-relevant versus irrelevant geometry distinction; central claim weakens |
 | Pair identities change but AUROC cancels | decision-level instability hidden by the aggregate |
+| Branches are almost entirely related by one affine map | raw-MD gap should be absent; lower the non-affine mechanism claim |
+| Tangential counterfactual update and non-affine residual grow together | supports coupling-to-direction-to-representation pathway |
 | Difference disappears after epoch 200 | finite-time/epoch-budget interaction |
 | Adam only | adaptive preconditioning-by-coupling interaction |
 | Adam and SGDM | more general coupling effect |
@@ -228,7 +306,8 @@ checkpoints, changing epoch 200, or expanding the detector panel.
 ## 7. Replication and scale
 
 1. ResNet-18/CIFAR-10 architecture-only replication.
-2. ResNet-18/CIFAR-100 dataset/class-count replication.
+2. ResNet-18/CIFAR-100 dataset/class-count replication and RMD
+   curvature-rank/allocation prediction.
 3. DenseNet-BC-100 k=12/CIFAR-10 focal appendix.
 4. ConvNeXt-Tiny/ImageNet-200 from-scratch focal appendix.
 
@@ -238,10 +317,11 @@ BN-versus-LN mechanism test. ImageNet-1K pretrained weights are forbidden.
 
 ## 8. Discussion and conclusion
 
-Discuss normalized-network effective-step dynamics as an alternative path,
-the difference between comparable-ID and Pareto evidence, the limits of CIFAR
-discovery and Gaussian fitting, and the boundary between tested optimizer
-families and universal claims.
+Discuss local normalized-block effective-step dynamics without calling the
+whole WRN trunk scale-invariant, the difference between comparable-ID and
+Pareto evidence, the limits of affine/full-rank assumptions and CIFAR Gaussian
+fitting, and the boundary between tested optimizer families and universal
+claims.
 
 Use the Card 13 strong sentence only if every corresponding gate passes.
 
@@ -250,9 +330,10 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
 1. From-scratch paired design and the update -> geometry -> score -> ordering
    chain, including MD/RMD/Marginal pair-margin decomposition.
 2. Historical component localization across 30 bundles and six OOD datasets.
-3. Fresh trajectories: update and representation geometry over time and depth.
-4. ID utility, OOD effect, pair transitions, and component/size/stretch
-   attribution at the primary endpoint.
+3. Fresh trajectories: counterfactual tangential update, non-affine residual,
+   and representation geometry over time and within-stage depth.
+4. ID utility, DeltaAUROC versus PairOrderChurn, Gain/Loss transitions, and
+   component/size/stretch attribution at the primary endpoint.
 5. Adam 2 x 2, SGDM control, and WRN--ResNet--DenseNet--ConvNeXt replication
    matrix.
 
@@ -261,5 +342,5 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
 1. Prior work versus the paired formation study.
 2. Exact run budget, checkpoints, depth taps, and execution status.
 3. Main paired ID/OOD estimates and practical classifications.
-4. Component, geometry, onset, and attenuation evidence by OOD dataset.
+4. Component, affine residual, divergence, churn, and attenuation evidence by OOD dataset.
 5. Replication claim gate and numerical-validation appendix.

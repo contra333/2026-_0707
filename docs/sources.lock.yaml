@@ -43,9 +43,9 @@ sources:
   local_fixed_readout_intervention_v2_reference_card:
     path: docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md
     role: historical radial-mechanism and shared-prefix planning contract; its failed Stage-2 execution remains immutable
-  local_paired_trajectory_component_attribution_v4_reference_card:
-    path: docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md
-    role: active from-scratch paired-trajectory, component/pair attribution, time/depth geometry, claim-gate, and replication protocol
+  local_theory_constrained_paired_trajectory_v5_reference_card:
+    path: docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md
+    role: active theory-constrained from-scratch paired-trajectory, geometry, component/pair-churn, claim-gate, and replication protocol
   local_optimizer_grid_literature_anchors_reference_card:
     path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
     role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07

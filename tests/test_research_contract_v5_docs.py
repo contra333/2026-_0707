@@ -8,15 +8,15 @@ import yaml
 ROOT = Path(__file__).parents[1]
 CARD = (
     ROOT
-    / "docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md"
+    / "docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md"
 )
 OUTLINE = ROOT / "docs/paper/intervention_supporting_theory_outline.md"
 
 
-def test_v4_contract_freezes_paired_trajectory_and_novelty_boundary():
+def test_v5_contract_freezes_theory_constrained_paired_trajectory():
     text = CARD.read_text(encoding="utf-8")
     required = (
-        "fixed_readout_paired_trajectory_component_attribution_v4",
+        "fixed_readout_theory_constrained_paired_trajectory_v5",
         "same model initialization",
         "same initialization and data stream",
         "Total Adam-family budget: **36 runs**",
@@ -32,6 +32,18 @@ def test_v4_contract_freezes_paired_trajectory_and_novelty_boundary():
         "representation geometry",
         "s_MD(z) = s_RMD(z) + s_Marginal(z)",
         "m_MD(i,o) = m_RMD(i,o) + m_Marginal(i,o)",
+        "PairOrderChurn = Gain + Loss",
+        "DeltaAUROC = Gain - Loss",
+        "Affine-gauge proposition",
+        "non-affine residual",
+        "local update-direction",
+        "RMD low-rank curvature",
+        "rank(H) <= K - 1",
+        "CIFAR-10 (`K=10`) and CIFAR-100",
+        "detectability time",
+        "not as a causal onset",
+        "independent statistical unit is the training seed",
+        "Primary outcome family",
         "global-referenced class-relative component",
         "computational hybrids",
         "unique physical or causal mediation decomposition",
@@ -61,7 +73,7 @@ def test_v4_contract_freezes_paired_trajectory_and_novelty_boundary():
         assert excluded_novelty in text
 
 
-def test_v4_contract_and_outline_local_links_resolve():
+def test_v5_contract_and_outline_local_links_resolve():
     for path in (CARD, OUTLINE):
         links = re.findall(r"\[[^]]+\]\(([^)]+)\)", path.read_text(encoding="utf-8"))
         for link in links:
@@ -69,11 +81,11 @@ def test_v4_contract_and_outline_local_links_resolve():
                 assert (path.parent / link).resolve().is_file(), (path, link)
 
 
-def test_v4_sources_and_architecture_truth_are_registered():
+def test_v5_sources_and_architecture_truth_are_registered():
     sources = yaml.safe_load((ROOT / "docs/sources.lock.yaml").read_text())["sources"]
-    assert sources["local_paired_trajectory_component_attribution_v4_reference_card"][
+    assert sources["local_theory_constrained_paired_trajectory_v5_reference_card"][
         "path"
-    ] == "docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v4.md"
+    ] == "docs/reference_cards/13_paired_trajectory_component_attribution_protocol_v5.md"
     assert sources["relative_mahalanobis_paper"]["stable_source"] == "arXiv:2106.09022"
     geometry = sources["geometry_based_mahalanobis_ood_paper"]
     assert geometry["stable_source"] == "arXiv:2510.15202v3"
@@ -88,7 +100,7 @@ def test_v4_sources_and_architecture_truth_are_registered():
     assert "`densenet_bc_100_k12`" in architecture
     assert "| Planned |" in architecture
     assert "ImageNet-1K pretrained weights are forbidden" in architecture
-    assert "v4 multi-depth taps pending" in architecture
+    assert "v5 multi-depth taps pending" in architecture
 
 
 def test_historical_v3_pair_manifest_remains_seed_matched_and_bounded():
@@ -126,7 +138,7 @@ def test_v2_failure_and_v3_discovery_remain_historical_evidence():
     assert "metric_contract_v1.2" in v1
 
 
-def test_active_current_docs_point_to_v4_not_v3_main():
+def test_active_current_docs_point_to_v5_not_v3_or_v4_main():
     active_paths = (
         ROOT / "README.md",
         ROOT / "docs/PROJECT_CONTEXT.md",
@@ -138,6 +150,16 @@ def test_active_current_docs_point_to_v4_not_v3_main():
     for path in active_paths:
         text = path.read_text(encoding="utf-8")
         assert "13_component_attribution_intervention_protocol_v3.md" not in text
+        assert "13_paired_trajectory_component_attribution_protocol_v4.md" not in text
     status = (ROOT / "docs/STATUS.md").read_text(encoding="utf-8")
-    assert "Research Contract v4 is the active paper protocol" in status
-    assert "no from-scratch v4 paired trajectory" in status
+    assert "Research Contract v5 is the active paper protocol" in status
+    assert "no from-scratch v5 paired trajectory" in status
+
+
+def test_v5_removes_threshold_onset_as_a_mechanism_gate():
+    card = CARD.read_text(encoding="utf-8")
+    outline = OUTLINE.read_text(encoding="utf-8")
+    for text in (card, outline):
+        assert "standardized divergence" in text
+        assert "causal onset" in text
+        assert "first of two consecutive checkpoints" not in text
