@@ -49,6 +49,7 @@ from .engine import (
     make_scheduler,
     train_one_epoch,
 )
+from .fork import restore_fork_checkpoint, sha256_file, validate_fork_configuration
 
 RUN_SCHEMA_VERSION = "1.0"
 PROTOCOL_NAME = "oge_cifar10_holdout_v1"
@@ -737,6 +738,7 @@ def _artifact_paths(run_dir: Path) -> dict[str, Path]:
         "environment": run_dir / "environment.json",
         "history": run_dir / "history.jsonl",
         "summary": run_dir / "summary.json",
+        "fork_manifest": run_dir / "fork_manifest.json",
         "last": checkpoint_dir / "last.pt",
         "best": checkpoint_dir / "best_val.pt",
         "snapshots": checkpoint_dir / "snapshots",
@@ -919,9 +921,10 @@ def fit_classifier(
     oge_git_sha: str,
     git_dirty: bool = False,
     resume_from: str | Path | None = None,
+    fork_from_prefix: str | Path | None = None,
     defer_id_test: bool = False,
 ) -> dict[str, object]:
-    """Run or resume the configured classifier training job."""
+    """Run, strictly resume, or start a decay branch from a zero-decay prefix."""
     target_device = _target_device(device)
     model_devices = {parameter.device for parameter in model.parameters()}
     model_devices.update(buffer.device for buffer in model.buffers())
@@ -931,6 +934,9 @@ def fit_classifier(
         )
     output_dir = Path(run_dir)
     resume_path = Path(resume_from) if resume_from is not None else None
+    fork_path = Path(fork_from_prefix) if fork_from_prefix is not None else None
+    if resume_path is not None and fork_path is not None:
+        raise ValueError("resume_from and fork_from_prefix are mutually exclusive")
     if resume_path is not None:
         expected_resume_path = output_dir / "checkpoints/last.pt"
         if resume_path.resolve() != expected_resume_path.resolve():
@@ -938,6 +944,10 @@ def fit_classifier(
     resume_payload = (
         load_torch_artifact(resume_path, map_location="cpu") if resume_path is not None else None
     )
+    fork_payload = (
+        load_torch_artifact(fork_path, map_location="cpu") if fork_path is not None else None
+    )
+    fork_best_payload: dict[str, object] | None = None
 
     if resume_payload is not None:
         _validate_checkpoint(resume_payload)
@@ -948,6 +958,28 @@ def fit_classifier(
         )
         if resume_payload["oge_git_sha"] != oge_git_sha:
             raise ValueError("resume checkpoint repository Git SHA differs from the current run")
+    if fork_payload is not None:
+        _validate_checkpoint(fork_payload)
+        validate_fork_configuration(
+            fork_payload["resolved_config"],
+            resolved_config,
+            completed_epoch=int(fork_payload["completed_epoch"]),
+        )
+        if fork_payload["oge_git_sha"] != oge_git_sha:
+            raise ValueError("fork checkpoint repository Git SHA differs from the current run")
+        assert fork_path is not None
+        prefix_best_path = fork_path.parent / "best_val.pt"
+        if not prefix_best_path.is_file():
+            raise ValueError("fork prefix requires its sibling checkpoints/best_val.pt")
+        fork_best_payload = load_torch_artifact(prefix_best_path, map_location="cpu")
+        if (
+            fork_best_payload.get("schema_version") != CHECKPOINT_SCHEMA_VERSION
+            or fork_best_payload.get("checkpoint_type") != "best_val"
+            or fork_best_payload.get("run_id") != fork_payload.get("run_id")
+            or int(fork_best_payload.get("completed_epoch", -1))
+            != int(fork_payload["best_validation"]["epoch"])
+        ):
+            raise ValueError("fork prefix best_val.pt is inconsistent with last.pt")
 
     paths, run_id = _prepare_artifacts(
         run_dir=output_dir,
@@ -960,7 +992,7 @@ def fit_classifier(
     )
     snapshot_epochs = set(int(value) for value in resolved_config["checkpoint"]["snapshot_epochs"])
 
-    if resume_payload is None:
+    if resume_payload is None and fork_payload is None:
         completed_epoch = 0
         global_step = 0
         best_validation: dict[str, float | int] | None = None
@@ -977,7 +1009,7 @@ def fit_classifier(
                 ),
                 paths["snapshots"] / "epoch_0000.pt",
             )
-    else:
+    elif resume_payload is not None:
         _restore_checkpoint(
             resume_payload,
             model=model,
@@ -1002,6 +1034,58 @@ def fit_classifier(
             oge_git_sha=oge_git_sha,
             run_id=run_id,
         )
+    else:
+        assert fork_payload is not None
+        assert fork_best_payload is not None
+        assert fork_path is not None
+        fork_record = restore_fork_checkpoint(
+            fork_payload,
+            model=model,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            train_generator=train_generator,
+            resolved_config=resolved_config,
+        )
+        completed_epoch = int(fork_payload["completed_epoch"])
+        global_step = int(fork_payload["global_step"])
+        best_validation = copy.deepcopy(fork_payload["best_validation"])
+        history = copy.deepcopy(fork_payload["history"])
+        if len(history) != completed_epoch or (
+            history and int(history[-1]["epoch"]) != completed_epoch
+        ):
+            raise ValueError("fork checkpoint history does not match completed_epoch")
+        _write_history(paths["history"], history)
+        inherited_best = copy.deepcopy(fork_best_payload)
+        inherited_best["run_id"] = run_id
+        inherited_best["resolved_config"] = copy.deepcopy(resolved_config)
+        inherited_best["oge_git_sha"] = oge_git_sha
+        inherited_best["fork_provenance"] = {
+            "source_run_id": str(fork_payload["run_id"]),
+            "source_checkpoint": str(fork_path.resolve()),
+        }
+        atomic_torch_save(inherited_best, paths["best"])
+        if completed_epoch in snapshot_epochs:
+            atomic_torch_save(
+                _snapshot_payload(
+                    completed_epoch=completed_epoch,
+                    model=model,
+                    resolved_config=resolved_config,
+                    oge_git_sha=oge_git_sha,
+                    run_id=run_id,
+                ),
+                paths["snapshots"] / f"epoch_{completed_epoch:04d}.pt",
+            )
+        fork_manifest = {
+            **fork_record,
+            "source_checkpoint": str(fork_path.resolve()),
+            "source_checkpoint_sha256": sha256_file(fork_path),
+            "branch_run_id": run_id,
+            "ordinary_resume_rules_changed": False,
+        }
+        _write_json(paths["fork_manifest"], fork_manifest)
+        metadata = _read_json(paths["metadata"])
+        metadata["fork_event"] = fork_manifest
+        _write_json(paths["metadata"], metadata)
 
     max_epochs = int(resolved_config["training"]["max_epochs"])
     for epoch in range(completed_epoch + 1, max_epochs + 1):
@@ -1126,6 +1210,13 @@ def fit_classifier(
             "summary": str(paths["summary"]),
         },
     }
+    if fork_payload is not None:
+        summary["fork"] = {
+            "status": "completed",
+            "source_checkpoint": str(fork_path.resolve()),
+            "manifest": str(paths["fork_manifest"]),
+        }
+        summary["artifact_paths"]["fork_manifest"] = str(paths["fork_manifest"])
     if defer_id_test:
         summary["id_test"] = {
             "status": "deferred",
@@ -1152,6 +1243,7 @@ def run_training_from_config(
     run_dir: str | Path,
     device: str,
     resume_from: str | Path | None = None,
+    fork_from_prefix: str | Path | None = None,
     max_epochs: int | None = None,
     defer_id_test: bool = False,
 ) -> dict[str, object]:
@@ -1205,5 +1297,6 @@ def run_training_from_config(
         oge_git_sha=git_sha,
         git_dirty=git_dirty,
         resume_from=resume_from,
+        fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
     )

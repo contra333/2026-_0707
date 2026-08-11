@@ -42,7 +42,10 @@ sources:
     role: authoritative completed WRN-28-10/CIFAR-10 v1.2 metric dictionary, implementation, artifact naming, and validation oracle
   local_fixed_readout_intervention_v2_reference_card:
     path: docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md
-    role: active fixed-readout mechanism, shared-prefix intervention, detector-tier, and replication protocol; fresh confirmation pending
+    role: historical radial-mechanism and shared-prefix planning contract; its failed Stage-2 execution remains immutable
+  local_component_attribution_intervention_v3_reference_card:
+    path: docs/reference_cards/13_component_attribution_intervention_protocol_v3.md
+    role: active component-attribution, shared-prefix intervention, claim-gate, and replication protocol
   local_optimizer_grid_literature_anchors_reference_card:
     path: docs/reference_cards/10_optimizer_grid_literature_anchors.md
     role: literature anchor mapping for the protocol v1.2 optimizer grids and research lineup; evidence mapping only, protocol authority stays with reference card 07
@@ -70,6 +73,20 @@ sources:
     url: https://arxiv.org/abs/1711.05101
     accessed: 2026-07-14
     role: primary decoupled weight decay reference; does not imply equal effective regularization at shared numeric weight decay
+  l2_regularization_batch_weight_normalization_paper:
+    title: L2 Regularization versus Batch and Weight Normalization
+    authors: van Laarhoven
+    stable_source: arXiv:1706.05350
+    url: https://arxiv.org/abs/1706.05350
+    accessed: 2026-08-11
+    role: normalized-network weight-scale and effective-learning-rate alternative pathway; not evidence that this pathway explains the planned OOD effect
+  three_mechanisms_weight_decay_paper:
+    title: Three Mechanisms of Weight Decay Regularization
+    authors: Zhang, Wang, Xu, and Grosse
+    stable_source: arXiv:1810.12281
+    url: https://arxiv.org/abs/1810.12281
+    accessed: 2026-08-11
+    role: optimizer- and architecture-dependent weight-decay mechanisms, including effective-learning-rate changes; alternative-pathway boundary only
   random_search_hpo_paper:
     title: Random Search for Hyper-Parameter Optimization
     authors: Bergstra and Bengio
@@ -125,6 +142,13 @@ sources:
       PyTorch default is fan_in. Both implementations therefore agree on fan_in.
       `pytorch/resnet.py` applies the projection shortcut to the pre-activated
       tensor `o1`, not to the raw block input.
+  densenet_paper:
+    title: Densely Connected Convolutional Networks
+    authors: Huang, Liu, van der Maaten, and Weinberger
+    stable_source: arXiv:1608.06993
+    url: https://arxiv.org/abs/1608.06993
+    accessed: 2026-08-11
+    role: planned DenseNet-BC-100 growth-rate-12 appendix architecture reference; implementation semantics remain pending
   convnext_paper:
     title: A ConvNet for the 2020s
     authors: Liu, Mao, Wu, Feichtenhofer, Darrell, and Xie
@@ -151,6 +175,11 @@ sources:
     url: https://github.com/Jingkang50/OpenOOD
     commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
     role: pinned dataset, preprocessing, grouping, and metric compatibility source
+  openood_v1_5_benchmark_overview:
+    title: OpenOOD v1.5 methods and benchmarks overview
+    url: https://github.com/Jingkang50/OpenOOD/wiki/OpenOOD-v1.5-methods-%26-benchmarks-overview
+    accessed: 2026-08-11
+    role: ImageNet-200 near-OOD, far-OOD, and covariate-shift grouping reference for the planned modern-scale appendix
   openood_v1_5_benchmark_imglist_release:
     source_repository: Jingkang50/OpenOOD
     source_commit: 3c35632ee91b54b09d1f085d04f94744cece7d0b
@@ -314,13 +343,20 @@ sources:
     url: https://arxiv.org/abs/2505.18032
     accessed: 2026-08-04
     role: L2-normalized Mahalanobis detector reference
+  relative_mahalanobis_paper:
+    title: A Simple Fix to Mahalanobis Distance for Improving Near-OOD Detection
+    authors: Ren, Fort, Liu, Guha Roy, Padhy, and Lakshminarayanan
+    stable_source: arXiv:2106.09022
+    url: https://arxiv.org/abs/2106.09022
+    accessed: 2026-08-11
+    role: original RMD definition subtracting the marginal global-Gaussian Mahalanobis distance
   geometry_based_mahalanobis_ood_paper:
-    title: "Dissecting Mahalanobis: How Feature Geometry and Normalization Shape OOD Detection"
+    title: A Geometry-Based View of Mahalanobis OOD Detection
     authors: Janiak, Binkowski, and Kajdanowicz
-    stable_source: arXiv:2510.15202
-    url: https://arxiv.org/abs/2510.15202
-    accessed: 2026-08-10
-    role: geometry, intrinsic-dimension, ID-only compatibility-prediction, and radial-transformation prior work; bounds the v2 novelty claim
+    stable_source: arXiv:2510.15202v3
+    url: https://arxiv.org/abs/2510.15202v3
+    accessed: 2026-08-11
+    role: exact size-stretch, term-wise RMD, spectrum-allocation, ID-instability, ID-only compatibility, and radial-transformation prior work; bounds the v3 novelty claim
   mahalanobis_pp_official_repository:
     repository: mueller-mp/maha-norm
     url: https://github.com/mueller-mp/maha-norm

@@ -1,34 +1,54 @@
 # Project Status
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 
 ## Current phase
 
-Research Contract v2 is the active paper protocol. The repository has finished
-the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive analysis.
+Research Contract v3 is the active paper protocol. It uses known
+MD--Marginal--RMD and size--stretch decompositions as measurement tools for a
+shared-prefix decay-coupling intervention and exact ID--OOD pair-order
+attribution. Contract v2 is historical: its radial Stage-2 failure remains
+immutable and is not being retried or tolerance-relaxed. The repository has
+finished the WRN-28-10/CIFAR-10 Metric Contract v1.2 foundation and descriptive
+analysis.
+
+Issue #63 implements the v3 foundation: a focused read-only 30-bundle
+component-attribution path and a separate `fork_from_prefix` operation. The
+implementation and post-review hardening passed the complete 477-test suite on
+Curie in a temporary Git snapshot. The production historical-discovery
+analysis also completed with `PASS`: 30 bundles, 360 bundle/component rows,
+and 108 prespecified
+descriptive-pair rows. Its artifacts and interpretation boundary are recorded
+in
+[`validation/issue63_component_attribution_and_fork_foundation.md`](validation/issue63_component_attribution_and_fork_foundation.md).
+
 The **Stage 2 existing-artifact mechanism gate** was executed at tooling SHA
 `b433c13ad6ec736fcfbca4c6c7ff0d876ddf0a03`. Its 30-bundle, 210-variant
 raw-kNN cache completed and passed the committed full-cache status rehash. The
 full evidence build then failed closed on the prespecified exact targeted
 witness for `radial_l2_mahalanobis:cifar100`; no 720/360 evidence package was
 published. The reducer's checksum-bound preflight package has status `FAILED`,
-with no selected candidate and `scientific_launch_allowed=false`. Stage 3 is
-stopped pending an explicitly versioned contract/tooling revision. Fresh
-shared-prefix confirmation and ResNet-18/CIFAR-100 replication have not
-started.
+with no selected candidate and `scientific_launch_allowed=false`. Stage 3
+under v2 remains terminally stopped. Card 13 defines a new v3 question, schema,
+and execution path rather than resuming v2. Fresh shared-prefix confirmation
+and every replication/scale arm remain `NOT_RUN`.
 
-The active claim is deliberately narrower than “optimizer X is better”:
+The active conditional claim is deliberately narrower than “optimizer X is
+better”:
 
 ```text
-paired training-rule change
--> detector-relevant representation channel
--> ID/OOD score-overlap change under a fixed readout
+shared zero-decay training prefix
+-> coupled / decoupled / zero continuation
+-> MD additive score component and affected quadratic term
+-> size / stretch, then spectrum / allocation diagnostic
+-> exact ID/OOD pair-order transition under a fixed readout
 -> fresh main confirmation
--> second-regime replication
+-> ordered architecture / dataset / scale replication
 ```
 
-[`reference_cards/12_fixed_readout_intervention_protocol_v2.md`](reference_cards/12_fixed_readout_intervention_protocol_v2.md)
-is authoritative for that sequence. It does not retroactively change v1.2.
+[`reference_cards/13_component_attribution_intervention_protocol_v3.md`](reference_cards/13_component_attribution_intervention_protocol_v3.md)
+is authoritative for that sequence. It does not retroactively change v1.2 or
+the v2 failed execution.
 
 ## Completed and validated foundation
 
@@ -93,7 +113,54 @@ analysis are valid descriptive/discovery evidence. They do **not** establish:
 `GDA-ClassDensity` is implemented and evaluated for SN-off checkpoints. `DDU`
 remains reserved for an unexecuted spectral-normalization training ablation.
 
-## Research Contract v2 decisions frozen
+## Research Contract v3 decisions frozen
+
+- Paper type: intervention with supporting theory, not a new Mahalanobis
+  decomposition or detector paper.
+- Main: WRN-28-10/CIFAR-10 with five Adam-family prefixes and three SGDM-family
+  control prefixes, each with coupled, decoupled, and zero continuations.
+- Primary attribution: `MD = RMD + Marginal` at score and pair-margin level,
+  tie-aware 3x3 pair transitions, and symmetric two-component AUROC accounting.
+- Diagnostic order: additive component -> quadratic term -> size/stretch ->
+  spectrum/allocation -> pair transition.
+- Replication order: ResNet-18/CIFAR-10, ResNet-18/CIFAR-100,
+  DenseNet-BC-100 k=12/CIFAR-10, ConvNeXt-Tiny/ImageNet-200.
+- ConvNeXt-Tiny is from scratch; ImageNet-1K pretrained weights are forbidden.
+- Strong claims remain conditional on component concentration, practical OOD
+  effect, ID equivalence/Pareto classification, and replication.
+
+The manuscript skeleton is
+[`paper/intervention_supporting_theory_outline.md`](paper/intervention_supporting_theory_outline.md).
+
+## V3 historical discovery result: `PASS`
+
+The v3 analysis read only the exact checksum-allowlisted score arrays already
+present in the 19.6 GB Stage-2 reuse tree. It did not reevaluate a checkpoint,
+traverse a protected dataset, select a candidate, or mutate the v2 failure.
+All 30 `last.pt` bundles and six OOD datasets were analyzed for raw and L2
+MD--Marginal--RMD scores. Exact score reconstruction, pair-margin
+reconstruction, tie-aware pair counts, and symmetric two-component AUROC
+accounting passed.
+
+Across the six OOD datasets, the mean historical cross-model AUROC range was
+0.418 for raw MD, 0.449 for raw Marginal, and 0.050 for raw RMD. For L2 scores
+the corresponding ranges were 0.117, 0.181, and 0.053. Among the 54
+prespecified descriptive pair rows per transform, the absolute Marginal
+attribution exceeded the absolute RMD attribution in 43 rows for raw and 43
+rows for L2. This is discovery evidence that the planned component question is
+worth confirming; it is not evidence that decay coupling caused the gap.
+
+The immutable result directory is outside the Git worktree:
+
+```text
+/home/contra333/2026여름방학실험코드/fixed_readout_component_attribution_v3/28ba5a067c55ba1f7a57d8265f55b57057d54762
+```
+
+Fresh shared-prefix training, ID-equivalence classification, protected-OOD
+confirmation, size--stretch branch attribution, and every architecture,
+dataset, and scale replication remain `NOT_RUN`.
+
+## Historical Research Contract v2 decisions
 
 - Main regime: WRN-28-10/CIFAR-10.
 - Replication regime: ResNet-18/CIFAR-100.
@@ -167,55 +234,51 @@ v2 policy. Exact identities, commands, diagnostics, hashes, and the verified
 local metadata archive are recorded in
 [`validation/fast_path_20260810_stage2_gate_execution.md`](validation/fast_path_20260810_stage2_gate_execution.md).
 
-The next permissible repository-changing research task is a versioned
-contract/tooling revision. It must not relax the observed result after the
-fact, reuse partial evidence for selection, or overwrite this execution. A new
-committed SHA, analysis ID, and fresh cache/evidence/gate roots are required
-before any rerun. Stage 3 remains stopped.
+The v2 execution remains closed. Card 13 is the versioned revision, but it asks
+a different component-attribution question and does not turn the old radial
+failure into a pass. Stage 3 under v2 remains stopped.
 
-## Stage-gated decisions still open
+## V3 pre-protected-OOD decisions still open
 
 These are intentional pre-confirmation decisions, not unresolved permission to
 tune on fresh OOD outcomes:
 
-- focal geometry channel, targeted transform, and exact invariant/null control;
 - switch epoch or prespecified switch-epoch set;
 - family-specific nominal decay dose or dose set;
 - ID accuracy equivalence margin and NLL/ECE guardrails;
 - per-outcome practical OOD margins;
-- fresh prefix count/power rule and multiplicity handling;
-- main go/no-go criterion.
+- power justification and multiplicity handling for the frozen 5/3 prefix
+  counts;
+- main go/no-go criterion and component-concentration rule.
 
-Before Stage 4, the CIFAR-100 membership/preprocessing/OOD contract, exact SGDM
-reference recipe, replication seed count, and replication success rule must be
-frozen separately.
+Before their execution, CIFAR-100 and ImageNet-200 membership/preprocessing/OOD
+contracts, DenseNet/ConvNeXt architecture implementations, replication recipes,
+and replication success rules must be frozen separately.
 
 ## Implementation and execution blockers
 
-- The current v2 numerical witness is terminally `FAILED`. A retry under the
-  same frozen policy is not authorized; a versioned remediation must first
-  define a numerically exact witness implementation and align worker/reducer
-  tolerance semantics without using partial outcomes for candidate selection.
+- The v2 numerical witness is terminally `FAILED`; it is historical, not an
+  active v3 implementation blocker.
 - The production raw-kNN cache is complete and reusable only under its frozen
   SHA/analysis identity. The successful 720-row candidate and 360-row
   diagnostic evidence populations do not exist because fail-closed extraction
   stopped before atomic publication.
-- The shared-prefix operation does not exist. It must eventually be
-  implemented as a new `fork_from_prefix` path while ordinary resume remains
-  strict, but implementation and fresh training are blocked until a revised
-  Stage 2 gate passes.
+- The minimal shared-prefix `fork_from_prefix` path exists and keeps ordinary
+  resume strict. It has CPU fixture validation but no production prefix or GPU
+  branch execution.
 - ResNet-18 is implemented, but the CIFAR-100 dataset/OOD protocol and its
   actual-data validation are pending.
+- DenseNet-BC, ConvNeXt-Tiny, and ImageNet-200 are planned only.
 
-The later experiment-design items above remain stage-gated. The numerical
-witness remediation is now a blocker to any revised Stage 2 execution.
+The later experiment-design items above remain stage-gated. Missing numerical
+values, not the historical v2 radial witness, block fresh v3 training launch.
 
-## Explicitly not run after the Stage 2 execution
+## Explicitly not run at the current v3 status boundary
 
-- no GPU work, server training, checkpoint inference, feature re-extraction,
-  or new protected dataset traversal;
+- no v3 GPU work, server training, checkpoint inference, feature
+  re-extraction, or new protected dataset traversal;
 - no successful 720/360 evidence publication, candidate ranking, focal
-  selection, or preconfirmation freeze;
+  selection, or preconfirmation freeze under the historical v2 gate;
 - no shared-prefix branch, fresh seed, or CIFAR-100 experiment;
 - no Hugging Face upload, source mutation, overwrite, or deletion;
 - no comparable-ID, causal decay-coupling, or replication conclusion.

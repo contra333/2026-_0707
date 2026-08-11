@@ -23,6 +23,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", required=True)
     parser.add_argument("--resume", type=Path)
     parser.add_argument(
+        "--fork-from-prefix",
+        type=Path,
+        help=(
+            "Start a new run from a zero-decay last.pt while preserving model, "
+            "optimizer tensor, scheduler, RNG, and DataLoader-generator state."
+        ),
+    )
+    parser.add_argument(
         "--defer-id-test",
         action="store_true",
         help="Do not evaluate or materialize ID-test results for study-selection runs.",
@@ -43,6 +51,7 @@ def main() -> int:
         run_dir=args.run_dir,
         device=args.device,
         resume_from=args.resume,
+        fork_from_prefix=args.fork_from_prefix,
         max_epochs=args.max_epochs,
         defer_id_test=args.defer_id_test,
     )

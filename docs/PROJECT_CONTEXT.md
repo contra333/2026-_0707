@@ -11,12 +11,12 @@ optimizer / training rule
 → ID/OOD reliability
 ```
 
-The active v2 question is whether a fixed feature-based OOD readout is
-practically non-invariant to a paired training-rule change at comparable ID
-utility, which detector-formula-relevant geometry channel changes ID--OOD score
-overlap, and whether that chain reproduces in a second dataset--architecture
-regime. The target evidence is paired intervention and score-level diagnosis,
-not an optimizer leaderboard or a scalar geometry--AUROC correlation alone.
+The active v3 question is where a training-rule-induced fixed-readout gap lives
+inside a known Mahalanobis score decomposition. The target evidence starts
+from one shared training prefix, changes only decay coupling, and traces the
+change through an additive score component, a quadratic size/stretch channel,
+and exact tie-aware ID--OOD pair transitions. Comparable ID utility controls
+interpretation; it is not the headline novelty or a checkpoint-matching rule.
 
 ## Repository as the source of truth
 
@@ -97,26 +97,28 @@ Documented and implemented result boundaries:
 - the WRN-28-10/CIFAR-10 Metric Contract v1.2 formulas, paper names, artifact
   keys, numerical failure semantics, validation oracles, and runtime entrypoints.
 
-Active but not yet executed research contract:
+Active but not yet executed scientific confirmation:
 
-- [`reference_cards/12_fixed_readout_intervention_protocol_v2.md`](reference_cards/12_fixed_readout_intervention_protocol_v2.md)
-  freezes WRN-28-10/CIFAR-10 as the main regime and
-  ResNet-18/CIFAR-100 as replication;
-- Adam/AdamW is the primary shared-prefix family, SGDM/SGDW is the
-  conventional-family control, and the replication adds a conventional SGDM
-  reference;
-- the v2 detector panel and score-overlap mechanism requirements are fixed,
-  while switch epoch, decay dose, practical margins, power, and the focal
-  channel/transform are explicitly Stage-2-gated decisions;
-- the completed v1.2 artifacts are discovery inputs only and are never
-  retroactively labeled causal confirmation.
+- [`reference_cards/13_component_attribution_intervention_protocol_v3.md`](reference_cards/13_component_attribution_intervention_protocol_v3.md)
+  is the active authority; Card 12 and its failed radial gate are historical;
+- known MD--Marginal--RMD and size--stretch decompositions are measurement
+  tools, not novelty claims;
+- WRN-28-10/CIFAR-10 is the main shared-prefix regime, Adam is primary, and
+  SGDM is the conventional-family control;
+- ResNet-18/CIFAR-10, ResNet-18/CIFAR-100, DenseNet-BC/CIFAR-10, and
+  ConvNeXt-Tiny/ImageNet-200 are the ordered replication/scale plan;
+- switch epoch, decay doses, ID/practical margins, and inferential success
+  rules still require a pre-protected-OOD addendum;
+- completed v1.2 artifacts remain discovery inputs and are never relabeled
+  causal confirmation.
 
 Not part of the validated foundation unless added by a later bounded task:
 
-- a completed shared-prefix fork implementation or paired causal optimizer-rule
-  conclusion;
+- a validated production shared-prefix branch execution or paired causal
+  optimizer-rule conclusion;
 - the CIFAR-100 dataset/OOD contract and ResNet-18 replication result;
 - a dataset-pooled geometry-OOD association;
+- DenseNet-BC, ConvNeXt-Tiny, ImageNet-200, and their actual-data contracts;
 - final manuscript prose and final main/appendix table selection;
 - spectral-normalization training and any future DDU ablation;
 - protected research-result evaluation for any architecture, dataset, or
@@ -144,9 +146,13 @@ Not part of the validated foundation unless added by a later bounded task:
 - `docs/reference_cards/11_metric_contract_v1_2.md`: authoritative
   WRN-28-10/CIFAR-10 metric definition dictionary for paper notation,
   reporting tiers, artifact keys, degeneracy states, and implementation tests.
-- `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`: active
-  claim hierarchy, mechanism gate, shared-prefix intervention, v2 detector
-  roles, statistics boundary, and replication protocol.
+- `docs/reference_cards/12_fixed_readout_intervention_protocol_v2.md`:
+  historical radial mechanism gate and its original shared-prefix plan.
+- `docs/reference_cards/13_component_attribution_intervention_protocol_v3.md`:
+  active novelty boundary, additive/pair attribution, shared-prefix fork,
+  detector roles, claim gates, and ordered replication/scale protocol.
+- `docs/paper/intervention_supporting_theory_outline.md`: manuscript section,
+  figure, table, and conditional-results-language skeleton governed by Card 13.
 - `docs/history/local_research_draft_manifest.md`: metadata-only inventory of
   preserved local historical/superseded drafts and handoff archives; those
   untracked files are never repository authorities.
