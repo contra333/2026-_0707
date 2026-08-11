@@ -142,7 +142,15 @@ def _components(config):
     }
 
 
-def _run(config, run_dir, *, resume_from=None, defer_id_test=False, test_loader=None):
+def _run(
+    config,
+    run_dir,
+    *,
+    resume_from=None,
+    fork_from_prefix=None,
+    defer_id_test=False,
+    test_loader=None,
+):
     components = _components(config)
     if test_loader is not None:
         components["test_loader"] = test_loader
@@ -153,6 +161,7 @@ def _run(config, run_dir, *, resume_from=None, defer_id_test=False, test_loader=
         device="cpu",
         oge_git_sha="fixture-sha",
         resume_from=resume_from,
+        fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
     )
     return components["model"], summary
@@ -205,6 +214,134 @@ def test_continuous_three_epochs_match_two_plus_one_resumed_epoch(tmp_path):
     _assert_nested_equal(continuous["optimizer_state"], resumed["optimizer_state"])
     _assert_nested_equal(continuous["scheduler_state"], resumed["scheduler_state"])
     _assert_nested_equal(continuous["rng_state"], resumed["rng_state"])
+
+
+def _zero_decay_config(max_epochs, *, optimizer_name="sgd", weight_decay=0.0):
+    config = _resolved_fixture_config(max_epochs)
+    config["optimizer"] = {
+        "name": optimizer_name,
+        "lr": 0.05,
+        "momentum": 0.9,
+        "nesterov": True,
+        "weight_decay": weight_decay,
+        "weight_decay_policy": "weights_only_no_bias_norm",
+    }
+    return config
+
+
+def test_zero_decay_fork_matches_uninterrupted_zero_decay_continuation(tmp_path):
+    import shutil
+
+    prefix_dir = tmp_path / "prefix"
+    resumed_dir = tmp_path / "ordinary_resume"
+    fork_dir = tmp_path / "zero_fork"
+    _run(_zero_decay_config(1), prefix_dir)
+    shutil.copytree(prefix_dir, resumed_dir)
+
+    _run(
+        _zero_decay_config(2),
+        resumed_dir,
+        resume_from=resumed_dir / "checkpoints/last.pt",
+    )
+    _, fork_summary = _run(
+        _zero_decay_config(2),
+        fork_dir,
+        fork_from_prefix=prefix_dir / "checkpoints/last.pt",
+    )
+
+    resumed = load_torch_artifact(resumed_dir / "checkpoints/last.pt")
+    forked = load_torch_artifact(fork_dir / "checkpoints/last.pt")
+    _assert_nested_equal(resumed["model_state"], forked["model_state"])
+    _assert_nested_equal(resumed["optimizer_state"], forked["optimizer_state"])
+    _assert_nested_equal(resumed["scheduler_state"], forked["scheduler_state"])
+    _assert_nested_equal(resumed["rng_state"], forked["rng_state"])
+    assert _history_without_timing(resumed["history"]) == _history_without_timing(
+        forked["history"]
+    )
+    assert fork_summary["fork"]["status"] == "completed"
+    manifest = json.loads((fork_dir / "fork_manifest.json").read_text())
+    assert manifest["ordinary_resume_rules_changed"] is False
+    assert len(manifest["transferred_state_digest"]) == 64
+
+
+def test_decay_fork_preserves_prefix_state_but_keeps_new_branch_decay(tmp_path):
+    prefix_dir = tmp_path / "prefix"
+    branch_dir = tmp_path / "branch"
+    _run(_zero_decay_config(1), prefix_dir)
+
+    _, summary = _run(
+        _zero_decay_config(2, optimizer_name="sgdw", weight_decay=0.01),
+        branch_dir,
+        fork_from_prefix=prefix_dir / "checkpoints/last.pt",
+    )
+
+    manifest = json.loads((branch_dir / "fork_manifest.json").read_text())
+    assert manifest["optimizer_family"] == "sgd"
+    assert manifest["branch_optimizer"]["name"] == "sgdw"
+    assert manifest["branch_optimizer"]["weight_decay"] == 0.01
+    assert summary["artifact_paths"]["fork_manifest"] == str(
+        branch_dir / "fork_manifest.json"
+    )
+
+
+def test_sibling_forks_share_state_digest_rng_and_first_minibatch(tmp_path):
+    prefix_dir = tmp_path / "prefix"
+    _run(_zero_decay_config(1), prefix_dir)
+    payload = load_torch_artifact(prefix_dir / "checkpoints/last.pt")
+
+    observations = []
+    for optimizer_name, decay in (("sgd", 0.01), ("sgdw", 0.01)):
+        config = _zero_decay_config(
+            2, optimizer_name=optimizer_name, weight_decay=decay
+        )
+        components = _components(config)
+        record = training_runner.restore_fork_checkpoint(
+            payload,
+            model=components["model"],
+            optimizer=components["optimizer"],
+            scheduler=components["scheduler"],
+            train_generator=components["train_generator"],
+            resolved_config=config,
+        )
+        first_batch = next(iter(components["train_loader"]))
+        observations.append((record, first_batch, components["optimizer"]))
+
+    assert (
+        observations[0][0]["transferred_state_digest"]
+        == observations[1][0]["transferred_state_digest"]
+    )
+    torch.testing.assert_close(
+        observations[0][1]["image"], observations[1][1]["image"], rtol=0, atol=0
+    )
+    torch.testing.assert_close(
+        observations[0][1]["class_label"],
+        observations[1][1]["class_label"],
+        rtol=0,
+        atol=0,
+    )
+    assert any(group["weight_decay"] == 0.01 for group in observations[0][2].param_groups)
+    assert any(group["weight_decay"] == 0.01 for group in observations[1][2].param_groups)
+
+
+def test_fork_rejects_nonzero_prefix_and_cross_family():
+    saved = _zero_decay_config(1)
+    saved["optimizer"]["weight_decay"] = 0.001
+    current = _zero_decay_config(2)
+    with pytest.raises(ValueError, match="zero-decay"):
+        training_runner.validate_fork_configuration(saved, current, completed_epoch=1)
+
+    saved["optimizer"]["weight_decay"] = 0.0
+    current["optimizer"] = {
+        "name": "adamw",
+        "lr": 0.05,
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "eps": 1e-8,
+        "weight_decay": 0.001,
+        "weight_decay_policy": "weights_only_no_bias_norm",
+    }
+    with pytest.raises(ValueError, match="cross optimizer families"):
+        training_runner.validate_fork_configuration(saved, current, completed_epoch=1)
 
 
 def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):

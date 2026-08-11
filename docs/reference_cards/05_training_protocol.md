@@ -60,6 +60,33 @@ and later extension. Resume uses the same run directory and its atomic
 override value and every other effective setting are written to
 `resolved_config.yaml`.
 
+## Shared-prefix fork versus ordinary resume
+
+Ordinary `--resume` remains a same-run operation: it requires that run
+directory's own `checkpoints/last.pt` and rejects optimizer names or
+hyperparameter changes.
+
+The v3 intervention adds a separate operation:
+
+```bash
+python scripts/train_cifar10.py \
+  --config /path/to/branch-config.yaml \
+  --data-root /path/to/openood-v1.5-root \
+  --run-dir /path/to/new-branch-run \
+  --device cuda:0 \
+  --fork-from-prefix /path/to/zero-prefix/checkpoints/last.pt
+```
+
+`--resume` and `--fork-from-prefix` are mutually exclusive. The fork path is
+authorized only by
+[`13_component_attribution_intervention_protocol_v3.md`](13_component_attribution_intervention_protocol_v3.md):
+it accepts an epoch-boundary exact zero-decay prefix, stays inside Adam or SGDM
+family, preserves model/optimizer tensor/scheduler/RNG/DataLoader-generator
+state, and changes only the decay endpoint/coupling plus future run length.
+The new run records `fork_manifest.json`, source SHA-256, and a sibling-
+invariant transferred-state digest. A zero-decay fork must match uninterrupted
+zero-decay continuation. This operation does not relax ordinary resume.
+
 ## DataLoader contract
 
 The existing imglist loader is reused with committed project ID lists. Only

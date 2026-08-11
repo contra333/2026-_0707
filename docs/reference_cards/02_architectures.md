@@ -37,11 +37,31 @@ For batch size `B`, configured class count `num_classes`, and the model's expose
 | `toy_cifar_cnn` | `src/oge/models/toy_cnn.py` | `ToyCifarCNN` | Toy/API smoke-test fixture only | Implemented | Local API contract |
 | `resnet18` | `src/oge/models/resnet.py` | `ResNet18` | Research backbone | Implemented | He et al., Deep Residual Learning for Image Recognition |
 | `wrn28_10` | `src/oge/models/wide_resnet.py` | `WideResNet` | Primary CIFAR research backbone | Implemented | Zagoruyko & Komodakis, Wide Residual Networks |
+| `densenet_bc_100_k12` | `src/oge/models/densenet.py` | `DenseNetBC` | Dense-connectivity appendix backbone | Planned | Huang et al., Densely Connected Convolutional Networks |
 | `vgg16` | `src/oge/models/vgg.py` | `VGG16` | Research backbone | Planned | Simonyan & Zisserman, Very Deep Convolutional Networks for Large-Scale Image Recognition |
 | `convnext_tiny` | `src/oge/models/convnext.py` | `ConvNeXtTiny` | Modern ConvNet research backbone | Planned | Liu et al., A ConvNet for the 2020s |
 | `vit_small` | `src/oge/models/vit.py` | `ViTSmall` | Modern transformer research backbone | Planned | Dosovitskiy et al., An Image is Worth 16x16 Words; Lee, Lee, and Song, Vision Transformer for Small-Size Datasets |
 
-## Active Research Contract v2 lineup (2026-08-10)
+## Active Research Contract v3 lineup (2026-08-11)
+
+[`13_component_attribution_intervention_protocol_v3.md`](13_component_attribution_intervention_protocol_v3.md)
+supersedes the v2 minimum lineup for the active paper. The table is an
+execution plan, not a claim that planned model/data paths exist.
+
+| Order | Role | Backbone | Dataset | Implementation status | Experiment status |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Main | `wrn28_10` | CIFAR-10 | implemented | historical discovery complete; fresh forked confirmation not run |
+| 2 | Architecture replication | `resnet18` | CIFAR-10 | implemented | not run |
+| 3 | Dataset/class-count replication | `resnet18` | CIFAR-100 | model implemented; data contract pending | not run |
+| 4 | Dense-connectivity appendix | `densenet_bc_100_k12` | CIFAR-10 | planned | not run |
+| 5 | Modern-scale appendix | `convnext_tiny` | ImageNet-200 | planned | data contract and experiment not run |
+
+DenseNet-BC-100 uses growth rate 12. ConvNeXt-Tiny is trained from scratch;
+ImageNet-1K pretrained weights are forbidden for the ImageNet-200 arm. Exact
+architecture and data semantics must be added by bounded implementation tasks
+before either planned row becomes executable.
+
+## Historical Research Contract v2 lineup (2026-08-10)
 
 [`12_fixed_readout_intervention_protocol_v2.md`](12_fixed_readout_intervention_protocol_v2.md)
 supersedes the earlier future-lineup priority for the minimum paper design. It
@@ -52,7 +72,7 @@ does not change any architecture implementation or completed v1.2 result.
 | Main | `wrn28_10` | CIFAR-10 | implemented | v1.2 discovery complete; fresh paired v2 confirmation not run |
 | Replication | `resnet18` (`cifar`) | CIFAR-100 | implemented | dataset/OOD contract and v2 replication pending |
 
-VGG-16-BN, ViT-Small, and ConvNeXt-Tiny are outside the minimum v2 paper. They
+VGG-16-BN, ViT-Small, and ConvNeXt-Tiny were outside the minimum v2 paper. They
 remain possible later extensions and are not prerequisites for the main claim.
 The replication row cannot execute until its CIFAR-100 membership,
 preprocessing, OOD roles, and validation are frozen in a versioned addendum.
