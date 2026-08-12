@@ -23,8 +23,10 @@ from scipy.stats import chi2, kstest, pearsonr, spearmanr
 from oge.studies.artifacts import atomic_write_json, sha256_file
 
 
-SCHEMA_VERSION = "discriminant_residual_preflight_v1"
-CONTRACT_SOURCE = "Card 13 Sections 7.4, 7.5, and 13"
+SCHEMA_VERSION = "discriminant_residual_preflight_v2"
+CONTRACT_SOURCE = "Card 13 v11 Sections 7.4, 7.5, and 13"
+TWO_FOLD_NAMESPACE = "discriminant_residual_preflight_v1"
+ISSUE_NUMBER = 77
 TRANSFORMS = ("raw", "l2")
 NU_LOWER = 2.05
 NU_UPPER = 1000.0
@@ -33,6 +35,9 @@ COMMON_RIDGE_SCALE = 1.0e-6
 MATRIX_TOLERANCE = 1.0e-10
 EXPECTED_REUSE_MANIFEST_SHA256 = (
     "f814f1ab3070a2dc4f0d541746bbd05c3ad74d761bd5c8fa88bc859f308318dc"
+)
+EXPECTED_V1_BUNDLE_RECORDS_SHA256 = (
+    "72f0260647cd666bdbf22460a015e59008aaff90268a3c49aa7468cd5824b91e"
 )
 
 ID_REQUIRED_PATHS = (
@@ -118,6 +123,27 @@ def _contract_scaled_max(
     return float(np.max(np.abs(residual) / scale))
 
 
+def _rmd_cancellation_scaled_max(
+    residual: np.ndarray,
+    direct_global: np.ndarray,
+    direct_class: np.ndarray,
+    q_parallel_global: np.ndarray,
+    q_parallel_class: np.ndarray,
+) -> float:
+    """Apply Card 13 v11's operand-aware RMD cancellation scale."""
+
+    scale = np.maximum.reduce(
+        (
+            np.ones_like(np.asarray(residual, dtype=np.float64)),
+            np.abs(np.asarray(direct_global, dtype=np.float64))
+            + np.abs(np.asarray(direct_class, dtype=np.float64)),
+            np.abs(np.asarray(q_parallel_global, dtype=np.float64))
+            + np.abs(np.asarray(q_parallel_class, dtype=np.float64)),
+        )
+    )
+    return float(np.max(np.abs(residual) / scale))
+
+
 def _pointwise_parity_max(residual: np.ndarray, *terms: np.ndarray) -> float:
     """Return a diagnostic direct-array parity residual, not a frozen gate."""
 
@@ -176,6 +202,136 @@ def _load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def _load_json_lines(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        raise PreflightInputError(f"required JSONL input is absent: {path}")
+    records: list[dict[str, Any]] = []
+    for line_number, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), start=1
+    ):
+        if not line.strip():
+            continue
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise PreflightInputError(
+                f"{path}:{line_number} must contain a JSON object"
+            )
+        records.append(value)
+    return records
+
+
+def _diff_snapshot(record: Mapping[str, Any], *, v2: bool) -> dict[str, Any]:
+    train = record.get("id_train", {})
+    test = record.get("id_test", {})
+    parity = record.get("cached_metric_v1_2_id_test_parity", {})
+    correlations = record.get("raw_norm_component_correlations")
+    return {
+        "status": record.get("status"),
+        "applicable": record.get("applicable"),
+        "required_numerical_pass": record.get("required_numerical_pass"),
+        "primary_channel": record.get("primary_channel"),
+        "rmd_cancellation_scale": (
+            train.get("rmd_cancellation_scale", "legacy_output_scale")
+            if v2
+            else "legacy_output_scale"
+        ),
+        "id_train_rmd_cancellation_scaled_max": train.get(
+            "rmd_cancellation_scaled_max"
+        ),
+        "id_train_rmd_cancellation_pass": train.get("checks", {}).get(
+            "rmd_cancellation"
+        ),
+        "id_test_rmd_cancellation_scaled_max": test.get(
+            "rmd_cancellation_scaled_max"
+        ),
+        "id_test_rmd_cancellation_pass": test.get("checks", {}).get(
+            "rmd_cancellation"
+        ),
+        "cached_parity_pass": parity.get("pass"),
+        "cached_parity_rmd_scaled_max": parity.get(
+            "scaled_max_residuals", {}
+        ).get("rmd"),
+        "cached_parity_legacy_rmd_scaled_max": (
+            parity.get("legacy_output_scaled_max_residuals", {}).get("rmd")
+            if v2
+            else parity.get("scaled_max_residuals", {}).get("rmd")
+        ),
+        "raw_norm_id_train_present": bool(
+            correlations is not None and "id_train" in correlations
+        ),
+        "raw_norm_id_test_present": bool(
+            correlations is not None and "id_test" in correlations
+        ),
+    }
+
+
+def build_v1_v2_diff(
+    v1_records: Iterable[Mapping[str, Any]],
+    v2_records: Iterable[Mapping[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Build a strict per-fit preservation diff for the one allowed rerun."""
+
+    def keyed(
+        records: Iterable[Mapping[str, Any]], label: str
+    ) -> dict[tuple[str, str], Mapping[str, Any]]:
+        output: dict[tuple[str, str], Mapping[str, Any]] = {}
+        for record in records:
+            key = (str(record.get("bundle_id")), str(record.get("transform")))
+            if key in output:
+                raise PreflightInputError(f"duplicate {label} fit key: {key}")
+            output[key] = record
+        return output
+
+    before_by_key = keyed(v1_records, "v1")
+    after_by_key = keyed(v2_records, "v2")
+    if set(before_by_key) != set(after_by_key):
+        missing = sorted(set(before_by_key) - set(after_by_key))
+        extra = sorted(set(after_by_key) - set(before_by_key))
+        raise PreflightInputError(
+            f"v1/v2 fit keys differ: missing={missing}, extra={extra}"
+        )
+    if len(before_by_key) != 60:
+        raise PreflightInputError(
+            f"v1/v2 preservation diff requires exactly 60 fits, got {len(before_by_key)}"
+        )
+
+    diff_records: list[dict[str, Any]] = []
+    for key in sorted(before_by_key):
+        before = _diff_snapshot(before_by_key[key], v2=False)
+        after = _diff_snapshot(after_by_key[key], v2=True)
+        changed_fields = [name for name in before if before[name] != after[name]]
+        diff_records.append(
+            {
+                "bundle_id": key[0],
+                "transform": key[1],
+                "before": before,
+                "after": after,
+                "changed_fields": changed_fields,
+            }
+        )
+
+    summary_fields = (
+        "status",
+        "applicable",
+        "required_numerical_pass",
+        "primary_channel",
+        "id_train_rmd_cancellation_pass",
+        "id_test_rmd_cancellation_pass",
+        "cached_parity_pass",
+    )
+    summary = {
+        "fit_count": len(diff_records),
+        "changed_fit_count": sum(bool(row["changed_fields"]) for row in diff_records),
+        "changed_count_by_field": {
+            field: sum(field in row["changed_fields"] for row in diff_records)
+            for field in summary_fields
+        },
+        "v1_immutable": True,
+        "historical_gate_2_re_adjudicated": False,
+    }
+    return diff_records, summary
+
+
 def _transform_features(features: np.ndarray, transform: str) -> np.ndarray:
     values = np.asarray(features, dtype=np.float64)
     if values.ndim != 2 or not np.isfinite(values).all():
@@ -207,7 +363,7 @@ def deterministic_class_stratified_twofold(
         keyed = sorted(
             selected,
             key=lambda index: hashlib.sha256(
-                f"{SCHEMA_VERSION}:twofold:{identities[index]}".encode("utf-8")
+                f"{TWO_FOLD_NAMESPACE}:twofold:{identities[index]}".encode("utf-8")
             ).digest(),
         )
         folds[np.asarray(keyed, dtype=np.int64)] = np.arange(len(keyed)) % 2
@@ -656,8 +812,12 @@ def score_discriminant_components(
         s_parallel_marginal,
         s_rmd,
     )
-    cancellation_residual = _contract_scaled_max(
-        s_rmd_direct - s_rmd, s_rmd_direct, s_rmd
+    cancellation_residual = _rmd_cancellation_scaled_max(
+        s_rmd_direct - s_rmd,
+        direct_global,
+        direct_class,
+        q_parallel_global,
+        q_parallel_class,
     )
     marginal_residual = _contract_scaled_max(
         s_marginal - (s_perp + s_parallel_marginal),
@@ -681,6 +841,7 @@ def score_discriminant_components(
         "score_reconstruction_scaled_max": score_residual,
         "marginal_reconstruction_scaled_max": marginal_residual,
         "rmd_cancellation_scaled_max": cancellation_residual,
+        "rmd_cancellation_scale": "operand_aware_card13_v11",
         "id_adjacent_pair_margin_reconstruction_scaled_max": margin_residual,
         "component_variances": np.diag(covariance).tolist(),
         "component_covariance_biased": covariance.tolist(),
@@ -701,6 +862,10 @@ def score_discriminant_components(
         "rmd": s_rmd_direct,
         "components": components,
         "q_perp": q_perp,
+        "direct_class_distance": direct_class,
+        "direct_global_distance": direct_global,
+        "q_parallel_class": q_parallel_class,
+        "q_parallel_global": q_parallel_global,
     }
 
 
@@ -769,7 +934,7 @@ def _cached_score_parity(
     cached_global = np.load(
         bundle_root / paths["global_distance"], allow_pickle=False
     ).astype(np.float64)
-    residuals = {
+    legacy_residuals = {
         "md": _pointwise_parity_max(
             arrays["md"] - cached_md, arrays["md"], cached_md
         ),
@@ -782,9 +947,50 @@ def _cached_score_parity(
             cached_global,
         ),
     }
+    current_operand_scale = np.abs(arrays["direct_global_distance"]) + np.abs(
+        arrays["direct_class_distance"]
+    )
+    cached_operand_scale = np.abs(cached_global) + np.abs(cached_md)
+    cached_rmd_scale = np.maximum.reduce(
+        (
+            np.ones_like(cached_rmd),
+            current_operand_scale,
+            cached_operand_scale,
+        )
+    )
+    residuals = {
+        **legacy_residuals,
+        "rmd": float(np.max(np.abs(arrays["rmd"] - cached_rmd) / cached_rmd_scale)),
+    }
     return {
         "scaled_max_residuals": residuals,
+        "legacy_output_scaled_max_residuals": legacy_residuals,
+        "rmd_scale": "operand_aware_direct_and_cached_quadratic_operands",
+        "decision_role": "diagnostic_not_required_gate",
         "pass": all(value <= tau_alg for value in residuals.values()),
+    }
+
+
+def _raw_norm_component_correlations(
+    train_raw: np.ndarray,
+    test_raw: np.ndarray,
+    train_components: np.ndarray,
+    test_components: np.ndarray,
+) -> dict[str, dict[str, dict[str, float | None]]]:
+    """Record Card 13 raw-norm correlations for both ID splits."""
+
+    names = ("s_perp", "s_parallel_marginal", "s_rmd")
+    train_norms = np.linalg.norm(np.asarray(train_raw, dtype=np.float64), axis=1)
+    test_norms = np.linalg.norm(np.asarray(test_raw, dtype=np.float64), axis=1)
+    return {
+        "id_train": {
+            name: _correlation(train_norms, train_components[:, index])
+            for index, name in enumerate(names)
+        },
+        "id_test": {
+            name: _correlation(test_norms, test_components[:, index])
+            for index, name in enumerate(names)
+        },
     }
 
 
@@ -907,24 +1113,12 @@ def _bundle_transform(
     cached_parity = _cached_score_parity(root, transform, test_arrays, fit.tau_alg)
     raw_norm_correlations = None
     if transform == "raw":
-        train_norms = np.linalg.norm(np.asarray(train_raw, dtype=np.float64), axis=1)
-        test_norms = np.linalg.norm(np.asarray(test_raw, dtype=np.float64), axis=1)
-        raw_norm_correlations = {
-            "id_train": {
-                name: _correlation(
-                    train_norms, train_arrays["components"][:, index]
-                )
-                for index, name in enumerate(
-                    ("s_perp", "s_parallel_marginal", "s_rmd")
-                )
-            },
-            "id_test": {
-                name: _correlation(test_norms, test_arrays["components"][:, index])
-                for index, name in enumerate(
-                    ("s_perp", "s_parallel_marginal", "s_rmd")
-                )
-            },
-        }
+        raw_norm_correlations = _raw_norm_component_correlations(
+            train_raw,
+            test_raw,
+            train_arrays["components"],
+            test_arrays["components"],
+        )
     base_checks = fit.numerical["checks"]
     score_checks = list(train_record["checks"].values()) + list(
         test_record["checks"].values()
@@ -1168,7 +1362,10 @@ def _aligned_pair_record(
 
 def _gate2_summary(tail_records: list[dict[str, Any]]) -> dict[str, Any]:
     by_transform: dict[str, Any] = {}
-    reason_codes = ["aggregate_gate2_decision_rule_not_predeclared"]
+    reason_codes = [
+        "historical_gate2_permanently_inconclusive",
+        "aggregate_gate2_decision_rule_was_not_predeclared",
+    ]
 
     def distribution(values: list[float]) -> dict[str, Any]:
         return {
@@ -1227,7 +1424,9 @@ def _gate2_summary(tail_records: list[dict[str, Any]]) -> dict[str, Any]:
         "status": "DESCRIPTIVE_ONLY",
         "gate_status": "INCONCLUSIVE",
         "reason_codes": reason_codes,
-        "aggregate_decision_rule": "NOT_PREDECLARED_IN_CARD_13",
+        "aggregate_decision_rule": "PERMANENTLY_NOT_ADJUDICATED",
+        "retroactive_threshold_or_readjudication": False,
+        "subset_tail_role": "numerically_applicable_subset_conditional_discovery_only",
         "by_transform": by_transform,
         "claim_boundary": (
             "historical mixed-recipe ID-only plausibility; cannot activate RtMD, "
@@ -1248,6 +1447,7 @@ def run_preflight(
     input_manifest_path: str | Path,
     cache_root: str | Path,
     output_dir: str | Path,
+    v1_bundle_records_path: str | Path | None = None,
     hard_cap_seconds: float = 4.0 * 60.0 * 60.0,
     progress_callback: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
@@ -1260,6 +1460,17 @@ def run_preflight(
     try:
         manifest = _load_json(manifest_path)
         verified, source_records = verify_input_cache(manifest, Path(cache_root))
+        if v1_bundle_records_path is None:
+            raise PreflightInputError("v1 bundle records are required for the v2 diff")
+        v1_records_path = Path(v1_bundle_records_path)
+        if not v1_records_path.is_file():
+            raise PreflightInputError(
+                f"required v1 bundle records are absent: {v1_records_path}"
+            )
+        observed_v1_sha256 = sha256_file(v1_records_path)
+        if observed_v1_sha256 != EXPECTED_V1_BUNDLE_RECORDS_SHA256:
+            raise PreflightInputError("v1 bundle records SHA-256 does not match")
+        v1_bundle_records = _load_json_lines(v1_records_path)
         _json_line(destination / "input_manifest.jsonl", source_records)
         if progress_callback is not None:
             progress_callback(
@@ -1327,9 +1538,13 @@ def run_preflight(
                         f"{len(manifest.get('pairs', [])) * len(TRANSFORMS)} "
                         f"{pair['pair_id']} {transform}"
                     )
+        diff_records, diff_summary = build_v1_v2_diff(
+            v1_bundle_records, bundle_records
+        )
         _json_line(destination / "bundle_records.jsonl", bundle_records)
         _json_line(destination / "tail_records.jsonl", tail_records)
         _json_line(destination / "pair_records.jsonl", pair_records)
+        _json_line(destination / "v1_v2_diff.jsonl", diff_records)
         required_numerical_pass_count = sum(
             row["required_numerical_pass"] for row in bundle_records
         )
@@ -1344,8 +1559,8 @@ def run_preflight(
             "schema_version": SCHEMA_VERSION,
             "contract_source": CONTRACT_SOURCE,
             "status": "PASS",
-            "issue": 73,
-            "analysis_role": "historical_mixed_recipe_id_only_discovery",
+            "issue": ISSUE_NUMBER,
+            "analysis_role": "historical_id_only_compliance_measurement_v2",
             "source_reuse_manifest_sha256": manifest["source_reuse_manifest_sha256"],
             "bundle_count": len(verified),
             "transform_count": len(TRANSFORMS),
@@ -1354,6 +1569,20 @@ def run_preflight(
             "primary_channel_scope": "per_fit_only",
             "primary_channel_counts": primary_channel_counts,
             "gate_2": gate2,
+            "v1_baseline": {
+                "bundle_records_sha256": observed_v1_sha256,
+                "fit_count": len(v1_bundle_records),
+                "immutable": True,
+            },
+            "v1_to_v2_diff": diff_summary,
+            "remediation": {
+                "classification": "FROZEN_WORDING_AMBIGUITY_COMPLIANCE_CLARIFICATION",
+                "changed_check": "rmd_cancellation_scale_only",
+                "tau_alg_changed": False,
+                "other_score_or_margin_scale_changed": False,
+                "two_fold_namespace": TWO_FOLD_NAMESPACE,
+                "historical_pass_rate_used": False,
+            },
             "gates": {
                 "gate_1": "NARROW_PASS_PREEXISTING",
                 "gate_2": gate2["gate_status"],
@@ -1377,12 +1606,12 @@ def run_preflight(
                 "historical Raw-MD OOD gap concentration",
             ],
             "hard_cap_seconds": float(hard_cap_seconds),
-            "wall_seconds": float(time.monotonic() - started),
             "payload_files": [
                 "bundle_records.jsonl",
                 "input_manifest.jsonl",
                 "pair_records.jsonl",
                 "tail_records.jsonl",
+                "v1_v2_diff.jsonl",
             ],
         }
         atomic_write_json(destination / "summary.json", summary)
@@ -1390,11 +1619,17 @@ def run_preflight(
         _write_payload_checksums(destination, payload_names)
         return summary
     except (PreflightInputError, HardCapExceeded, ValueError) as error:
+        if isinstance(error, PreflightInputError):
+            status = "INCONCLUSIVE_INPUT"
+        elif isinstance(error, HardCapExceeded):
+            status = "INCONCLUSIVE_HARD_CAP"
+        else:
+            status = "INCONCLUSIVE_NUMERICAL"
         summary = {
             "schema_version": SCHEMA_VERSION,
             "contract_source": CONTRACT_SOURCE,
-            "status": "INCONCLUSIVE",
-            "issue": 73,
+            "status": status,
+            "issue": ISSUE_NUMBER,
             "reason": str(error),
             "gate_2": {"gate_status": "INCONCLUSIVE"},
             "gates": {
@@ -1404,7 +1639,6 @@ def run_preflight(
                 "gate_4": "NOT_RUN",
                 "gate_5": "NOT_RUN",
             },
-            "wall_seconds": float(time.monotonic() - started),
         }
         atomic_write_json(destination / "summary.json", summary)
         _write_payload_checksums(destination, ["summary.json"])

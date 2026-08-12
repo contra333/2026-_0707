@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the bounded Card-13 historical ID-only CPU preflight."""
+"""Generate the one bounded Card-13 v11 historical ID-only CPU preflight v2."""
 
 from __future__ import annotations
 
@@ -21,6 +21,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cache-root", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument(
+        "--v1-bundle-records",
+        type=Path,
+        required=True,
+        help="Immutable v1 bundle_records.jsonl used for the strict per-fit diff.",
+    )
+    parser.add_argument(
         "--hard-cap-seconds",
         type=float,
         default=4.0 * 60.0 * 60.0,
@@ -35,6 +41,7 @@ def main() -> None:
         input_manifest_path=args.input_manifest,
         cache_root=args.cache_root,
         output_dir=args.output_dir,
+        v1_bundle_records_path=args.v1_bundle_records,
         hard_cap_seconds=args.hard_cap_seconds,
         progress_callback=lambda message: print(message, flush=True),
     )

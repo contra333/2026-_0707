@@ -7,6 +7,9 @@ from oge.analysis.discriminant_residual_preflight import (
     _contract_scaled_max,
     _gate2_summary,
     _json_safe,
+    _raw_norm_component_correlations,
+    _rmd_cancellation_scaled_max,
+    build_v1_v2_diff,
     deterministic_class_stratified_twofold,
     fit_discriminant_geometry,
     fit_residual_nu,
@@ -44,6 +47,15 @@ def test_stable_twofold_is_deterministic_unique_and_class_balanced():
         deterministic_class_stratified_twofold(
             np.asarray(["duplicate", "duplicate"]), np.asarray([0, 0])
         )
+
+
+def test_twofold_partition_keeps_the_v1_namespace_snapshot():
+    sample_ids = np.asarray([f"id-{index}" for index in range(12)])
+    labels = np.repeat(np.arange(3), 4)
+
+    folds = deterministic_class_stratified_twofold(sample_ids, labels)
+
+    assert folds.tolist() == [1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1]
 
 
 def test_discriminant_components_reconstruct_scores_covariance_and_energy():
@@ -155,7 +167,8 @@ def test_gate2_is_inconclusive_when_any_required_fit_is_numerically_inapplicable
 
     assert summary["status"] == "DESCRIPTIVE_ONLY"
     assert summary["gate_status"] == "INCONCLUSIVE"
-    assert summary["aggregate_decision_rule"] == "NOT_PREDECLARED_IN_CARD_13"
+    assert summary["aggregate_decision_rule"] == "PERMANENTLY_NOT_ADJUDICATED"
+    assert not summary["retroactive_threshold_or_readjudication"]
     assert summary["by_transform"]["raw"]["inconclusive_fit_count"] == 1
     assert "pass" not in summary["by_transform"]["raw"]
 
@@ -169,6 +182,90 @@ def test_reconstruction_scale_uses_sum_of_absolute_components():
     result = _contract_scaled_max(residual, direct, first, second)
 
     assert result == pytest.approx(1.0 / 5.0)
+
+
+def test_rmd_cancellation_uses_only_the_card13_v11_operand_scale():
+    residual = np.asarray([1.0, 2.0])
+    direct_global = np.asarray([100.0, 10.0])
+    direct_class = np.asarray([99.0, 5.0])
+    q_parallel_global = np.asarray([4.0, 20.0])
+    q_parallel_class = np.asarray([3.0, 10.0])
+
+    result = _rmd_cancellation_scaled_max(
+        residual,
+        direct_global,
+        direct_class,
+        q_parallel_global,
+        q_parallel_class,
+    )
+
+    assert result == pytest.approx(2.0 / 30.0)
+
+
+def test_raw_norm_correlations_are_recorded_for_train_and_test():
+    train = np.asarray([[1.0, 0.0], [0.0, 2.0], [3.0, 0.0]])
+    test = np.asarray([[1.0, 1.0], [0.0, 3.0], [4.0, 0.0]])
+    train_components = np.column_stack((np.arange(3), np.arange(3) ** 2, -np.arange(3)))
+    test_components = np.column_stack((np.arange(3) + 1, np.arange(3) ** 2, -np.arange(3)))
+
+    correlations = _raw_norm_component_correlations(
+        train, test, train_components, test_components
+    )
+
+    assert set(correlations) == {"id_train", "id_test"}
+    assert set(correlations["id_train"]) == {
+        "s_perp",
+        "s_parallel_marginal",
+        "s_rmd",
+    }
+    assert set(correlations["id_test"]) == set(correlations["id_train"])
+
+
+def test_v1_v2_diff_requires_and_conserves_exactly_60_fit_keys():
+    def record(index, *, v2, rescued=False):
+        passed = bool(rescued)
+        return {
+            "bundle_id": f"{index:064x}",
+            "transform": "raw" if index % 2 == 0 else "l2",
+            "status": "PASS" if passed else "INAPPLICABLE",
+            "applicable": True,
+            "required_numerical_pass": passed,
+            "primary_channel": "S-perp" if passed else "none",
+            "id_train": {
+                "rmd_cancellation_scaled_max": 1.0e-12 if passed else 1.0e-5,
+                "rmd_cancellation_scale": "operand_aware_card13_v11" if v2 else None,
+                "checks": {"rmd_cancellation": passed},
+            },
+            "id_test": {
+                "rmd_cancellation_scaled_max": 1.0e-12 if passed else 1.0e-5,
+                "checks": {"rmd_cancellation": passed},
+            },
+            "cached_metric_v1_2_id_test_parity": {
+                "pass": passed,
+                "scaled_max_residuals": {"rmd": 1.0e-12 if passed else 1.0e-5},
+                **(
+                    {"legacy_output_scaled_max_residuals": {"rmd": 1.0e-5}}
+                    if v2
+                    else {}
+                ),
+            },
+            "raw_norm_component_correlations": (
+                {"id_train": {}, "id_test": {}} if index % 2 == 0 else None
+            ),
+        }
+
+    before = [record(index, v2=False) for index in range(60)]
+    after = [
+        record(index, v2=True, rescued=index == 0) for index in range(60)
+    ]
+
+    records, summary = build_v1_v2_diff(before, after)
+
+    assert len(records) == 60
+    assert summary["fit_count"] == 60
+    assert summary["changed_count_by_field"]["required_numerical_pass"] == 1
+    assert summary["changed_count_by_field"]["primary_channel"] == 1
+    assert not summary["historical_gate_2_re_adjudicated"]
 
 
 def test_json_safe_preserves_nonfinite_numeric_sentinels_without_invalid_json():
@@ -211,7 +308,7 @@ def test_missing_required_cache_stops_with_compact_inconclusive(tmp_path):
         output_dir=tmp_path / "output",
     )
 
-    assert result["status"] == "INCONCLUSIVE"
+    assert result["status"] == "INCONCLUSIVE_INPUT"
     assert result["gates"]["gate_2"] == "INCONCLUSIVE"
     assert "required bundle is absent" in result["reason"]
     assert not (tmp_path / "output" / "bundle_records.jsonl").exists()
