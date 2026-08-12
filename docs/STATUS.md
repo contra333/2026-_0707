@@ -46,7 +46,13 @@ same initialization and data stream
   `0.359` on MNIST, versus same-policy seed references `0.220` and `0.273`.
   Raw-RMD medians were `0.123` and `0.111`, close to seed references `0.114`
   and `0.098`. This is a `GO` for the fresh churn-first question, not a causal
-  coupling result or an RMD-immunity claim.
+  coupling result or an RMD-immunity claim. The historical independently
+  trained configurations remain confounded and noncausal; preserving them did
+  not create fresh scientific evidence. Their byte-exact reproducibility archive
+  is stored at
+  `hf://buckets/contra333/ICLR_RUN/artifacts/d1_historical_survival/v1/25f9b588f52bf539cc86c0221424f68d4ba846fb9adefe26a2e1f9b3c1d6380a/d1_historical_survival_v1.tar`
+  with SHA-256
+  `25f9b588f52bf539cc86c0221424f68d4ba846fb9adefe26a2e1f9b3c1d6380a`.
 - The historical radial Stage-2 mechanism gate ended `FAILED` on its numerical witness.
   It is closed and is not an active launch dependency.
 
