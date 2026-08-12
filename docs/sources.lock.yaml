@@ -494,8 +494,22 @@ sources:
     authors: Zhao, Cheng, Masarczyk, and Lucchi
     stable_source: arXiv:2602.16642
     url: https://arxiv.org/abs/2602.16642
-    accessed: 2026-07-23
-    role: closest known prior work on optimizer and weight-decay-coupling effects on Neural Collapse; no OOD detection; abstract-level audit only, re-audit required before related-work writing
+    accessed: 2026-08-12
+    role: upstream optimizer and weight-decay-coupling theory for Neural Collapse plus fixed-total-decay coupled-ratio interpolation precedent; no OOD detection or Mahalanobis readout; not a temporal optimizer-switch experiment
+  predictive_churn_good_models_paper:
+    title: Predictive Churn with the Set of Good Models
+    authors: Watson-Daniels, du Pin Calmon, D'Amour, Long, Parkes, and Ustun
+    stable_source: arXiv:2402.07745v2
+    url: https://arxiv.org/abs/2402.07745
+    accessed: 2026-08-12
+    role: classification predictive-churn and multiplicity vocabulary; does not study ID--OOD pair-ranking churn or Mahalanobis component attribution
+  bayesian_nonparametric_mahalanobis_paper:
+    title: A Bayesian Nonparametric Perspective on Mahalanobis Distance for Out of Distribution Detection
+    authors: Randolph W. Linderman, Noah Cowan, Yiran Chen, and Scott W. Linderman
+    stable_source: arXiv:2502.08695v2; TMLR 2026
+    url: https://arxiv.org/abs/2502.08695
+    accessed: 2026-08-12
+    role: formal Bayesian-nonparametric and RMDS boundary plus predictive generalizations; mandatory RtMD novelty-gate comparison
   flavors_of_margin_paper:
     title: "Flavors of Margin: Implicit Bias of Steepest Descent in Homogeneous Neural Networks"
     authors: Tsilivis, Vardi, and Kempe

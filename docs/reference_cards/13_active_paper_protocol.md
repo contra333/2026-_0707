@@ -5,13 +5,13 @@
 Protocol identifier:
 
 ```text
-fixed_readout_discriminant_residual_paired_trajectory_v9
+fixed_readout_pair_ranking_multiplicity_paired_trajectory_v10
 ```
 
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v9`, and its fresh
+Card 13 filename. The current design version is `v10`, and its fresh
 experiments are `NOT_RUN`.
 
 This revision does not change completed evidence:
@@ -21,16 +21,22 @@ This revision does not change completed evidence:
 - the Research Contract v2 radial Stage-2 result remains immutable `FAILED`;
 - the v3 historical MD--Marginal--RMD analysis remains `PASS` and discovery
   only;
+- a bounded, checksum-verified D1 reuse analysis of historical per-sample
+  scores is complete and gives a discovery-only `GO` for the pair-ranking
+  multiplicity question; its cross-policy configurations mix LR/WD and are
+  not same-initialization causal evidence;
 - the validated `fork_from_prefix` runtime remains available, but it is an
   optional follow-up tool rather than the main paper intervention;
-- no discriminant--residual or residual-tail preflight, fresh v9 trajectory, protected-OOD
+- no discriminant--residual or residual-tail preflight, fresh v10 trajectory, protected-OOD
   confirmation, or replication has run.
 
 Fisher/LDA discriminant subspaces, the known MD--Marginal--RMD relation, L2
 feature normalization, size--stretch, spectrum--allocation, and
 radial/angular optimization dynamics are prior knowledge or measurement
 tools. They are not claimed as new generic subspace facts or complete causal
-mediation. The mechanism study remains the primary paper. Section 7.5 reserves
+mediation. Pair-ranking multiplicity under controlled training-rule variation
+is the primary problem; the formation study and theorem explain it. Section
+7.5 reserves
 one conditional, theory-derived Residual-t Mahalanobis (`RtMD`) method slot;
 it is not yet a defined or validated detector and may be closed without
 weakening the primary paper.
@@ -40,39 +46,53 @@ weakening the primary paper.
 The paper asks:
 
 > Starting from the same initialization and data stream, does changing only
-> decay coupling alter the trajectory of representation geometry; do those
-> changes concentrate in the within-class-whitened class-mean subspace `S` or
-> its residual complement `S-perp`; and do the score components that can see
-> that geometry alter exact ID--OOD pair orderings?
+> decay coupling alter exact ID--OOD pair orderings beyond same-policy seed
+> variation; where in the update and representation trajectory does that
+> multiplicity form; and do the within-class-whitened `S`/`S-perp` score
+> components explain why Raw MD and RMD differ in sensitivity?
 
-The primary contribution is a paired from-scratch trajectory study, not an
-optimizer leaderboard and not a claim that similar ID accuracy alone causes
-OOD differences. Comparable ID utility is an interpretation condition.
+The primary contribution is a controlled pair-ranking-multiplicity study
+implemented as paired from-scratch trajectories, not an optimizer leaderboard
+and not a claim that similar ID accuracy alone causes OOD differences.
+Comparable ID utility is an interpretation condition.
 
 Contribution order:
 
-1. a discriminant--residual score theorem: under the stated estimator
-   conditions, Raw MD and Marginal share the same `S-perp` term and RMD
-   cancels it;
+1. controlled pair-ranking multiplicity: exact tie-aware
+   Gain/Loss/PairOrderChurn for same-image pairs, scaled against same-policy
+   seed variation;
 2. paired from-scratch attribution from decay policy through update and
-   representation trajectories to the theorem-aligned score channels;
-3. exact tie-aware accounting of `S-perp`, parallel-Marginal, and RMD pair
-   margins together with AUROC Gain/Loss/PairOrderChurn;
-4. a prespecified normalization-by-cancellation diagnostic and residual-channel
-   attenuation path, followed by a controlled
-   coupled/decoupled/zero-decay factorial with architecture, class-capacity,
-   connectivity, and modern-scale replication.
+   representation trajectories to the score channels that carry that churn;
+3. a discriminant--residual explanatory interface: under the stated estimator
+   conditions, Raw MD and Marginal share the same `S-perp` term and RMD
+   cancels it, with exact component-level pair accounting;
+4. a fixed-total-decay `alpha in {0, 0.5, 1}` anchor confirmation, the
+   prespecified normalization/cancellation diagnostics, and controlled
+   factorial plus architecture/class-capacity replication;
 5. only if every Section 7.5 preregistered gate passes, a secondary `RtMD`
    contribution that retains residual OOD information while replacing the
    Gaussian residual-tail model with one frozen ID-only heavy-tail model.
 
+The positioning boundary is explicit. Prior OOD work already establishes
+that seeds and training details can change detector performance and rankings;
+this paper does not claim discovery of OOD instability. Classification churn
+and predictive multiplicity provide the decision-level vocabulary, but the
+primary estimand here is **ID--OOD pair-ranking churn**, not thresholded class
+prediction disagreement. Zhao et al. establish that weight-decay coupling can
+change Neural-Collapse formation and provide the fixed-total-decay coupling
+interpolation precedent, but they do not study OOD detection or Mahalanobis
+scores. The paper asks which optimizer-sensitive geometry is transmitted to a
+fixed OOD readout. It treats NC0--NC4 as a supporting profile spanning
+classifier, within-class, class-mean, and alignment structure; it never
+identifies “NC” wholesale with the `S` side of this score decomposition.
+
 The strongest allowed sentence is conditional:
 
-> Decay coupling alters class-orthogonal residual geometry while largely
-> preserving class-mean-discriminative utility. Raw Mahalanobis reads this
-> residual channel, whereas RMD cancels it under the stated estimator
-> conditions, producing predictable differences in the ordering of the same
-> ID--OOD pairs.
+> Changing only decay coupling can create pair-ranking multiplicity beyond
+> ordinary seed variation while largely preserving class-discriminative
+> utility. When that excess churn localizes to class-orthogonal residual
+> geometry, Raw Mahalanobis reads the channel whereas RMD cancels it under the
+> stated estimator conditions and attenuates the policy-specific excess.
 
 If the normalization interaction gates also pass, the following extension is
 allowed:
@@ -129,12 +149,18 @@ different practical question and is not part of the causal main contrast.
 
 Coupled Adam does not expose a unique additive `decay update`: the L2 term
 enters first and second moments and the coordinate-wise denominator. Therefore
-v9 does not place Adam and AdamW on a purported common realized-decay norm.
+v10 does not place Adam and AdamW on a purported common realized-decay norm.
 It uses an exact same-state, same-gradient one-step counterfactual operator
 difference, defined in Section 6.1, and reports its radial and tangential
-components. At each LR, the common zero reference plus nominal WD values
-`1e-4` and `1e-3` already supply three prespecified dose points; no asymmetric
-post-hoc WD point is added.
+components.
+
+At the primary nonzero-decay anchor, v10 also uses the already implemented
+`adam_coupled_decoupled` operator with `total_weight_decay=1e-4` and
+`coupled_ratio alpha in {0, 0.5, 1}`. Here `alpha=0` is the exact AdamW
+endpoint, `alpha=1` is the exact Adam endpoint, and `alpha=0.5` sends half of
+the nominal decay through each path. This fixes a nominal total input but does
+not match realized regularization. Zero decay remains a separate reference,
+not a fourth alpha value.
 
 Training seed is the independent statistical unit. Repeated images and
 ID--OOD pairs are paired observations, not independent replicates.
@@ -149,15 +175,16 @@ Use the local 2 x 2 design below. Each nonzero cell contains both Adam
 | LR | nominal WD `1e-4` | nominal WD `1e-3` |
 | --- | --- | --- |
 | `3e-4` | Adam / AdamW | Adam / AdamW |
-| `1e-3` | **primary anchor:** Adam / AdamW | Adam / AdamW |
+| `1e-3` | **primary anchor:** zero / `alpha=0,0.5,1` | Adam / AdamW |
 
 The schedule shape is shared: 200 epochs, Multistep milestones
 `[60, 120, 160]`, and `gamma=0.2`. Only the initial LR differs by row.
 
 Run allocation:
 
-- primary anchor `(lr=1e-3, wd=1e-4)`: zero / Adam / AdamW, five seeds,
-  all trajectory, depth, geometry, score, and pair analyses: 15 runs;
+- primary anchor `(lr=1e-3, wd=1e-4)`: zero / `alpha=0` AdamW /
+  `alpha=0.5` mixed / `alpha=1` Adam, five paired seeds, all trajectory,
+  depth, geometry, score, and pair analyses: 20 runs;
 - `(1e-3, 1e-3)`: Adam / AdamW, three seeds, epoch-200 focal analysis:
   6 runs;
 - `(3e-4, 1e-4)`: zero / Adam / AdamW, three seeds, epoch-200 focal
@@ -165,7 +192,7 @@ Run allocation:
 - `(3e-4, 1e-3)`: Adam / AdamW, three seeds, epoch-200 focal analysis:
   6 runs.
 
-Total Adam-family budget: **36 runs**. One zero-decay baseline is shared by
+Total Adam-family budget: **41 runs**. One zero-decay baseline is shared by
 the two WD cells at each LR because WD is inactive at zero.
 
 Every cell is reported separately before any summary. For outcome `Y`, the
@@ -179,6 +206,19 @@ The two WD levels test coupling-by-decay-strength interaction; the two LR
 levels test coupling-by-step-scale interaction. Raw runs are never pooled
 across cells. A cell-equal-weight summary is secondary and cannot hide sign
 reversal or a primary-only result.
+
+The alpha arm reports the three seed-paired point estimates and the contrasts
+`Y_0.5-Y_0`, `Y_1-Y_0.5`, and `Y_1-Y_0` for ID utility, geometry components,
+Raw-MD/RMD pair churn, and net AUROC. An outcome is called
+**interior-compatible** only when the seed-mean `alpha=0.5` estimate lies
+between the two seed-mean endpoint estimates in the endpoint direction;
+otherwise it is reported as a non-monotone three-point response. No sign is
+assumed in advance, and seed-level contrasts plus uncertainty remain visible.
+With one
+interior point the protocol may test midpoint/interiority and monotonic
+compatibility, but it must not claim a resolved dose-response curve, linearity,
+or a common effective-regularization scale. A one-seed shortened run may check
+execution only and is never scientific evidence.
 
 ### 3.2 Conventional SGDM-family control
 
@@ -237,7 +277,7 @@ not a replacement for epoch 200. `best<=200` and `best<=300` are reported as
 separate selection windows.
 
 The update policies differ by construction at the first nonzero-decay step.
-Consequently, v9 does not use “update onset precedes geometry onset” as a
+Consequently, v10 does not use “update onset precedes geometry onset” as a
 mechanism gate. For every prespecified quantity, report the seed-level paired
 divergence curve, a standardized effect against same-policy natural training
 variability, the minimum detectable effect, an early divergence slope, and a
@@ -500,6 +540,12 @@ The basic paired contrasts within every seed and cell are coupled--decoupled,
 coupled--zero, and decoupled--zero. This separates the presence of decay from
 the way decay is coupled.
 
+The NC profile is the explicit interface to Zhao et al.'s upstream formation
+theory. Report whether alpha and endpoint contrasts in NC0--NC4 track, precede,
+or dissociate from the detector-interface and churn contrasts. This is a
+transfer analysis, not a claim that Zhao predicts OOD behavior or that NC is a
+scalar mediator.
+
 Each branch refits `mu_c` and `Sigma_W`, so its whitened subspace is generally
 different. The primary detector attribution is exact **inside each branch**.
 Cross-branch statements about feature energy or subspace rotation require an
@@ -732,7 +778,7 @@ within-class residual vectors have zero mean and identity second moment. Hence
 branches, the pinned means differ only through that measured dimension. This
 does **not** pin `Var(q_perp)`: it depends on fourth moments of the residual
 vector, and skewness, kurtosis, upper-tail shape, and held-out behavior remain
-free. The main non-pinned categories inspected by v9 are ID higher-order
+free. The main non-pinned categories inspected by v10 are ID higher-order
 interface shape, held-out-ID generalization drift, OOD placement in
 `(q_perp,P_S x)`, and branch-specific fitted geometry/class heterogeneity.
 These are an organizing list, not a theorem that exactly four statistical
@@ -864,7 +910,7 @@ not confirm a decay-coupling effect or guarantee fresh-study power.
 
 ### 7.5 Conditional Residual-t Mahalanobis method slot
 
-v9 reserves exactly one optional post-hoc method slot. Its working statistical
+v10 reserves exactly one optional post-hoc method slot. Its working statistical
 object is a block model that keeps the class-discriminative `S` distance and
 replaces the Gaussian radial likelihood in `S-perp` by one multivariate-t
 radial likelihood:
@@ -901,7 +947,8 @@ free-scale alternative cannot be chosen after tail or OOD results are seen.
 The gates are sequential:
 
 1. **Derivation and novelty gate:** complete the WDiscOOD, CORE, MaRS, direct
-   RMD/LDA, and robust/t-Mahalanobis full-text audit. Close the slot on a direct
+   RMD/LDA, robust/t-Mahalanobis, and Bayesian-nonparametric/DPMM--RMDS
+   full-text audit, including Linderman et al. Close the slot on a direct
    collision or an incoherent likelihood/fit.
 2. **Historical ID-only plausibility gate:** with frozen rules, use the
    existing cache only to test held-out-ID `q_perp` deviation from `chi^2_k`,
@@ -962,6 +1009,16 @@ Primary outcome family:
 - paired `DeltaAUROC` and `PairOrderChurn`;
 - policy-to-natural-variability `R_churn` as a descriptive standardized effect;
 - prespecified near/far summaries with per-seed effects.
+
+Prespecified alpha confirmation family:
+
+- the same five anchor seeds at `alpha=0,0.5,1` with fixed
+  `total_weight_decay=1e-4`;
+- endpoint, lower-half, and upper-half paired contrasts for ID utility,
+  NC0--NC4, theorem-aligned components, Raw-MD/RMD churn, and net AUROC;
+- interior-compatibility versus non-monotone three-point classification;
+- no fitted curve, post-hoc alpha selection, or claim of matched realized
+  regularization.
 
 Primary mechanism family:
 
@@ -1063,6 +1120,18 @@ but optimizer, LR, and WD are mixed in that population. It cannot establish
 that decay coupling caused the gap. Nearest-accuracy matching is excluded from
 primary analysis and, if shown, is labeled selection-biased sensitivity.
 
+A bounded D1 survival reuse has also been completed without checkpoint
+inference. It verified 96 score-array hashes and exact sample ordering for four
+frozen role configurations, then compared six historical cross-policy pairs
+with 12 same-policy seed pairs. For Raw MD, median PairOrderChurn was `0.322`
+versus `0.220` on CIFAR-100 and `0.359` versus `0.273` on MNIST
+(cross-policy versus same-policy seed reference). For Raw RMD it was `0.123`
+versus `0.114` and `0.111` versus `0.098`. This is discovery-only evidence
+that ranking multiplicity is worth a controlled test and that RMD may
+attenuate policy-specific excess churn; it does not establish coupling
+causality, RMD immunity, all-dataset generality, or independence of the
+historical LR/WD recipe differences.
+
 The same immutable cache supports the read-only discriminant--residual
 preflight in Section 7.4 without new training or protected-data traversal. It
 first checks estimator applicability and exact `S-perp`/parallel-Marginal/RMD
@@ -1089,9 +1158,10 @@ from this optional fork operation.
 
 ## 12. Required artifacts and validation
 
-Every v9 result must identify seed, initialization, config, branch policy,
+Every v10 result must identify seed, initialization, config, branch policy,
 checkpoint epoch, depth tap, probe-image membership, Gaussian-fit population,
-and source code/config hashes. Required records include:
+and source code/config hashes. Alpha-arm records must also identify
+`total_weight_decay` and `coupled_ratio`. Required records include:
 
 - ID accuracy/NLL/ECE and `last` versus `best_val` identity;
 - per-sample MD, Marginal, and RMD raw/L2 scores;
@@ -1112,6 +1182,8 @@ and source code/config hashes. Required records include:
 - tie-aware pair-transition counts and component Shapley accounting;
 - Gain, Loss, PairOrderChurn, DeltaAUROC, and operating-point disagreement;
 - same-policy churn reference, `R_churn`, and ID/OOD replacement hybrids;
+- alpha endpoint/lower-half/upper-half paired contrasts and the frozen
+  interior-compatibility classification;
 - quadratic size/stretch and symmetric branch contributions;
 - spectrum/allocation spectral-band summaries;
 - exact zero-state and history-conditioned counterfactual update differences
@@ -1155,7 +1227,7 @@ Required checks include:
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository has part of this infrastructure, but the v9
+The current repository has part of this infrastructure, but the v10
 discriminant--residual interface/preflight, fresh training, multi-depth
 extraction, expanded trajectory snapshots, update logging, and scale regimes
 are `NOT_RUN`/not yet implemented until separately authorized.
@@ -1182,6 +1254,8 @@ Before inspecting the historical discriminant--residual preflight, freeze:
 Before protected OOD execution, freeze in a versioned addendum:
 
 - exact accuracy/NLL/ECE equivalence and guardrail margins;
+- alpha-arm seed pairing, endpoint/lower-half/upper-half uncertainty, and the
+  exact interior-compatibility decision rule without adding alpha points;
 - practical AUROC/FPR95 margins;
 - seed-count/power or minimum-detectable-effect justification for the fixed
   five/three seed allocation;

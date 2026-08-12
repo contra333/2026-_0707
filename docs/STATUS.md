@@ -6,7 +6,9 @@ Last updated: 2026-08-12
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The next task is the v9 theory/estimator/literature lock, including the exact
+The active design is v10. A bounded historical D1 survival check is complete
+and supports the pair-ranking-multiplicity framing as discovery evidence. The
+next task is the theory/estimator/literature lock, including the exact
 conditional `RtMD` derivation and close-the-slot rule, followed by a bounded
 implementation of the existing-cache discriminant--residual and ID-only
 residual-tail preflight. Fresh paired training has not started.
@@ -21,6 +23,7 @@ same initialization and data stream
 → S-perp / parallel-Marginal / RMD score attribution
 → raw/L2 x MD/RMD interaction and fixed residual-retention path
 → exact pair gain, loss, churn, and net AUROC
+→ fixed-total-decay alpha = 0 / 0.5 / 1 interiority check at the anchor
 → channel-matched attenuation and replication
 → conditional only: frozen residual-tail RtMD method gate and evaluation
 ```
@@ -37,6 +40,13 @@ same initialization and data stream
 - Metric Contract v1.2 protected evaluation completed for 60 checkpoint bundles.
 - The historical 30-model MD--Marginal--RMD component analysis completed with `PASS`.
   It is descriptive discovery, not decay-coupling confirmation.
+- A checksum-verified, no-inference D1 reuse analysis recovered exact per-sample
+  scores for four frozen historical role configurations. Across six confounded
+  cross-policy pairs, median Raw-MD PairOrderChurn was `0.322` on CIFAR-100 and
+  `0.359` on MNIST, versus same-policy seed references `0.220` and `0.273`.
+  Raw-RMD medians were `0.123` and `0.111`, close to seed references `0.114`
+  and `0.098`. This is a `GO` for the fresh churn-first question, not a causal
+  coupling result or an RMD-immunity claim.
 - The historical radial Stage-2 mechanism gate ended `FAILED` on its numerical witness.
   It is closed and is not an active launch dependency.
 
@@ -64,11 +74,15 @@ outside Git at the hash-addressed HF archive recorded there.
   `Var(q_perp)` or its tail.
 - One optional `RtMD` method slot is registered. It is secondary, must freeze
   its covariance/scatter convention, ID-only fit, activation gates, comparison
-  panel, and guardrails before the tail preflight/protected OOD, and closes on
-  any failed gate without changing the primary mechanism paper.
+  panel, and guardrails before the tail preflight/protected OOD; its novelty
+  audit explicitly includes the Bayesian-nonparametric/DPMM--RMDS boundary.
+  It closes on any failed gate without changing the primary paper.
 - Main: WRN-28-10/CIFAR-10 from-scratch paired trajectories.
-- Adam family: 2 x 2 LR/nominal-WD design, 36 total runs; the primary anchor uses five
-  seeds and the other cells three.
+- Adam family: the existing 2 x 2 LR/nominal-WD design plus a fixed-total-decay
+  anchor interpolation at `coupled_ratio alpha in {0, 0.5, 1}`. The midpoint
+  adds five runs, for 41 total; the primary anchor uses five paired seeds and
+  the other cells three. The three points test midpoint/interiority and
+  monotonic compatibility, not a dose-response curve shape.
 - SGDM family: one conventional zero/SGDM/SGDW cell, three seeds, nine runs.
 - Epoch-200 `last.pt` is primary; ID-selected `best_val.pt` is a separate control.
 - Raw MD `DeltaAUROC` and `PairOrderChurn` are co-primary at the primary endpoint.
@@ -83,7 +97,8 @@ replication rules live only in the active protocol.
 - full-rank/common-ridge applicability, numerical-rank/condition/reconstruction
   tolerances, and the separately named common-ridge diagnostic
 - branch-alignment and common-frame summaries; RMD/LDA, WDiscOOD, CORE, MaRS,
-  robust/t-Mahalanobis, NECO, ViM, Neural-Collapse Mahalanobis, and
+  robust/t-Mahalanobis, Bayesian-nonparametric/DPMM--RMDS, NECO, ViM,
+  Neural-Collapse Mahalanobis, and
   projection-filtering novelty audit
 - component variance--covariance/norm summaries and the normalization x
   cancellation interaction estimand
@@ -101,6 +116,7 @@ replication rules live only in the active protocol.
 - no `S`/`S-perp` analysis interface, historical discriminant--residual or
   residual-tail preflight, fixed residual-retention diagnostic, or `RtMD`
   implementation/evaluation
-- no fresh active-protocol training, GPU work, checkpoint inference, or protected OOD
+- no fresh active-protocol training, alpha midpoint run, GPU work, checkpoint
+  inference, or protected OOD
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion

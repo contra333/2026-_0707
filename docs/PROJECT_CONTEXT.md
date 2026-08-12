@@ -11,12 +11,14 @@ training rule
 → ID/OOD pair ordering and reliability
 ```
 
-현재 논문은 같은 initialization과 data stream에서 coupled, decoupled,
-zero-decay training을 처음부터 비교한다. 중심 이론은 within-class-whitened
+현재 논문은 fixed OOD readout의 **pair-ranking multiplicity**를 중심 문제로 둔다.
+같은 initialization과 data stream에서 coupled, decoupled, zero-decay training을
+처음부터 비교하고, decay coupling만 바꾸었을 때 동일 ID--OOD pair ordering이
+same-policy seed variation보다 더 많이 바뀌는지 검정한다. Within-class-whitened
 class-mean span `S`와 residual complement `S-perp`에서 Raw MD와 Marginal이
-공유하는 residual 항을 RMD가 상쇄한다는 조건부 정리다. 실험은 decay coupling이
-어느 subspace geometry를 형성하고 그 변화가 동일 ID--OOD pair ordering에 어떻게
-전달되는지 검정한다.
+공유하는 residual 항을 RMD가 상쇄한다는 조건부 정리는 그 multiplicity가 어느
+score channel에서 생기고 어떤 readout이 왜 덜 민감한지를 설명하는 이론적
+interface다.
 
 Raw/L2와 MD/RMD의 2 x 2 비교는 normalization과 residual cancellation의
 상호작용을 진단한다. 정리는 각 transform 내부에는 적용되지만, L2가 raw fit의
@@ -31,8 +33,11 @@ whitening은 ID-train의 `mean(q_perp)=d-dim(S)`를 고정하지만 `Var(q_perp)
 
 Fisher/LDA의 discriminant subspace, 알려진 MD--Marginal--RMD 관계,
 size--stretch, spectrum--allocation, radial/angular dynamics는 선행 지식 또는
-측정도구다. 중심 논문은 새로운 detector나 optimizer leaderboard가 아니다. 단,
-Card 13 v9는 residual tail과 novelty gate를 모두 통과할 때만 평가하는 하나의
+측정도구다. 중심 논문은 optimizer leaderboard가 아니며, OOD instability의 존재
+자체를 최초로 보였다고 주장하지 않는다. 새 기여 후보는 통제된 same-init 개입,
+pair-level transition accounting, score-component 귀속, 그리고 fixed-total-decay
+`alpha in {0, 0.5, 1}` 확인 설계의 결합이다. 단, Card 13 v10은 residual tail과
+novelty gate를 모두 통과할 때만 평가하는 하나의
 조건부 Residual-t Mahalanobis (`RtMD`) method slot을 사전등록한다. Score
 accounting만으로 완전한 causal mediation을 주장하지 않는다.
 
