@@ -15,7 +15,9 @@ change the ordering of the same ID--OOD image pairs.
 
 This paper aims to identify the geometric location and detector visibility of
 training-rule sensitivity. It is an intervention paper with supporting theory,
-not a new detector or an Adam-versus-AdamW leaderboard.
+not an Adam-versus-AdamW leaderboard. One secondary, theory-derived `RtMD`
+method slot is preregistered, but it becomes a contribution only if its
+derivation, novelty, ID-only tail, protected-OOD, and replication gates pass.
 
 ## Abstract logic
 
@@ -40,6 +42,9 @@ not a new detector or an Adam-versus-AdamW leaderboard.
    conclusion is conditional on estimator applicability, practical paired
    effect, repeatable representation divergence, component concentration,
    attenuation, ID-equivalence/Pareto classification, and replication.
+7. If the residual-tail gates pass, evaluate one frozen Residual-t
+   Mahalanobis candidate that retains residual evidence while limiting
+   heavy-tail domination. Its failure does not weaken items 1--6.
 
 Do not open with “same ID accuracy, different OOD.” That is the premise.
 
@@ -64,6 +69,8 @@ State contributions in this order:
    attenuation path;
 4. controlled local factorial evidence plus architecture,
    discriminant-capacity, connectivity, and scale replication.
+5. conditionally, one preregistered residual-tail method derived from the same
+   score interface, with no OOD-tuned formula or second rescue method.
 
 Comparable ID accuracy/NLL/ECE qualifies interpretation. It is not used for
 post-hoc checkpoint selection.
@@ -72,9 +79,11 @@ post-hoc checkpoint selection.
 
 Cover training-induced OOD variability, the original Mahalanobis detector,
 Marginal Mahalanobis and RMD, Mahalanobis++, and *A Geometry-Based View of
-Mahalanobis OOD Detection*. Audit NECO, ViM, Neural-Collapse Mahalanobis
-scores, classifier/principal/residual-subspace methods, and PCA projection
-filtering as direct neighboring boundaries.
+Mahalanobis OOD Detection*. Treat WDiscOOD as the direct whitened
+discriminative/residual score predecessor. Audit NECO, ViM, CORE, MaRS,
+Neural-Collapse Mahalanobis scores, robust/t-Mahalanobis models,
+classifier/principal/residual-subspace methods, and PCA projection filtering
+as direct neighboring boundaries.
 
 Explicitly credit prior work for:
 
@@ -91,6 +100,15 @@ RMD/LDA and subspace-detector literature audit is complete. Mahalanobis++
 already refits MD and RMD after L2 normalization; the paper's possible
 addition is a controlled, component-level explanation of when normalization
 and cancellation interact, not the normalized detector itself.
+
+WDiscOOD already combines nearest-class distance in a whitened discriminative
+subspace with a weighted residual-centroid distance. Therefore neither the
+`S/S-perp` split nor a linear residual weight is a method contribution here.
+The conditional `RtMD` candidate must earn a separate novelty claim through
+its residual-only heavy-tail likelihood, ID-only fitting, policy-stability
+target, and controlled formation evidence. CORE is an adjacent
+classifier-aligned/residual combination; MaRS uses Mahalanobis scoring of
+autoencoder reconstruction residuals and is related but not the same object.
 
 The difference is the unit of evidence:
 
@@ -153,11 +171,25 @@ corollary. This theorem says what the scores can see. It does not predict that
 decay coupling changes `S-perp`, the sign of an OOD effect, or which detector
 wins.
 
+For one fixed branch, transform, and fit, summarize the sample-side input to
+this Gaussian score family by the **detector interface**
+`(q_perp, x_parallel)=(||P_S-perp x||^2,P_S x)`. The whitening map, `S`, class
+centers, and `B|_S` remain branch-specific fitted state. Call this
+score-sufficient relative to the fixed fit, not a general statistical
+sufficient statistic or a complete description of the representation.
+
 In the unregularized full-rank case, pooled ID-train within-class whitening
 also gives exact mean residual energies `d-dim(S)` in `S-perp` and `dim(S)` in
 `S`. This explains large mean residual energy in high dimension, not its
 sample variance, correlation with raw feature norm, policy sensitivity, or OOD
 utility. Under a common ridge these means become projected traces.
+
+State the pinning boundary explicitly. Whitening pins the pooled ID-train
+residual vector's first two moments and therefore `E[q_perp]=d-dim(S)`. It does
+not pin `Var(q_perp)`, because that depends on fourth moments, nor does it pin
+skewness, kurtosis, upper tails, held-out-ID drift, or OOD placement. Organize
+the empirical search around these non-pinned categories without claiming that
+they form an exhaustive list of exactly four degrees of freedom.
 
 The theorem applies separately to each raw or L2-normalized fit. L2 maps each
 sample nonlinearly and refits means, covariance, whitening, and `S`; it does
@@ -183,6 +215,34 @@ putative feature map that scales `S-perp` by `gamma>0` and then refits MD is
 affine-invariant and changes nothing; `gamma=0` is a singular projection.
 Thus do not present the `rho` path as a new refitted normalization or select a
 best `rho`.
+
+**Conditional method track: Residual-t Mahalanobis.** Reserve one candidate of
+the form
+
+```text
+q_S = min_c ||x_parallel-eta_c||^2
+D_RtMD = q_S + g_(nu,k)(q_perp),  k=dim(S-perp),
+```
+
+where `g` is one frozen multivariate-t radial negative log likelihood. The
+idea is not to discard `S-perp`, but to retain its OOD evidence without letting
+a Gaussian quadratic tail dominate. The exact covariance-versus-scatter
+parameterization, `nu`/scale fit, ID-only split, fallback, and MD limit must be
+derived and frozen before the historical residual-tail preflight. The current
+covariance-normalized working form proportional to
+`(nu+k) log(1+q_perp/(nu-2))`, `nu>2`, is not executable until that lock.
+
+Activate protected-OOD evaluation only after: the direct novelty audit passes;
+historical held-out ID supports an estimable non-Gaussian residual tail; and
+fresh paired ID-only trajectories show a preregistered policy effect on tail
+shape beyond same-policy seed variation. Judge the method primarily by reduced
+policy `PairOrderChurn` relative to Raw MD, with frozen AUROC/FPR95 and far-OOD
+residual-signal guardrails, then require replication. On any failed gate, close
+the method slot and keep the mechanism paper. Never tune `nu`, choose the
+parameterization, or repair the formula with protected OOD.
+
+An ID-only `nu-hat` may be explored as a predictor of fresh policy churn, not
+detector performance. Heavy tails alone do not establish that prediction.
 
 The frozen Metric Contract v1.2 uses Moore--Penrose-compatible precision
 without explicit ridge. Do not silently change it. Apply exact cancellation to
@@ -277,6 +337,12 @@ The four computational RMD/Marginal hybrids provide symmetric Shapley
 accounting. They are not trained detectors and are not a unique causal
 mediation decomposition.
 
+Present these as three views of one pair-margin object: exact additive
+components at pair level, the fixed `rho` residual-channel section with
+analytic flip thresholds, and Shapley only for declared nonlinear aggregate
+replacement games. Do not use Shapley where the exact additive identity
+already answers the question.
+
 The theory removes impossible explanations and creates measurements; it does
 not establish the sign or size of the training effect, component
 concentration, ID equivalence, attenuation, or replication.
@@ -297,6 +363,14 @@ variation. The completed C3 raw/L2 pattern motivates the fresh interaction
 hypothesis but is not an ordered dose response because detector-wise maxima
 occur on different OOD datasets. Curvature and spectrum/allocation remain
 supporting diagnostics.
+
+Only after the conditional method specification is locked, add an ID-only
+residual-tail preflight: held-out-ID `q_perp` Q--Q deviation from `chi^2_k`,
+empirical variance, standardized moments, upper quantiles, tail-fit stability,
+and between-model variation. The fitted ID-train mean is pinned by whitening
+and is not a tail or policy-sensitivity result. This historical mixed-recipe
+analysis may close the `RtMD` slot, but cannot by itself activate a causal or
+method claim.
 
 Do not call the mixed optimizer/LR/WD population causal evidence. Do not use
 nearest-accuracy matching as a primary analysis. Preserve the failed v2 radial
@@ -365,12 +439,14 @@ Follow the same deterministic probe images through four levels:
    moments, BN/running statistics, residual/shortcut ratio, and exact one-step
    counterfactuals at both zero-decay and history-conditioned states. These are
    cited manipulation/pathway measurements, not a new theorem.
-2. **Representation geometry:** branch-internal `S`/`S-perp`, actual `dim(S)`,
-   ID-only gauge alignment, subspace principal angles, whitening change, and a
-   zero-decay common frame; held-out ID as the affine fit floor and every OOD
-   dataset reported separately; global radial scale as a negative control;
-   norm/radial heterogeneity; class-mean/CDNV/NC profile; global/within
-   covariance; spectral-band allocation; nearest versus full class profile.
+2. **Representation geometry:** make the fitted detector interface primary:
+   branch-internal distributions of `q_perp` and `P_S x`, actual `dim(S)`,
+   whitening, class centers, and `B|_S`; then ID-only gauge alignment,
+   subspace principal angles, whitening change, a zero-decay common frame, and
+   held-out ID as the affine fit floor. Use global radial scale as a negative
+   control and keep norm/radial heterogeneity, class-mean/CDNV/NC,
+   global/within covariance, spectral-band allocation, and nearest/full class
+   profiles as supporting explanations rather than equal headline outcomes.
 3. **Score geometry:** branch-specific ID-only Gaussian fits; raw/L2 MD,
    Marginal, and RMD; explicit theorem-applicability status;
    `S-perp`/parallel-Marginal/RMD score and pair-margin reconstruction; RMD
@@ -382,6 +458,10 @@ Follow the same deterministic probe images through four levels:
    at every checkpoint, with exact theorem-aligned component attribution, Gain, Loss,
    PairOrderChurn, net DeltaAUROC, policy/seed churn ratio, and ID/OOD-side
    replacement accounting.
+
+If the `RtMD` slot passes its fresh ID-only activation gate, add its frozen
+score and comparison panel as a separate secondary method analysis. It does
+not enter the primary mechanism family or change the raw-MD endpoint.
 
 For every seed and cell report coupled--decoupled, coupled--zero, and
 decoupled--zero. The update policies differ by construction at the first
@@ -410,8 +490,10 @@ natural-variability reference, not a null.
   clipping, or whitening diagnostic;
 - class-distance-profile difference -> nearest-class versus full profile.
 
-Do not add a detector after seeing results. Scalar correlations can support,
-but cannot replace, exact accounting and selective attenuation.
+Do not add a detector after seeing results. The single `RtMD` slot is allowed
+only because its derivation, activation, and closure rules are registered
+before the residual-tail and protected-OOD analyses. Scalar correlations can
+support, but cannot replace, exact accounting and selective attenuation.
 
 ### Inferential hierarchy
 
@@ -429,6 +511,9 @@ but cannot replace, exact accounting and selective attenuation.
   Adam LR/WD interaction, SGDM control, best-validation, epoch 300.
 - Exploratory/appendix: external detector panel, individual eigenvectors,
   extra geometry scalars, and optional fork.
+- Conditional secondary method family, only if activated: frozen `RtMD`
+  policy-churn reduction, performance/far-OOD guardrails, WDiscOOD and other
+  prespecified comparisons, and replication.
 
 Do not perform an unadjusted test for every checkpoint by depth by metric by
 OOD dataset. Freeze family-wise uncertainty, practical margins, minimum
@@ -463,6 +548,9 @@ OOD execution.
 | Adam only | adaptive preconditioning-by-coupling interaction |
 | Adam and SGDM | more general coupling effect |
 | No fresh effect | historical gap was not primarily caused by coupling under this design |
+| Residual-tail or novelty gate fails | close `RtMD` and `nu-hat`; retain the mechanism paper unchanged |
+| `RtMD` reduces policy churn, passes performance/far-OOD guardrails, and replicates | promote the conditional method contribution |
+| `RtMD` helps the anchor only or loses far-OOD signal | report a local exploratory result or close the slot; do not make a general method claim |
 
 Null outcomes remain in the paper. They are not rescued by matching
 checkpoints, changing epoch 200, or expanding the detector panel.
@@ -499,6 +587,11 @@ and universal optimizer claims. Decision stability is measured by policy
 churn relative to same-policy seed churn; do not rename one model's ID score
 variance as retraining reproducibility.
 
+If active, discuss `RtMD` as a theorem-derived residual likelihood correction,
+not a replacement for the formation contribution or a generic claim that
+heavy-tailed scores always outperform MD. Contrast it directly with WDiscOOD's
+linear discriminative/residual combination and RMD's complete cancellation.
+
 Use the Card 13 strong sentence only if every corresponding gate passes.
 
 ## Figure plan
@@ -517,6 +610,8 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
    attribution at the primary endpoint, with the fixed `rho` attenuation path.
 5. Adam 2 x 2, SGDM control, and WRN--ResNet--DenseNet--ConvNeXt replication
    matrix.
+6. Conditional only: residual-tail gate, frozen `RtMD` policy/seed churn and
+   performance guardrails, and replication. Omit the figure if the slot closes.
 
 ## Table plan
 
@@ -527,3 +622,5 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
    cancellation, affine residual, churn, and attenuation evidence by OOD
    dataset.
 5. Replication claim gate and numerical-validation appendix.
+6. Conditional only: `RtMD` specification, ID-only fit/activation record,
+   direct baselines, guardrails, and close-or-promote verdict.

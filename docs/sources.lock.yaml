@@ -345,6 +345,37 @@ sources:
     commit: c4467aec134e99691359da209f811d91283fc1e3
     accessed: 2026-08-04
     role: pinned tie-grouped selective-risk and risk-coverage AURC reference; card 11 stores the unscaled area
+  wdiscood_paper:
+    title: "WDiscOOD: Out-of-Distribution Detection via Whitened Linear Discriminant Analysis"
+    authors: Chen, Lin, Xu, and Vela
+    stable_source: ICCV 2023
+    url: https://openaccess.thecvf.com/content/ICCV2023/html/Chen_WDiscOOD_Out-of-Distribution_Detection_via_Whitened_Linear_Discriminant_Analysis_ICCV_2023_paper.html
+    accessed: 2026-08-12
+    role: >-
+      direct whitened discriminative/residual-subspace OOD-score boundary;
+      combines nearest-class discriminative distance with a linearly weighted
+      residual-centroid distance, so neither the S/S-perp split nor a simple
+      residual weight is a new detector contribution here
+  core_ood_paper:
+    title: "CORE: Robust Out-of-Distribution Detection via Confidence and Orthogonal Residual Scoring"
+    authors: Yang, Kim, and Bahk
+    stable_source: arXiv:2603.18290v1
+    url: https://arxiv.org/abs/2603.18290v1
+    accessed: 2026-08-12
+    role: >-
+      classifier-aligned versus orthogonal-residual scoring and normalized
+      combination boundary for the conditional RtMD novelty audit; uses a
+      different subspace and score construction from within-class-whitened S
+  mars_ood_paper:
+    title: "MaRS: Robust Out-of-Distribution Detection via Mahalanobis Residual Scoring"
+    authors: Di Salvo, Doerrich, and Ledig
+    stable_source: arXiv:2606.22649v1
+    url: https://arxiv.org/abs/2606.22649v1
+    accessed: 2026-08-12
+    role: >-
+      Mahalanobis scoring of autoencoder reconstruction residuals; adjacent
+      residual-method and naming boundary but not the class-orthogonal
+      whitened residual radius used by the conditional RtMD candidate
   mahalanobis_pp_paper:
     title: "Mahalanobis++: Improving OOD Detection via Feature Normalization"
     authors: Mueller and Hein

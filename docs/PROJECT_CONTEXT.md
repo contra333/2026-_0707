@@ -23,10 +23,18 @@ Raw/L2와 MD/RMD의 2 x 2 비교는 normalization과 residual cancellation의
 `S-perp`만 부분 제거한다는 주장은 정리에서 자동으로 나오지 않으며 직접 component
 검정이 필요하다.
 
+한 branch와 fit 안에서 Gaussian score가 sample로부터 읽는 중심 interface는
+`q_perp=||P_S-perp x||^2`와 `P_S x`다. 다른 기하 지표는 이 interface와
+branch-specific fit이 왜 움직였는지 설명하거나 대안 경로를 검사한다. Full-rank
+whitening은 ID-train의 `mean(q_perp)=d-dim(S)`를 고정하지만 `Var(q_perp)`와 tail은
+고정하지 않는다.
+
 Fisher/LDA의 discriminant subspace, 알려진 MD--Marginal--RMD 관계,
 size--stretch, spectrum--allocation, radial/angular dynamics는 선행 지식 또는
-측정도구다. 새로운 detector, optimizer leaderboard, 또는 score accounting만으로
-완전한 causal mediation을 주장하지 않는다.
+측정도구다. 중심 논문은 새로운 detector나 optimizer leaderboard가 아니다. 단,
+Card 13 v9는 residual tail과 novelty gate를 모두 통과할 때만 평가하는 하나의
+조건부 Residual-t Mahalanobis (`RtMD`) method slot을 사전등록한다. Score
+accounting만으로 완전한 causal mediation을 주장하지 않는다.
 
 ## Active sources
 

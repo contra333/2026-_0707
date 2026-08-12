@@ -6,9 +6,10 @@ Last updated: 2026-08-12
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The next task is the v8 theory/estimator/literature lock followed by a bounded
-implementation of the existing-cache discriminant--residual preflight. Fresh paired
-training has not started.
+The next task is the v9 theory/estimator/literature lock, including the exact
+conditional `RtMD` derivation and close-the-slot rule, followed by a bounded
+implementation of the existing-cache discriminant--residual and ID-only
+residual-tail preflight. Fresh paired training has not started.
 
 The planned chain is:
 
@@ -21,6 +22,7 @@ same initialization and data stream
 → raw/L2 x MD/RMD interaction and fixed residual-retention path
 → exact pair gain, loss, churn, and net AUROC
 → channel-matched attenuation and replication
+→ conditional only: frozen residual-tail RtMD method gate and evaluation
 ```
 
 ## Validated foundation
@@ -56,6 +58,14 @@ outside Git at the hash-addressed HF archive recorded there.
   interpretation requires the frozen raw/L2 x MD/RMD interaction and component
   checks. The fixed residual-retention path is diagnostic and never selects a
   best detector parameter.
+- For a fixed branch/transform/fit, `(q_perp, P_S x)` is the sample-side
+  Gaussian-score interface; branch-specific whitening, `S`, class centers, and
+  `B|_S` remain fitted state. ID-train whitening pins `mean(q_perp)` but not
+  `Var(q_perp)` or its tail.
+- One optional `RtMD` method slot is registered. It is secondary, must freeze
+  its covariance/scatter convention, ID-only fit, activation gates, comparison
+  panel, and guardrails before the tail preflight/protected OOD, and closes on
+  any failed gate without changing the primary mechanism paper.
 - Main: WRN-28-10/CIFAR-10 from-scratch paired trajectories.
 - Adam family: 2 x 2 LR/nominal-WD design, 36 total runs; the primary anchor uses five
   seeds and the other cells three.
@@ -72,10 +82,14 @@ replication rules live only in the active protocol.
 
 - full-rank/common-ridge applicability, numerical-rank/condition/reconstruction
   tolerances, and the separately named common-ridge diagnostic
-- branch-alignment and common-frame summaries; RMD/LDA, NECO, ViM,
-  Neural-Collapse Mahalanobis, and projection-filtering novelty audit
+- branch-alignment and common-frame summaries; RMD/LDA, WDiscOOD, CORE, MaRS,
+  robust/t-Mahalanobis, NECO, ViM, Neural-Collapse Mahalanobis, and
+  projection-filtering novelty audit
 - component variance--covariance/norm summaries and the normalization x
   cancellation interaction estimand
+- exact `RtMD` likelihood parameterization, ID-only split/estimator/fallback,
+  historical and fresh activation thresholds, churn estimand, performance and
+  far-OOD guardrails, and replication/closure rule
 - ID accuracy/NLL/ECE equivalence and Pareto guardrails
 - practical OOD margins and seed/power justification
 - standardized trajectory uncertainty, multiplicity, and spectral-band boundaries
@@ -84,8 +98,9 @@ replication rules live only in the active protocol.
 
 ## Explicitly not run
 
-- no `S`/`S-perp` analysis interface, historical discriminant--residual
-  preflight, or fixed residual-retention diagnostic
+- no `S`/`S-perp` analysis interface, historical discriminant--residual or
+  residual-tail preflight, fixed residual-retention diagnostic, or `RtMD`
+  implementation/evaluation
 - no fresh active-protocol training, GPU work, checkpoint inference, or protected OOD
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion

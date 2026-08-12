@@ -5,13 +5,13 @@
 Protocol identifier:
 
 ```text
-fixed_readout_discriminant_residual_paired_trajectory_v8
+fixed_readout_discriminant_residual_paired_trajectory_v9
 ```
 
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v8`, and its fresh
+Card 13 filename. The current design version is `v9`, and its fresh
 experiments are `NOT_RUN`.
 
 This revision does not change completed evidence:
@@ -23,14 +23,17 @@ This revision does not change completed evidence:
   only;
 - the validated `fork_from_prefix` runtime remains available, but it is an
   optional follow-up tool rather than the main paper intervention;
-- no discriminant--residual preflight, fresh v8 trajectory, protected-OOD
+- no discriminant--residual or residual-tail preflight, fresh v9 trajectory, protected-OOD
   confirmation, or replication has run.
 
 Fisher/LDA discriminant subspaces, the known MD--Marginal--RMD relation, L2
 feature normalization, size--stretch, spectrum--allocation, and
 radial/angular optimization dynamics are prior knowledge or measurement
-tools. They are not claimed as new detectors, new generic subspace facts, or
-complete causal mediation.
+tools. They are not claimed as new generic subspace facts or complete causal
+mediation. The mechanism study remains the primary paper. Section 7.5 reserves
+one conditional, theory-derived Residual-t Mahalanobis (`RtMD`) method slot;
+it is not yet a defined or validated detector and may be closed without
+weakening the primary paper.
 
 ## 1. Paper question and claim boundary
 
@@ -59,6 +62,9 @@ Contribution order:
    attenuation path, followed by a controlled
    coupled/decoupled/zero-decay factorial with architecture, class-capacity,
    connectivity, and modern-scale replication.
+5. only if every Section 7.5 preregistered gate passes, a secondary `RtMD`
+   contribution that retains residual OOD information while replacing the
+   Gaussian residual-tail model with one frozen ID-only heavy-tail model.
 
 The strongest allowed sentence is conditional:
 
@@ -92,6 +98,12 @@ algebraic cancellation inside one fixed transformed feature space. The paper
 may claim that they attenuate a common empirical sensitivity channel only if
 the transform-specific component and interaction gates in Sections 6--8 pass.
 
+`RtMD` is never required for either allowed sentence above. A method claim is
+available only after the exact score, covariance/scatter convention, ID-only
+fit, failure rule, comparison panel, and success/guardrail criteria are frozen
+before the historical residual-tail preflight and before protected OOD is
+opened. It cannot be added or altered to rescue a failed mechanism result.
+
 ## 2. What is controlled in a paired trajectory
 
 For each seed and hyperparameter cell, coupled, decoupled, and zero-decay runs
@@ -117,7 +129,7 @@ different practical question and is not part of the causal main contrast.
 
 Coupled Adam does not expose a unique additive `decay update`: the L2 term
 enters first and second moments and the coordinate-wise denominator. Therefore
-v8 does not place Adam and AdamW on a purported common realized-decay norm.
+v9 does not place Adam and AdamW on a purported common realized-decay norm.
 It uses an exact same-state, same-gradient one-step counterfactual operator
 difference, defined in Section 6.1, and reports its radial and tangential
 components. At each LR, the common zero reference plus nominal WD values
@@ -225,7 +237,7 @@ not a replacement for epoch 200. `best<=200` and `best<=300` are reported as
 separate selection windows.
 
 The update policies differ by construction at the first nonzero-decay step.
-Consequently, v8 does not use “update onset precedes geometry onset” as a
+Consequently, v9 does not use “update onset precedes geometry onset” as a
 mechanism gate. For every prespecified quantity, report the seed-level paired
 divergence curve, a standardized effect against same-policy natural training
 variability, the minimum detectable effect, an early divergence slope, and a
@@ -290,6 +302,23 @@ pair-margin components add. Implementations must not mix these definitions
 with unsigned positive distance terms. The `S-perp`, parallel-Marginal, and
 RMD components are primary mechanism accounting; the older two-component
 Marginal/RMD identity remains a coarser exact view and historical bridge.
+
+For one fixed branch, transform, and fitted detector, the sample-side
+**detector interface** for all three Gaussian scores is
+
+```text
+q_perp(x) = ||P_S-perp x||^2,
+x_parallel = P_S x.
+```
+
+The branch-specific fitted objects--the whitening map, `S`, `eta_c`, and
+`B|_S`--remain part of the detector state. Thus `(q_perp, x_parallel)` is
+score-sufficient only relative to that fixed fit; it is not claimed to be a
+general statistical sufficient statistic, a complete description of the
+representation, or a common coordinate system across branches. Policy effects
+reach this Gaussian score family through changes in the sample-side interface
+or these fitted objects. Other geometry channels are retained to explain why
+that interface moved or to test alternative pathways.
 
 The prespecified residual-retention diagnostic is defined inside one fixed
 branch and one fixed raw/L2 fit as
@@ -367,6 +396,12 @@ Their averages reconstruct `DeltaAUROC` exactly. The four hybrid transitions
 also show whether replacing only the ID or only the OOD side crosses the
 ordering boundary. Because threshold crossing is nonlinear, this is a declared
 counterfactual/Shapley accounting, not a unique causal decomposition of churn.
+
+Keep the three accounting views distinct but connected: the component identity
+is the exact additive account of a pair margin; the fixed `rho` path is its
+one-parameter residual-channel section with analytic flip thresholds; Shapley
+is used only for a declared nonlinear aggregate replacement game. Shapley is
+neither needed nor used to replace the exact pair-level additive identity.
 
 To make churn interpretable, compare the same-seed policy contrast with
 same-policy natural training variability:
@@ -451,18 +486,15 @@ mechanisms can coexist in either arm.
 For recipe `r`, checkpoint `t`, depth `l`, and fixed image `x`, extract
 `z_{r,t,l}(x)`. Fit and report these prespecified channels:
 
-| Channel | Measurements |
-| --- | --- |
-| Discriminant/residual | branch-internal `S` rank/basis and `S-perp` feature/score/pair-margin energy |
-| Branch-frame alignment | ID-only gauge-aligned principal angles plus zero-decay common-frame diagnostics |
-| Affine gauge / residual | ID-only branch alignment and held-out same-image non-affine residual |
-| Global radial scale | shared-scale negative control; mean/median norm trajectory |
-| Radial heterogeneity | full and class-conditioned norm distributions, same-image multipliers, ID--OOD radial relation, radius--direction coupling |
-| Class geometry | class-mean distances/angles, CDNV, and the prespecified NC profile |
-| Global geometry | global mean and covariance trace/spectrum/effective rank |
-| Within-class geometry | pooled covariance spectrum and condition number |
-| Allocation | sample displacement energy in covariance spectral bands |
-| Class-distance profile | nearest-class distance versus the full class profile |
+| Role | Channel | Measurements |
+| --- | --- | --- |
+| Primary score-facing interface | Discriminant/residual | distributions of `q_perp` and `P_S x` on ID train, held-out ID, and each OOD dataset; branch-internal score/pair components |
+| Primary fitted geometry | Fit and branch frame | actual `dim(S)`, whitening, `eta_c`, `B|_S`, ID-only gauge-aligned principal angles, and zero-decay common-frame diagnostics |
+| Primary negative control | Affine gauge / residual | ID-only branch alignment and held-out same-image non-affine residual |
+| Supporting formation diagnostic | Global radial scale and heterogeneity | shared-scale negative control; norm trajectories and distributions; same-image multipliers; ID--OOD radial relation; radius--direction coupling |
+| Supporting formation diagnostic | Class geometry | class-mean distances/angles, CDNV, and the prespecified NC profile |
+| Supporting estimator diagnostic | Global/within-class geometry | global and pooled covariance trace/spectrum/effective rank/condition number |
+| Supporting score diagnostic | Allocation and class-distance profile | spectral-band sample displacement plus nearest-class versus full class profile |
 
 The basic paired contrasts within every seed and cell are coupled--decoupled,
 coupled--zero, and decoupled--zero. This separates the presence of decay from
@@ -476,6 +508,15 @@ zero-decay sibling. Report the principal-angle profile and whitening change;
 do not compare two separately whitened coordinate systems as if they were one
 fixed frame. Measure the actual `dim(S)`, which may be below `K-1`; equality is
 not an applicability gate.
+
+In the unregularized full-rank case, the fitted ID-train mean of `q_perp` is
+pinned to `d-dim(S)`. Therefore a branch claim is not based on a larger
+ID-train mean residual energy. Report the empirical variance, standardized
+moments, upper quantiles, and held-out-ID Q--Q deviation from `chi^2_k`, with
+`k=dim(S-perp)`, using a frozen cross-fit or calibration rule. Whitening does
+not pin `Var(q_perp)` or its tail. These tail summaries are a primary
+activation input only for the conditional Section 7.5 method slot; they do not
+replace the score-component and pair-order outcomes.
 
 Under an invertible affine map `z_C=A z_D+b`, branch-refitted full-rank
 Mahalanobis distances and pair orderings are identical when the covariance
@@ -611,7 +652,8 @@ After localization, weaken only the implicated channel:
 
 The confirmation must selectively attenuate the branch gap without being
 chosen after OOD results. A new detector is not added to rescue a failed
-mechanism claim.
+mechanism claim; the separately gated Section 7.5 slot cannot serve as this
+confirmation or change the mechanism verdict.
 
 ## 7. Theory-constrained attribution and its limits
 
@@ -683,6 +725,18 @@ share of within-class whitened distance. It does **not** imply that it carries
 most sample variance, raw Euclidean norm variation, policy sensitivity, or OOD
 signal. With a common ridge the corresponding quantities are projected traces
 of `A^(-1/2) Sigma_W A^(-1/2)`, not simply dimensions.
+
+**Pinning corollary.** In the unregularized full-rank fit, pooled ID-train
+within-class residual vectors have zero mean and identity second moment. Hence
+`mean(q_perp)=d-r` inside each branch, where `r=dim(S)`. If `r` differs across
+branches, the pinned means differ only through that measured dimension. This
+does **not** pin `Var(q_perp)`: it depends on fourth moments of the residual
+vector, and skewness, kurtosis, upper-tail shape, and held-out behavior remain
+free. The main non-pinned categories inspected by v9 are ID higher-order
+interface shape, held-out-ID generalization drift, OOD placement in
+`(q_perp,P_S x)`, and branch-specific fitted geometry/class heterogeneity.
+These are an organizing list, not a theorem that exactly four statistical
+degrees of freedom remain.
 
 `S` means the class-mean-discriminative subspace for this pooled
 tied-covariance detector; it is not all information used by a nonlinear
@@ -808,7 +862,75 @@ mass/allocation is secondary. This mixed-recipe
 population is noncausal: it selects a useful measurement hypothesis but does
 not confirm a decay-coupling effect or guarantee fresh-study power.
 
-### 7.5 Pair-order balance proposition
+### 7.5 Conditional Residual-t Mahalanobis method slot
+
+v9 reserves exactly one optional post-hoc method slot. Its working statistical
+object is a block model that keeps the class-discriminative `S` distance and
+replaces the Gaussian radial likelihood in `S-perp` by one multivariate-t
+radial likelihood:
+
+```text
+q_S(x) = min_c ||x_parallel-eta_c||^2
+q_perp(x) = ||x_perp||^2
+D_RtMD(x) = q_S(x) + g_(nu,k)(q_perp(x)),  k=dim(S-perp).
+```
+
+The intended interpretation is: MD trusts the quadratic residual fully, RMD
+cancels it, and `RtMD` retains residual evidence while limiting domination by
+a heavy tail. This is a conditional method candidate, not a current result or
+the central theorem. In particular, a simple linear `S`/`S-perp` weighting is
+not claimed as novel because WDiscOOD already combines whitened
+discriminative and residual scores.
+
+Before inspecting any historical residual-tail preflight, a versioned
+addendum must freeze all of the following:
+
+- the exact covariance-normalized Student-t or free-scale parameterization,
+  including constants and the `nu -> infinity` MD limit;
+- the admissible `nu`/scale domain, optimizer, convergence and fallback rules;
+- the disjoint ID fit/calibration or cross-fitting split and whether `nu` is
+  branch-specific; protected OOD is forbidden for every fit and choice;
+- the ID-only tail statistics, activation thresholds, and numerical rules;
+- the fixed comparison panel and method-success/guardrail estimands.
+
+The currently discussed covariance-normalized candidate is proportional to
+`(nu+k) log(1+q_perp/(nu-2))` for `nu>2`; it is **not executable or frozen**
+until the addendum resolves the covariance-versus-scatter convention. A
+free-scale alternative cannot be chosen after tail or OOD results are seen.
+
+The gates are sequential:
+
+1. **Derivation and novelty gate:** complete the WDiscOOD, CORE, MaRS, direct
+   RMD/LDA, and robust/t-Mahalanobis full-text audit. Close the slot on a direct
+   collision or an incoherent likelihood/fit.
+2. **Historical ID-only plausibility gate:** with frozen rules, use the
+   existing cache only to test held-out-ID `q_perp` deviation from `chi^2_k`,
+   tail estimability, and between-model variation. This remains mixed-recipe
+   discovery and cannot activate a causal claim.
+3. **Fresh ID-only activation gate:** before protected OOD, require the paired
+   anchor to show a prespecified, repeatable policy effect on held-out residual
+   tail shape beyond same-policy seed variation. Mean ID-train residual energy
+   cannot satisfy this gate because it is pinned by whitening.
+4. **Frozen protected-OOD evaluation:** only after Gates 1--3 pass, evaluate
+   the unchanged score once. The primary method estimand is reduction of
+   coupled--decoupled `PairOrderChurn` relative to Raw MD and the same-policy
+   churn reference. Prespecified AUROC/FPR95 non-inferiority and preservation
+   of far-OOD residual signal relative to RMD are guardrails.
+5. **Replication gate:** a method contribution requires the frozen effect to
+   replicate outside the WRN/CIFAR-10 anchor. Otherwise report it as local or
+   close the slot.
+
+`nu-hat` may be recorded as an exploratory ID-only candidate predictor of
+fresh policy churn, not detector performance. Heavy tails alone do not imply
+that `nu-hat` predicts retraining instability. The predictor is promoted only
+with a frozen target and fresh paired confirmation.
+
+If any gate fails, `RtMD`, `nu-hat`, and their method claims are removed from
+the contribution list while the theorem and paired mechanism study continue
+unchanged. No second new-score slot, best-`nu` OOD search, or post-result
+formula repair is allowed.
+
+### 7.6 Pair-order balance proposition
 
 The Gain/Loss/PairOrderChurn identities in Section 5 are exact and explain how
 large opposing ordering changes can be hidden by a small net AUROC difference.
@@ -863,6 +985,11 @@ every depth by every OOD dataset. Exact family definitions,
 simultaneous/functional trajectory uncertainty, practical margins, and
 multiplicity control are frozen in the pre-protected-OOD addendum.
 
+If and only if Section 7.5 reaches its protected-OOD gate, `RtMD` forms a
+separate secondary method family. Its churn-reduction estimand, performance
+guardrails, and replication rule are not pooled with the primary mechanism
+family. Failure of this family does not alter the primary paper result.
+
 ## 9. Detector roles
 
 Focal Mahalanobis family:
@@ -875,15 +1002,18 @@ Focal Mahalanobis family:
 External controls:
 
 - kNN-Raw/L2, CTM, Pure Residual, and Energy-T1;
-- MSP and ViM in the appendix;
+- WDiscOOD as the direct whitened discriminative/residual score control;
+- MSP, ViM, and CORE in the appendix;
 - ReAct excluded.
 
 The focal family answers the component question. Controls test whether the
 effect is specific to the Mahalanobis formula. They are not ranked by
-popularity, and no post-hoc detector expansion is allowed. The fixed `rho`
-path is an exact computational intervention on an already declared component,
-not an additional benchmark detector; no `rho` is selected or entered into a
-performance leaderboard.
+popularity. No post-hoc detector expansion beyond the explicit Section 7.5
+slot is allowed. If that slot activates, `RtMD` is compared with Raw MD, RMD,
+their L2 fits, WDiscOOD, and the prespecified appendix controls without OOD
+tuning. The fixed `rho` path is an exact computational intervention on an
+already declared component, not an additional benchmark detector; no `rho` is
+selected or entered into a performance leaderboard.
 
 ## 10. Replication and scale order
 
@@ -943,6 +1073,11 @@ summary only; do not recreate the retired Stage-2 gate, checksum catalog, or
 large generated tables in Git. This preflight is discovery, not causal
 evidence or a five-seed power guarantee.
 
+After the Section 7.5 method specification is frozen, the same cache may also
+support an ID-only residual-tail plausibility preflight. It must use no OOD
+score to select a tail model, `nu`, scale, gate, or formula. Its results are
+discovery and do not activate `RtMD` without the fresh ID-only paired gate.
+
 The existing `fork_from_prefix` implementation may be used only as an optional
 follow-up if the from-scratch divergence curves produce a quantitative
 switch-time prediction. A future test must use prespecified switch times and
@@ -954,7 +1089,7 @@ from this optional fork operation.
 
 ## 12. Required artifacts and validation
 
-Every v8 result must identify seed, initialization, config, branch policy,
+Every v9 result must identify seed, initialization, config, branch policy,
 checkpoint epoch, depth tap, probe-image membership, Gaussian-fit population,
 and source code/config hashes. Required records include:
 
@@ -964,6 +1099,8 @@ and source code/config hashes. Required records include:
   condition, ridge, inverse-parity, and applicability status;
 - actual `dim(S)`, branch-internal basis/projector metadata, `S-perp` feature
   energy, and per-sample `S-perp`/parallel-Marginal/RMD score components;
+- ID-train and held-out-ID `q_perp` variance, standardized moments, upper-tail
+  quantiles, and frozen Q--Q/tail-fit diagnostics;
 - transform-specific raw/L2 component variance--covariance matrices,
   raw-norm/component correlations, and the MD/RMD normalization interaction;
 - component pair margins, additive reconstruction residuals, and RMD
@@ -983,6 +1120,9 @@ and source code/config hashes. Required records include:
   precision residual;
 - update-dynamics and standardized geometry trajectories;
 - numerical condition, ridge, failure, and leakage status.
+- if the Section 7.5 slot activates, the frozen `RtMD` specification hash,
+  ID-only split and fit record, `nu`/scale/fallback status, method churn and
+  guardrails, and every prespecified comparison result.
 
 Required checks include:
 
@@ -990,6 +1130,8 @@ Required checks include:
   full-rank and common-ridge conventions, including RMD `S-perp` invariance;
 - full-rank ID-train mean-energy identities and the common-ridge projected-trace
   boundary;
+- a matched-covariance counterexample showing that whitening pins
+  `mean(q_perp)` but not `Var(q_perp)` or the residual tail;
 - exact fixed-`rho` score/margin reconstruction and pair-flip-threshold tests;
 - an invertible `S-perp`-scaling/refit affine-invariance fixture that rejects
   the incorrect claim that `gamma>0` creates a continuous refitted-MD family;
@@ -1007,10 +1149,13 @@ Required checks include:
 - same-initialization, RNG, DataLoader, and first-minibatch identity;
 - zero-decay Adam/AdamW and SGDM/SGDW semantic parity where applicable;
 - deterministic probe membership and no protected-result leakage;
+- if activated, covariance/scatter parameterization, `nu -> infinity` MD
+  limit, deterministic ID-only fitting, fallback, and no-OOD-selection tests
+  for `RtMD`;
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository has part of this infrastructure, but the v8
+The current repository has part of this infrastructure, but the v9
 discriminant--residual interface/preflight, fresh training, multi-depth
 extraction, expanded trajectory snapshots, update logging, and scale regimes
 are `NOT_RUN`/not yet implemented until separately authorized.
@@ -1029,6 +1174,10 @@ Before inspecting the historical discriminant--residual preflight, freeze:
   reporting with no data-dependent `rho` selection;
 - the rule for promoting `S-perp`, parallel-Marginal, RMD, or no component as
   the fresh anchor's primary empirical channel.
+- the full Section 7.5 `RtMD` mathematical specification, novelty verdict,
+  ID-only split/fit/fallback rule, historical and fresh activation gates,
+  comparison panel, churn estimand, performance guardrails, and close-the-slot
+  rule; if these cannot be frozen now, the slot closes before the preflight.
 
 Before protected OOD execution, freeze in a versioned addendum:
 
@@ -1040,6 +1189,8 @@ Before protected OOD execution, freeze in a versioned addendum:
   detectability summaries, multiplicity handling, and spectral-band boundaries;
 - propagated affine-score bound, churn denominator floor, and ID/OOD residual
   normalization;
+- the fresh ID-only `RtMD` activation verdict; if active, its unchanged
+  specification hash, separate multiplicity family, and replication rule;
 - exact protected OOD evaluation schedule and go/no-go rule.
 
 Null and adverse results remain reportable. Do not rescue them by adding a
