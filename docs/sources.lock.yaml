@@ -350,22 +350,50 @@ sources:
     authors: Mueller and Hein
     stable_source: arXiv:2505.18032
     url: https://arxiv.org/abs/2505.18032
-    accessed: 2026-08-04
-    role: L2-normalized Mahalanobis detector reference
+    accessed: 2026-08-12
+    role: >-
+      post-hoc per-sample L2 normalization followed by refitted Mahalanobis
+      statistics; also evaluates Relative Mahalanobis++ and reports broad
+      improvement, so it bounds any universal claim that L2 is redundant after
+      RMD and is not evidence that L2 literally scales the raw-fit S-perp term
   relative_mahalanobis_paper:
     title: A Simple Fix to Mahalanobis Distance for Improving Near-OOD Detection
     authors: Ren, Fort, Liu, Guha Roy, Padhy, and Lakshminarayanan
     stable_source: arXiv:2106.09022
     url: https://arxiv.org/abs/2106.09022
-    accessed: 2026-08-11
+    accessed: 2026-08-12
     role: original RMD definition subtracting the marginal global-Gaussian Mahalanobis distance
   geometry_based_mahalanobis_ood_paper:
     title: A Geometry-Based View of Mahalanobis OOD Detection
     authors: Janiak, Binkowski, and Kajdanowicz
     stable_source: arXiv:2510.15202v3
     url: https://arxiv.org/abs/2510.15202v3
-    accessed: 2026-08-11
-    role: exact size-stretch, term-wise RMD, spectrum-allocation, ID-instability, ID-only compatibility, and radial-transformation prior work; bounds the v3 novelty claim
+    accessed: 2026-08-12
+    role: >-
+      exact size-stretch, term-wise RMD, spectrum-allocation, ID-instability,
+      and radially scaled phi_beta transformations followed by detector refit
+      with ID-only beta selection; bounds both the v3 geometry claim and any
+      continuous-normalization or ID-only-selection novelty claim
+  representation_training_shift_systematic_analysis_paper:
+    title: A Systematic Analysis of Out-of-Distribution Detection Under Representation and Training Paradigm Shifts
+    authors: Claros Olivares and Brockmeier
+    stable_source: arXiv:2511.11934v3
+    url: https://arxiv.org/abs/2511.11934v3
+    accessed: 2026-08-12
+    role: >-
+      representation-regime detector competitiveness, PCA projection filtering,
+      and Neural-Collapse-based ID-only detector-shortlist boundary; differs
+      from the paired fixed-readout formation and decision-churn question
+  mahavar_paper:
+    title: "MahaVar: OOD Detection via Class-wise Mahalanobis Distance Variance under Neural Collapse"
+    authors: Kim and Yoon
+    stable_source: arXiv:2605.14413v1
+    url: https://arxiv.org/abs/2605.14413v1
+    accessed: 2026-08-12
+    role: >-
+      Neural-Collapse and class-wise-Mahalanobis OOD-score boundary for the
+      direct novelty audit; proposes a new detector and does not study paired
+      decay-coupling formation or the MD-Marginal residual cancellation
   mahalanobis_pp_official_repository:
     repository: mueller-mp/maha-norm
     url: https://github.com/mueller-mp/maha-norm
@@ -377,7 +405,7 @@ sources:
     authors: Wang, Li, Feng, Zhang, Su, Zhu, Zhang, and Wang
     stable_source: CVPR 2022
     url: https://arxiv.org/abs/2203.10807
-    accessed: 2026-08-04
+    accessed: 2026-08-12
     role: ViM origin, residual-subspace, virtual-logit, and score reference
   vim_official_repository:
     repository: haoqiwang/vim
@@ -392,8 +420,12 @@ sources:
     authors: Ben Ammar et al.
     stable_source: ICLR 2024
     url: https://openreview.net/forum?id=9ROuKblmi7
-    accessed: 2026-08-04
-    role: NECO detector reference
+    accessed: 2026-08-12
+    role: >-
+      Neural-Collapse-motivated principal-subspace norm-ratio detector;
+      direct boundary for any discriminant/principal-subspace OOD claim, while
+      remaining distinct from within-class-whitened class-mean S and RMD
+      cancellation
   neco_official_repository:
     repository: drti/neco
     url: https://gitlab.com/drti/neco

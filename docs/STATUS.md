@@ -6,7 +6,7 @@ Last updated: 2026-08-12
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The next task is the v7 theory/estimator/literature lock followed by a bounded
+The next task is the v8 theory/estimator/literature lock followed by a bounded
 implementation of the existing-cache discriminant--residual preflight. Fresh paired
 training has not started.
 
@@ -18,6 +18,7 @@ same initialization and data stream
 → update and non-affine representation divergence
 → discriminant subspace S / residual subspace S-perp
 → S-perp / parallel-Marginal / RMD score attribution
+→ raw/L2 x MD/RMD interaction and fixed residual-retention path
 → exact pair gain, loss, churn, and net AUROC
 → channel-matched attenuation and replication
 ```
@@ -50,6 +51,11 @@ outside Git at the hash-addressed HF archive recorded there.
 - Primary detector attribution is exact within each branch. Cross-branch
   representation interpretation additionally requires ID-only gauge alignment,
   subspace principal angles, and a zero-decay common-frame diagnostic.
+- L2 normalization and RMD are separate operations. The theorem is applied
+  inside each transform-specific fit; a common residual-sensitivity
+  interpretation requires the frozen raw/L2 x MD/RMD interaction and component
+  checks. The fixed residual-retention path is diagnostic and never selects a
+  best detector parameter.
 - Main: WRN-28-10/CIFAR-10 from-scratch paired trajectories.
 - Adam family: 2 x 2 LR/nominal-WD design, 36 total runs; the primary anchor uses five
   seeds and the other cells three.
@@ -66,7 +72,10 @@ replication rules live only in the active protocol.
 
 - full-rank/common-ridge applicability, numerical-rank/condition/reconstruction
   tolerances, and the separately named common-ridge diagnostic
-- branch-alignment and common-frame summaries; Fisher/LDA and RMD novelty audit
+- branch-alignment and common-frame summaries; RMD/LDA, NECO, ViM,
+  Neural-Collapse Mahalanobis, and projection-filtering novelty audit
+- component variance--covariance/norm summaries and the normalization x
+  cancellation interaction estimand
 - ID accuracy/NLL/ECE equivalence and Pareto guardrails
 - practical OOD margins and seed/power justification
 - standardized trajectory uncertainty, multiplicity, and spectral-band boundaries
@@ -75,7 +84,8 @@ replication rules live only in the active protocol.
 
 ## Explicitly not run
 
-- no `S`/`S-perp` analysis interface or historical discriminant--residual preflight
+- no `S`/`S-perp` analysis interface, historical discriminant--residual
+  preflight, or fixed residual-retention diagnostic
 - no fresh active-protocol training, GPU work, checkpoint inference, or protected OOD
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion

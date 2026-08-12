@@ -5,13 +5,13 @@
 Protocol identifier:
 
 ```text
-fixed_readout_discriminant_residual_paired_trajectory_v7
+fixed_readout_discriminant_residual_paired_trajectory_v8
 ```
 
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v7`, and its fresh
+Card 13 filename. The current design version is `v8`, and its fresh
 experiments are `NOT_RUN`.
 
 This revision does not change completed evidence:
@@ -23,7 +23,7 @@ This revision does not change completed evidence:
   only;
 - the validated `fork_from_prefix` runtime remains available, but it is an
   optional follow-up tool rather than the main paper intervention;
-- no discriminant--residual preflight, fresh v7 trajectory, protected-OOD
+- no discriminant--residual preflight, fresh v8 trajectory, protected-OOD
   confirmation, or replication has run.
 
 Fisher/LDA discriminant subspaces, the known MD--Marginal--RMD relation, L2
@@ -55,7 +55,8 @@ Contribution order:
    representation trajectories to the theorem-aligned score channels;
 3. exact tie-aware accounting of `S-perp`, parallel-Marginal, and RMD pair
    margins together with AUROC Gain/Loss/PairOrderChurn;
-4. prespecified channel attenuation and a controlled
+4. a prespecified normalization-by-cancellation diagnostic and residual-channel
+   attenuation path, followed by a controlled
    coupled/decoupled/zero-decay factorial with architecture, class-capacity,
    connectivity, and modern-scale replication.
 
@@ -67,13 +68,29 @@ The strongest allowed sentence is conditional:
 > conditions, producing predictable differences in the ordering of the same
 > ID--OOD pairs.
 
-This sentence is unavailable unless the practical paired effect, estimator
+If the normalization interaction gates also pass, the following extension is
+allowed:
+
+> Post-hoc L2 normalization and RMD stabilize this sensitivity by distinct
+> operations on an empirically common residual channel: normalization reshapes
+> the feature distribution and its refitted residual term, whereas RMD cancels
+> the transform-specific residual term algebraically.
+
+The first sentence is unavailable unless the practical paired effect, estimator
 applicability, repeatable representation divergence, `S-perp` component
 concentration, RMD attenuation, ID-equivalence/Pareto classification, and
-fresh replication gates pass. The theorem alone does not establish that decay
-coupling changes `S-perp`, the sign of an OOD effect, or causal mediation. If
-ID equivalence fails, the result is retained and interpreted as a Pareto
-trade-off rather than discarded or post-hoc checkpoint-matched.
+fresh replication gates pass. The extension additionally requires the
+transform-specific component, interaction, and fixed-`rho` attenuation gates.
+The theorem alone does not establish that decay coupling changes `S-perp`, the
+sign of an OOD effect, or causal mediation. If ID equivalence fails, the result
+is retained and interpreted as a Pareto trade-off rather than discarded or
+post-hoc checkpoint-matched.
+
+L2 normalization and RMD are not declared to be the same operation. L2 is a
+nonlinear feature transform followed by a new Gaussian fit; RMD is an
+algebraic cancellation inside one fixed transformed feature space. The paper
+may claim that they attenuate a common empirical sensitivity channel only if
+the transform-specific component and interaction gates in Sections 6--8 pass.
 
 ## 2. What is controlled in a paired trajectory
 
@@ -100,7 +117,7 @@ different practical question and is not part of the causal main contrast.
 
 Coupled Adam does not expose a unique additive `decay update`: the L2 term
 enters first and second moments and the coordinate-wise denominator. Therefore
-v7 does not place Adam and AdamW on a purported common realized-decay norm.
+v8 does not place Adam and AdamW on a purported common realized-decay norm.
 It uses an exact same-state, same-gradient one-step counterfactual operator
 difference, defined in Section 6.1, and reports its radial and tangential
 components. At each LR, the common zero reference plus nominal WD values
@@ -208,7 +225,7 @@ not a replacement for epoch 200. `best<=200` and `best<=300` are reported as
 separate selection windows.
 
 The update policies differ by construction at the first nonzero-decay step.
-Consequently, v7 does not use “update onset precedes geometry onset” as a
+Consequently, v8 does not use “update onset precedes geometry onset” as a
 mechanism gate. For every prespecified quantity, report the seed-level paired
 divergence curve, a standardized effect against same-policy natural training
 variability, the minimum detectable effect, an early divergence slope, and a
@@ -274,6 +291,31 @@ with unsigned positive distance terms. The `S-perp`, parallel-Marginal, and
 RMD components are primary mechanism accounting; the older two-component
 Marginal/RMD identity remains a coarser exact view and historical bridge.
 
+The prespecified residual-retention diagnostic is defined inside one fixed
+branch and one fixed raw/L2 fit as
+
+```text
+s_MD^(rho) = rho s_perp + s_parallel_Marginal + s_RMD,
+m_MD^(rho) = rho m_perp + m_parallel_Marginal + m_RMD,
+rho in [0,1].
+```
+
+`rho=1` is that fit's MD score and `rho=0` is its `S`-only MD score. The latter
+is not RMD because it retains the parallel-Marginal term. For each ID--OOD pair
+the margin is linear in `rho`, so every interior flip threshold is available
+analytically; the aggregate AUROC/churn path is reconstructed from those exact
+pair transitions. Use this as a fixed channel-dose diagnostic, not as a new
+detector family. Do not choose a favorable `rho` from ID or protected OOD data
+and do not make a best-`rho` performance claim.
+
+This score attenuation must not be mislabeled as a refitted feature
+normalization. Scaling `S-perp` coordinates by any `gamma>0` is an invertible
+linear map; if class means and covariance are transformed and refitted
+consistently, affine invariance makes MD unchanged. `gamma=0` is a singular
+projection rather than a continuous refitted-MD family. A `gamma^2 s_perp`
+formula is therefore a frozen-metric score reweighting, which is exactly the
+role served by `rho` above.
+
 RMD is called the **global-referenced class-relative component**. It is not
 called a pure class-contrastive score.
 
@@ -338,6 +380,9 @@ Report numerator and denominator alongside the ratio for every OOD dataset;
 do not call the denominator a null or treat its overlapping seed pairs as
 independent replicates. If the denominator is below the frozen numerical or
 practical floor, report the ratio as undefined rather than inflating it.
+Call this decision stability under a controlled policy perturbation. Reserve
+“retraining reproducibility” for the same-policy, different-seed denominator;
+one model's ID score variance alone cannot establish it.
 
 ## 6. How training recipe is linked to geometry and ordering
 
@@ -456,6 +501,24 @@ only that run's ID-train features. Score the same probe images with:
 - Mahalanobis-Raw, Marginal-Mahalanobis-Raw, and RMD-Raw;
 - their separately refitted L2-normalized versions.
 
+Treat this as a prespecified `normalization x cancellation` 2 x 2:
+
+| Feature fit | Reads transform-specific `S-perp` | Cancels transform-specific `S-perp` |
+| --- | --- | --- |
+| raw | MD-Raw | RMD-Raw |
+| per-sample L2, then refit | MD++ | RMD++ |
+
+The cancellation theorem applies separately inside each applicable raw or L2
+fit. Per-sample L2 normalization changes the class means, covariance,
+whitening, `S`, and potentially every parallel term; it does not literally
+multiply the raw fit's `s_perp`. Therefore compare the four detector outcomes
+and their transform-specific decompositions without identifying
+`S_raw-perp` with `S_L2-perp`. Record raw feature norm correlations with each
+raw score component, the component variance--covariance matrix on ID, and the
+normalization effect on component pair margins, policy gap, and churn. A large
+raw-to-L2 improvement is only consistent with residual-channel suppression
+when these direct checks agree.
+
 Before calling cancellation exact, record the actual precision backend,
 covariance identity residual, numerical rank, retained condition number, and
 score/component reconstruction residual. Metric Contract v1.2 continues to
@@ -469,7 +532,8 @@ as a separately named diagnostic; it never silently replaces the v1.2 score.
 For every applicable fit, save per-sample and pair-margin values for
 `S-perp`, parallel-Marginal, and RMD, together with exact reconstruction and
 RMD `S-perp` cancellation residuals. These are the primary score-geometry
-channels.
+channels. Also evaluate the fixed `rho` attenuation path in Section 5 and
+store exact interior pair-flip thresholds; never select a best `rho`.
 
 As a supporting diagnostic for each relevant quadratic term, use the cited
 size--stretch factorization:
@@ -538,9 +602,9 @@ After localization, weaken only the implicated channel:
 
 | Localized channel | Confirmatory diagnostic |
 | --- | --- |
-| `S-perp` residual | RMD cancellation and `S`-only reconstruction should selectively attenuate gap/churn |
+| `S-perp` residual | RMD cancellation, `S`-only reconstruction, and the fixed `rho` path should selectively attenuate gap/churn |
 | parallel-Marginal or RMD | retain the gap in `S`-only accounting and test class-relative/estimator pathways |
-| sample/class-conditioned radial heterogeneity | L2 normalization and refitting; global scale remains a negative control |
+| sample/class-conditioned radial heterogeneity | L2 normalization and refitting; use the raw/L2 x MD/RMD interaction to test whether the changed channel is transform-specific `S-perp`; global scale remains a negative control |
 | non-affine branch deformation | ID-only affine alignment and residual/precision perturbation accounting |
 | spectrum/stretch | ID-only spectral-band ablation, eigenvalue clipping, or whitening diagnostic |
 | class-distance profile | nearest-class versus full-profile readout |
@@ -600,8 +664,25 @@ cancels it. For component `q`, define `m_q(i,o)=s_q(i)-s_q(o)`; then the same
 additive identity holds for ID--OOD pair margins. This is the central theorem.
 Fisher/LDA class-mean subspaces and the rank bound are prior facts; the proposed
 paper contribution is the OOD-score cancellation formalization combined with
-the controlled formation study. Do not use “first” language until the
-RMD/LDA/classifier-subspace novelty audit is locked.
+the controlled formation study. Do not use “first” language until the direct
+RMD/LDA literature and the NECO, ViM, Neural-Collapse Mahalanobis,
+classifier/principal/residual-subspace, and projection-filtering boundaries
+are locked.
+
+In the unregularized full-rank case, the pooled ID-train within-class residual
+has identity covariance after whitening. If `r=dim(S)`, this gives the exact
+training-set mean-energy identities
+
+```text
+mean_ID-train ||P_S-perp A^(-1/2)(z-mu_y)||^2 = d-r
+mean_ID-train ||P_S      A^(-1/2)(z-mu_y)||^2 = r.
+```
+
+This explains why a high-dimensional residual channel can carry a large mean
+share of within-class whitened distance. It does **not** imply that it carries
+most sample variance, raw Euclidean norm variation, policy sensitivity, or OOD
+signal. With a common ridge the corresponding quantities are projected traces
+of `A^(-1/2) Sigma_W A^(-1/2)`, not simply dimensions.
 
 `S` means the class-mean-discriminative subspace for this pooled
 tied-covariance detector; it is not all information used by a nonlinear
@@ -609,6 +690,17 @@ classifier. `S-perp` is not meaningless noise: it may contain OOD signal,
 higher-order structure, or class-specific covariance information. The theorem
 states what these three Gaussian scores can see, not which channel training
 must change or which detector must perform better.
+
+L2 normalization is outside the algebra of one fixed raw fit: it maps each
+sample nonlinearly to the sphere and then refits all Gaussian statistics. The
+theorem holds again inside the normalized fit if its own applicability gate
+passes, but it does not prove that L2 partially removes the raw fit's
+`S-perp`. The stronger empirical interpretation--L2 reduces a norm-driven
+residual sensitivity whereas RMD cancels the transform-specific residual--is
+available only if the Section 6.3 interaction, component covariance, norm
+correlation, and pair-margin attenuation agree. Existing broad
+Mahalanobis++ evidence that normalization can also improve RMD prevents a
+universal claim that L2 is useless or harmful after RMD.
 
 Metric Contract v1.2 uses `Sigma_W^dagger` and `Sigma_0^dagger` without an
 explicit common ridge. A general Moore--Penrose pseudoinverse does not inherit
@@ -704,7 +796,15 @@ reconstruction tolerances first, then measure theorem applicability,
 branch-internal `S-perp`/parallel-Marginal/RMD reconstruction, RMD cancellation
 residual, actual `dim(S)`, branch principal angles, the zero-reference common
 frame, classifier-row-space alignment, and historical Raw-MD gap
-concentration. Curvature mass/allocation is secondary. This mixed-recipe
+concentration. For ID train/test, report all three component variances and
+their full covariance matrix so that they reconstruct total score variance;
+also report raw-norm/component correlations. Do not call
+`Var(s_perp)/Var(s_MD)` a percentage of fragility: covariance can put this
+ratio outside `[0,1]`, and within-model ID variation is not retraining
+variation. Use the completed C3 raw/L2 x MD/RMD pattern only to motivate the
+fresh interaction prediction because its detector-wise maxima occur on
+different OOD datasets and compare different optimizer families. Curvature
+mass/allocation is secondary. This mixed-recipe
 population is noncausal: it selects a useful measurement hypothesis but does
 not confirm a decay-coupling effect or guarantee fresh-study power.
 
@@ -745,7 +845,8 @@ Primary mechanism family:
 
 - theorem applicability and exact branch-internal
   `S-perp`/parallel-Marginal/RMD score and pair attribution;
-- RMD cancellation residual and prespecified `S`-only attenuation;
+- RMD cancellation residual, the raw/L2 x MD/RMD interaction, and the
+  prespecified `rho` residual-retention path including `S`-only attenuation;
 - gauge-aligned branch principal angles, zero-decay common-frame diagnostics,
   and held-out-ID versus per-OOD affine residual;
 - ID/OOD score-side replacement accounting;
@@ -779,7 +880,10 @@ External controls:
 
 The focal family answers the component question. Controls test whether the
 effect is specific to the Mahalanobis formula. They are not ranked by
-popularity, and no post-hoc detector expansion is allowed.
+popularity, and no post-hoc detector expansion is allowed. The fixed `rho`
+path is an exact computational intervention on an already declared component,
+not an additional benchmark detector; no `rho` is selected or entered into a
+performance leaderboard.
 
 ## 10. Replication and scale order
 
@@ -850,7 +954,7 @@ from this optional fork operation.
 
 ## 12. Required artifacts and validation
 
-Every v7 result must identify seed, initialization, config, branch policy,
+Every v8 result must identify seed, initialization, config, branch policy,
 checkpoint epoch, depth tap, probe-image membership, Gaussian-fit population,
 and source code/config hashes. Required records include:
 
@@ -860,8 +964,12 @@ and source code/config hashes. Required records include:
   condition, ridge, inverse-parity, and applicability status;
 - actual `dim(S)`, branch-internal basis/projector metadata, `S-perp` feature
   energy, and per-sample `S-perp`/parallel-Marginal/RMD score components;
+- transform-specific raw/L2 component variance--covariance matrices,
+  raw-norm/component correlations, and the MD/RMD normalization interaction;
 - component pair margins, additive reconstruction residuals, and RMD
   cancellation residuals;
+- fixed-`rho` score/margin paths and exact interior pair-flip thresholds, with
+  no selected best `rho`;
 - gauge-aligned branch principal angles, whitening change, classifier-row-space
   alignment, and zero-decay common-frame diagnostics;
 - tie-aware pair-transition counts and component Shapley accounting;
@@ -880,6 +988,11 @@ Required checks include:
 
 - small-array discriminant--residual score and pair-margin reconstruction under
   full-rank and common-ridge conventions, including RMD `S-perp` invariance;
+- full-rank ID-train mean-energy identities and the common-ridge projected-trace
+  boundary;
+- exact fixed-`rho` score/margin reconstruction and pair-flip-threshold tests;
+- an invertible `S-perp`-scaling/refit affine-invariance fixture that rejects
+  the incorrect claim that `gamma>0` creates a continuous refitted-MD family;
 - a deliberate rank-deficient pseudoinverse boundary fixture that prevents an
   unsupported exact-cancellation claim;
 - orthogonal-projector, actual-rank, principal-angle, and common-frame tests;
@@ -897,7 +1010,7 @@ Required checks include:
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository has part of this infrastructure, but the v7
+The current repository has part of this infrastructure, but the v8
 discriminant--residual interface/preflight, fresh training, multi-depth
 extraction, expanded trajectory snapshots, update logging, and scale regimes
 are `NOT_RUN`/not yet implemented until separately authorized.
@@ -911,6 +1024,9 @@ Before inspecting the historical discriminant--residual preflight, freeze:
 - the exact name and ridge value of any common-ridge diagnostic;
 - numerical `dim(S)` and principal-angle rules, classifier-alignment summary,
   and zero-decay common-frame convention;
+- component variance--covariance and raw-norm correlation summaries, the
+  normalization x cancellation interaction estimand, and fixed `rho` path
+  reporting with no data-dependent `rho` selection;
 - the rule for promoting `S-perp`, parallel-Marginal, RMD, or no component as
   the fresh anchor's primary empirical channel.
 

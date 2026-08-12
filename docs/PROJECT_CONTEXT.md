@@ -18,6 +18,11 @@ class-mean span `S`와 residual complement `S-perp`에서 Raw MD와 Marginal이
 어느 subspace geometry를 형성하고 그 변화가 동일 ID--OOD pair ordering에 어떻게
 전달되는지 검정한다.
 
+Raw/L2와 MD/RMD의 2 x 2 비교는 normalization과 residual cancellation의
+상호작용을 진단한다. 정리는 각 transform 내부에는 적용되지만, L2가 raw fit의
+`S-perp`만 부분 제거한다는 주장은 정리에서 자동으로 나오지 않으며 직접 component
+검정이 필요하다.
+
 Fisher/LDA의 discriminant subspace, 알려진 MD--Marginal--RMD 관계,
 size--stretch, spectrum--allocation, radial/angular dynamics는 선행 지식 또는
 측정도구다. 새로운 detector, optimizer leaderboard, 또는 score accounting만으로

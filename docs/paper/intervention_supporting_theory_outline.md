@@ -32,8 +32,10 @@ not a new detector or an Adam-versus-AdamW leaderboard.
    corollary of RMD acting only on `S`.
 5. Branch-internal `S-perp`/parallel-Marginal/RMD identities and exact
    Gain/Loss/PairOrderChurn accounting connect geometry to both net AUROC and
-   canceled same-pair reversals. Prior update, size--stretch, and
-   spectrum--allocation tools explain how a localized channel formed.
+   canceled same-pair reversals. A raw/L2 x MD/RMD interaction and fixed
+   residual-retention path distinguish nonlinear normalization from algebraic
+   cancellation. Prior update, size--stretch, and spectrum--allocation tools
+   explain how a localized channel formed.
 6. Prespecified channel-matched diagnostics test the explanation. The
    conclusion is conditional on estimator applicability, practical paired
    effect, repeatable representation divergence, component concentration,
@@ -57,8 +59,9 @@ State contributions in this order:
 1. discriminant--residual RMD cancellation under explicit estimator
    conditions;
 2. paired from-scratch training-to-subspace-to-score trajectories;
-3. exact subspace component and pair-order-churn accounting with
-   prespecified attenuation;
+3. exact subspace component and pair-order-churn accounting with a
+   prespecified normalization-by-cancellation diagnostic and residual-channel
+   attenuation path;
 4. controlled local factorial evidence plus architecture,
    discriminant-capacity, connectivity, and scale replication.
 
@@ -69,7 +72,9 @@ post-hoc checkpoint selection.
 
 Cover training-induced OOD variability, the original Mahalanobis detector,
 Marginal Mahalanobis and RMD, Mahalanobis++, and *A Geometry-Based View of
-Mahalanobis OOD Detection*.
+Mahalanobis OOD Detection*. Audit NECO, ViM, Neural-Collapse Mahalanobis
+scores, classifier/principal/residual-subspace methods, and PCA projection
+filtering as direct neighboring boundaries.
 
 Explicitly credit prior work for:
 
@@ -82,7 +87,10 @@ Explicitly credit prior work for:
 Do not claim that the class-discriminative subspace itself is new. The theorem
 candidate is the OOD-score statement that Raw MD and Marginal share the same
 `S-perp` term and RMD cancels it. Avoid “first” language until the direct
-RMD/LDA/classifier-subspace literature audit is complete.
+RMD/LDA and subspace-detector literature audit is complete. Mahalanobis++
+already refits MD and RMD after L2 normalization; the paper's possible
+addition is a controlled, component-level explanation of when normalization
+and cancellation interact, not the normalized detector itself.
 
 The difference is the unit of evidence:
 
@@ -144,6 +152,37 @@ cancels it. `dim(S)<=K-1`; the old low-rank-curvature result follows as a
 corollary. This theorem says what the scores can see. It does not predict that
 decay coupling changes `S-perp`, the sign of an OOD effect, or which detector
 wins.
+
+In the unregularized full-rank case, pooled ID-train within-class whitening
+also gives exact mean residual energies `d-dim(S)` in `S-perp` and `dim(S)` in
+`S`. This explains large mean residual energy in high dimension, not its
+sample variance, correlation with raw feature norm, policy sensitivity, or OOD
+utility. Under a common ridge these means become projected traces.
+
+The theorem applies separately to each raw or L2-normalized fit. L2 maps each
+sample nonlinearly and refits means, covariance, whitening, and `S`; it does
+not literally scale the raw fit's `s_perp`. Therefore “L2 partially suppresses
+the same channel that RMD fully removes” is a gated empirical interpretation,
+not a corollary. Test it through the raw/L2 x MD/RMD interaction,
+transform-specific component covariance, raw-norm/component correlations, and
+pair-margin attenuation. Broad Mahalanobis++ results in which normalization
+often also improves RMD forbid a universal claim that L2 is redundant or
+harmful after RMD.
+
+Inside a fixed branch and transform, define the score diagnostic
+
+```text
+s_MD^(rho) = rho s_perp + s_parallel_Marginal + s_RMD,
+m_MD^(rho) = rho m_perp + m_parallel_Marginal + m_RMD,
+rho in [0,1].
+```
+
+It connects MD (`rho=1`) to `S`-only MD (`rho=0`) and yields exact pair-flip
+thresholds. It is a channel-dose diagnostic, not an optimized detector. A
+putative feature map that scales `S-perp` by `gamma>0` and then refits MD is
+affine-invariant and changes nothing; `gamma=0` is a singular projection.
+Thus do not present the `rho` path as a new refitted normalization or select a
+best `rho`.
 
 The frozen Metric Contract v1.2 uses Moore--Penrose-compatible precision
 without explicit ridge. Do not silently change it. Apply exact cancellation to
@@ -250,8 +289,14 @@ tolerances and run a compact discriminant--residual preflight: theorem
 applicability, branch-internal `S-perp`/parallel-Marginal/RMD score and pair
 reconstruction, RMD cancellation residual, actual `dim(S)`, branch principal
 angles, zero-reference common frame, classifier alignment, and historical
-component concentration. Curvature and spectrum/allocation remain supporting
-diagnostics.
+component concentration. For ID train/test, include the complete three-component
+variance--covariance matrix and raw-norm/component correlations. Do not label
+`Var(s_perp)/Var(s_MD)` as a fragility percentage: covariance can move it
+outside `[0,1]`, and one model's ID score variation is not retraining
+variation. The completed C3 raw/L2 pattern motivates the fresh interaction
+hypothesis but is not an ordered dose response because detector-wise maxima
+occur on different OOD datasets. Curvature and spectrum/allocation remain
+supporting diagnostics.
 
 Do not call the mixed optimizer/LR/WD population causal evidence. Do not use
 nearest-accuracy matching as a primary analysis. Preserve the failed v2 radial
@@ -329,7 +374,9 @@ Follow the same deterministic probe images through four levels:
 3. **Score geometry:** branch-specific ID-only Gaussian fits; raw/L2 MD,
    Marginal, and RMD; explicit theorem-applicability status;
    `S-perp`/parallel-Marginal/RMD score and pair-margin reconstruction; RMD
-   cancellation residual; size/stretch and spectrum/allocation as supporting
+   cancellation residual; raw/L2 x MD/RMD interaction; component
+   variance--covariance and raw-norm correlations; fixed `rho` path and exact
+   pair-flip thresholds; size/stretch and spectrum/allocation as supporting
    decompositions.
 4. **OOD ordering:** the same ID--OOD pairs classified as incorrect/tie/correct
    at every checkpoint, with exact theorem-aligned component attribution, Gain, Loss,
@@ -352,9 +399,12 @@ natural-variability reference, not a null.
 
 ### Channel-matched confirmation
 
-- `S-perp` residual -> RMD cancellation and `S`-only reconstruction;
+- `S-perp` residual -> RMD cancellation, `S`-only reconstruction, and the
+  fixed `rho` residual-retention path;
 - parallel-Marginal/RMD -> retained `S`-only gap and class-relative/estimator audit;
-- sample/class-conditioned radial difference -> L2 normalization and refitting;
+- sample/class-conditioned radial difference -> L2 normalization and refitting,
+  interpreted through the raw/L2 x MD/RMD interaction rather than assumed to
+  be raw-`S-perp` suppression;
 - non-affine deformation -> ID-only affine alignment plus residual/precision accounting;
 - spectrum/stretch difference -> prespecified ID-only spectral-band ablation,
   clipping, or whitening diagnostic;
@@ -370,6 +420,7 @@ but cannot replace, exact accounting and selective attenuation.
   summaries.
 - Primary mechanism: theorem applicability, branch-internal
   `S-perp`/parallel-Marginal/RMD pair attribution, RMD cancellation,
+  raw/L2 x MD/RMD interaction, fixed `rho` attenuation,
   gauge-aligned subspace comparison, differential ID/OOD affine residual,
   ID/OOD score-side accounting, counterfactual update audit, and
   channel-matched attenuation.
@@ -389,6 +440,8 @@ OOD execution.
 | Observation | Allowed interpretation |
 | --- | --- |
 | Applicability passes, practical gap/churn concentrates in `S-perp`, and RMD selectively attenuates it | strongest discriminant--residual mechanism result |
+| L2 reduces transform-specific residual variation, helps MD much more than RMD, and the fixed `rho` path attenuates gap/churn | supports a shared empirical residual-sensitivity channel; L2 and RMD remain different operations |
+| L2 changes parallel terms or helps RMD comparably | normalization acts beyond residual suppression; reject the simple partial-versus-complete account |
 | Gap is dominated by parallel-Marginal or RMD | theorem remains; lower the empirical `S-perp` claim and report the observed `S` pathway |
 | RMD retains the branch gap | residual cancellation is insufficient; investigate `S`-internal, class-relative, or estimator pathways |
 | Separately whitened subspaces differ but align after gauge control | coordinate/frame effect; do not claim substantive subspace rotation |
@@ -440,8 +493,11 @@ Discuss local normalized-block effective-step dynamics without calling the
 whole WRN trunk scale-invariant, the difference between comparable-ID and
 Pareto evidence, the limits of affine/full-rank/common-ridge assumptions and
 CIFAR Gaussian fitting, branch-dependent whitening frames, the fact that
-`S-perp` is not meaningless noise, and the boundary between tested decay
-policies and universal optimizer claims.
+`S-perp` is not meaningless noise, the distinction between nonlinear L2 refit
+and algebraic RMD cancellation, and the boundary between tested decay policies
+and universal optimizer claims. Decision stability is measured by policy
+churn relative to same-policy seed churn; do not rename one model's ID score
+variance as retraining reproducibility.
 
 Use the Card 13 strong sentence only if every corresponding gate passes.
 
@@ -450,14 +506,15 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
 1. From-scratch paired design and the update -> `S/S-perp` geometry -> score ->
    ordering chain, including the discriminant--residual cancellation theorem.
 2. Historical applicability and `S-perp`/parallel-Marginal/RMD localization
-   across 30 bundles and six OOD datasets.
+   across 30 bundles and six OOD datasets, including component covariance and
+   the existing raw/L2 x MD/RMD pattern.
 3. Fresh trajectories: zero-state/history-conditioned counterfactual update,
    differential ID/OOD affine residual,
    gauge-aligned subspace/frame diagnostics, and representation geometry over
    time and within-stage depth.
 4. ID utility, DeltaAUROC versus PairOrderChurn, policy/seed churn ratio,
    ID/OOD-side and Gain/Loss transitions, and theorem-aligned component
-   attribution at the primary endpoint.
+   attribution at the primary endpoint, with the fixed `rho` attenuation path.
 5. Adam 2 x 2, SGDM control, and WRN--ResNet--DenseNet--ConvNeXt replication
    matrix.
 
@@ -466,6 +523,7 @@ Use the Card 13 strong sentence only if every corresponding gate passes.
 1. Prior work versus the paired formation study.
 2. Exact run budget, checkpoints, depth taps, and execution status.
 3. Main paired ID/OOD estimates and practical classifications.
-4. Applicability, subspace/frame, component, affine residual, churn, and
-   attenuation evidence by OOD dataset.
+4. Applicability, subspace/frame, component covariance, normalization x
+   cancellation, affine residual, churn, and attenuation evidence by OOD
+   dataset.
 5. Replication claim gate and numerical-validation appendix.
