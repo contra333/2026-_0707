@@ -39,6 +39,9 @@ EXPECTED_REUSE_MANIFEST_SHA256 = (
 EXPECTED_V1_BUNDLE_RECORDS_SHA256 = (
     "72f0260647cd666bdbf22460a015e59008aaff90268a3c49aa7468cd5824b91e"
 )
+EXPECTED_V1_TAIL_RECORDS_SHA256 = (
+    "58ab400b4e9cc7b50012fe639c0fac5c292a725a696c75a7968e199ac6c85645"
+)
 
 ID_REQUIRED_PATHS = (
     "artifact_manifest.json",
@@ -256,6 +259,19 @@ def _diff_snapshot(record: Mapping[str, Any], *, v2: bool) -> dict[str, Any]:
             if v2
             else parity.get("scaled_max_residuals", {}).get("rmd")
         ),
+        "common_ridge_status": record.get("common_ridge_diagnostic", {}).get(
+            "status"
+        ),
+        "common_ridge_id_train_rmd_cancellation_scaled_max": record.get(
+            "common_ridge_diagnostic", {}
+        )
+        .get("id_train", {})
+        .get("rmd_cancellation_scaled_max"),
+        "common_ridge_id_test_rmd_cancellation_scaled_max": record.get(
+            "common_ridge_diagnostic", {}
+        )
+        .get("id_test", {})
+        .get("rmd_cancellation_scaled_max"),
         "raw_norm_id_train_present": bool(
             correlations is not None and "id_train" in correlations
         ),
@@ -265,9 +281,28 @@ def _diff_snapshot(record: Mapping[str, Any], *, v2: bool) -> dict[str, Any]:
     }
 
 
+def _tail_diff_snapshot(record: Mapping[str, Any]) -> dict[str, Any]:
+    nu_fit = record.get("nu_fit") or {}
+    heldout = record.get("heldout_id_test") or {}
+    partition = record.get("partition") or {}
+    return {
+        "tail_status": record.get("status"),
+        "partition_method": partition.get("method"),
+        "partition_fold_counts": partition.get("fold_counts"),
+        "nu_selected_model": nu_fit.get("selected_model"),
+        "nu_selected_value": nu_fit.get("selected_nu"),
+        "heldout_chi2_ks_statistic": heldout.get("chi2_ks_statistic"),
+        "heldout_variance_to_chi2_ratio": heldout.get(
+            "variance_to_chi2_ratio"
+        ),
+    }
+
+
 def build_v1_v2_diff(
     v1_records: Iterable[Mapping[str, Any]],
     v2_records: Iterable[Mapping[str, Any]],
+    v1_tail_records: Iterable[Mapping[str, Any]] | None = None,
+    v2_tail_records: Iterable[Mapping[str, Any]] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Build a strict per-fit preservation diff for the one allowed rerun."""
 
@@ -294,11 +329,27 @@ def build_v1_v2_diff(
         raise PreflightInputError(
             f"v1/v2 preservation diff requires exactly 60 fits, got {len(before_by_key)}"
         )
+    before_tail_by_key = (
+        keyed(v1_tail_records, "v1 tail") if v1_tail_records is not None else None
+    )
+    after_tail_by_key = (
+        keyed(v2_tail_records, "v2 tail") if v2_tail_records is not None else None
+    )
+    if (before_tail_by_key is None) != (after_tail_by_key is None):
+        raise PreflightInputError("v1 and v2 tail records must be supplied together")
+    if before_tail_by_key is not None and (
+        set(before_tail_by_key) != set(before_by_key)
+        or set(after_tail_by_key or {}) != set(before_by_key)
+    ):
+        raise PreflightInputError("v1/v2 bundle and tail fit keys differ")
 
     diff_records: list[dict[str, Any]] = []
     for key in sorted(before_by_key):
         before = _diff_snapshot(before_by_key[key], v2=False)
         after = _diff_snapshot(after_by_key[key], v2=True)
+        if before_tail_by_key is not None and after_tail_by_key is not None:
+            before.update(_tail_diff_snapshot(before_tail_by_key[key]))
+            after.update(_tail_diff_snapshot(after_tail_by_key[key]))
         changed_fields = [name for name in before if before[name] != after[name]]
         diff_records.append(
             {
@@ -318,6 +369,11 @@ def build_v1_v2_diff(
         "id_train_rmd_cancellation_pass",
         "id_test_rmd_cancellation_pass",
         "cached_parity_pass",
+        "common_ridge_status",
+        "tail_status",
+        "partition_method",
+        "partition_fold_counts",
+        "nu_selected_model",
     )
     summary = {
         "fit_count": len(diff_records),
@@ -1448,6 +1504,7 @@ def run_preflight(
     cache_root: str | Path,
     output_dir: str | Path,
     v1_bundle_records_path: str | Path | None = None,
+    v1_tail_records_path: str | Path | None = None,
     hard_cap_seconds: float = 4.0 * 60.0 * 60.0,
     progress_callback: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
@@ -1471,6 +1528,17 @@ def run_preflight(
         if observed_v1_sha256 != EXPECTED_V1_BUNDLE_RECORDS_SHA256:
             raise PreflightInputError("v1 bundle records SHA-256 does not match")
         v1_bundle_records = _load_json_lines(v1_records_path)
+        if v1_tail_records_path is None:
+            raise PreflightInputError("v1 tail records are required for the v2 diff")
+        v1_tail_path = Path(v1_tail_records_path)
+        if not v1_tail_path.is_file():
+            raise PreflightInputError(
+                f"required v1 tail records are absent: {v1_tail_path}"
+            )
+        observed_v1_tail_sha256 = sha256_file(v1_tail_path)
+        if observed_v1_tail_sha256 != EXPECTED_V1_TAIL_RECORDS_SHA256:
+            raise PreflightInputError("v1 tail records SHA-256 does not match")
+        v1_tail_records = _load_json_lines(v1_tail_path)
         _json_line(destination / "input_manifest.jsonl", source_records)
         if progress_callback is not None:
             progress_callback(
@@ -1539,7 +1607,10 @@ def run_preflight(
                         f"{pair['pair_id']} {transform}"
                     )
         diff_records, diff_summary = build_v1_v2_diff(
-            v1_bundle_records, bundle_records
+            v1_bundle_records,
+            bundle_records,
+            v1_tail_records,
+            tail_records,
         )
         _json_line(destination / "bundle_records.jsonl", bundle_records)
         _json_line(destination / "tail_records.jsonl", tail_records)
@@ -1571,6 +1642,7 @@ def run_preflight(
             "gate_2": gate2,
             "v1_baseline": {
                 "bundle_records_sha256": observed_v1_sha256,
+                "tail_records_sha256": observed_v1_tail_sha256,
                 "fit_count": len(v1_bundle_records),
                 "immutable": True,
             },

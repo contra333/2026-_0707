@@ -4,7 +4,18 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
+
+# Pin numerical-library scheduling before importing NumPy/SciPy through oge.
+for _thread_variable in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+):
+    os.environ[_thread_variable] = "1"
 
 from oge.analysis.discriminant_residual_preflight import run_preflight
 
@@ -27,6 +38,12 @@ def parse_args() -> argparse.Namespace:
         help="Immutable v1 bundle_records.jsonl used for the strict per-fit diff.",
     )
     parser.add_argument(
+        "--v1-tail-records",
+        type=Path,
+        required=True,
+        help="Immutable v1 tail_records.jsonl used for the strict per-fit diff.",
+    )
+    parser.add_argument(
         "--hard-cap-seconds",
         type=float,
         default=4.0 * 60.0 * 60.0,
@@ -42,6 +59,7 @@ def main() -> None:
         cache_root=args.cache_root,
         output_dir=args.output_dir,
         v1_bundle_records_path=args.v1_bundle_records,
+        v1_tail_records_path=args.v1_tail_records,
         hard_cap_seconds=args.hard_cap_seconds,
         progress_callback=lambda message: print(message, flush=True),
     )
