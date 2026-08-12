@@ -6,7 +6,7 @@ Last updated: 2026-08-12
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The active design is v10. A bounded historical D1 survival check is complete
+The active design is v11. A bounded historical D1 survival check is complete
 and supports the pair-ranking-multiplicity framing as discovery evidence. The
 Task B theory/estimator/literature lock is complete: the core numerical and
 subspace rules, discovery-informed `S-perp` hypothesis, and exact conditional
@@ -15,11 +15,16 @@ discriminant--residual and ID-only residual-tail CPU preflight is complete. Its
 execution passed, but Gate 2 is `INCONCLUSIVE`: Card 13 has no frozen aggregate
 decision rule and only 15 of 30 fits per transform had numerically applicable
 two-fold geometry. Fresh paired training has not started.
+
 An ID-only archive diagnostic has now re-derived the 60-fit failure layers,
 checksum-verified all 30 NC1 inputs, and found synthetic forward-error support
 for treating the RMD-cancellation denominator as a Card-13 wording ambiguity.
 This authorizes one prospective contract clarification and CPU preflight v2;
 it does not re-adjudicate Gate 2 or activate RtMD.
+Card 13 v11 now records that clarification, makes historical Gate 2 permanently
+`INCONCLUSIVE`, transfers its unresolved plausibility question to a fresh
+pre-registered Gate 3, and requires explicit owner approval before either a
+fresh GPU launch or protected-OOD access.
 
 The planned chain is:
 
