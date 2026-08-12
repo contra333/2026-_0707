@@ -57,6 +57,45 @@ sources:
     url: https://arxiv.org/abs/1810.12281
     accessed: 2026-08-11
     role: optimizer- and architecture-dependent weight-decay mechanisms, including effective-learning-rate changes; alternative-pathway boundary only
+  rotational_equilibrium_paper:
+    title: "Rotational Equilibrium: How Weight Decay Balances Learning Across Neural Networks"
+    authors: Kosson, Messmer, and Jaggi
+    stable_source: ICML 2024, PMLR 235
+    url: https://proceedings.mlr.press/v235/kosson24a.html
+    accessed: 2026-08-12
+    role: >-
+      primary rotational-equilibrium and angular-update prior for normalized
+      networks; cited upstream manipulation/pathway context, not evidence that
+      rotation uniquely mediates the planned OOD effect
+  spherical_motion_dynamics_paper:
+    title: "Spherical Motion Dynamics: Learning Dynamics of Neural Network with Normalization, Weight Decay, and SGD"
+    authors: Wan, Zhu, Zhang, and Sun
+    stable_source: arXiv:2006.08419v4
+    url: https://arxiv.org/abs/2006.08419v4
+    accessed: 2026-08-12
+    role: >-
+      angular-update and normalization/weight-decay/SGD dynamics prior;
+      measurement rationale only, not a decay-coupling-to-OOD mechanism source
+  adamp_paper:
+    title: "AdamP: Slowing Down the Slowdown for Momentum Optimizers on Scale-invariant Weights"
+    authors: Heo, Chun, Oh, Han, Yun, Kim, Uh, and Ha
+    stable_source: ICLR 2021; arXiv:2006.08217v3
+    url: https://arxiv.org/abs/2006.08217v3
+    accessed: 2026-08-12
+    role: >-
+      momentum, radial-update, and scale-invariant-weight prior; bounds the
+      novelty of update-direction diagnostics and does not validate the planned
+      OOD pathway
+  fisher_linear_discriminant_paper:
+    title: The Use of Multiple Measurements in Taxonomic Problems
+    authors: Fisher
+    stable_source: DOI:10.1111/j.1469-1809.1936.tb02137.x
+    url: https://doi.org/10.1111/j.1469-1809.1936.tb02137.x
+    accessed: 2026-08-12
+    role: >-
+      canonical linear-discriminant-analysis origin and novelty boundary for
+      class-mean discriminant subspaces; not a source for RMD or the proposed
+      OOD-score cancellation statement
   random_search_hpo_paper:
     title: Random Search for Hyper-Parameter Optimization
     authors: Bergstra and Bengio

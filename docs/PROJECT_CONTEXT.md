@@ -12,8 +12,16 @@ training rule
 ```
 
 현재 논문은 같은 initialization과 data stream에서 coupled, decoupled,
-zero-decay training을 처음부터 비교한다. 알려진 MD--Marginal--RMD와
-size--stretch 분해는 측정도구이며 새로운 detector나 decomposition으로 주장하지 않는다.
+zero-decay training을 처음부터 비교한다. 중심 이론은 within-class-whitened
+class-mean span `S`와 residual complement `S-perp`에서 Raw MD와 Marginal이
+공유하는 residual 항을 RMD가 상쇄한다는 조건부 정리다. 실험은 decay coupling이
+어느 subspace geometry를 형성하고 그 변화가 동일 ID--OOD pair ordering에 어떻게
+전달되는지 검정한다.
+
+Fisher/LDA의 discriminant subspace, 알려진 MD--Marginal--RMD 관계,
+size--stretch, spectrum--allocation, radial/angular dynamics는 선행 지식 또는
+측정도구다. 새로운 detector, optimizer leaderboard, 또는 score accounting만으로
+완전한 causal mediation을 주장하지 않는다.
 
 ## Active sources
 

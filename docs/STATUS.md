@@ -1,12 +1,14 @@
 # Project status
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 ## Current phase
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The next task is its bounded local implementation; fresh paired training has not started.
+The next task is the v7 theory/estimator/literature lock followed by a bounded
+implementation of the existing-cache discriminant--residual preflight. Fresh paired
+training has not started.
 
 The planned chain is:
 
@@ -14,7 +16,8 @@ The planned chain is:
 same initialization and data stream
 → coupled / decoupled / zero-decay trajectories
 → update and non-affine representation divergence
-→ MD / Marginal / RMD and size / stretch attribution
+→ discriminant subspace S / residual subspace S-perp
+→ S-perp / parallel-Marginal / RMD score attribution
 → exact pair gain, loss, churn, and net AUROC
 → channel-matched attenuation and replication
 ```
@@ -40,6 +43,13 @@ outside Git at the hash-addressed HF archive recorded there.
 
 ## Frozen active design
 
+- Central theorem: under the stated full-rank/common-ridge applicability
+  conditions, Raw MD and Marginal share the same `S-perp` residual term and RMD
+  cancels it. Metric Contract v1.2 pseudoinverse scores remain unchanged and
+  require an explicit applicability gate.
+- Primary detector attribution is exact within each branch. Cross-branch
+  representation interpretation additionally requires ID-only gauge alignment,
+  subspace principal angles, and a zero-decay common-frame diagnostic.
 - Main: WRN-28-10/CIFAR-10 from-scratch paired trajectories.
 - Adam family: 2 x 2 LR/nominal-WD design, 36 total runs; the primary anchor uses five
   seeds and the other cells three.
@@ -54,6 +64,9 @@ replication rules live only in the active protocol.
 
 ## Open before protected OOD
 
+- full-rank/common-ridge applicability, numerical-rank/condition/reconstruction
+  tolerances, and the separately named common-ridge diagnostic
+- branch-alignment and common-frame summaries; Fisher/LDA and RMD novelty audit
 - ID accuracy/NLL/ECE equivalence and Pareto guardrails
 - practical OOD margins and seed/power justification
 - standardized trajectory uncertainty, multiplicity, and spectral-band boundaries
@@ -62,6 +75,7 @@ replication rules live only in the active protocol.
 
 ## Explicitly not run
 
+- no `S`/`S-perp` analysis interface or historical discriminant--residual preflight
 - no fresh active-protocol training, GPU work, checkpoint inference, or protected OOD
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion
