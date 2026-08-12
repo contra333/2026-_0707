@@ -356,6 +356,17 @@ sources:
       combines nearest-class discriminative distance with a linearly weighted
       residual-centroid distance, so neither the S/S-perp split nor a simple
       residual weight is a new detector contribution here
+  dknn_generalized_ood_paper:
+    title: "Breaking Semantic Hegemony: Decoupling Principal and Residual Subspaces for Generalized OOD Detection"
+    authors: Peng, Peng, Zhang, Yu, Xing, Ma, Yang, Chen, Lu, and Gu
+    stable_source: arXiv:2602.05360v1
+    url: https://arxiv.org/abs/2602.05360v1
+    accessed: 2026-08-12
+    role: >-
+      PCA principal/residual decomposition, dual-space KNN scoring, and
+      standardized score-calibration boundary for the conditional RtMD novelty
+      audit; it uses neither the within-class-whitened RMD-cancellation block
+      nor a residual-only Student-t likelihood or training-rule churn target
   core_ood_paper:
     title: "CORE: Robust Out-of-Distribution Detection via Confidence and Orthogonal Residual Scoring"
     authors: Yang, Kim, and Bahk

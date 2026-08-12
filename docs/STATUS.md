@@ -8,16 +8,17 @@ The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
 The active design is v10. A bounded historical D1 survival check is complete
 and supports the pair-ranking-multiplicity framing as discovery evidence. The
-next task is the theory/estimator/literature lock, including the exact
-conditional `RtMD` derivation and close-the-slot rule, followed by a bounded
-implementation of the existing-cache discriminant--residual and ID-only
-residual-tail preflight. Fresh paired training has not started.
+Task B theory/estimator/literature lock is complete: the core numerical and
+subspace rules, discovery-informed `S-perp` hypothesis, and exact conditional
+`RtMD` specification are frozen in Card 13. The next task is one bounded Issue
+to implement and run the existing-cache discriminant--residual and ID-only
+residual-tail preflight on CPU. Fresh paired training has not started.
 
 The planned chain is:
 
 ```text
 same initialization and data stream
-→ coupled / decoupled / zero-decay trajectories
+→ coupled / decoupled / zero-decay trajectories plus the alpha=0.5 anchor arm
 → update and non-affine representation divergence
 → discriminant subspace S / residual subspace S-perp
 → S-perp / parallel-Marginal / RMD score attribution
@@ -78,11 +79,19 @@ outside Git at the hash-addressed HF archive recorded there.
   Gaussian-score interface; branch-specific whitening, `S`, class centers, and
   `B|_S` remain fitted state. ID-train whitening pins `mean(q_perp)` but not
   `Var(q_perp)` or its tail.
-- One optional `RtMD` method slot is registered. It is secondary, must freeze
-  its covariance/scatter convention, ID-only fit, activation gates, comparison
-  panel, and guardrails before the tail preflight/protected OOD; its novelty
-  audit explicitly includes the Bayesian-nonparametric/DPMM--RMDS boundary.
-  It closes on any failed gate without changing the primary paper.
+- One optional `RtMD` method slot is registered. Its covariance-normalized
+  residual-t score, deterministic ID-only two-fold fit, finite-domain/fallback
+  rule, comparison panel, and guardrails are frozen. The direct-collision
+  subgate is a narrow `PASS` after WDiscOOD, Linderman/DPMM--RMDS, D-KNN, CORE,
+  and MaRS boundary checks; empirical Gates 2--5 are `NOT_RUN`. It closes on
+  any failed gate without changing the primary paper.
+- Core preflight rules are frozen: condition-aware algebra tolerances,
+  numerical `dim(S)`, rank-sensitive reporting, gauge-aligned angles,
+  classifier alignment, the zero-decay common frame, component covariance,
+  the raw/L2 x MD/RMD interaction, and the fixed five-point `rho` path.
+- `S-perp` is the only fresh primary-channel candidate. This is explicitly
+  discovery-informed by the historical two-component result; historical
+  preflight can return primary=`none` but cannot promote another component.
 - Main: WRN-28-10/CIFAR-10 from-scratch paired trajectories.
 - Adam family: the existing 2 x 2 LR/nominal-WD design plus a fixed-total-decay
   anchor interpolation at `coupled_ratio alpha in {0, 0.5, 1}`. The midpoint
@@ -100,17 +109,6 @@ replication rules live only in the active protocol.
 
 ## Open before protected OOD
 
-- full-rank/common-ridge applicability, numerical-rank/condition/reconstruction
-  tolerances, and the separately named common-ridge diagnostic
-- branch-alignment and common-frame summaries; RMD/LDA, WDiscOOD, CORE, MaRS,
-  robust/t-Mahalanobis, Bayesian-nonparametric/DPMM--RMDS, NECO, ViM,
-  Neural-Collapse Mahalanobis, and
-  projection-filtering novelty audit
-- component variance--covariance/norm summaries and the normalization x
-  cancellation interaction estimand
-- exact `RtMD` likelihood parameterization, ID-only split/estimator/fallback,
-  historical and fresh activation thresholds, churn estimand, performance and
-  far-OOD guardrails, and replication/closure rule
 - ID accuracy/NLL/ECE equivalence and Pareto guardrails
 - practical OOD margins and seed/power justification
 - standardized trajectory uncertainty, multiplicity, and spectral-band boundaries

@@ -118,23 +118,23 @@ Explicitly credit prior work for:
 
 Do not claim that the class-discriminative subspace itself is new. The theorem
 candidate is the OOD-score statement that Raw MD and Marginal share the same
-`S-perp` term and RMD cancels it. Avoid “first” language until the direct
-RMD/LDA and subspace-detector literature audit is complete. Mahalanobis++
-already refits MD and RMD after L2 normalization; the paper's possible
-addition is a controlled, component-level explanation of when normalization
-and cancellation interact, not the normalized detector itself.
+`S-perp` term and RMD cancels it. The direct audit permits no “first” language.
+Mahalanobis++ already refits MD and RMD after L2 normalization; the paper's
+possible addition is a controlled, component-level explanation of when
+normalization and cancellation interact, not the normalized detector itself.
 
 WDiscOOD already combines nearest-class distance in a whitened discriminative
 subspace with a weighted residual-centroid distance. Therefore neither the
 `S/S-perp` split nor a linear residual weight is a method contribution here.
-The conditional `RtMD` candidate must earn a separate novelty claim through
-its residual-only heavy-tail likelihood, ID-only fitting, policy-stability
-target, and controlled formation evidence. The full-text gate explicitly
-includes Linderman et al.'s Bayesian-nonparametric/DPMM--RMDS connection and
-predictive generalizations; a direct collision closes the slot. CORE is an
-adjacent
-classifier-aligned/residual combination; MaRS uses Mahalanobis scoring of
-autoencoder reconstruction residuals and is related but not the same object.
+The conditional `RtMD` candidate has passed only a narrow direct-collision
+subgate. Linderman et al. already occupy the generic RMDS/Student-t predictive
+boundary, and D-KNN already decouples PCA principal/residual spaces for a
+dual-space KNN score. CORE is classifier-aligned/residual; MaRS uses
+autoencoder reconstruction residuals. The remaining narrow question is
+whether tail-correcting only the RMD-cancelled class-orthogonal block reduces
+training-rule pair-ranking churn while preserving far-OOD residual evidence.
+That question still requires every empirical gate and is not a current method
+contribution.
 
 The difference is the unit of evidence:
 
@@ -247,16 +247,20 @@ the form
 
 ```text
 q_S = min_c ||x_parallel-eta_c||^2
+g_(nu,k)(q) = (nu+k) log(1+q/(nu-2))
 D_RtMD = q_S + g_(nu,k)(q_perp),  k=dim(S-perp),
+s_RtMD = -D_RtMD.
 ```
 
-where `g` is one frozen multivariate-t radial negative log likelihood. The
-idea is not to discard `S-perp`, but to retain its OOD evidence without letting
-a Gaussian quadratic tail dominate. The exact covariance-versus-scatter
-parameterization, `nu`/scale fit, ID-only split, fallback, and MD limit must be
-derived and frozen before the historical residual-tail preflight. The current
-covariance-normalized working form proportional to
-`(nu+k) log(1+q_perp/(nu-2))`, `nu>2`, is not executable until that lock.
+This is the covariance-normalized multivariate-t residual likelihood with
+scale `((nu-2)/nu)I`; `nu=infinity` recovers Raw MD. One `nu` per
+branch/transform is fit from deterministic class-stratified two-fold
+out-of-fold ID-train residuals, with no free scale and no ID-test/OOD tuning.
+The finite domain is `[2.05,1000]`; retain it only when
+`2(LL_t-LL_Gaussian)>log(N)`, otherwise fall back to exact Gaussian and fail
+activation for that fit. The idea is not to discard `S-perp`, but to test
+whether its OOD evidence can be retained without a Gaussian quadratic tail
+dominating.
 
 Activate protected-OOD evaluation only after: the direct novelty audit passes;
 historical held-out ID supports an estimable non-Gaussian residual tail; and
@@ -269,6 +273,7 @@ parameterization, or repair the formula with protected OOD.
 
 An ID-only `nu-hat` may be explored as a predictor of fresh policy churn, not
 detector performance. Heavy tails alone do not establish that prediction.
+This formula is frozen but remains unimplemented and `NOT_RUN`.
 
 The frozen Metric Contract v1.2 uses Moore--Penrose-compatible precision
 without explicit ridge. Do not silently change it. Apply exact cancellation to
@@ -389,6 +394,14 @@ variation. The completed C3 raw/L2 pattern motivates the fresh interaction
 hypothesis but is not an ordered dose response because detector-wise maxima
 occur on different OOD datasets. Curvature and spectrum/allocation remain
 supporting diagnostics.
+
+The fresh primary-channel candidate is frozen as `S-perp`. This is honestly
+described as informed by the historical two-component MD/Marginal/RMD
+discovery, while the finer `S-perp` versus parallel-Marginal split was unseen
+at freeze. The preflight may reject numerical applicability, producing
+primary=`none`, but it may not replace `S-perp` with whichever component looks
+largest. Exact tolerances, rank-sensitive handling, branch alignment, and the
+zero-decay common frame are governed by Card 13 Section 13.
 
 Only after the conditional method specification is locked, add an ID-only
 residual-tail preflight: held-out-ID `q_perp` Q--Q deviation from `chi^2_k`,

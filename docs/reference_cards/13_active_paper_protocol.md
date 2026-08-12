@@ -36,10 +36,10 @@ radial/angular optimization dynamics are prior knowledge or measurement
 tools. They are not claimed as new generic subspace facts or complete causal
 mediation. Pair-ranking multiplicity under controlled training-rule variation
 is the primary problem; the formation study and theorem explain it. Section
-7.5 reserves
-one conditional, theory-derived Residual-t Mahalanobis (`RtMD`) method slot;
-it is not yet a defined or validated detector and may be closed without
-weakening the primary paper.
+7.5 reserves one conditional, theory-derived Residual-t Mahalanobis (`RtMD`)
+method slot. Its formula and ID-only fit are now frozen, but it is not
+implemented, activated, or validated and may be closed without weakening the
+primary paper.
 
 ## 1. Paper question and claim boundary
 
@@ -118,11 +118,11 @@ algebraic cancellation inside one fixed transformed feature space. The paper
 may claim that they attenuate a common empirical sensitivity channel only if
 the transform-specific component and interaction gates in Sections 6--8 pass.
 
-`RtMD` is never required for either allowed sentence above. A method claim is
-available only after the exact score, covariance/scatter convention, ID-only
-fit, failure rule, comparison panel, and success/guardrail criteria are frozen
-before the historical residual-tail preflight and before protected OOD is
-opened. It cannot be added or altered to rescue a failed mechanism result.
+`RtMD` is never required for either allowed sentence above. Section 13 freezes
+its exact score, covariance/scatter convention, ID-only fit, failure rule,
+comparison panel, and success/guardrail criteria before the historical
+residual-tail preflight and before protected OOD is opened. It cannot be added
+or altered to rescue a failed mechanism result.
 
 ## 2. What is controlled in a paired trajectory
 
@@ -366,16 +366,18 @@ branch and one fixed raw/L2 fit as
 ```text
 s_MD^(rho) = rho s_perp + s_parallel_Marginal + s_RMD,
 m_MD^(rho) = rho m_perp + m_parallel_Marginal + m_RMD,
-rho in [0,1].
+rho in {0, 0.25, 0.5, 0.75, 1}.
 ```
 
 `rho=1` is that fit's MD score and `rho=0` is its `S`-only MD score. The latter
 is not RMD because it retains the parallel-Marginal term. For each ID--OOD pair
 the margin is linear in `rho`, so every interior flip threshold is available
-analytically; the aggregate AUROC/churn path is reconstructed from those exact
-pair transitions. Use this as a fixed channel-dose diagnostic, not as a new
-detector family. Do not choose a favorable `rho` from ID or protected OOD data
-and do not make a best-`rho` performance claim.
+analytically. Report the five frozen grid values and every exact interior
+pair-flip threshold; do not fit or select another `rho`. The aggregate
+AUROC/churn path is reconstructed from those exact pair transitions. Use this
+as a fixed channel-dose diagnostic, not as a new detector family. Do not choose
+a favorable `rho` from ID or protected OOD data and do not make a best-`rho`
+performance claim.
 
 This score attenuation must not be mislabeled as a refitted feature
 normalization. Scaling `S-perp` coordinates by any `gamma>0` is an invertible
@@ -910,46 +912,75 @@ not confirm a decay-coupling effect or guarantee fresh-study power.
 
 ### 7.5 Conditional Residual-t Mahalanobis method slot
 
-v10 reserves exactly one optional post-hoc method slot. Its working statistical
-object is a block model that keeps the class-discriminative `S` distance and
-replaces the Gaussian radial likelihood in `S-perp` by one multivariate-t
-radial likelihood:
+v10 reserves exactly one optional post-hoc method slot. Its frozen statistical
+object keeps the class-discriminative `S` distance and replaces only the
+Gaussian radial likelihood in `S-perp` by one covariance-normalized
+multivariate-t radial likelihood:
 
 ```text
 q_S(x) = min_c ||x_parallel-eta_c||^2
 q_perp(x) = ||x_perp||^2
-D_RtMD(x) = q_S(x) + g_(nu,k)(q_perp(x)),  k=dim(S-perp).
+k = dim(S-perp)
+
+g_(nu,k)(q) = (nu+k) log(1 + q/(nu-2)),  2 < nu < infinity
+g_(infinity,k)(q) = q
+
+D_RtMD(x) = q_S(x) + g_(nu,k)(q_perp(x))
+s_RtMD(x) = -D_RtMD(x).
 ```
 
+The residual t distribution has covariance `I` and scale matrix
+`((nu-2)/nu) I`. Thus `g` is twice its negative log likelihood after removing
+the sample-independent constant, and `nu -> infinity` recovers the Raw-MD
+quadratic exactly. The full residual negative log likelihood used to fit `nu`
+is
+
+```text
+nll(q;k,nu)
+ = -lgamma((nu+k)/2) + lgamma(nu/2)
+   + (k/2) log((nu-2) pi)
+   + ((nu+k)/2) log(1 + q/(nu-2)).
+```
+
+No free residual scale is permitted. For every branch and raw/L2 transform,
+fit one `nu` from ID train only. Split stable sample identities into a
+deterministic class-stratified two-fold partition. Fit the geometry on the
+opposite fold for each observation, pool the out-of-fold `q_perp` values, fit
+one branch/transform-specific `nu`, and then refit the final query geometry on
+all ID train. The finite domain is `nu in [2.05,1000]`, optimized
+deterministically in `theta=log(nu-2)` with a bounded scalar optimizer, plus an
+exact `nu=infinity` Gaussian candidate. Retain finite t only if
+`2(LL_t-LL_Gaussian)>log(N)`. Otherwise, or on a non-finite objective,
+optimization failure, or lower-bound solution, fall back to `nu=infinity` and
+record RtMD activation failure for that fit. ID test, protected OOD, AUROC,
+and FPR95 are forbidden for fitting, selection, or fallback.
+
 The intended interpretation is: MD trusts the quadratic residual fully, RMD
-cancels it, and `RtMD` retains residual evidence while limiting domination by
-a heavy tail. This is a conditional method candidate, not a current result or
-the central theorem. In particular, a simple linear `S`/`S-perp` weighting is
-not claimed as novel because WDiscOOD already combines whitened
-discriminative and residual scores.
+cancels it, and `RtMD` tests whether a tail correction can retain residual
+evidence while limiting domination by that channel. This is a conditional
+method candidate, not a current result, central theorem, or fifth contribution.
 
-Before inspecting any historical residual-tail preflight, a versioned
-addendum must freeze all of the following:
-
-- the exact covariance-normalized Student-t or free-scale parameterization,
-  including constants and the `nu -> infinity` MD limit;
-- the admissible `nu`/scale domain, optimizer, convergence and fallback rules;
-- the disjoint ID fit/calibration or cross-fitting split and whether `nu` is
-  branch-specific; protected OOD is forbidden for every fit and choice;
-- the ID-only tail statistics, activation thresholds, and numerical rules;
-- the fixed comparison panel and method-success/guardrail estimands.
-
-The currently discussed covariance-normalized candidate is proportional to
-`(nu+k) log(1+q_perp/(nu-2))` for `nu>2`; it is **not executable or frozen**
-until the addendum resolves the covariance-versus-scatter convention. A
-free-scale alternative cannot be chosen after tail or OOD results are seen.
+The completed direct-collision subgate of Gate 1 is a **narrow PASS**. WDiscOOD
+already occupies the within-class-whitened discriminative/residual split and a
+linear residual combination. Linderman et al. occupy the RMDS/DPMM connection
+and generic Student-t predictive extensions. D-KNN uses PCA
+principal/residual spaces with dual-space KNN calibration; CORE uses a
+classifier-row-space residual; MaRS uses an autoencoder reconstruction
+residual. None of these audited methods combines the exact frozen block score
+above with training-rule pair-ranking churn as its target, but that absence is
+not a “first” claim. The only allowed novelty scope is to test whether
+tail-correcting the class-orthogonal residual block identified by RMD
+cancellation reduces training-rule pair-ranking churn while preserving
+far-OOD residual evidence. Do not claim the first subspace detector, the first
+Student-t/robust Mahalanobis detector, the first residual-score combination,
+or that a heavy tail implies method success.
 
 The gates are sequential:
 
-1. **Derivation and novelty gate:** complete the WDiscOOD, CORE, MaRS, direct
-   RMD/LDA, robust/t-Mahalanobis, and Bayesian-nonparametric/DPMM--RMDS
-   full-text audit, including Linderman et al. Close the slot on a direct
-   collision or an incoherent likelihood/fit.
+1. **Derivation and novelty gate:** the frozen likelihood is coherent and the
+   WDiscOOD, D-KNN, CORE, MaRS, direct RMD/LDA, robust/t-Mahalanobis, and
+   Bayesian-nonparametric/DPMM--RMDS audit, including Linderman et al., gives
+   the narrow direct-collision PASS above. This does not activate the method.
 2. **Historical ID-only plausibility gate:** with frozen rules, use the
    existing cache only to test held-out-ID `q_perp` deviation from `chi^2_k`,
    tail estimability, and between-model variation. This remains mixed-recipe
@@ -959,10 +990,11 @@ The gates are sequential:
    tail shape beyond same-policy seed variation. Mean ID-train residual energy
    cannot satisfy this gate because it is pinned by whitening.
 4. **Frozen protected-OOD evaluation:** only after Gates 1--3 pass, evaluate
-   the unchanged score once. The primary method estimand is reduction of
-   coupled--decoupled `PairOrderChurn` relative to Raw MD and the same-policy
-   churn reference. Prespecified AUROC/FPR95 non-inferiority and preservation
-   of far-OOD residual signal relative to RMD are guardrails.
+   the unchanged score once against Raw MD, RMD, their L2 fits, WDiscOOD, and
+   the already prespecified appendix controls. The primary method estimand is
+   reduction of coupled--decoupled `PairOrderChurn` relative to Raw MD and the
+   same-policy churn reference. Prespecified AUROC/FPR95 non-inferiority and
+   preservation of far-OOD residual signal relative to RMD are guardrails.
 5. **Replication gate:** a method contribution requires the frozen effect to
    replicate outside the WRN/CIFAR-10 anchor. Otherwise report it as local or
    close the slot.
@@ -1234,22 +1266,122 @@ are `NOT_RUN`/not yet implemented until separately authorized.
 
 ## 13. Pre-execution addendum and stopping rules
 
-Before inspecting the historical discriminant--residual preflight, freeze:
+The following Task B addendum is frozen before any historical
+discriminant--residual or residual-tail preflight. Every covariance,
+whitening, eigendecomposition/SVD, projector, and reference-score calculation
+uses `float64`; covariance matrices are symmetrized as `(M+M.T)/2`.
 
-- full-rank applicability, condition, inverse-parity, covariance-identity,
-  score-reconstruction, and cancellation tolerances;
-- the exact name and ridge value of any common-ridge diagnostic;
-- numerical `dim(S)` and principal-angle rules, classifier-alignment summary,
-  and zero-decay common-frame convention;
-- component variance--covariance and raw-norm correlation summaries, the
-  normalization x cancellation interaction estimand, and fixed `rho` path
-  reporting with no data-dependent `rho` selection;
-- the rule for promoting `S-perp`, parallel-Marginal, RMD, or no component as
-  the fresh anchor's primary empirical channel.
-- the full Section 7.5 `RtMD` mathematical specification, novelty verdict,
-  ID-only split/fit/fallback rule, historical and fresh activation gates,
-  comparison panel, churn estimand, performance guardrails, and close-the-slot
-  rule; if these cannot be frozen now, the slot closes before the preflight.
+### 13.1 Applicability and algebra tolerances
+
+Let `eps64=finfo(float64).eps`, `d` be feature dimension, and
+`tau_spec=lambda_max*d*eps64`. Eigenvalues below `-tau_spec` fail the fit;
+values in `[-tau_spec,0)` are clipped to zero and counted. The primary score is
+full-rank applicable only when the numerical rank is `d` and
+`kappa_2<=1e8`. Preserve a failed or inapplicable Metric Contract v1.2 score,
+but do not attach the exact-cancellation claim to it.
+
+For every applicable fit define
+
+```text
+tau_alg(kappa) = max(1e-10, 10*kappa*eps64)
+score_scale = max(1, |s_direct|, sum_j |s_j|)
+margin_scale = max(1, |m_direct|, sum_j |m_j|).
+```
+
+At the allowed condition ceiling, `tau_alg` is approximately `2.22e-7`.
+Backend/inverse parity, inverse backward residual, score reconstruction, RMD
+cancellation, pair-margin reconstruction, and full-rank ID energy pinning must
+each be no larger than `tau_alg(kappa)`. Matrix parity uses Frobenius residual
+divided by `max(1,||A||_F,||B||_F)`; inverse backward error uses
+`||Sigma P-I||_2/max(1,||Sigma||_2||P||_2)`. Score and margin checks use the
+scales above, which remain defined for near ties. ID energy checks use
+`max(1,|observed|,|target|)`. Covariance identity
+`Sigma_0=Sigma_W+Sigma_B` uses relative Frobenius tolerance `1e-10`.
+Projector symmetry and idempotence each use relative Frobenius tolerance
+`1e-10`. A fit enters a primary theorem figure only if every required check
+passes; failures are never hidden by aggregation.
+
+The only common-ridge diagnostic is named
+`discriminant_residual_common_ridge_lmax_1e-6` and uses
+
+```text
+lambda = 1e-6 * lambda_max(Sigma_W)
+A = Sigma_W + lambda I
+global = Sigma_0 + lambda I = A + Sigma_B.
+```
+
+The same positive `lambda` is applied to conditional and marginal terms. If
+`lambda_max(Sigma_W)<=0`, the diagnostic fails. It never replaces or inherits
+the name of the primary v1.2 score.
+
+### 13.2 Subspace, alignment, and common-frame rules
+
+Construct `E=[sqrt(pi_c) eta_c]` and define
+
+```text
+tau_S = sigma_max(E) * max(d,K) * eps64
+dim(S) = count(sigma_i(E) > tau_S).
+```
+
+If `sigma_max(E)=0`, set `dim(S)=0`. If any singular value lies in
+`[tau_S/10,10*tau_S]`, record a rank-sensitive flag and make no cross-branch
+rank-difference claim; branch-internal identities may continue if their
+projectors and reconstructions pass.
+
+Compare branches only after ID-only gauge alignment. Equal-rank comparisons
+report the full principal-angle vector. Unequal-rank comparisons report the
+`min(r_C,r_D)` angles, rank gap, and chordal projector distance. Principal
+angles are descriptive and have no pass threshold. For classifier alignment,
+remove the common-logit direction from the classifier rows, compare the row
+span of `W_centered A^(1/2)` with `S`, and store the angle profile and
+`||P_S Q_W||_F^2/rank(Q_W)`; a zero classifier rank is `N/A`.
+
+The zero common frame is fit from the same seed/checkpoint/depth/transform
+zero-decay sibling: estimate its `mu_0`, `A`, and `S`, then project the
+coupled, decoupled, and zero features into that frame without refitting. It is
+a formation diagnostic only; exact score attribution remains branch-internal.
+
+### 13.3 Component, interaction, and primary-channel rules
+
+For every split/dataset/branch/transform, store the biased `1/N` covariance of
+`[s_perp,s_parallel_Marginal,s_RMD]`. Require `1^T Cov 1` to reconstruct the
+direct `Var(s_MD)` within relative `1e-10`. Raw feature norm versus each raw
+component uses Spearman correlation as primary and Pearson as secondary;
+zero-variance inputs are `N/A`.
+
+The primary normalization-by-cancellation interaction for the same seed and
+OOD dataset is
+
+```text
+I_churn = (Churn_MD_raw - Churn_RMD_raw)
+          - (Churn_MD_L2 - Churn_RMD_L2).
+```
+
+Apply the same difference-in-differences to signed `DeltaAUROC` as secondary.
+This does not identify raw and L2 `S-perp` as the same space. The frozen `rho`
+grid is `{0,0.25,0.5,0.75,1}` together with every exact interior pair-flip
+threshold; no best `rho` is selected.
+
+`S-perp` is the fresh anchor's only prespecified primary empirical-channel
+candidate. This choice is explicitly **discovery-informed** by the already
+observed historical two-component MD/Marginal/RMD result; the finer
+three-component split between `S-perp` and parallel-Marginal was not observed
+when this rule was frozen. Historical preflight may test numerical
+applicability and measurability but may not switch the candidate. If all
+required numerical gates pass, primary=`S-perp`; otherwise primary=`none` and
+all three components remain descriptive. Parallel-Marginal or RMD is never
+promoted post hoc, even if it moves more in historical or fresh results.
+
+### 13.4 Frozen conditional-method boundary
+
+Section 7.5 freezes the RtMD covariance convention, score, ID-only two-fold
+fit, finite domain, BIC-style fallback, narrow Gate-1 novelty verdict,
+sequential activation gates, comparison panel, churn estimand, performance and
+far-OOD guardrails, replication rule, and close-the-slot rule. Gates 2--5 are
+`NOT_RUN`. RtMD remains outside the abstract and active contribution list
+unless all later gates pass. The paper does not introduce a general new
+“stability-targeted scoring” contribution at this stage; if RtMD later
+replicates, it may become a secondary method contribution only.
 
 Before protected OOD execution, freeze in a versioned addendum:
 
