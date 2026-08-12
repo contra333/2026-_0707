@@ -26,6 +26,14 @@ Card 13 v11 now records that clarification, makes historical Gate 2 permanently
 pre-registered Gate 3, and requires explicit owner approval before either a
 fresh GPU launch or protected-OOD access.
 
+The single authorized CPU preflight v2 is complete. The operand-aware
+cancellation scale left theorem applicability unchanged at 30 of 60 fits and
+made all 30 applicable fits pass every required numerical gate, up from 9 in
+v1. The frozen two-fold tail and pair payloads are byte-identical to v1, and a
+second fixed-thread execution reproduced every v2 payload hash. Historical
+Gate 2 remains permanently `INCONCLUSIVE`; this result only makes the frozen
+estimator eligible for a prospective fresh Gate-3 addendum.
+
 The planned chain is:
 
 ```text
@@ -68,6 +76,13 @@ same initialization and data stream
   high-precision condition-grid fixture supports an operand-aware cancellation
   scale without changing `tau_alg`; the compact record is
   [`results/discriminant_residual_diagnostic_v1.json`](../results/discriminant_residual_diagnostic_v1.json).
+- The one allowed Card-13 v11 compliance rerun completed 60 raw/L2 fits on the
+  same verified ID-only cache. Applicability remained 30/60; all 30 applicable
+  fits passed the required gates, cached Metric Contract v1.2 parity, and RMD
+  cancellation. V1 remained immutable, all 60 fit keys were conserved, and
+  tail model/fold status did not change. Gate 2 remains permanently
+  `INCONCLUSIVE`. The compact record is
+  [`results/discriminant_residual_preflight_v2.json`](../results/discriminant_residual_preflight_v2.json).
 - A checksum-verified, no-inference D1 reuse analysis recovered exact per-sample
   scores for four frozen historical role configurations. Across six confounded
   cross-policy pairs, median Raw-MD PairOrderChurn was `0.322` on CIFAR-100 and

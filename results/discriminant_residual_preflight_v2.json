@@ -1,0 +1,114 @@
+{
+  "analysis_role": "historical_id_only_compliance_measurement_v2",
+  "archive": {
+    "filename": "discriminant_residual_preflight_v2.tar",
+    "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/discriminant_residual_preflight/v2/f93a70897041a213cda63560d5b64ef336f601a8aacb62266f0be31b46365804/discriminant_residual_preflight_v2.tar",
+    "remote_download_sha256": "f93a70897041a213cda63560d5b64ef336f601a8aacb62266f0be31b46365804",
+    "remote_verified": true,
+    "sha256": "f93a70897041a213cda63560d5b64ef336f601a8aacb62266f0be31b46365804",
+    "size": 911360
+  },
+  "claim_boundary": "Historical ID-only compliance measurement only; no Gate 2 activation, causal claim, detector evaluation, or OOD claim.",
+  "decision": {
+    "common_ridge": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+    "estimator_status": "ELIGIBLE_FOR_PROSPECTIVE_GATE3_ADDENDUM",
+    "gate_2": {
+      "retroactive_threshold_or_readjudication": false,
+      "status": "INCONCLUSIVE_IMMUTABLE"
+    },
+    "metric_contract_v1_2_relationship": {
+      "applicable_cached_parity_failure_count": 0,
+      "applicable_unexplained_residual_count": 0,
+      "inapplicable_cached_parity_failure_count": 9,
+      "inapplicable_scope": "outside_full_rank_theorem_scope"
+    },
+    "next_action": "FREEZE_FRESH_GATE3_ADDENDUM_AND_EXPORT_SCHEMA_BEFORE_GPU_LAUNCH",
+    "rmd_cancellation": {
+      "classification": "FROZEN_WORDING_AMBIGUITY_COMPLIANCE_CLARIFICATION",
+      "historical_pass_rate_used": false,
+      "other_score_or_margin_scale_change": "NONE",
+      "tau_alg_change": "NONE"
+    }
+  },
+  "evidence": {
+    "applicable_fit_count": 30,
+    "fit_count": 60,
+    "inapplicable_fit_count": 30,
+    "numerically_applicable_cancellation_failure_count": 0,
+    "raw_norm_component_correlations": {
+      "id_test_complete_count": 30,
+      "id_train_complete_count": 30,
+      "pass": true,
+      "raw_fit_count": 30
+    },
+    "required_numerical_pass_count": 30,
+    "required_numerical_pass_count_v1": 9,
+    "required_numerical_pass_gain_from_clarification": 21,
+    "tail_measurement": {
+      "finite_t_selected_count": 30,
+      "numerically_complete_count": 30,
+      "payload_byte_identical_to_v1": true,
+      "role": "numerically_applicable_subset_conditional_discovery_only"
+    },
+    "v1_to_v2": {
+      "applicability_changed_count": 0,
+      "fit_count": 60,
+      "nu_selected_model_changed_count": 0,
+      "partition_changed_count": 0,
+      "primary_channel_changed_count": 21,
+      "required_numerical_pass_changed_count": 21,
+      "tail_status_changed_count": 0
+    }
+  },
+  "execution_git_sha": "2b832796e3820e17459be2a9289420c2660d1dcd",
+  "gate_2": {
+    "retroactive_threshold_or_readjudication": false,
+    "status": "INCONCLUSIVE_IMMUTABLE",
+    "subset_tail_role": "numerically applicable subset conditional discovery only"
+  },
+  "input_integrity": {
+    "allowlisted_id_file_count": 450,
+    "bundle_count": 30,
+    "preflight_v1_archive_sha256": "4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88",
+    "v1_bundle_records_sha256": "72f0260647cd666bdbf22460a015e59008aaff90268a3c49aa7468cd5824b91e",
+    "v1_immutable": true
+  },
+  "issue": "https://github.com/contra333/2026-_0707/issues/77",
+  "not_run": [
+    "GPU",
+    "checkpoint inference or reevaluation",
+    "protected OOD access or evaluation",
+    "fresh training",
+    "full RtMD detector or OOD evaluation",
+    "historical Gate 2 readjudication"
+  ],
+  "schema_version": "discriminant_residual_preflight_preservation_v2",
+  "status": "PASS",
+  "tracked_implementation": {
+    "focused_fixtures": {
+      "path": "tests/test_discriminant_residual_preflight.py",
+      "sha256": "6920342c7d644c4c52af19b9b542657e45671d1b23f06441cf3d0e026597c8a4"
+    },
+    "generator": {
+      "path": "scripts/analyze_discriminant_residual_preflight.py",
+      "sha256": "a168bbc457550e437fc7a45f743529e7a8a10bdcc8a1633fdc341112127ad42c"
+    },
+    "input_manifest": {
+      "path": "configs/analysis/discriminant_residual_preflight_v1.json",
+      "sha256": "5327daf9703f76f38b41aaa32b50ce5cf5aaef26127fdbd3d42b7d61b19157f0"
+    },
+    "module": {
+      "path": "src/oge/analysis/discriminant_residual_preflight.py",
+      "sha256": "fc9ba3a093502ed243c0de2248b691314d0da9700a25e1ff894b53c44869b592"
+    }
+  },
+  "validation": {
+    "deterministic_reexecution": "PASS_ALL_PAYLOAD_HASHES_IDENTICAL",
+    "focused_fixtures": "20 passed including diagnostic fixtures",
+    "pair_payload_byte_identical_to_v1": "PASS",
+    "production_execution": "PASS",
+    "remote_download_hash": "PASS",
+    "tail_payload_byte_identical_to_v1": "PASS",
+    "v1_v2_count_conservation": "PASS"
+  }
+}
