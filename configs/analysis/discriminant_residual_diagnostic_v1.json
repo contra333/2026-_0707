@@ -1,0 +1,330 @@
+{
+  "cancellation_scale_candidates": {
+    "current_output_scale": "max(1, abs(s_rmd_direct), abs(s_rmd_decomposed))",
+    "operand_aware_scale": "max(1, abs(direct_global)+abs(direct_class), abs(q_parallel_global)+abs(q_parallel_class))",
+    "selection_basis": [
+      "high_precision_algebraic_equivalence",
+      "condition_aware_forward_error",
+      "synthetic_fixture_grid"
+    ]
+  },
+  "contract_source": {
+    "path": "docs/reference_cards/13_active_paper_protocol.md",
+    "sha256": "48e75694d3372899b9d1d16e0d46178ccc9f7aa557ce310d359b702c421a32c4"
+  },
+  "forbidden_inputs": [
+    "metrics/result.json",
+    "OOD arrays or metrics",
+    "checkpoint files or inference",
+    "GPU",
+    "fresh training"
+  ],
+  "hf_base_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2",
+  "historical_pass_rate_may_select_scale": false,
+  "issue": "https://github.com/contra333/2026-_0707/issues/75",
+  "nc1_array_contract": {
+    "aggregation": "sum(trace_components)/class_count",
+    "class_count": 10,
+    "dtype": "float64",
+    "shape": [
+      640
+    ]
+  },
+  "nc1_entries": [
+    {
+      "bundle_id": "3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "01dd81bf290cf13f404795b5fcc677adc6f63eb41041e537274f35e463868c64",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "4b0c0692e557f6265f5f38424b8421f69015e1fa094fb3b39c71aa3db9547743",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "a0dd6ddebb9ea499595afcb7b7c9968f02e8f9cd31aade41c2dd8e7e679e75df",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "14795cc7ef020f3d65e653cd00aece2dcad62f103f0607a81af86cb098824b8a",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "410719f7649ec6afdc9181d2fcbbe5a14a6a5d511c9df868d8a0f0f1e6cf513f",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "905fae48705c69b90500ce665203a63f4147289a98235061fede3db103f9e033",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "7dc37a66c5ed5355eeecea2a598494069d9950a03609075950720715f0520bd9",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/7dc37a66c5ed5355eeecea2a598494069d9950a03609075950720715f0520bd9/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "7dc37a66c5ed5355eeecea2a598494069d9950a03609075950720715f0520bd9/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "8c15358c7ff1eab5a3d0f0064c01253c5d5d01216714a1c0548a4acfb01c1e9b",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "50233983deddc4eaade19cb16a67fe141d81fdbda77fc9e4b19a47a50b00be6c",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/50233983deddc4eaade19cb16a67fe141d81fdbda77fc9e4b19a47a50b00be6c/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "50233983deddc4eaade19cb16a67fe141d81fdbda77fc9e4b19a47a50b00be6c/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "2753beca2056442b318589a27241d9bf98fccb19718421f0ae58f186d2d880ce",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "3075455742ff496f3444bcf8e659183942baded1e8c7db03d2e424bbe19e4e86",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/3075455742ff496f3444bcf8e659183942baded1e8c7db03d2e424bbe19e4e86/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "3075455742ff496f3444bcf8e659183942baded1e8c7db03d2e424bbe19e4e86/trace_components.npy",
+      "optimizer_family": "adam",
+      "sha256": "58de06b4a9a67d191a785e4a08b3826216829c2f5d127b342f7e52b4bbc3c148",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "f1172cbff5be6eeb6c78cc90bc571e7b49efaf33d4f29b0af6b29c80fff3cc7a",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "f62e5ebbd2bde15b4bb4cad0ffa0d83ddf81148b0cc6e52f6c8ad54167bc9a5f",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "1855e0da34e8d1b679cf10604c8548619f80582eaeef2f0a0e37122defdb3230",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "c00bf7a701f57bb76eb908c1b5585cf5f59e20da86cfd292b45474b510b84ded",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "e1fbf04aff7e2d1c2c43521080af79109456347c9e5475102520b1a69c13a6d0",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "73ecc0f6cab69b5b30017002db8608b370bc7c2e8690bac9f6dbe42c399f1bcb",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "f62a0ee09e8152772e8865ca59253f9a77e4f29e886d29f9b6538f3ceae182e6",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/f62a0ee09e8152772e8865ca59253f9a77e4f29e886d29f9b6538f3ceae182e6/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "f62a0ee09e8152772e8865ca59253f9a77e4f29e886d29f9b6538f3ceae182e6/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "a635861d28ea1dd85cd5b811ccebcc0866dca3c9a0c4cc36a70bc2341e98c527",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "a6a5c4be6c91ec7131fa16f2ff5b78f67ca998e62a7cbce0eb07ca4373b6689e",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/a6a5c4be6c91ec7131fa16f2ff5b78f67ca998e62a7cbce0eb07ca4373b6689e/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "a6a5c4be6c91ec7131fa16f2ff5b78f67ca998e62a7cbce0eb07ca4373b6689e/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "4c455e418c536a10cbbb2934f643e1b4a3c187c8a5c3655465ae4275f86fd916",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "9a4e3a76aa795903df5d98bbcbbedfc2592c36de7a529286eae1762e9e12c62b",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/9a4e3a76aa795903df5d98bbcbbedfc2592c36de7a529286eae1762e9e12c62b/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "9a4e3a76aa795903df5d98bbcbbedfc2592c36de7a529286eae1762e9e12c62b/trace_components.npy",
+      "optimizer_family": "adamw",
+      "sha256": "ea7438259ef5d5329309b2ce4b796270bd722489d96834bf8f44b2aebe0e55dc",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "1d05765c5f37e462d4dbdf003e06cfd76e938b20ca0039f3e46766283d0b5408",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "09208fe95f56050e5a80ed7e20de00ec9e93a1b0a2d30e865f3b2a1ff3b34a6c",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "2c47409fb3087725d8d9179aea4d5e6565683b5439eab7c7673e728eba3d62a9",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "21f530202ed6bd9442ed9f75f10553e882b813f0e65251e9c2ea12bd83732abf",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/21f530202ed6bd9442ed9f75f10553e882b813f0e65251e9c2ea12bd83732abf/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "21f530202ed6bd9442ed9f75f10553e882b813f0e65251e9c2ea12bd83732abf/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "ac244870796749cc4d2f9da25d6d473e0db30fbe94eebdcc538976166cd2c9ef",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "0bc45121f18855203225932b731cefa87a947cddf6253b02558c4622237aa22f",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/0bc45121f18855203225932b731cefa87a947cddf6253b02558c4622237aa22f/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "0bc45121f18855203225932b731cefa87a947cddf6253b02558c4622237aa22f/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "a1a9498efc490c5023455f72c85729b941e6b2c1bc0eefe2cbaa15c4819ec633",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "7dc59233d53dd4b723aa4e84897c3410ac12ea329c23909db442b978eda6ea1e",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/7dc59233d53dd4b723aa4e84897c3410ac12ea329c23909db442b978eda6ea1e/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "7dc59233d53dd4b723aa4e84897c3410ac12ea329c23909db442b978eda6ea1e/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "9976a6f24612210fc4ba7ec562f4ad28bfe6330db3374761e34ce4b76d3c3daf",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "c4b6573c9c7b0c8631977dcdd75c6c6ce9040f23a37d9fbfeada0cdff9c712b5",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "8a46a493ad6b4700483de473d773de774c430aadd864e97841acb6879d1117d4",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "1acb0b5fbf78206b8a4fbc6e2b56fdd324dae4727859bb7dd277eee9eef65b13",
+      "training_seed": 2
+    },
+    {
+      "bundle_id": "da7cd6870e394035903bb506e00afdb6427eb414b4b6a0eaf52be250918dc7fb",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/da7cd6870e394035903bb506e00afdb6427eb414b4b6a0eaf52be250918dc7fb/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "da7cd6870e394035903bb506e00afdb6427eb414b4b6a0eaf52be250918dc7fb/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "41e8c1d776948012c17eac9e8e69298aa8fde6b2e26785f5a043bf907a6bbbaa",
+      "training_seed": 0
+    },
+    {
+      "bundle_id": "6df16772205df057cfdef1137c8730d38eb9609ead2cb851034d15f3d0d90be7",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/6df16772205df057cfdef1137c8730d38eb9609ead2cb851034d15f3d0d90be7/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "6df16772205df057cfdef1137c8730d38eb9609ead2cb851034d15f3d0d90be7/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "9a45b3c6a2d602f17f49a68e88339f25bed8f1422e6743003557e00ff3af5cf4",
+      "training_seed": 1
+    },
+    {
+      "bundle_id": "dad449f58d35fb28bc6cad9b61bca72d612888c35d108c1deb198723c771d8d2",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "hf_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract.v1.2/dad449f58d35fb28bc6cad9b61bca72d612888c35d108c1deb198723c771d8d2/metrics/arrays/geometry/train/neural_collapse/nc1_diagnostics/trace_components.npy",
+      "local_path": "dad449f58d35fb28bc6cad9b61bca72d612888c35d108c1deb198723c771d8d2/trace_components.npy",
+      "optimizer_family": "sgd",
+      "sha256": "d0708bac7ebc66c8eb82f575375a15d057c963c83486400563e4e8a51d484b0a",
+      "training_seed": 2
+    }
+  ],
+  "nc1_hypothesis": {
+    "frozen_before_association": true,
+    "predicted_spearman_sign": "negative",
+    "role": "descriptive_only_no_p_value_no_causal_claim",
+    "statement": "Smaller NC1 (stronger collapse) predicts larger log10 condition number."
+  },
+  "preflight_archive": {
+    "filename": "discriminant_residual_preflight_v1.tar",
+    "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/discriminant_residual_preflight/v1/4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88/discriminant_residual_preflight_v1.tar",
+    "required_members": [
+      "bundle_records.jsonl",
+      "checksums.sha256",
+      "summary.json",
+      "tail_records.jsonl"
+    ],
+    "sha256": "4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88"
+  },
+  "schema_version": "discriminant_residual_diagnostic_inputs_v1",
+  "start_git_sha": "cc097cc318173cf5456a56e436ea4ccee262c7c2",
+  "v1_2_comparison": {
+    "backend": "sklearn_scipy_pinvh_vs_card13_numpy_eigh",
+    "centering": "class_residual_and_global_mean_in_both",
+    "covariance_denominator": "biased_1_over_N_in_both",
+    "l2": "per_sample_normalization_then_refit_in_both"
+  }
+}

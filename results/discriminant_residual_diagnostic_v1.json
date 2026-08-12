@@ -1,0 +1,141 @@
+{
+  "analysis_role": "historical_mixed_recipe_id_only_diagnostic",
+  "archive": {
+    "filename": "discriminant_residual_diagnostic_v1.tar",
+    "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/discriminant_residual_diagnostic/v1/3319163816faa5e0da0615c80a92aca3e6ed40014fbb5353835eb573608dfaa6/discriminant_residual_diagnostic_v1.tar",
+    "remote_download_sha256": "3319163816faa5e0da0615c80a92aca3e6ed40014fbb5353835eb573608dfaa6",
+    "remote_verified": true,
+    "sha256": "3319163816faa5e0da0615c80a92aca3e6ed40014fbb5353835eb573608dfaa6",
+    "size": 81920
+  },
+  "claim_boundary": "Evidence-quality and numerical-compliance diagnostic only; no causal, OOD, detector-performance, or Gate 2 activation claim.",
+  "decision": {
+    "common_ridge": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+    "estimator_status": "CONDITIONAL_ONE_REMEDIATION_AND_V2_REQUIRED",
+    "gate_2": {
+      "retroactive_threshold_or_readjudication": false,
+      "status": "INCONCLUSIVE_IMMUTABLE"
+    },
+    "metric_contract_v1_2_relationship": {
+      "applicable_parity_difference": "RMD_ONLY_CANCELLATION_SCALE_PENDING_V2_CONFIRMATION",
+      "card_estimator_self_spec": "CONSISTENT_PENDING_V2_CONFIRMATION",
+      "inapplicable_parity_difference": "OUTSIDE_FULL_RANK_THEOREM_SCOPE",
+      "same_statistical_conventions": {
+        "backend": "sklearn_scipy_pinvh_vs_card13_numpy_eigh",
+        "centering": "class_residual_and_global_mean_in_both",
+        "covariance_denominator": "biased_1_over_N_in_both",
+        "l2": "per_sample_normalization_then_refit_in_both"
+      }
+    },
+    "next_action": "FREEZE_CARD13_V11_THEN_ONE_BOUNDED_V2",
+    "rmd_cancellation": {
+      "candidate_scale": "max(1, abs(direct_global)+abs(direct_class), abs(q_parallel_global)+abs(q_parallel_class))",
+      "candidate_supported": true,
+      "classification": "FROZEN_WORDING_AMBIGUITY_COMPLIANCE_CLARIFICATION",
+      "historical_pass_rate_used": false,
+      "other_score_or_margin_scale_change": "NONE",
+      "selection_basis": [
+        "high_precision_algebraic_equivalence",
+        "condition_aware_forward_error",
+        "synthetic_fixture_grid"
+      ],
+      "tau_alg_change": "NONE"
+    }
+  },
+  "evidence": {
+    "cancellation_fixture_criteria": {
+      "all_injected_errors_within_condition_eps": true,
+      "high_precision_algebraic_equivalence": true,
+      "operand_scale_respects_tau_on_grid": true,
+      "output_scale_understates_error_on_grid": true
+    },
+    "fit_count": 60,
+    "layer_a_applicability_failure_count": 30,
+    "layer_a_condition_ceiling_count": 8,
+    "layer_a_rank_deficient_count": 22,
+    "layer_b_failed_checks": [
+      {
+        "check": "id_test.rmd_cancellation",
+        "count": 14
+      },
+      {
+        "check": "id_train.rmd_cancellation",
+        "count": 19
+      }
+    ],
+    "layer_b_required_gate_failure_count": 21,
+    "layer_c_applicable_failure_count": 19,
+    "layer_c_applicable_failures_only_rmd": true,
+    "layer_c_cached_parity_failure_count": 36,
+    "nc1_interpretation": "Overall frozen sign is supported, but optimizer-family heterogeneity and rank-deficient exclusions keep this descriptive.",
+    "nc1_vs_log10_condition_spearman": {
+      "l2": {
+        "excluded_rank_deficient_count": 11,
+        "finite_condition_fit_count": 19,
+        "predicted_negative_direction_supported": true,
+        "rho": -0.46140350877192987
+      },
+      "raw": {
+        "excluded_rank_deficient_count": 11,
+        "finite_condition_fit_count": 19,
+        "predicted_negative_direction_supported": true,
+        "rho": -0.46315789473684205
+      }
+    },
+    "raw_norm_component_correlations": {
+      "id_test_complete_count": 30,
+      "id_train_complete_count": 30,
+      "pass": true,
+      "raw_fit_count": 30
+    }
+  },
+  "gate_2": {
+    "retroactive_threshold_or_readjudication": false,
+    "status": "INCONCLUSIVE_IMMUTABLE",
+    "subset_tail_role": "conditional discovery only"
+  },
+  "input_integrity": {
+    "missing_or_mismatched_count": 0,
+    "nc1_scope": "manifested ID-train trace_components only",
+    "preflight_v1_archive_sha256": "4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88",
+    "verified_nc1_array_count": 30
+  },
+  "issue": "https://github.com/contra333/2026-_0707/issues/75",
+  "not_run": [
+    "GPU",
+    "checkpoint inference or reevaluation",
+    "protected OOD access or evaluation",
+    "fresh training",
+    "full RtMD detector or OOD evaluation",
+    "historical Gate 2 readjudication"
+  ],
+  "schema_version": "discriminant_residual_diagnostic_preservation_v1",
+  "start_git_sha": "cc097cc318173cf5456a56e436ea4ccee262c7c2",
+  "status": "PASS",
+  "tracked_implementation": {
+    "focused_fixtures": {
+      "path": "tests/test_discriminant_residual_diagnostic.py",
+      "sha256": "4d8bba5e8c76019281d555e7670477fb77f37d8f8ebe290654d929353ae6306a"
+    },
+    "generator": {
+      "path": "scripts/analyze_discriminant_residual_diagnostic.py",
+      "sha256": "698f8debc514dd0d93b9f92dfa5c1af9d8caf7098d9924f5c2cba1cf0f66621e"
+    },
+    "input_manifest": {
+      "path": "configs/analysis/discriminant_residual_diagnostic_v1.json",
+      "sha256": "02ac1ce836843c4762f98ad71e356eea09ab26f1fd9b1cb27a0710a986147056"
+    },
+    "module": {
+      "path": "src/oge/analysis/discriminant_residual_diagnostic.py",
+      "sha256": "1c279844b1818c67ee5d1e6ae1ca430850cfbd0b7bb27b27981dd27aa04cf9d8"
+    }
+  },
+  "validation": {
+    "count_conservation": "PASS",
+    "deterministic_reexecution": "PASS",
+    "focused_fixtures": "6 passed",
+    "payload_checksums": "PASS",
+    "production_execution": "PASS",
+    "remote_download_hash": "PASS"
+  }
+}

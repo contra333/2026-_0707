@@ -15,6 +15,11 @@ discriminant--residual and ID-only residual-tail CPU preflight is complete. Its
 execution passed, but Gate 2 is `INCONCLUSIVE`: Card 13 has no frozen aggregate
 decision rule and only 15 of 30 fits per transform had numerically applicable
 two-fold geometry. Fresh paired training has not started.
+An ID-only archive diagnostic has now re-derived the 60-fit failure layers,
+checksum-verified all 30 NC1 inputs, and found synthetic forward-error support
+for treating the RMD-cancellation denominator as a Card-13 wording ambiguity.
+This authorizes one prospective contract clarification and CPU preflight v2;
+it does not re-adjudicate Gate 2 or activate RtMD.
 
 The planned chain is:
 
@@ -50,6 +55,14 @@ same initialization and data stream
   30 bundles per transform and selected finite tails in all 30 completed fits;
   Gate 2 remains `INCONCLUSIVE`, not a method activation or OOD claim. The compact
   record is [`results/discriminant_residual_preflight_v1.json`](../results/discriminant_residual_preflight_v1.json).
+- The bounded follow-up diagnostic re-derived 30 applicability failures
+  (`22` rank, `8` condition), 21 applicable required-gate failures confined to
+  RMD cancellation, and 36 cached-parity diagnostic failures. Its pre-frozen
+  NC1 direction was supported overall on the finite-condition subset but was
+  heterogeneous by optimizer family, so it remains descriptive. A
+  high-precision condition-grid fixture supports an operand-aware cancellation
+  scale without changing `tau_alg`; the compact record is
+  [`results/discriminant_residual_diagnostic_v1.json`](../results/discriminant_residual_diagnostic_v1.json).
 - A checksum-verified, no-inference D1 reuse analysis recovered exact per-sample
   scores for four frozen historical role configurations. Across six confounded
   cross-policy pairs, median Raw-MD PairOrderChurn was `0.322` on CIFAR-100 and
