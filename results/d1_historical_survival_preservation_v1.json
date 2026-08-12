@@ -1,0 +1,62 @@
+{
+  "schema_version": "d1_historical_survival_preservation_v1",
+  "status": "PASS",
+  "issue": "https://github.com/contra333/2026-_0707/issues/71",
+  "start_git_sha": "c6ddbc5c91581b2ea1578a2095016c7c2834acc4",
+  "analysis_role": "historical_descriptive_discovery",
+  "claim_boundary": "Historical independently trained and confounded configurations only; noncausal, not comparable-ID evidence, not an RMD-immunity claim, and not fresh scientific evidence.",
+  "tracked_generator": {
+    "path": "scripts/analyze_d1_historical_survival.py",
+    "sha256": "0973a6d021bb41a2fa1a33c02dc9a0ccc183866cc6ae219f9b698814eda0dcf0"
+  },
+  "tracked_input_manifest": {
+    "path": "configs/analysis/d1_historical_survival_input_v1.json",
+    "sha256": "3b0415507add1ff76245b062563221d326e2cc8d588c0bbb56f5457abfdefcae",
+    "bundle_count": 12,
+    "sample_id_file_count": 36,
+    "score_file_uses": 96
+  },
+  "source": {
+    "remote_hf_root": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract_v1.2",
+    "score_manifest": {
+      "logical_name": "score_source_manifest.jsonl",
+      "component_analysis_revision": "28ba5a067c55ba1f7a57d8265f55b57057d54762",
+      "size": 331890,
+      "row_count": 1260,
+      "sha256": "b2f0a0777c561ff1f2b2ddaab092c135ef7fc74ff5914bc063449d1c28572b82"
+    }
+  },
+  "original_artifact_identity": {
+    "analyze_d1_survival.py": "1bb55ae7856573bb3afdfcc51c593bde5e9df9e7a356ad53e279e008357c68dc",
+    "data_quality.json": "d6d8b6a7483ca4644a6e268218901a9ee5b2d049e41c8211e5f72f81f2176c42",
+    "pair_metrics.csv": "856391363c36182d76e1f27556f935356424e80f3cec36d169dc2aaf309ab09c",
+    "summary.json": "f73346e1b0468514344e9b601a09b084eb95ce4f1cde2543ec09788f3d3197f9"
+  },
+  "production_rerun": {
+    "status": "PASS",
+    "score_file_uses_verified": 96,
+    "sample_ordering_verified": true,
+    "scope_and_numbers_byte_exact": true,
+    "output_identity": {
+      "data_quality.json": "d6d8b6a7483ca4644a6e268218901a9ee5b2d049e41c8211e5f72f81f2176c42",
+      "pair_metrics.csv": "856391363c36182d76e1f27556f935356424e80f3cec36d169dc2aaf309ab09c",
+      "summary.json": "f73346e1b0468514344e9b601a09b084eb95ce4f1cde2543ec09788f3d3197f9"
+    }
+  },
+  "archive": {
+    "filename": "d1_historical_survival_v1.tar",
+    "size": 71680,
+    "sha256": "25f9b588f52bf539cc86c0221424f68d4ba846fb9adefe26a2e1f9b3c1d6380a",
+    "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/d1_historical_survival/v1/25f9b588f52bf539cc86c0221424f68d4ba846fb9adefe26a2e1f9b3c1d6380a/d1_historical_survival_v1.tar",
+    "remote_listing_file_count": 1,
+    "remote_xet_hash": "dfedb1b0bba3af19cf24bf23d6dfd3698ec7f97ed8dd270b04ba181a4e1f25b4",
+    "remote_download_sha256": "25f9b588f52bf539cc86c0221424f68d4ba846fb9adefe26a2e1f9b3c1d6380a",
+    "remote_verified": true
+  },
+  "validation": {
+    "focused_tests": "7 passed",
+    "production_rerun": "PASS",
+    "archive_checksum": "PASS",
+    "remote_listing_and_download_hash": "PASS"
+  }
+}
