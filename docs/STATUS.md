@@ -10,9 +10,11 @@ The active design is v10. A bounded historical D1 survival check is complete
 and supports the pair-ranking-multiplicity framing as discovery evidence. The
 Task B theory/estimator/literature lock is complete: the core numerical and
 subspace rules, discovery-informed `S-perp` hypothesis, and exact conditional
-`RtMD` specification are frozen in Card 13. The next task is one bounded Issue
-to implement and run the existing-cache discriminant--residual and ID-only
-residual-tail preflight on CPU. Fresh paired training has not started.
+`RtMD` specification are frozen in Card 13. The bounded existing-cache
+discriminant--residual and ID-only residual-tail CPU preflight is complete. Its
+execution passed, but Gate 2 is `INCONCLUSIVE`: Card 13 has no frozen aggregate
+decision rule and only 15 of 30 fits per transform had numerically applicable
+two-fold geometry. Fresh paired training has not started.
 
 The planned chain is:
 
@@ -41,6 +43,13 @@ same initialization and data stream
 - Metric Contract v1.2 protected evaluation completed for 60 checkpoint bundles.
 - The historical 30-model MD--Marginal--RMD component analysis completed with `PASS`.
   It is descriptive discovery, not decay-coupling confirmation.
+- The Card-13 historical ID-only CPU preflight verified 450 allowlisted files from
+  30 cached bundles and completed 60 raw/L2 fits without checkpoint inference.
+  Required numerical gates passed for 9 fits (`S-perp`; the other 51 retained
+  primary=`none`). Deterministic two-fold residual-tail fits completed for 15 of
+  30 bundles per transform and selected finite tails in all 30 completed fits;
+  Gate 2 remains `INCONCLUSIVE`, not a method activation or OOD claim. The compact
+  record is [`results/discriminant_residual_preflight_v1.json`](../results/discriminant_residual_preflight_v1.json).
 - A checksum-verified, no-inference D1 reuse analysis recovered exact per-sample
   scores for four frozen historical role configurations. Across six confounded
   cross-policy pairs, median Raw-MD PairOrderChurn was `0.322` on CIFAR-100 and
@@ -83,8 +92,9 @@ outside Git at the hash-addressed HF archive recorded there.
   residual-t score, deterministic ID-only two-fold fit, finite-domain/fallback
   rule, comparison panel, and guardrails are frozen. The direct-collision
   subgate is a narrow `PASS` after WDiscOOD, Linderman/DPMM--RMDS, D-KNN, CORE,
-  and MaRS boundary checks; empirical Gates 2--5 are `NOT_RUN`. It closes on
-  any failed gate without changing the primary paper.
+  and MaRS boundary checks. The historical ID-only Gate 2 preflight is
+  `INCONCLUSIVE`; empirical Gates 3--5 are `NOT_RUN`. It closes on any failed
+  gate without changing the primary paper.
 - Core preflight rules are frozen: condition-aware algebra tolerances,
   numerical `dim(S)`, rank-sensitive reporting, gauge-aligned angles,
   classifier alignment, the zero-decay common frame, component covariance,
@@ -117,9 +127,8 @@ replication rules live only in the active protocol.
 
 ## Explicitly not run
 
-- no `S`/`S-perp` analysis interface, historical discriminant--residual or
-  residual-tail preflight, fixed residual-retention diagnostic, or `RtMD`
-  implementation/evaluation
+- no fixed residual-retention diagnostic, full `RtMD` detector, or `RtMD` OOD
+  evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain `NOT_RUN`
 - no fresh active-protocol training, alpha midpoint run, GPU work, checkpoint
   inference, or protected OOD
 - no new architecture/dataset replication

@@ -1,0 +1,138 @@
+{
+  "schema_version": "discriminant_residual_preflight_preservation_v1",
+  "status": "PASS",
+  "issue": "https://github.com/contra333/2026-_0707/issues/73",
+  "start_git_sha": "50a23fcc6a52d17253844f26c9829fe18b536acb",
+  "contract_source": "Card 13 Sections 7.4, 7.5, and 13",
+  "analysis_role": "historical_mixed_recipe_id_only_discovery",
+  "claim_boundary": "ID-only plausibility preflight; cannot activate RtMD, predict OOD performance, or support a causal claim.",
+  "tracked_implementation": {
+    "generator": {
+      "path": "scripts/analyze_discriminant_residual_preflight.py",
+      "sha256": "a2a09afbd04550e4cb9c8f112d52205a5d8de75b223e81c69f79adc997f10965"
+    },
+    "module": {
+      "path": "src/oge/analysis/discriminant_residual_preflight.py",
+      "sha256": "55255430b37d8ba436d061b0aa31287f89960dd1e23e83421dba6743abc3e22f"
+    },
+    "input_manifest": {
+      "path": "configs/analysis/discriminant_residual_preflight_v1.json",
+      "sha256": "5327daf9703f76f38b41aaa32b50ce5cf5aaef26127fdbd3d42b7d61b19157f0"
+    },
+    "focused_fixtures": {
+      "path": "tests/test_discriminant_residual_preflight.py",
+      "sha256": "d9147c806c86d2fa24ed540bc75b9abb3d5ea4337106941a7a4f662e970e8821"
+    }
+  },
+  "source": {
+    "remote_hf_root": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract_v1.2",
+    "reuse_manifest_sha256": "f814f1ab3070a2dc4f0d541746bbd05c3ad74d761bd5c8fa88bc859f308318dc",
+    "verified_bundle_count": 30,
+    "verified_id_only_file_count": 450,
+    "access_scope": "fixed ID-only allowlist"
+  },
+  "execution": {
+    "status": "PASS",
+    "hard_cap_seconds": 14400,
+    "generator_wall_seconds": 1232.0047099499934,
+    "fit_count": 60,
+    "required_numerical_pass_count": 9,
+    "primary_channel_scope": "per_fit_only",
+    "primary_channel_counts": {
+      "S-perp": 9,
+      "none": 51
+    },
+    "tail_fit_status_counts": {
+      "PASS": 30,
+      "INCONCLUSIVE_NUMERICAL": 30
+    },
+    "pair_status_counts": {
+      "PASS": 6,
+      "INAPPLICABLE": 12
+    },
+    "common_ridge_status_counts": {
+      "PASS": 27,
+      "FAILED": 33
+    },
+    "cached_metric_parity_diagnostic_counts": {
+      "PASS": 24,
+      "FAILED": 36
+    }
+  },
+  "gate_2": {
+    "status": "INCONCLUSIVE",
+    "aggregate_decision_rule": "NOT_PREDECLARED_IN_CARD_13",
+    "reason_codes": [
+      "aggregate_gate2_decision_rule_not_predeclared",
+      "raw_required_numerical_fits_incomplete",
+      "l2_required_numerical_fits_incomplete"
+    ],
+    "raw": {
+      "complete_fit_count": 15,
+      "inconclusive_fit_count": 15,
+      "finite_t_selected_count": 15,
+      "selected_nu": {
+        "minimum": 23.876874194696168,
+        "median": 33.47731650026513,
+        "maximum": 56.613372732491044
+      },
+      "heldout_gain_per_sample": {
+        "minimum": 4.561803204759211,
+        "median": 9.703075423539989,
+        "maximum": 15.916843015863746
+      },
+      "heldout_chi2_ks_mean": 0.33086037051736816,
+      "heldout_chi2_upper_0_99_exceedance_mean": 0.3075333333333333,
+      "heldout_variance_to_chi2_mean": 28.61766598921976
+    },
+    "l2": {
+      "complete_fit_count": 15,
+      "inconclusive_fit_count": 15,
+      "finite_t_selected_count": 15,
+      "selected_nu": {
+        "minimum": 16.97115909704226,
+        "median": 19.553283743655893,
+        "maximum": 25.984573209037485
+      },
+      "heldout_gain_per_sample": {
+        "minimum": 17.233221639845148,
+        "median": 20.801724176082388,
+        "maximum": 30.459870928913727
+      },
+      "heldout_chi2_ks_mean": 0.38976445923056996,
+      "heldout_chi2_upper_0_99_exceedance_mean": 0.3934933333333334,
+      "heldout_variance_to_chi2_mean": 61.011601511641274
+    }
+  },
+  "zero_common_frame": {
+    "status": "NOT_AVAILABLE",
+    "fabricated_substitute_used": false,
+    "reason": "The verified historical population has no exact same-seed, same-cell coupled/decoupled/zero trio."
+  },
+  "archive": {
+    "filename": "discriminant_residual_preflight_v1.tar",
+    "size": 727040,
+    "sha256": "4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88",
+    "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/discriminant_residual_preflight/v1/4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88/discriminant_residual_preflight_v1.tar",
+    "summary_sha256": "77ad6be1c472b484767883f759194c4c3d4ea2bf03cc612ebe9c7c027c26782a",
+    "payload_checksum_catalog_sha256": "9e28d764314efe33b20f6a9610ad9aaadd7b3213bd5802c9aeb96ee8d3d31a17",
+    "remote_download_sha256": "4f58de57551c42ac4c75a6621b05c8dbfdc5f3bb8072de08d137c614c9611a88",
+    "remote_verified": true
+  },
+  "not_run": [
+    "GPU",
+    "checkpoint reevaluation or inference",
+    "protected OOD access or evaluation",
+    "fresh training",
+    "full RtMD detector or OOD evaluation",
+    "RtMD AUROC, FPR95, or churn evaluation",
+    "historical Raw-MD OOD gap concentration"
+  ],
+  "validation": {
+    "focused_fixtures": "10 passed",
+    "production_execution": "PASS",
+    "payload_checksums": "PASS",
+    "archive_checksum": "PASS",
+    "remote_download_hash": "PASS"
+  }
+}

@@ -1,0 +1,353 @@
+{
+  "bundles": [
+    {
+      "bundle_checksums_sha256": "08ad4768136c795053eb718755ea789a9e9c38c35011ab51e367199ee3650c10",
+      "bundle_id": "3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "optimizer_family": "adam",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "ade54d8e6d54286f6c16cc616c32b0feebf3ab3a5dab3170caadd0ef81dd3647",
+      "bundle_id": "c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "optimizer_family": "adam",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "37208c43e763d404c6b3313c6d8f05f16f186dd03b05dab9127b6d1ee3cb9e8c",
+      "bundle_id": "545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3",
+      "config_hash": "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78",
+      "optimizer_family": "adam",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "9dfa39034f9ab238cd63b6d4ac2973909c4f3beae870848459788364bb48138d",
+      "bundle_id": "09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "optimizer_family": "adam",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "84cf18654483770d55d026f80a7d2b3e813d9ba40f3e1a985878a0cd3e49efca",
+      "bundle_id": "66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "optimizer_family": "adam",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "3265ebe096fb76627322a03448f0e5b1d34d4239cee93f78cfa1d28fba4b97a3",
+      "bundle_id": "d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09",
+      "config_hash": "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328",
+      "optimizer_family": "adam",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "14625d3a93974fa176a4d05f678d4b753955e7370cc95795b475c622ea8077ba",
+      "bundle_id": "7dc37a66c5ed5355eeecea2a598494069d9950a03609075950720715f0520bd9",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "optimizer_family": "adam",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "068936b02b22ade7108b69771fe9b59f486d5597411324732d9fba706a248ca7",
+      "bundle_id": "50233983deddc4eaade19cb16a67fe141d81fdbda77fc9e4b19a47a50b00be6c",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "optimizer_family": "adam",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "ec152bf2a5956b858311fa9c8c484665fe60f2bad0a86f28b6c9900458ae09d3",
+      "bundle_id": "3075455742ff496f3444bcf8e659183942baded1e8c7db03d2e424bbe19e4e86",
+      "config_hash": "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211",
+      "optimizer_family": "adam",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "60aa64eb1f60e698287e76664766d941a64aa173a5eed9a91474d5ed05f89b03",
+      "bundle_id": "9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "optimizer_family": "adamw",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "496561a915d037c4388c089936f844bc1f484ba9bed0401f45728794256a1ac2",
+      "bundle_id": "c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "optimizer_family": "adamw",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "b38f15cb519a48cc1b3160780a1e289c2dc0fd910652b9febef35cbd24ac1a74",
+      "bundle_id": "77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b",
+      "config_hash": "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e",
+      "optimizer_family": "adamw",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "f870400498a5852549ca40dae1a196a8f80c860c62561566e94c6c4af9f61a27",
+      "bundle_id": "5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "optimizer_family": "adamw",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "129980c8b15a79dc8ad0feea15f1c5542dc9366e01f17fb1a9573cf837124ecb",
+      "bundle_id": "1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "optimizer_family": "adamw",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "2ad139b83b166ad8b3d4c033b4feb3bc0fce5682991b705da013afbc46e3c127",
+      "bundle_id": "52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c",
+      "config_hash": "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f",
+      "optimizer_family": "adamw",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "6feecf15562ced65fc46da54ddd202bb088d06b5c664f42c468be717e6f126d8",
+      "bundle_id": "f62a0ee09e8152772e8865ca59253f9a77e4f29e886d29f9b6538f3ceae182e6",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "optimizer_family": "adamw",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "f37e8247397bbcfe6df1b6477ca316236b5919f0f99efc65369228b45815d30a",
+      "bundle_id": "a6a5c4be6c91ec7131fa16f2ff5b78f67ca998e62a7cbce0eb07ca4373b6689e",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "optimizer_family": "adamw",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "6faebb421801b748ebb18f4fe0de4aea9bd62eaad526e8c1977aa781f64978ce",
+      "bundle_id": "9a4e3a76aa795903df5d98bbcbbedfc2592c36de7a529286eae1762e9e12c62b",
+      "config_hash": "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f",
+      "optimizer_family": "adamw",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "bfb47a4178c9efc46301ee898219e6b98206811dde988fd905c5bc51ac780a19",
+      "bundle_id": "e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "optimizer_family": "sgd",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "8c5f8d09fd7acf87c432d22aeea2ff6e9d24035c72d33e8d6f6e482e0d865057",
+      "bundle_id": "f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "optimizer_family": "sgd",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "57ffd17d679332a6608c756bbc51353f6025632865ad5c37c7043f41094737d9",
+      "bundle_id": "4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6",
+      "config_hash": "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2",
+      "optimizer_family": "sgd",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "ccf703590b0100b8f8e4c10d2ee77a05de8247410deb94e1209557727719898e",
+      "bundle_id": "21f530202ed6bd9442ed9f75f10553e882b813f0e65251e9c2ea12bd83732abf",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "optimizer_family": "sgd",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "62da315a741e6691708e87369b5d69265a8a03acb0fdfa74e5121c7e31e90e0f",
+      "bundle_id": "0bc45121f18855203225932b731cefa87a947cddf6253b02558c4622237aa22f",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "optimizer_family": "sgd",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "a0be66fd70cb68044587f98c4f886226173ea2024db7ed2db0ebdebed214f596",
+      "bundle_id": "7dc59233d53dd4b723aa4e84897c3410ac12ea329c23909db442b978eda6ea1e",
+      "config_hash": "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c",
+      "optimizer_family": "sgd",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "da6e0af80371bec78b69e02af953e958dc6f9f1c7b2a208b8bc78f9aaa582f84",
+      "bundle_id": "4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "optimizer_family": "sgd",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "3ea871110fd67259c261a5a3fc236f8b2dee3f52d90c99937251316608c706e6",
+      "bundle_id": "d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "optimizer_family": "sgd",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "00b33faa13f29365a431a041abb97c572af2f1767aba45b994b7dfe11d20e5d9",
+      "bundle_id": "4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967",
+      "config_hash": "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9",
+      "optimizer_family": "sgd",
+      "training_seed": 2
+    },
+    {
+      "bundle_checksums_sha256": "970dc3e56736d4dd2c34b3d7e600b88697969f45f1246d4403911a41b9f70349",
+      "bundle_id": "da7cd6870e394035903bb506e00afdb6427eb414b4b6a0eaf52be250918dc7fb",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "optimizer_family": "sgd",
+      "training_seed": 0
+    },
+    {
+      "bundle_checksums_sha256": "e1b9ed7bb0f5c0dfdec4587515f00a07415f5b8a977d28325bbaad46c605664e",
+      "bundle_id": "6df16772205df057cfdef1137c8730d38eb9609ead2cb851034d15f3d0d90be7",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "optimizer_family": "sgd",
+      "training_seed": 1
+    },
+    {
+      "bundle_checksums_sha256": "dcdc5092fccc13a2a4c9be5574154b31464e6d41dc6e59abc4ad537643c4405f",
+      "bundle_id": "dad449f58d35fb28bc6cad9b61bca72d612888c35d108c1deb198723c771d8d2",
+      "config_hash": "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242",
+      "optimizer_family": "sgd",
+      "training_seed": 2
+    }
+  ],
+  "configurations": {
+    "188f2e248d512bb338cd5c33c140337ac59206948aa209631ca797a09d4b9eb2": {
+      "labels": [
+        "pair:sgd_sgdw:A",
+        "role:sgd:C1"
+      ],
+      "optimizer_family": "sgd"
+    },
+    "3e2bac6d488d016b4c0a216c6e210e16bcc4ca139bf6356687dc98bc7c39ec78": {
+      "labels": [
+        "role:adam:C4"
+      ],
+      "optimizer_family": "adam"
+    },
+    "4039a31891b5637f4198ad78f79d97e89aa97f4ccd6efa5779b14c5b4203059e": {
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C4"
+      ],
+      "optimizer_family": "adamw"
+    },
+    "5742764ef3bd686abf56fbeafa222ed2fa2784afb6f787533493cfe88190f71f": {
+      "labels": [
+        "pair:adam_adamw",
+        "role:adamw:C3"
+      ],
+      "optimizer_family": "adamw"
+    },
+    "61d7d1f20bc593cc2d106f24f0343084f56f811c8ebc63c856eaced34c50b65f": {
+      "labels": [
+        "role:adamw:C1"
+      ],
+      "optimizer_family": "adamw"
+    },
+    "7aa36ee28bf5fa9c0b29152bb63c02833c5c6d02ae2c4908d0256a35582c9d9c": {
+      "labels": [
+        "role:sgd:C4"
+      ],
+      "optimizer_family": "sgd"
+    },
+    "86af0abedd46c2a0c8eddb4fea4739037bd2bfd7259cc44a9b8303088bfee3b9": {
+      "labels": [
+        "pair:sgd_sgdw:B",
+        "role:sgd:C2"
+      ],
+      "optimizer_family": "sgd"
+    },
+    "b701f780ad99d469949a985b0472b8d1f26be0545e531d92895b7559ca142328": {
+      "labels": [
+        "role:adam:C1",
+        "role:adam:C3"
+      ],
+      "optimizer_family": "adam"
+    },
+    "db137e7d3c712f7a4752a4ecaee827c58ae25bc907f916dbab0de88a87e33211": {
+      "labels": [
+        "role:adam:C2"
+      ],
+      "optimizer_family": "adam"
+    },
+    "f315d560c588b29298c6e3749f644634c09a1f3187eeea25d98e941c498f6242": {
+      "labels": [
+        "role:sgd:C3"
+      ],
+      "optimizer_family": "sgd"
+    }
+  },
+  "expected_bundle_count": 30,
+  "hf_base_uri": "hf://buckets/contra333/ICLR_RUN/evaluations/metric_contract_v1.2",
+  "pairs": [
+    {
+      "left_bundle_id": "3107fa05d2e385174001009e90a50e3692d60425623c071ef05d34994af9dccd",
+      "left_label": "adam_c4",
+      "pair_id": "adam_c4_vs_adamw_c4_seed0",
+      "right_bundle_id": "9940d5548da8547592bd583e11231bcec348bc9cc4b96187abda89e6e2e9290a",
+      "right_label": "adamw_c4"
+    },
+    {
+      "left_bundle_id": "c937587d63d386b9cf9c868804cceb290125a1c1ff540b7c3aefeec75b8d319e",
+      "left_label": "adam_c4",
+      "pair_id": "adam_c4_vs_adamw_c4_seed1",
+      "right_bundle_id": "c1ad4b461aad9ee23c7f44b0c1b86e86302443a732f9fdbd12d8fcc1646f44c4",
+      "right_label": "adamw_c4"
+    },
+    {
+      "left_bundle_id": "545c2877356672fb5cffddaec85a199d510752a4df835b6328b386194b5e3ff3",
+      "left_label": "adam_c4",
+      "pair_id": "adam_c4_vs_adamw_c4_seed2",
+      "right_bundle_id": "77c8a481be816b61033035dcce0545f9ebb0a6f905aa79b285609ba13eea566b",
+      "right_label": "adamw_c4"
+    },
+    {
+      "left_bundle_id": "09442d81872d37e49f213f59d4687b6e86e375282e92a87346ad77f88c731cf0",
+      "left_label": "adam_c3",
+      "pair_id": "adam_c3_vs_adamw_c3_seed0",
+      "right_bundle_id": "5b4a84503131fb9a126173753fa2ca8afaaf4bafb6afe00ccabf127f6a89756d",
+      "right_label": "adamw_c3"
+    },
+    {
+      "left_bundle_id": "66cab371dce7d15ae9328dd611bfd43239fd104abf7f2bf5736da0b0028d4362",
+      "left_label": "adam_c3",
+      "pair_id": "adam_c3_vs_adamw_c3_seed1",
+      "right_bundle_id": "1ced49b37f58c01af5bd97bcc1c05678974245535606d96414b0ad352a4f86af",
+      "right_label": "adamw_c3"
+    },
+    {
+      "left_bundle_id": "d9d8421f7cd3bd2f2167ef26a01a146811543ff13f234f725560318246a43b09",
+      "left_label": "adam_c3",
+      "pair_id": "adam_c3_vs_adamw_c3_seed2",
+      "right_bundle_id": "52d36fd252b926d4064fd50e0aaed9c604e7bc4eb5d03cd938dd9f4c876bf75c",
+      "right_label": "adamw_c3"
+    },
+    {
+      "left_bundle_id": "e8e42ed60d71a3d0f0a1486171bf165e80d43f9c2ccc63afff94b6738f6a3347",
+      "left_label": "sgd_c1_pair_a",
+      "pair_id": "sgd_c1_vs_c2_seed0",
+      "right_bundle_id": "4467aff88cddbb8d3553a4c3d6cc2a8f34d7df8215d3f22ebda84a81c670b36c",
+      "right_label": "sgd_c2_pair_b"
+    },
+    {
+      "left_bundle_id": "f903c13fc415379500fb38b0d9c54dff5c1e382a7d4f875ef08a3f90c90bb50f",
+      "left_label": "sgd_c1_pair_a",
+      "pair_id": "sgd_c1_vs_c2_seed1",
+      "right_bundle_id": "d5d5dfb08167d04c75f0d12d890c4e8a1ca4dd5d0e4d5ca5d6c36cf3ae6b8355",
+      "right_label": "sgd_c2_pair_b"
+    },
+    {
+      "left_bundle_id": "4770f944cd56121a6d91aaae7aedd0e585b55386d499e1d7a2bdd93b6b578bf6",
+      "left_label": "sgd_c1_pair_a",
+      "pair_id": "sgd_c1_vs_c2_seed2",
+      "right_bundle_id": "4acd3c5ece340d2fbca1e0c2e3834e400dd21b93f57e657043d9eb524d6b1967",
+      "right_label": "sgd_c2_pair_b"
+    }
+  ],
+  "schema_version": "discriminant_residual_preflight_inputs_v1",
+  "source_reuse_manifest_sha256": "f814f1ab3070a2dc4f0d541746bbd05c3ad74d761bd5c8fa88bc859f308318dc",
+  "source_role": "verified_30_bundle_last_pt_raw_feature_cache",
+  "zero_reference_reason": "the verified historical population has no exact same-seed, same-cell coupled/decoupled/zero trio; no substitute is allowed",
+  "zero_reference_trios": []
+}
