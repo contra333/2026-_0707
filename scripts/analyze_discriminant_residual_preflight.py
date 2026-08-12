@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 # Pin numerical-library scheduling before importing NumPy/SciPy through oge.
+DETERMINISTIC_NUMERICAL_THREADS = 4
 for _thread_variable in (
     "OPENBLAS_NUM_THREADS",
     "OMP_NUM_THREADS",
@@ -15,7 +16,7 @@ for _thread_variable in (
     "VECLIB_MAXIMUM_THREADS",
     "NUMEXPR_NUM_THREADS",
 ):
-    os.environ[_thread_variable] = "1"
+    os.environ[_thread_variable] = str(DETERMINISTIC_NUMERICAL_THREADS)
 
 from oge.analysis.discriminant_residual_preflight import run_preflight
 
@@ -61,6 +62,7 @@ def main() -> None:
         v1_bundle_records_path=args.v1_bundle_records,
         v1_tail_records_path=args.v1_tail_records,
         hard_cap_seconds=args.hard_cap_seconds,
+        numerical_thread_limit=DETERMINISTIC_NUMERICAL_THREADS,
         progress_callback=lambda message: print(message, flush=True),
     )
     print(

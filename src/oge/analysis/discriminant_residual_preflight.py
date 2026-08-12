@@ -1506,6 +1506,7 @@ def run_preflight(
     v1_bundle_records_path: str | Path | None = None,
     v1_tail_records_path: str | Path | None = None,
     hard_cap_seconds: float = 4.0 * 60.0 * 60.0,
+    numerical_thread_limit: int | None = None,
     progress_callback: Callable[[str], None] | None = None,
 ) -> dict[str, Any]:
     """Run the bounded preflight and publish only compact, ID-only records."""
@@ -1678,6 +1679,10 @@ def run_preflight(
                 "historical Raw-MD OOD gap concentration",
             ],
             "hard_cap_seconds": float(hard_cap_seconds),
+            "deterministic_runtime": {
+                "numerical_thread_limit": numerical_thread_limit,
+                "environment_pinned_by_generator": numerical_thread_limit is not None,
+            },
             "payload_files": [
                 "bundle_records.jsonl",
                 "input_manifest.jsonl",
