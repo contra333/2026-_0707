@@ -308,7 +308,7 @@ def test_task_f_manifest_rejects_every_missing_card13_minimum_field(tmp_path):
 @pytest.mark.parametrize(
     "mutation,match",
     [
-        (lambda value: value["sibling_members"].pop("alpha_1"), "missing fields"),
+        (lambda value: value["sibling_members"].pop("alpha_1"), "complete zero/alpha quartet"),
         (
             lambda value: value["sibling_members"]["alpha_1"].__setitem__(
                 "initialization_sha256", _sha("f")
@@ -355,6 +355,52 @@ def test_task_f_checkpoint_never_infers_missing_provenance_from_legacy_fields():
     }
     with pytest.raises(ValueError, match="task_f_provenance"):
         validate_task_f_checkpoint_payload(legacy_payload)
+
+
+@pytest.mark.parametrize(
+    "role,policy",
+    [
+        ("wd_1e_3_coupled", "adam"),
+        ("wd_1e_3_decoupled", "adamw"),
+        ("sgdm_coupled", "sgd"),
+        ("sgdm_decoupled", "sgdw"),
+    ],
+)
+def test_task_f_checkpoint_accepts_full_matrix_generic_sibling_roles(role, policy):
+    provenance = _provenance(role="zero")
+    generic_member = {
+        "run_id": f"fixture-{role}",
+        "training_seed": 7,
+        "branch_policy": policy,
+        "total_weight_decay": 1e-3,
+        "coupled_ratio": None,
+        "initialization_sha256": _sha("a"),
+        "data_stream_sha256": _sha("b"),
+    }
+    provenance["sibling_members"] = {
+        "zero": provenance["sibling_members"]["zero"],
+        role: generic_member,
+    }
+    provenance["sibling_role"] = role
+    for key in (
+        "run_id",
+        "training_seed",
+        "branch_policy",
+        "total_weight_decay",
+        "coupled_ratio",
+        "initialization_sha256",
+        "data_stream_sha256",
+    ):
+        provenance[key] = generic_member[key]
+    validated = task_f.validate_task_f_checkpoint_provenance(provenance)
+    assert validated["sibling_members"][role]["branch_policy"] == policy
+
+
+def test_task_f_checkpoint_rejects_generic_role_without_zero_reference():
+    provenance = _provenance(role="alpha_0_5")
+    provenance["sibling_members"].pop("zero")
+    with pytest.raises(ValueError, match="contain zero"):
+        task_f.validate_task_f_checkpoint_provenance(provenance)
 
 
 def test_task_f_schema_and_exporter_reject_protected_references_before_file_access(
