@@ -33,20 +33,21 @@ from oge.studies.hashing import canonical_json_bytes, canonical_sha256
 from oge.training import load_torch_artifact
 
 
-TASK_F_ARTIFACT_SCHEMA_VERSION: Final = "task_f_id_feature_artifact_v1"
+TASK_F_ARTIFACT_SCHEMA_VERSION: Final = "task_f_id_feature_artifact_v2"
 TASK_F_CHECKPOINT_PROVENANCE_SCHEMA_VERSION: Final = (
-    "task_f_checkpoint_provenance_v1"
+    "task_f_checkpoint_provenance_v2"
 )
-TASK_F_SIBLING_SCHEMA_VERSION: Final = "task_f_alpha_sibling_identity_v1"
-TASK_F_SPECIFICATION_VERSION: Final = "task_f_id_feature_export_specification_v1"
-TASK_F_OUTPUT_IDENTITY_VERSION: Final = "task_f_feature_output_identity_v1"
+TASK_F_SIBLING_SCHEMA_VERSION: Final = "task_f_paired_sibling_identity_v2"
+TASK_F_SPECIFICATION_VERSION: Final = "task_f_id_feature_export_specification_v2"
+TASK_F_OUTPUT_IDENTITY_VERSION: Final = "task_f_feature_output_identity_v2"
 TASK_F_ID_SPLITS: Final = (
     "id_train",
     "id_validation",
     "id_probe",
     "synthetic_id_fixture",
 )
-TASK_F_SIBLING_ROLES: Final = ("zero", "alpha_0", "alpha_0_5", "alpha_1")
+TASK_F_ALPHA_SIBLING_ROLES: Final = ("zero", "alpha_0", "alpha_0_5", "alpha_1")
+TASK_F_GENERIC_BRANCH_POLICIES: Final = ("adam", "adamw", "sgd", "sgdw")
 TASK_F_FEATURE_DTYPE: Final = "float32"
 
 _SHA256_PATTERN = re.compile(r"[0-9a-f]{64}")
@@ -248,16 +249,24 @@ def _validate_role_semantics(role: str, member: Mapping[str, Any]) -> None:
                 "total_weight_decay=0, and coupled_ratio=null"
             )
         return
-    expected_ratio = {"alpha_0": 0.0, "alpha_0_5": 0.5, "alpha_1": 1.0}[role]
-    if policy != "adam_coupled_decoupled" or total <= 0.0:
+    if role in {"alpha_0", "alpha_0_5", "alpha_1"}:
+        expected_ratio = {"alpha_0": 0.0, "alpha_0_5": 0.5, "alpha_1": 1.0}[role]
+        if policy != "adam_coupled_decoupled" or total <= 0.0:
+            raise ValueError(
+                f"{role} requires branch_policy='adam_coupled_decoupled' and positive "
+                "total_weight_decay"
+            )
+        if isinstance(ratio, bool) or not isinstance(ratio, (int, float)):
+            raise ValueError(f"{role} coupled_ratio must be {expected_ratio}")
+        if not math.isfinite(float(ratio)) or float(ratio) != expected_ratio:
+            raise ValueError(f"{role} coupled_ratio must be {expected_ratio}")
+        return
+    if policy not in TASK_F_GENERIC_BRANCH_POLICIES or total <= 0.0 or ratio is not None:
         raise ValueError(
-            f"{role} requires branch_policy='adam_coupled_decoupled' and positive "
-            "total_weight_decay"
+            f"generic sibling {role!r} requires branch_policy in "
+            f"{TASK_F_GENERIC_BRANCH_POLICIES}, positive total_weight_decay, "
+            "and coupled_ratio=null"
         )
-    if isinstance(ratio, bool) or not isinstance(ratio, (int, float)):
-        raise ValueError(f"{role} coupled_ratio must be {expected_ratio}")
-    if not math.isfinite(float(ratio)) or float(ratio) != expected_ratio:
-        raise ValueError(f"{role} coupled_ratio must be {expected_ratio}")
 
 
 def _validated_sibling_members(
@@ -269,11 +278,22 @@ def _validated_sibling_members(
 ) -> dict[str, dict[str, Any]]:
     if not isinstance(value, Mapping):
         raise ValueError("sibling_members must be a mapping")
-    _require_exact_keys(value, set(TASK_F_SIBLING_ROLES), "sibling_members")
+    if len(value) < 2 or "zero" not in value:
+        raise ValueError("sibling_members must contain zero and at least one comparison")
+    roles = tuple(sorted(value))
+    if any(not isinstance(role, str) or not role for role in roles):
+        raise ValueError("sibling role keys must be non-empty strings")
+    for role in roles:
+        _reject_protected_reference(role, f"sibling role {role!r}")
+    alpha_present = set(roles).intersection(TASK_F_ALPHA_SIBLING_ROLES)
+    if alpha_present.difference({"zero"}) and not set(TASK_F_ALPHA_SIBLING_ROLES).issubset(
+        roles
+    ):
+        raise ValueError("any alpha sibling requires the complete zero/alpha quartet")
     normalized: dict[str, dict[str, Any]] = {}
     run_ids: set[str] = set()
     alpha_total: float | None = None
-    for role in TASK_F_SIBLING_ROLES:
+    for role in roles:
         member = value[role]
         if not isinstance(member, Mapping):
             raise ValueError(f"sibling_members.{role} must be a mapping")
@@ -300,7 +320,7 @@ def _validated_sibling_members(
         ) != data_stream_sha256:
             raise ValueError("all siblings must share data_stream_sha256")
         _validate_role_semantics(role, member)
-        if role != "zero":
+        if role in {"alpha_0", "alpha_0_5", "alpha_1"}:
             member_total = float(member["total_weight_decay"])
             if alpha_total is None:
                 alpha_total = member_total
@@ -376,14 +396,14 @@ def validate_task_f_checkpoint_provenance(value: Any) -> dict[str, Any]:
     )
     _reject_protected_reference(sibling_group_id, "task_f_provenance.sibling_group_id")
     sibling_role = value["sibling_role"]
-    if sibling_role not in TASK_F_SIBLING_ROLES:
-        raise ValueError(f"sibling_role must be one of {TASK_F_SIBLING_ROLES}")
     members = _validated_sibling_members(
         value["sibling_members"],
         training_seed=training_seed,
         initialization_sha256=initialization_sha256,
         data_stream_sha256=data_stream_sha256,
     )
+    if sibling_role not in members:
+        raise ValueError("sibling_role must identify one declared sibling member")
     current = members[str(sibling_role)]
     for key in (
         "run_id",
@@ -583,7 +603,8 @@ def specification_payload() -> dict[str, Any]:
         "checkpoint_provenance_fields": sorted(_CHECKPOINT_PROVENANCE_KEYS),
         "sibling_contract": {
             "schema_version": TASK_F_SIBLING_SCHEMA_VERSION,
-            "roles_in_order": list(TASK_F_SIBLING_ROLES),
+            "required_zero_member": True,
+            "minimum_member_count": 2,
             "member_fields": sorted(_SIBLING_MEMBER_KEYS),
             "zero": {
                 "branch_policy": "zero_decay",
@@ -598,6 +619,14 @@ def specification_payload() -> dict[str, Any]:
                     "alpha_1": 1.0,
                 },
                 "requires_shared_positive_total_weight_decay": True,
+                "roles": list(TASK_F_ALPHA_SIBLING_ROLES),
+                "complete_quartet_required_if_any_alpha_role_is_present": True,
+            },
+            "generic_paired_roles": {
+                "role_names_are_stable_manifest_keys": True,
+                "allowed_branch_policies": list(TASK_F_GENERIC_BRANCH_POLICIES),
+                "requires_positive_total_weight_decay": True,
+                "coupled_ratio": None,
             },
             "requires_shared_training_seed": True,
             "requires_shared_initialization_sha256": True,
@@ -675,14 +704,14 @@ def _validate_sibling_identity(
         raise ValueError("unsupported sibling_identity schema_version")
     group_id = _require_nonempty_string(value["group_id"], "sibling_identity.group_id")
     role = value["role"]
-    if role not in TASK_F_SIBLING_ROLES:
-        raise ValueError(f"sibling_identity.role must be one of {TASK_F_SIBLING_ROLES}")
     members = _validated_sibling_members(
         value["members"],
         training_seed=manifest["training_seed"],
         initialization_sha256=manifest["initialization_sha256"],
         data_stream_sha256=manifest["data_stream_sha256"],
     )
+    if role not in members:
+        raise ValueError("sibling_identity.role must identify one declared member")
     current = members[str(role)]
     for key in (
         "run_id",
