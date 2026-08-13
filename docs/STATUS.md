@@ -1,38 +1,29 @@
 # Project status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Current phase
 
 The active paper protocol is
 [`13_active_paper_protocol.md`](reference_cards/13_active_paper_protocol.md).
-The active design is v11. A bounded historical D1 survival check is complete
-and supports the pair-ranking-multiplicity framing as discovery evidence. The
-Task B theory/estimator/literature lock is complete: the core numerical and
-subspace rules, discovery-informed `S-perp` hypothesis, and exact conditional
-`RtMD` specification are frozen in Card 13. The bounded existing-cache
-discriminant--residual and ID-only residual-tail CPU preflight is complete. Its
-execution passed, but Gate 2 is `INCONCLUSIVE`: Card 13 has no frozen aggregate
-decision rule and only 15 of 30 fits per transform had numerically applicable
-two-fold geometry. Fresh paired training has not started.
+The active design is v12. The bounded historical D1 survival check, Task B
+theory/estimator/literature lock, ID-only archive diagnostic, and single
+authorized CPU preflight v2 are complete. V2 left theorem applicability at
+30/60 and made all 30 applicable fits pass every required numerical gate, up
+from 9 in v1. Historical Gate 2 remains permanently `INCONCLUSIVE`; no Gate 2
+or scientific conclusion changed.
 
-An ID-only archive diagnostic has now re-derived the 60-fit failure layers,
-checksum-verified all 30 NC1 inputs, and found synthetic forward-error support
-for treating the RMD-cancellation denominator as a Card-13 wording ambiguity.
-This authorizes one prospective contract clarification and CPU preflight v2;
-it does not re-adjudicate Gate 2 or activate RtMD.
-Card 13 v11 now records that clarification, makes historical Gate 2 permanently
-`INCONCLUSIVE`, transfers its unresolved plausibility question to a fresh
-pre-registered Gate 3, and requires explicit owner approval before either a
-fresh GPU launch or protected-OOD access.
+The v2 compact preservation record now matches the official production
+payload: cached-parity diagnostic failures are eight theorem-inapplicable fits,
+not the preliminary run's nine. This is a transcription/provenance correction,
+not a preflight rerun or method activation. The deterministic repeat reproduced
+all payload hashes on the same runtime with the fixed four-thread numerical
+environment.
 
-The single authorized CPU preflight v2 is complete. The operand-aware
-cancellation scale left theorem applicability unchanged at 30 of 60 fits and
-made all 30 applicable fits pass every required numerical gate, up from 9 in
-v1. The frozen two-fold tail and pair payloads are byte-identical to v1, and a
-second fixed-thread execution reproduced every v2 payload hash. Historical
-Gate 2 remains permanently `INCONCLUSIVE`; this result only makes the frozen
-estimator eligible for a prospective fresh Gate-3 addendum.
+RtMD is an optional sidecar, not a prerequisite for Task F or the main fresh
+paired mechanism study. No exact Gate 3 rule is frozen. The immediate next
+work is bounded Task F CPU engineering and fixture validation; fresh training
+still requires its separate pre-execution contracts and resource approval.
 
 The planned chain is:
 
@@ -78,10 +69,11 @@ same initialization and data stream
   [`results/discriminant_residual_diagnostic_v1.json`](../results/discriminant_residual_diagnostic_v1.json).
 - The one allowed Card-13 v11 compliance rerun completed 60 raw/L2 fits on the
   same verified ID-only cache. Applicability remained 30/60; all 30 applicable
-  fits passed the required gates, cached Metric Contract v1.2 parity, and RMD
-  cancellation. V1 remained immutable, all 60 fit keys were conserved, and
-  tail model/fold status did not change. Gate 2 remains permanently
-  `INCONCLUSIVE`. The compact record is
+  fits passed the required gates and cached Metric Contract v1.2 parity.
+  Across all fits, cached parity was a diagnostic with 52 PASS and eight
+  theorem-inapplicable FAILED fits. V1 remained immutable, all 60 fit keys were
+  conserved, and tail model/fold status did not change. Gate 2 remains
+  permanently `INCONCLUSIVE`. The compact record is
   [`results/discriminant_residual_preflight_v2.json`](../results/discriminant_residual_preflight_v2.json).
 - A checksum-verified, no-inference D1 reuse analysis recovered exact per-sample
   scores for four frozen historical role configurations. Across six confounded
@@ -127,7 +119,8 @@ outside Git at the hash-addressed HF archive recorded there.
   subgate is a narrow `PASS` after WDiscOOD, Linderman/DPMM--RMDS, D-KNN, CORE,
   and MaRS boundary checks. The historical ID-only Gate 2 preflight is
   `INCONCLUSIVE`; empirical Gates 3--5 are `NOT_RUN`. It closes on any failed
-  gate without changing the primary paper.
+  gate without changing or stopping the primary paper, Task F, or main fresh
+  mechanism training.
 - Core preflight rules are frozen: condition-aware algebra tolerances,
   numerical `dim(S)`, rank-sensitive reporting, gauge-aligned angles,
   classifier alignment, the zero-decay common frame, component covariance,
@@ -160,8 +153,9 @@ replication rules live only in the active protocol.
 
 ## Explicitly not run
 
-- no fixed residual-retention diagnostic, full `RtMD` detector, or `RtMD` OOD
-  evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain `NOT_RUN`
+- no fixed residual-retention diagnostic, fresh Gate 3, full `RtMD` detector,
+  or `RtMD` OOD evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain
+  `NOT_RUN`
 - no fresh active-protocol training, alpha midpoint run, GPU work, checkpoint
   inference, or protected OOD
 - no new architecture/dataset replication

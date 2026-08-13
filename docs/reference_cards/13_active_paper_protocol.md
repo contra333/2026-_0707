@@ -5,14 +5,21 @@
 Protocol identifier:
 
 ```text
-fixed_readout_pair_ranking_multiplicity_paired_trajectory_v11
+fixed_readout_pair_ranking_multiplicity_paired_trajectory_v12
 ```
 
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v11`, and its fresh
+Card 13 filename. The current design version is `v12`, and its fresh
 experiments are `NOT_RUN`.
+
+V12 is an owner-approved governance and preservation-record revision. It
+corrects one compact-record transcription error, documents the already-run
+cached-parity diagnostic convention, and separates the primary mechanism
+study from the optional RtMD method slot. It does not rerun or re-analyze the
+preflight, change a numerical tolerance or estimator, or change any completed
+scientific result or gate decision.
 
 This revision does not change completed evidence:
 
@@ -31,7 +38,10 @@ This revision does not change completed evidence:
   complete, with execution `PASS` and historical Gate 2 permanently
   `INCONCLUSIVE`; a follow-up ID-only archive diagnostic supports one
   operand-scale compliance clarification, but neither result activates RtMD;
-- no fresh v11 trajectory, protected-OOD confirmation, or replication has run.
+- the single v2 compliance rerun is complete and makes the frozen estimator
+  eligible for prospective fresh use without re-adjudicating Gate 2 or
+  activating RtMD;
+- no fresh v12 trajectory, protected-OOD confirmation, or replication has run.
 
 Fisher/LDA discriminant subspaces, the known MD--Marginal--RMD relation, L2
 feature normalization, size--stretch, spectrum--allocation, and
@@ -130,6 +140,11 @@ comparison panel, and success/guardrail criteria before the historical
 residual-tail preflight and before protected OOD is opened. It cannot be added
 or altered to rescue a failed mechanism result.
 
+V12 treats RtMD as an optional sidecar. The main fresh paired mechanism study,
+Task F engineering, and their preserved claim boundaries do not depend on a
+Gate 3 `PASS` or on the existence of an exact Gate 3 rule. RtMD failure or
+closure is neither failure nor a stopping condition for the main study.
+
 ## 2. What is controlled in a paired trajectory
 
 For each seed and hyperparameter cell, coupled, decoupled, and zero-decay runs
@@ -155,12 +170,12 @@ different practical question and is not part of the causal main contrast.
 
 Coupled Adam does not expose a unique additive `decay update`: the L2 term
 enters first and second moments and the coordinate-wise denominator. Therefore
-v11 does not place Adam and AdamW on a purported common realized-decay norm.
+v12 does not place Adam and AdamW on a purported common realized-decay norm.
 It uses an exact same-state, same-gradient one-step counterfactual operator
 difference, defined in Section 6.1, and reports its radial and tangential
 components.
 
-At the primary nonzero-decay anchor, v11 also uses the already implemented
+At the primary nonzero-decay anchor, v12 also uses the already implemented
 `adam_coupled_decoupled` operator with `total_weight_decay=1e-4` and
 `coupled_ratio alpha in {0, 0.5, 1}`. Here `alpha=0` is the exact AdamW
 endpoint, `alpha=1` is the exact Adam endpoint, and `alpha=0.5` sends half of
@@ -172,6 +187,22 @@ Training seed is the independent statistical unit. Repeated images and
 ID--OOD pairs are paired observations, not independent replicates.
 
 ## 3. Main training design
+
+### 3.0 V12 study and workstream priority
+
+Fresh paired mechanism training is the primary study. It preserves the
+same-initialization/data-stream control, fixed-total-decay alpha design,
+trajectory snapshots, comparable-ID/Pareto interpretation boundary, claim
+limits, and prohibition on protected-OOD access. Task F CPU engineering and
+fixture validation may proceed in parallel with, and independently of, the
+optional RtMD slot. Main paired training may likewise proceed after its own
+pre-execution contracts and resource approval even if no exact RtMD Gate 3
+rule exists.
+
+The RtMD slot remains secondary and optional. Historical v2 establishes only
+that the frozen estimator is numerically eligible for prospective fresh use;
+it does not supply a Gate 2 `PASS`, a Gate 3 rule, method activation, or OOD
+evidence.
 
 ### 3.1 WRN-28-10/CIFAR-10 Adam-family factorial
 
@@ -244,8 +275,9 @@ momentum family. It is a control, not a second HPO study.
 ### 3.3 ID utility and model-selection controls
 
 At every reported endpoint, record accuracy, NLL, and ECE. Practical
-equivalence margins and the inferential rule must be frozen before protected
-OOD results are opened.
+equivalence margins and the inferential rule must be frozen with independent
+evidence before fresh research results are inspected, as specified in Section
+13.4.
 
 - If all ID guardrails pass, use `comparable-ID` language.
 - If they do not pass, keep every run and show the ID/OOD Pareto relation.
@@ -283,7 +315,7 @@ not a replacement for epoch 200. `best<=200` and `best<=300` are reported as
 separate selection windows.
 
 The update policies differ by construction at the first nonzero-decay step.
-Consequently, v11 does not use “update onset precedes geometry onset” as a
+Consequently, v12 does not use “update onset precedes geometry onset” as a
 mechanism gate. For every prespecified quantity, report the seed-level paired
 divergence curve, a standardized effect against same-policy natural training
 variability, the minimum detectable effect, an early divergence slope, and a
@@ -786,7 +818,7 @@ within-class residual vectors have zero mean and identity second moment. Hence
 branches, the pinned means differ only through that measured dimension. This
 does **not** pin `Var(q_perp)`: it depends on fourth moments of the residual
 vector, and skewness, kurtosis, upper-tail shape, and held-out behavior remain
-free. The main non-pinned categories inspected by v11 are ID higher-order
+free. The main non-pinned categories inspected by v12 are ID higher-order
 interface shape, held-out-ID generalization drift, OOD placement in
 `(q_perp,P_S x)`, and branch-specific fitted geometry/class heterogeneity.
 These are an organizing list, not a theorem that exactly four statistical
@@ -916,15 +948,29 @@ mass/allocation is secondary. This mixed-recipe
 population is noncausal: it selects a useful measurement hypothesis but does
 not confirm a decay-coupling effect or guarantee fresh-study power.
 
-The one allowed compliance rerun is v2. It uses the same ID-only cache and
-changes only the RMD-cancellation denominator clarified in Section 13.1; v1
-and its permanently `INCONCLUSIVE` Gate 2 record remain immutable. V2 writes a
-new schema/output directory/archive plus a per-fit v1-to-v2 diff. It refreshes
-measurement coverage and exact accounting but never re-adjudicates Gate 2.
+The one allowed compliance rerun, v2, is complete. It used the same ID-only
+cache and changed only the RMD-cancellation denominator clarified in Section
+13.1; v1 and its permanently `INCONCLUSIVE` Gate 2 record remain immutable.
+The official production payload preserved all 60 fit keys and left theorem
+applicability unchanged at `30/60`. All 30 applicable fits passed every
+required numerical gate. Cached Metric Contract v1.2 parity was a diagnostic:
+v1 had 24 PASS and 36 FAILED fits, while official v2 had 52 PASS and 8 FAILED
+fits (`28` `FAILED→PASS`, `0` `PASS→FAILED`); all eight remaining failures were
+theorem-inapplicable, and applicable cached-parity failures were zero. The
+common-ridge diagnostic moved from 27 to 48 PASS fits, with 21
+`FAILED→PASS` and no reverse transition. Required numerical PASS moved from
+`9/60` to `30/60`, a gain of 21.
+
+The compact preservation record's former value of nine inapplicable
+cached-parity failures came from preliminary-output provenance rather than the
+official production payload and is corrected to eight in v12. This is a
+transcription/provenance correction, not another preflight execution,
+remediation, Gate 2 re-adjudication, or scientific-result change. V2 refreshed
+measurement coverage and exact accounting but did not activate RtMD.
 
 ### 7.5 Conditional Residual-t Mahalanobis method slot
 
-v11 reserves exactly one optional post-hoc method slot. Its frozen statistical
+V12 reserves exactly one optional post-hoc method slot. Its frozen statistical
 object keeps the class-discriminative `S` distance and replaces only the
 Gaussian radial likelihood in `S-perp` by one covariance-normalized
 multivariate-t radial likelihood:
@@ -987,8 +1033,9 @@ far-OOD residual evidence. Do not claim the first subspace detector, the first
 Student-t/robust Mahalanobis detector, the first residual-score combination,
 or that a heavy tail implies method success.
 
-The gates are sequential, with the historical Gate 2 governance outcome
-preserved rather than retroactively thresholded:
+The gates are sequential only for the optional RtMD slot, with the historical
+Gate 2 governance outcome preserved rather than retroactively thresholded.
+They are not launch gates for Task F or the main paired mechanism study:
 
 1. **Derivation and novelty gate:** the frozen likelihood is coherent and the
    WDiscOOD, D-KNN, CORE, MaRS, direct RMD/LDA, robust/t-Mahalanobis, and
@@ -1001,18 +1048,26 @@ preserved rather than retroactively thresholded:
    geometry. Its governance status is permanently `INCONCLUSIVE`; its finite
    subset is conditional discovery and is never re-adjudicated as PASS or
    FAILED. The unresolved plausibility question transfers to Gate 3.
-3. **Fresh ID-only activation gate:** before any fresh result is inspected,
-   freeze a versioned addendum containing the exact primary transform,
-   tail-shape statistic, same-policy seed reference, pairing, multiplicity,
-   inapplicability/fallback handling, and deterministic activation rule. On the
-   paired anchor, that rule must jointly establish numerical applicability,
-   ID-only tail estimability, and a repeatable policy effect on held-out
-   residual tail shape beyond same-policy seed variation. Mean ID-train
-   residual energy cannot satisfy this gate because it is pinned by whitening.
-   A failed or inapplicable Gate 3 closes the RtMD slot without a replacement
-   estimator.
-4. **Frozen protected-OOD evaluation:** only after Gate 1 and the fresh Gate 3
-   rule, including the transferred plausibility content, pass, evaluate the
+3. **Fresh ID-only activation gate:** v12 does not yet freeze an exact Gate 3
+   statistic, threshold, same-policy reference, or finite-time aggregate rule.
+   Confirmatory use of the paired anchor requires a versioned addendum frozen
+   before its fresh ID-only residual results are inspected, including the exact
+   primary transform, tail-shape statistic, same-policy seed reference,
+   pairing, multiplicity, inapplicability/fallback handling, and deterministic
+   activation rule. If the rule is designed after inspecting the anchor's
+   ID-only results, that anchor's RtMD evidence is `discovery-informed` or
+   `discovery-only`; it cannot be reused as a confirmatory PASS, and method
+   activation requires a later preregistered replication Gate. Any prospective
+   rule must jointly establish numerical applicability, ID-only tail
+   estimability, and a repeatable policy effect on held-out residual tail shape
+   beyond same-policy seed variation. Mean ID-train residual energy cannot
+   satisfy this gate because it is pinned by whitening. Weak residual evidence,
+   insufficient estimator applicability, or a failed prospective Gate 3 closes
+   the RtMD slot without a replacement estimator while the main study
+   continues.
+4. **Frozen protected-OOD evaluation:** only after Gate 1 and a prospectively
+   registered fresh Gate 3, including any required replication Gate carrying
+   the transferred plausibility content, pass, evaluate the
    unchanged score once against Raw MD, RMD, their L2 fits, WDiscOOD, and
    the already prespecified appendix controls. The primary method estimand is
    reduction of coupled--decoupled `PairOrderChurn` relative to Raw MD and the
@@ -1021,6 +1076,12 @@ preserved rather than retroactively thresholded:
 5. **Replication gate:** a method contribution requires the frozen effect to
    replicate outside the WRN/CIFAR-10 anchor. Otherwise report it as local or
    close the slot.
+
+The full RtMD detector and every protected-OOD path remain prohibited from
+implementation and execution. Protected OOD may be connected only after a
+separate frozen addendum specifies the necessary gate, unchanged evaluation
+schedule, and resource report, followed by explicit owner approval. No
+protected-OOD path or dataset identity is part of the pre-Task-F interface.
 
 `nu-hat` may be recorded as an exploratory ID-only candidate predictor of
 fresh policy churn, not detector performance. Heavy tails alone do not imply
@@ -1213,10 +1274,45 @@ from this optional fork operation.
 
 ## 12. Required artifacts and validation
 
-Every v11 result must identify seed, initialization, config, branch policy,
+Every v12 result must identify seed, initialization, config, branch policy,
 checkpoint epoch, depth tap, probe-image membership, Gaussian-fit population,
 and source code/config hashes. Alpha-arm records must also identify
-`total_weight_decay` and `coupled_ratio`. Required records include:
+`total_weight_decay` and `coupled_ratio`.
+
+### 12.1 Minimum pre-Task-F artifact identity interface
+
+Task F must preserve the following common identity fields for every emitted
+feature/checkpoint artifact:
+
+```text
+run_id
+training_seed
+branch_policy
+total_weight_decay
+coupled_ratio
+checkpoint_epoch
+checkpoint_sha256
+depth_tap
+dataset_split
+ordered_sample_id_sha256
+feature_shape
+feature_dtype
+oge_git_sha
+specification_sha256
+execution_only
+```
+
+The manifest must explicitly encode the zero / `alpha=0` / `alpha=0.5` /
+`alpha=1` sibling relationship and preserve verifiable same-initialization and
+data-stream identity across siblings. Protected-OOD paths and dataset
+identities are excluded from this pre-Task-F interface. The concrete
+serialization schema, validation rules, and specification-hash generation
+belong to a later bounded Task F implementation Issue; v12 creates no
+code/config/schema implementation.
+
+### 12.2 Full-study records and checks
+
+Required records include:
 
 - ID accuracy/NLL/ECE and `last` versus `best_val` identity;
 - per-sample MD, Marginal, and RMD raw/L2 scores;
@@ -1282,20 +1378,27 @@ Required checks include:
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository implements the historical v1 preflight and its bounded
-ID-only archive diagnostic. The prospective v2 compliance rerun, fresh v11
-training, multi-depth extraction, expanded trajectory snapshots, update
-logging, and scale regimes are `NOT_RUN`/not yet implemented until separately
-authorized.
+The current repository implements the historical v1 preflight, its bounded
+ID-only archive diagnostic, and the completed v2 compliance rerun. V2 left
+estimator applicability unchanged at `30/60`, and all 30 applicable fits
+passed every required numerical gate. Historical Gate 2 remains permanently
+`INCONCLUSIVE`. Fresh v12 paired training, multi-depth extraction, expanded
+trajectory snapshots, update logging, fresh Gate 3, GPU work, the full RtMD
+detector, protected OOD, and scale regimes remain `NOT_RUN`/not yet implemented
+until their respective contracts and approvals are satisfied.
 
 ## 13. Pre-execution addendum and stopping rules
 
 The v10 Task B addendum was frozen before the historical v1
 discriminant--residual and residual-tail preflight. V11 adds only the
 operand-scale compliance clarification supported by the bounded Issue-75
-diagnostic; it does not alter or re-adjudicate v1. Every covariance,
-whitening, eigendecomposition/SVD, projector, and reference-score calculation
-uses `float64`; covariance matrices are symmetrized as `(M+M.T)/2`.
+diagnostic; it does not alter or re-adjudicate v1. V12 preserves that
+historical clarification and adds only the compact-record provenance
+correction, cached-parity convention documentation, main/RtMD governance
+separation, and minimum pre-Task-F artifact interface described here. Every
+covariance, whitening, eigendecomposition/SVD, projector, and reference-score
+calculation uses `float64`; covariance matrices are symmetrized as
+`(M+M.T)/2`.
 
 ### 13.1 Applicability and algebra tolerances
 
@@ -1335,6 +1438,26 @@ their respective scales above, which remain defined for near ties. ID energy che
 Projector symmetry and idempotence each use relative Frobenius tolerance
 `1e-10`. A fit enters a primary theorem figure only if every required check
 passes; failures are never hidden by aggregation.
+
+The frozen `rmd_cancellation_scale` above applies only to the required RMD
+cancellation identity. Cached Metric Contract v1.2 parity is a separate
+diagnostic comparison. The already-executed v2 implementation used
+
+```text
+cached_parity_rmd_scale
+  = max(
+      1,
+      |current_direct_global| + |current_direct_class|,
+      |cached_global_distance| + |cached_mahalanobis_score|
+    ).
+```
+
+This comparison convention is necessary because the cached pipeline does not
+preserve the current fit's internal quadratic operands. The record also
+preserves the legacy output-scaled parity residual. Cached parity does not
+enter `required_numerical_pass`, `primary_channel`, Gate 2, Gate 3, or RtMD
+activation. Documenting the convention in v12 is post-execution provenance
+clarification, not a new remediation and not a change to any v2 result.
 
 The only common-ridge diagnostic is named
 `discriminant_residual_common_ridge_lmax_1e-6` and uses
@@ -1414,20 +1537,40 @@ fit, finite domain, BIC-style fallback, narrow Gate-1 novelty verdict,
 sequential activation gates, comparison panel, churn estimand, performance and
 far-OOD guardrails, replication rule, and close-the-slot rule. Historical Gate
 2 is permanently `INCONCLUSIVE`; Gates 3--5 are `NOT_RUN`. Gate 4 requires
-Gate 1 plus the fresh Gate 3 rule containing the transferred plausibility
-question, not a retroactive Gate 2 PASS. RtMD remains outside the abstract and
+Gate 1 plus a prospectively registered fresh Gate 3 containing the transferred
+plausibility question, not a retroactive Gate 2 PASS. No exact Gate 3 rule is
+frozen in v12. RtMD remains outside the abstract and
 active contribution list unless all later gates pass. The paper does not
 introduce a general new
 “stability-targeted scoring” contribution at this stage; if RtMD later
 replicates, it may become a secondary method contribution only.
 
-Before any fresh GPU launch, freeze the fresh ID-only Gate 3 rule, estimator
-serialization/specification hash, exact ID equivalence margins, and alpha
-interior-compatibility implementation in a versioned addendum. Before
-protected OOD execution, extend that same addendum with the remaining
-protected-evaluation items:
+Task F CPU-side engineering and fixture tests require no GPU approval. They
+must create the concrete serialization/schema contract and specification-hash
+procedure in their own bounded implementation Issue before a research launch.
+An RtMD Gate 3 rule is not a prerequisite for Task F, its fixtures, or main
+paired training.
 
-- exact accuracy/NLL/ECE equivalence and guardrail margins;
+Numeric accuracy/NLL/ECE ID-equivalence margins must be frozen with independent
+evidence before fresh research results are inspected. They are the main
+study's comparable-ID/Pareto interpretation gate and are not combined with
+RtMD Gate 3. No research verdict or numeric equivalence margin applies to an
+execution-only pilot. Before full fresh research training, a separate
+versioned pre-execution addendum must freeze these margins, the Task F
+specification identity, and the alpha interior-compatibility implementation;
+it need not contain a Gate 3 rule unless the owner chooses to preregister a
+confirmatory RtMD anchor test.
+
+The one-seed shortened `alpha=0.5` pilot is only for execution, resume, and
+export verification and is excluded from research evidence. Before that pilot,
+the owner must receive the execution SHA and estimated GPU-hours, wall time,
+and storage, then give explicit approval. Full fresh GPU training requires a
+separate current resource check and explicit owner approval.
+
+Before protected OOD execution, a separate frozen addendum must carry forward
+the pre-execution identities and add the remaining protected-evaluation items:
+
+- the already-frozen accuracy/NLL/ECE equivalence and guardrail margins;
 - alpha-arm seed pairing, endpoint/lower-half/upper-half uncertainty, and the
   exact interior-compatibility decision rule without adding alpha points;
 - practical AUROC/FPR95 margins;
@@ -1441,11 +1584,10 @@ protected-evaluation items:
   specification hash, separate multiplicity family, and replication rule;
 - exact protected OOD evaluation schedule and go/no-go rule.
 
-No fresh GPU launch is authorized until the owner receives the execution SHA,
-estimated GPU-hours, wall time, and storage and gives explicit approval. The
-one-seed shortened `alpha=0.5` pilot remains an execution-only check. Protected
-OOD is a separate one-shot approval: report its frozen schedule and expected
-resources to the owner and obtain explicit approval immediately before access.
+Protected OOD remains a separate one-shot approval: report its frozen schedule
+and expected resources to the owner and obtain explicit approval immediately
+before access. Until then, neither the full RtMD detector nor protected-OOD
+evaluation may be implemented, connected, or executed.
 
 Null and adverse results remain reportable. Do not rescue them by adding a
 detector, selecting a matching checkpoint, changing the primary epoch, or
