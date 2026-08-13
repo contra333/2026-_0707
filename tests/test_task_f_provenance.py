@@ -5,7 +5,9 @@ import pytest
 import torch
 from torch import nn
 
+from oge.feature_export import validate_task_f_checkpoint_provenance
 from oge.training import (
+    build_task_f_checkpoint_provenance,
     build_task_f_training_config,
     capture_rng_state,
     create_initial_paired_provenance,
@@ -100,6 +102,32 @@ def test_same_initialization_rng_first_batch_and_augmentation_witnesses_match():
     )
     for field in fields:
         assert len({record[field] for record in records}) == 1
+
+
+def test_all_50_run_plans_build_the_versioned_feature_export_checkpoint_interface():
+    batch = {
+        "sample_id": ["fixture:a", "fixture:b"],
+        "image": torch.arange(8, dtype=torch.float32).reshape(2, 1, 2, 2),
+        "class_label": torch.tensor([0, 1]),
+    }
+    plan = generate_research_run_matrix(
+        anchor_seeds=FIXTURE_ANCHOR_SEEDS,
+        adam_factorial_seeds=FIXTURE_FACTORIAL_SEEDS,
+        sgdm_seeds=FIXTURE_SGDM_SEEDS,
+    )
+    for run in plan["runs"]:
+        config = _resolved_config(run)
+        paired = _provenance(run, batch)
+        exported = build_task_f_checkpoint_provenance(
+            resolved_config=config,
+            paired_control_provenance=paired,
+            checkpoint_epoch=200,
+            checkpoint_role="last",
+            oge_git_sha="d" * 40,
+            run_id=config["task_f"]["run_id"],
+        )
+        assert exported is not None
+        assert validate_task_f_checkpoint_provenance(exported)["run_id"] == run["run_id"]
 
 
 def test_first_batch_observation_itself_does_not_advance_rng_or_consume_again():

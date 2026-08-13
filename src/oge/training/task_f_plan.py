@@ -25,6 +25,12 @@ _TASK_F_B_ROLE_BY_POLICY = {
     "adam_mixed_alpha_0_5": "alpha_0_5",
     "adam_alpha_1": "alpha_1",
 }
+_TASK_F_B_GENERIC_POLICY = {
+    "adam_coupled": "adam",
+    "adamw_decoupled": "adamw",
+    "sgdm_coupled": "sgd",
+    "sgdw_decoupled": "sgdw",
+}
 
 _EXPECTED_CELL_COUNTS = {
     "adam_lr1e-3_wd1e-4_anchor": 20,
@@ -170,21 +176,30 @@ def _task_f_b_specification_sha256() -> str:
 def _task_f_b_sibling_plan(
     runs: Sequence[Mapping[str, Any]],
 ) -> dict[str, dict[str, Any]]:
-    by_policy = {str(run["branch_policy"]): run for run in runs}
-    if set(by_policy) != set(_TASK_F_B_ROLE_BY_POLICY):
-        raise ValueError("Task F-B export requires the complete anchor alpha quartet")
     plan: dict[str, dict[str, Any]] = {}
-    for policy, role in _TASK_F_B_ROLE_BY_POLICY.items():
-        run = by_policy[policy]
+    for run in sorted(runs, key=lambda item: str(item["run_id"])):
+        policy = str(run["branch_policy"])
         optimizer = run["optimizer"]
-        if role == "zero":
+        if policy in _TASK_F_B_ROLE_BY_POLICY:
+            role = _TASK_F_B_ROLE_BY_POLICY[policy]
+        elif policy in _TASK_F_B_GENERIC_POLICY:
+            role = f"{run['cell_id']}_{policy}"
+        else:
+            raise ValueError(f"Task F-B export does not recognize branch policy {policy!r}")
+        if role in plan:
+            raise ValueError(f"Task F-B sibling role collision: {role}")
+        if policy == "zero":
             branch_policy = "zero_decay"
             total_weight_decay = 0.0
             coupled_ratio = None
-        else:
+        elif policy in _TASK_F_B_ROLE_BY_POLICY:
             branch_policy = "adam_coupled_decoupled"
             total_weight_decay = float(optimizer["total_weight_decay"])
             coupled_ratio = float(optimizer["coupled_ratio"])
+        else:
+            branch_policy = _TASK_F_B_GENERIC_POLICY[policy]
+            total_weight_decay = float(optimizer["weight_decay"])
+            coupled_ratio = None
         plan[role] = {
             "run_id": str(run["run_id"]),
             "training_seed": int(run["training_seed"]),
@@ -195,17 +210,17 @@ def _task_f_b_sibling_plan(
     return plan
 
 
-def _attach_task_f_b_anchor_identity(runs: Sequence[dict[str, Any]]) -> None:
+def _attach_task_f_b_identity(runs: Sequence[dict[str, Any]]) -> None:
     by_group: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for run in runs:
-        if run["cell_id"] == "adam_lr1e-3_wd1e-4_anchor":
-            by_group[str(run["sibling_group_id"])].append(run)
+        by_group[str(run["sibling_group_id"])].append(run)
     for group_runs in by_group.values():
         members = _task_f_b_sibling_plan(group_runs)
         for run in group_runs:
-            run["task_f_b_sibling_role"] = _TASK_F_B_ROLE_BY_POLICY[
-                str(run["branch_policy"])
-            ]
+            policy = str(run["branch_policy"])
+            run["task_f_b_sibling_role"] = _TASK_F_B_ROLE_BY_POLICY.get(
+                policy, f"{run['cell_id']}_{policy}"
+            )
             run["task_f_b_sibling_members"] = copy.deepcopy(members)
 
 
@@ -353,7 +368,7 @@ def generate_research_run_matrix(
                 )
             )
 
-    _attach_task_f_b_anchor_identity(runs)
+    _attach_task_f_b_identity(runs)
     plan = {
         "schema_version": TASK_F_PLAN_SCHEMA_VERSION,
         "protocol_id": TASK_F_PROTOCOL_ID,
@@ -537,15 +552,11 @@ def build_task_f_training_config(
         "aggregate_eligible": bool(run["aggregate_eligible"]),
         "from_scratch": bool(run["from_scratch"]),
         "defer_id_test": True,
-        "artifact_export": (
-            {
-                "specification_sha256": _task_f_b_specification_sha256(),
-                "sibling_role": str(run["task_f_b_sibling_role"]),
-                "sibling_members": copy.deepcopy(run["task_f_b_sibling_members"]),
-            }
-            if "task_f_b_sibling_role" in run
-            else None
-        ),
+        "artifact_export": {
+            "specification_sha256": _task_f_b_specification_sha256(),
+            "sibling_role": str(run["task_f_b_sibling_role"]),
+            "sibling_members": copy.deepcopy(run["task_f_b_sibling_members"]),
+        },
         "update_telemetry": {
             "schema_version": "task_f_update_telemetry_v1",
             "audit_steps": list(audit_steps),
@@ -699,23 +710,20 @@ def validate_task_f_training_config(config: Mapping[str, Any]) -> None:
         }
     )
     artifact_export = task_f["artifact_export"]
-    if artifact_export is not None:
-        if not isinstance(artifact_export, Mapping):
-            raise ValueError("Task F artifact_export must be a mapping or null")
-        if artifact_export.get("specification_sha256") != _task_f_b_specification_sha256():
-            raise ValueError("Task F-B specification hash mismatch")
-        role = artifact_export.get("sibling_role")
-        members = artifact_export.get("sibling_members")
-        if role not in {"zero", "alpha_0", "alpha_0_5", "alpha_1"}:
-            raise ValueError("Task F-B sibling_role is invalid")
-        if not isinstance(members, Mapping) or role not in members:
-            raise ValueError("Task F-B sibling plan is incomplete")
-        current = members[role]
-        if (
-            current.get("run_id") != task_f["run_id"]
-            or int(current.get("training_seed", -1)) != int(config["training"]["seed"])
-        ):
-            raise ValueError("Task F-B current sibling identity differs from training config")
+    if not isinstance(artifact_export, Mapping):
+        raise ValueError("Task F artifact_export must be a mapping")
+    if artifact_export.get("specification_sha256") != _task_f_b_specification_sha256():
+        raise ValueError("Task F-B specification hash mismatch")
+    role = artifact_export.get("sibling_role")
+    members = artifact_export.get("sibling_members")
+    if not isinstance(role, str) or not isinstance(members, Mapping) or role not in members:
+        raise ValueError("Task F-B sibling plan is incomplete")
+    current = members[role]
+    if (
+        current.get("run_id") != task_f["run_id"]
+        or int(current.get("training_seed", -1)) != int(config["training"]["seed"])
+    ):
+        raise ValueError("Task F-B current sibling identity differs from training config")
     telemetry = task_f["update_telemetry"]
     if not isinstance(telemetry, Mapping):
         raise ValueError("Task F update_telemetry must be a mapping")

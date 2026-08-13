@@ -282,8 +282,10 @@ def build_task_f_checkpoint_provenance(
         raise ValueError("Task F-B current sibling is absent from the sibling plan")
     current = members[sibling_role]
     model = resolved_config["model"]
+    from oge.feature_export import TASK_F_CHECKPOINT_PROVENANCE_SCHEMA_VERSION
+
     provenance = {
-        "schema_version": "task_f_checkpoint_provenance_v1",
+        "schema_version": TASK_F_CHECKPOINT_PROVENANCE_SCHEMA_VERSION,
         "run_id": run_id,
         "training_seed": int(resolved_config["training"]["seed"]),
         "branch_policy": current["branch_policy"],

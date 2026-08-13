@@ -79,6 +79,19 @@ def test_task_f_matrix_conserves_41_adam_plus_9_sgdm_and_exact_cells():
     }
 
 
+def test_every_research_run_has_a_complete_b_export_sibling_identity():
+    plan = _plan()
+    for run in plan["runs"]:
+        config = build_task_f_training_config(_base_config(), run)
+        export = config["task_f"]["artifact_export"]
+        assert len(export["specification_sha256"]) == 64
+        assert export["sibling_role"] in export["sibling_members"]
+        assert "zero" in export["sibling_members"]
+        assert export["sibling_members"][export["sibling_role"]]["run_id"] == run[
+            "run_id"
+        ]
+
+
 def test_zero_baselines_are_shared_without_duplicate_research_runs():
     runs = _plan()["runs"]
     zeros = {run["run_id"]: run for run in runs if run["branch_policy"] == "zero"}
