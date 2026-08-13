@@ -58,6 +58,18 @@ cell-and-seed-matched paired 90% t-intervals, non-dropping terminal status, and
 deterministic table templates. Comparable-ID remains
 `PENDING_PROTECTED_ID_TEST`; no protected inference was run.
 
+PR #96 added the reusable staged-evaluation supervisor and the Task F adapter.
+Its evaluation execution SHA is
+`be666c04ec9a1e0075a4b82d788161d850f1663e`; the Task F specification remains
+unchanged. Clean detached evaluation worktrees and host supervisors are now
+running independently on `curie`, `lise`, and `precision_medicine`, and the
+central collector is detached on `precision_medicine`. They are gated on all
+50 training runs and the pre-existing 310 exports reaching verified remote
+completion. Only then will the fixed 1,010 supplemental GPU exports, 660
+ID-only geometry units, 657 sibling alignments, host uploads, and central
+paired aggregation run automatically. No supplemental export, protected
+`id_test`, OOD, or RtMD execution has started at this gate.
+
 The planned chain is:
 
 ```text
