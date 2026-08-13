@@ -18,7 +18,7 @@ import shutil
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, Callable, Final
 
 import numpy as np
 import torch
@@ -33,13 +33,13 @@ from oge.studies.hashing import canonical_json_bytes, canonical_sha256
 from oge.training import load_torch_artifact
 
 
-TASK_F_ARTIFACT_SCHEMA_VERSION: Final = "task_f_id_feature_artifact_v2"
+TASK_F_ARTIFACT_SCHEMA_VERSION: Final = "task_f_id_feature_artifact_v3"
 TASK_F_CHECKPOINT_PROVENANCE_SCHEMA_VERSION: Final = (
     "task_f_checkpoint_provenance_v2"
 )
 TASK_F_SIBLING_SCHEMA_VERSION: Final = "task_f_paired_sibling_identity_v2"
-TASK_F_SPECIFICATION_VERSION: Final = "task_f_id_feature_export_specification_v2"
-TASK_F_OUTPUT_IDENTITY_VERSION: Final = "task_f_feature_output_identity_v2"
+TASK_F_SPECIFICATION_VERSION: Final = "task_f_id_feature_export_specification_v3"
+TASK_F_OUTPUT_IDENTITY_VERSION: Final = "task_f_feature_output_identity_v3"
 TASK_F_ID_SPLITS: Final = (
     "id_train",
     "id_validation",
@@ -79,6 +79,17 @@ _RUNTIME_KEYS: Final = {
     "torch_num_interop_threads",
     "thread_environment",
     "numpy_blas",
+    "accelerator",
+}
+_ACCELERATOR_KEYS: Final = {
+    "backend",
+    "local_device_index",
+    "device_name",
+    "device_uuid",
+    "total_memory_bytes",
+    "cuda_runtime_version",
+    "cudnn_version",
+    "cuda_visible_devices",
 }
 
 _CHECKPOINT_PROVENANCE_KEYS: Final = {
@@ -229,10 +240,24 @@ def _validate_dataset_split(dataset_split: Any, *, execution_only: bool) -> str:
     return str(dataset_split)
 
 
-def _require_cpu_device(device: str | torch.device) -> torch.device:
+def _require_export_device(device: str | torch.device) -> torch.device:
     target = torch.device(device)
-    if target.type != "cpu":
-        raise ValueError("Task F-B exporter v1 is CPU-only")
+    if target.type == "cpu":
+        if target.index is not None:
+            raise ValueError("Task F exporter CPU device must be exactly 'cpu'")
+        return target
+    if target.type != "cuda":
+        raise ValueError("Task F exporter device must be 'cpu' or explicit 'cuda:<index>'")
+    if target.index is None:
+        raise ValueError("Task F exporter CUDA device must include an explicit local index")
+    if not torch.cuda.is_available():
+        raise RuntimeError("Task F exporter requested CUDA but torch.cuda.is_available() is false")
+    device_count = torch.cuda.device_count()
+    if target.index < 0 or target.index >= device_count:
+        raise ValueError(
+            f"Task F exporter CUDA index {target.index} is outside the visible device count "
+            f"{device_count}"
+        )
     return target
 
 
@@ -495,11 +520,37 @@ def _numpy_blas_identity() -> dict[str, Any]:
 
 
 def collect_runtime_provenance(device: str | torch.device) -> dict[str, Any]:
-    target = _require_cpu_device(device)
+    target = _require_export_device(device)
     try:
         interop_threads: int | None = torch.get_num_interop_threads()
     except RuntimeError:
         interop_threads = None
+    accelerator: dict[str, Any] = {
+        "backend": target.type,
+        "local_device_index": None,
+        "device_name": None,
+        "device_uuid": None,
+        "total_memory_bytes": None,
+        "cuda_runtime_version": None,
+        "cudnn_version": None,
+        "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+    }
+    if target.type == "cuda":
+        properties = torch.cuda.get_device_properties(target.index)
+        device_uuid = getattr(properties, "uuid", None)
+        cudnn_version = torch.backends.cudnn.version()
+        accelerator.update(
+            {
+                "local_device_index": target.index,
+                "device_name": str(properties.name),
+                "device_uuid": None if device_uuid is None else str(device_uuid),
+                "total_memory_bytes": int(properties.total_memory),
+                "cuda_runtime_version": (
+                    None if torch.version.cuda is None else str(torch.version.cuda)
+                ),
+                "cudnn_version": None if cudnn_version is None else int(cudnn_version),
+            }
+        )
     return {
         "python_version": platform.python_version(),
         "python_implementation": platform.python_implementation(),
@@ -516,6 +567,7 @@ def collect_runtime_provenance(device: str | torch.device) -> dict[str, Any]:
             key: os.environ.get(key) for key in _THREAD_ENVIRONMENT_KEYS
         },
         "numpy_blas": _numpy_blas_identity(),
+        "accelerator": accelerator,
     }
 
 
@@ -556,6 +608,55 @@ def _validate_runtime(value: Any) -> dict[str, Any]:
         raise ValueError("runtime thread environment values must be strings or null")
     if not isinstance(value["numpy_blas"], Mapping):
         raise ValueError("runtime.numpy_blas must be a mapping")
+    accelerator = value["accelerator"]
+    if not isinstance(accelerator, Mapping):
+        raise ValueError("runtime.accelerator must be a mapping")
+    _require_exact_keys(accelerator, _ACCELERATOR_KEYS, "runtime.accelerator")
+    if accelerator["backend"] != value["device_type"]:
+        raise ValueError("runtime accelerator backend must match device_type")
+    visible_devices = accelerator["cuda_visible_devices"]
+    if visible_devices is not None and not isinstance(visible_devices, str):
+        raise ValueError("runtime.accelerator.cuda_visible_devices must be a string or null")
+    if value["device_type"] == "cpu":
+        if value["device"] != "cpu":
+            raise ValueError("CPU runtime device must be exactly 'cpu'")
+        cpu_null_fields = (
+            "local_device_index",
+            "device_name",
+            "device_uuid",
+            "total_memory_bytes",
+            "cuda_runtime_version",
+            "cudnn_version",
+        )
+        if any(accelerator[key] is not None for key in cpu_null_fields):
+            raise ValueError("CPU runtime must not declare CUDA accelerator identity")
+    elif value["device_type"] == "cuda":
+        index = _require_integer(
+            accelerator["local_device_index"],
+            "runtime.accelerator.local_device_index",
+        )
+        if value["device"] != f"cuda:{index}":
+            raise ValueError("CUDA runtime device must match its explicit local index")
+        _require_nonempty_string(
+            accelerator["device_name"], "runtime.accelerator.device_name"
+        )
+        _require_integer(
+            accelerator["total_memory_bytes"],
+            "runtime.accelerator.total_memory_bytes",
+            minimum=1,
+        )
+        for key in ("device_uuid", "cuda_runtime_version"):
+            item = accelerator[key]
+            if item is not None:
+                _require_nonempty_string(item, f"runtime.accelerator.{key}")
+        if accelerator["cudnn_version"] is not None:
+            _require_integer(
+                accelerator["cudnn_version"],
+                "runtime.accelerator.cudnn_version",
+                minimum=1,
+            )
+    else:
+        raise ValueError("runtime.device_type must be cpu or cuda")
     return json.loads(canonical_json_bytes(dict(value)))
 
 
@@ -651,7 +752,9 @@ def specification_payload() -> dict[str, Any]:
         },
         "runtime_contract": {
             "fields": sorted(_RUNTIME_KEYS),
-            "allowed_device_types": ["cpu"],
+            "allowed_device_types": ["cpu", "cuda"],
+            "cuda_requires_explicit_local_index": True,
+            "accelerator_fields": sorted(_ACCELERATOR_KEYS),
         },
         "output_identity": {
             "schema_version": TASK_F_OUTPUT_IDENTITY_VERSION,
@@ -1077,7 +1180,7 @@ def load_task_f_id_input(path: str | Path) -> tuple[np.ndarray, np.ndarray]:
 def load_task_f_checkpoint(
     path: str | Path, *, device: str | torch.device
 ) -> tuple[WideResNet, dict[str, Any], str]:
-    target = _require_cpu_device(device)
+    target = _require_export_device(device)
     source = Path(path)
     _reject_protected_reference(source, "checkpoint path")
     payload = load_torch_artifact(source, map_location="cpu")
@@ -1098,6 +1201,7 @@ def extract_task_f_features(
     depth_tap: str,
     device: str | torch.device,
     batch_size: int,
+    progress_callback: Callable[[int, int], None] | None = None,
 ) -> np.ndarray:
     if depth_tap not in WRN_FEATURE_TAP_NAMES:
         raise ValueError(f"depth_tap must be one of {WRN_FEATURE_TAP_NAMES}")
@@ -1107,7 +1211,7 @@ def extract_task_f_features(
         raise ValueError("model feature tap contract version mismatch")
     if tuple(model.feature_tap_names) != WRN_FEATURE_TAP_NAMES:
         raise ValueError("model feature tap names/order mismatch")
-    target = _require_cpu_device(device)
+    target = _require_export_device(device)
     model.eval()
     chunks: list[np.ndarray] = []
     parity_checked = False
@@ -1128,6 +1232,8 @@ def extract_task_f_features(
             if not torch.is_floating_point(selected) or not torch.isfinite(selected).all():
                 raise ValueError("model returned non-floating or non-finite Task F features")
             chunks.append(selected.detach().cpu().to(torch.float32).numpy())
+            if progress_callback is not None:
+                progress_callback(min(start + batch_size, images.shape[0]), images.shape[0])
     if not parity_checked:
         raise ValueError("Task F input is empty")
     return np.concatenate(chunks).astype(np.float32, copy=False)
@@ -1142,6 +1248,7 @@ def export_task_f_from_files(
     depth_tap: str,
     device: str | torch.device = "cpu",
     batch_size: int = 128,
+    progress_callback: Callable[[int, int], None] | None = None,
 ) -> Path:
     """Extract one ID-only tap from an explicit Task F checkpoint and NPZ."""
 
@@ -1149,6 +1256,7 @@ def export_task_f_from_files(
     _validate_dataset_split(dataset_split, execution_only=True)
     _reject_protected_reference(input_npz_path, "input NPZ path")
     _reject_protected_reference(checkpoint_path, "checkpoint path")
+    _require_export_device(device)
     images, sample_ids = load_task_f_id_input(input_npz_path)
     model, provenance, checkpoint_sha256 = load_task_f_checkpoint(
         checkpoint_path, device=device
@@ -1160,6 +1268,7 @@ def export_task_f_from_files(
         depth_tap=depth_tap,
         device=device,
         batch_size=batch_size,
+        progress_callback=progress_callback,
     )
     return write_task_f_artifact(
         artifact_root=artifact_root,

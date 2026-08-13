@@ -150,6 +150,16 @@ def _runtime() -> dict:
             "available": True,
             "blas": {"name": "fixture-blas", "version": "1"},
         },
+        "accelerator": {
+            "backend": "cpu",
+            "local_device_index": None,
+            "device_name": None,
+            "device_uuid": None,
+            "total_memory_bytes": None,
+            "cuda_runtime_version": None,
+            "cudnn_version": None,
+            "cuda_visible_devices": None,
+        },
     }
 
 
@@ -247,9 +257,57 @@ def test_wrn_rejects_ambiguous_dual_feature_return_request():
         )
 
 
-def test_task_f_exporter_v1_rejects_gpu_devices_without_accessing_cuda():
-    with pytest.raises(ValueError, match="CPU-only"):
+def test_task_f_exporter_rejects_unavailable_or_ambiguous_cuda(monkeypatch):
+    monkeypatch.setattr(task_f.torch.cuda, "is_available", lambda: False)
+    with pytest.raises(RuntimeError, match="is_available"):
         task_f.collect_runtime_provenance("cuda:0")
+    with pytest.raises(RuntimeError, match="is_available"):
+        export_task_f_from_files(
+            checkpoint_path="missing-checkpoint.pt",
+            input_npz_path="missing-id-input.npz",
+            artifact_root="unused-artifact-root",
+            dataset_split="id_train",
+            depth_tap="penultimate",
+            device="cuda:0",
+        )
+    with pytest.raises(ValueError, match="explicit local index"):
+        task_f.collect_runtime_provenance("cuda")
+
+
+def test_task_f_cuda_runtime_identity_is_explicit_and_part_of_specification(monkeypatch):
+    class FixtureProperties:
+        name = "Fixture CUDA GPU"
+        uuid = "GPU-fixture-uuid"
+        total_memory = 24 * 1024**3
+
+    monkeypatch.setattr(task_f.torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(task_f.torch.cuda, "device_count", lambda: 1)
+    monkeypatch.setattr(
+        task_f.torch.cuda, "get_device_properties", lambda index: FixtureProperties()
+    )
+    monkeypatch.setattr(task_f.torch.backends.cudnn, "version", lambda: 8900)
+    monkeypatch.setattr(task_f.torch.version, "cuda", "12.1")
+
+    runtime = task_f.collect_runtime_provenance("cuda:0")
+    assert runtime["device_type"] == "cuda"
+    assert runtime["device"] == "cuda:0"
+    assert runtime["accelerator"] == {
+        "backend": "cuda",
+        "local_device_index": 0,
+        "device_name": "Fixture CUDA GPU",
+        "device_uuid": "GPU-fixture-uuid",
+        "total_memory_bytes": 24 * 1024**3,
+        "cuda_runtime_version": "12.1",
+        "cudnn_version": 8900,
+        "cuda_visible_devices": None,
+    }
+    assert task_f._validate_runtime(runtime) == runtime
+    contract = specification_payload()["runtime_contract"]
+    assert contract["allowed_device_types"] == ["cpu", "cuda"]
+    assert contract["cuda_requires_explicit_local_index"] is True
+
+    with pytest.raises(ValueError, match="visible device count"):
+        task_f.collect_runtime_provenance("cuda:1")
 
 
 def test_task_f_artifact_has_deterministic_manifest_spec_and_separate_output_identity(
