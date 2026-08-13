@@ -50,7 +50,13 @@ bridge now validates the exact 50-run inventory, checkpoint/feature/membership/
 classifier identities, and the complete 1,320-record `id_train` plus
 `id_validation` logical coverage. The existing 310-job export queue is a
 validated subset; the 1,010 supplemental exports have not started and remain
-gated on terminal training and terminal completion of that queue.
+gated on terminal training and terminal completion of that queue. The fresh
+ID-only geometry and paired-aggregation implementation is now fixture-tested:
+it produces raw/L2 discriminant-component bundles, NC/norm/spectrum records,
+ID-train affine and gauge alignment with held-out `id_validation` residuals,
+cell-and-seed-matched paired 90% t-intervals, non-dropping terminal status, and
+deterministic table templates. Comparable-ID remains
+`PENDING_PROTECTED_ID_TEST`; no protected inference was run.
 
 The planned chain is:
 

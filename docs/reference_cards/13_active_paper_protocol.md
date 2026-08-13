@@ -1709,6 +1709,15 @@ selection. The `0.08` NLL margin is a prospective practical margin grounded in
 existing ID-only, same-policy seed dispersion. It is not derived from fresh
 results or protected OOD.
 
+The versioned fresh-ID aggregation implementation fixes the decision statistic
+as the absolute value of the seed-paired mean difference for each of accuracy,
+NLL, and ECE. Each metric passes only when that statistic is at or below its
+frozen practical margin, and all three must pass jointly. The two-sided paired
+90% t-interval is reported descriptively as uncertainty but is not part of the
+PASS rule and is not a TOST claim. Until the protected `id_test` endpoint is
+separately authorized and evaluated, the implementation must report
+`PENDING_PROTECTED_ID_TEST`; `id_validation` cannot substitute for it.
+
 Alpha confirmation uses exactly the three existing points and this
 classification:
 
