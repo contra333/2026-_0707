@@ -806,6 +806,54 @@ def _artifact_paths(run_dir: Path) -> dict[str, Path]:
     }
 
 
+def _begin_epoch_boundary_stop_event(
+    paths: dict[str, Path], *, requested_epoch: int
+) -> int:
+    metadata = _read_json(paths["metadata"])
+    events = metadata.setdefault("runtime_control_events", [])
+    if not isinstance(events, list):
+        raise ValueError("run metadata runtime_control_events must be a list")
+    events.append(
+        {
+            "control": "stop_after_epoch_boundary",
+            "requested_epoch": requested_epoch,
+            "requested_at": _utc_now(),
+            "status": "pending",
+        }
+    )
+    _write_json(paths["metadata"], metadata)
+    return len(events) - 1
+
+
+def _complete_epoch_boundary_stop_event(
+    paths: dict[str, Path],
+    *,
+    event_index: int,
+    completed_epoch: int,
+    global_step: int,
+) -> dict[str, object]:
+    metadata = _read_json(paths["metadata"])
+    events = metadata.get("runtime_control_events")
+    if not isinstance(events, list) or event_index >= len(events):
+        raise ValueError("epoch-boundary stop provenance event is missing")
+    event = events[event_index]
+    if not isinstance(event, dict) or event.get("status") != "pending":
+        raise ValueError("epoch-boundary stop provenance event is invalid")
+    if int(event.get("requested_epoch", -1)) != completed_epoch:
+        raise ValueError("epoch-boundary stop completed at an unexpected epoch")
+    event.update(
+        {
+            "status": "completed",
+            "completed_epoch": completed_epoch,
+            "global_step": global_step,
+            "completed_at": _utc_now(),
+            "exit_mode": "normal_return_after_complete_epoch_artifacts",
+        }
+    )
+    _write_json(paths["metadata"], metadata)
+    return copy.deepcopy(event)
+
+
 def _prepare_artifacts(
     *,
     run_dir: Path,
@@ -1045,6 +1093,7 @@ def fit_classifier(
     defer_id_test: bool = False,
     initial_rng_state: dict[str, object] | None = None,
     update_telemetry_recorder: UpdateTelemetryRecorder | None = None,
+    stop_after_epoch_boundary: int | None = None,
 ) -> dict[str, object]:
     """Run, strictly resume, or start a decay branch from a zero-decay prefix."""
     target_device = _target_device(device)
@@ -1085,6 +1134,18 @@ def fit_classifier(
         load_torch_artifact(fork_path, map_location="cpu") if fork_path is not None else None
     )
     fork_best_payload: dict[str, object] | None = None
+
+    max_epochs = int(resolved_config["training"]["max_epochs"])
+    if stop_after_epoch_boundary is not None:
+        if (
+            isinstance(stop_after_epoch_boundary, bool)
+            or not isinstance(stop_after_epoch_boundary, int)
+        ):
+            raise ValueError("stop_after_epoch_boundary must be an integer")
+        if task_f is None or not bool(task_f["execution_only"]):
+            raise ValueError(
+                "stop_after_epoch_boundary is allowed only for execution-only Task F"
+            )
 
     if resume_payload is not None:
         _validate_checkpoint(resume_payload)
@@ -1127,6 +1188,20 @@ def fit_classifier(
         ):
             raise ValueError("fork prefix best_val.pt is inconsistent with last.pt")
 
+    if stop_after_epoch_boundary is not None:
+        completed_before_run = (
+            int(resume_payload["completed_epoch"])
+            if resume_payload is not None
+            else int(fork_payload["completed_epoch"])
+            if fork_payload is not None
+            else 0
+        )
+        if not completed_before_run < stop_after_epoch_boundary < max_epochs:
+            raise ValueError(
+                "stop_after_epoch_boundary must be after the current boundary and "
+                "before max_epochs"
+            )
+
     paths, run_id = _prepare_artifacts(
         run_dir=output_dir,
         resolved_config=resolved_config,
@@ -1137,6 +1212,14 @@ def fit_classifier(
         defer_id_test=defer_id_test,
         paired_control_provenance=paired_control_provenance,
     )
+    stop_event_index = (
+        _begin_epoch_boundary_stop_event(
+            paths, requested_epoch=stop_after_epoch_boundary
+        )
+        if stop_after_epoch_boundary is not None
+        else None
+    )
+    completed_stop_event: dict[str, object] | None = None
     snapshot_epochs = set(int(value) for value in resolved_config["checkpoint"]["snapshot_epochs"])
 
     if resume_payload is None and fork_payload is None:
@@ -1253,7 +1336,6 @@ def fit_classifier(
             paired_control_provenance, batch
         )
 
-    max_epochs = int(resolved_config["training"]["max_epochs"])
     for epoch in range(completed_epoch + 1, max_epochs + 1):
         epoch_started = time.perf_counter()
         learning_rates = current_learning_rates(optimizer)
@@ -1358,6 +1440,16 @@ def fit_classifier(
                 ),
                 paths["snapshots"] / f"epoch_{epoch:04d}.pt",
             )
+        completed_epoch = epoch
+        if stop_after_epoch_boundary == epoch:
+            assert stop_event_index is not None
+            completed_stop_event = _complete_epoch_boundary_stop_event(
+                paths,
+                event_index=stop_event_index,
+                completed_epoch=completed_epoch,
+                global_step=global_step,
+            )
+            break
 
     evaluation_results: dict[str, dict[str, object]] = {}
     if not defer_id_test:
@@ -1384,9 +1476,13 @@ def fit_classifier(
     final_history = history[-1]
     summary: dict[str, object] = {
         "schema_version": RUN_SCHEMA_VERSION,
-        "status": "completed",
+        "status": (
+            "stopped_at_epoch_boundary"
+            if completed_stop_event is not None
+            else "completed"
+        ),
         "run_id": run_id,
-        "completed_epoch": max_epochs,
+        "completed_epoch": completed_epoch,
         "global_step": global_step,
         "final_validation": {
             "epoch": int(final_history["epoch"]),
@@ -1407,6 +1503,13 @@ def fit_classifier(
             "summary": str(paths["summary"]),
         },
     }
+    metadata = _read_json(paths["metadata"])
+    runtime_control_events = metadata.get("runtime_control_events")
+    if runtime_control_events is not None:
+        summary["runtime_control_events"] = copy.deepcopy(runtime_control_events)
+    if completed_stop_event is not None:
+        summary["runtime_control"] = completed_stop_event
+        summary["target_max_epochs"] = max_epochs
     if paired_control_provenance is not None:
         summary["paired_control_provenance"] = copy.deepcopy(
             paired_control_provenance
@@ -1459,6 +1562,7 @@ def run_training_from_config(
     fork_from_prefix: str | Path | None = None,
     max_epochs: int | None = None,
     defer_id_test: bool = False,
+    stop_after_epoch_boundary: int | None = None,
 ) -> dict[str, object]:
     """Resolve real protocol inputs, construct shared factories, and run training."""
     raw_config = load_training_config(config_path)
@@ -1514,4 +1618,5 @@ def run_training_from_config(
         fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
         initial_rng_state=initial_rng_state,
+        stop_after_epoch_boundary=stop_after_epoch_boundary,
     )

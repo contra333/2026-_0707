@@ -14,10 +14,20 @@ from oge.studies.hashing import canonical_sha256
 
 TASK_F_PLAN_SCHEMA_VERSION = "task_f_paired_run_plan_v1"
 TASK_F_TRAINING_SCHEMA_VERSION = "task_f_paired_training_v1"
-TASK_F_APPROVAL_PACKET_SCHEMA_VERSION = "task_f_approval_packet_v1"
+TASK_F_APPROVAL_PACKET_SCHEMA_VERSION = "task_f_approval_packet_v2"
 TASK_F_PROTOCOL_ID = "fixed_readout_pair_ranking_multiplicity_paired_trajectory_v12"
 TASK_F_STUDY_ID = "card13_v12_fresh_paired_mechanism"
 TASK_F_SNAPSHOT_EPOCHS = (0, 1, 10, 30, 60, 61, 120, 121, 160, 161, 200)
+TASK_F_FROZEN_RESEARCH_SEEDS = {
+    "anchor": (0, 1, 2, 3, 4),
+    "adam_factorial": (0, 1, 2),
+    "sgdm": (0, 1, 2),
+}
+TASK_F_FROZEN_ID_EQUIVALENCE_MARGINS = {
+    "accuracy": 0.01,
+    "nll": 0.08,
+    "ece": 0.02,
+}
 
 _TASK_F_B_ROLE_BY_POLICY = {
     "zero": "zero",
@@ -759,12 +769,7 @@ def generate_approval_packet(
             raise ValueError(f"{key} calibration must be finite")
         resources[key] = value
 
-    unresolved = [
-        "accuracy_nll_ece_equivalence_margins",
-        "exact_research_seed_ids",
-        "gpu_resource_approval",
-        "rtmd_gate_3_rule",
-    ]
+    unresolved = ["gpu_resource_approval"]
     if pilot_config is None:
         pilot = {
             "config_path": "UNRESOLVED",
@@ -795,10 +800,26 @@ def generate_approval_packet(
         "pilot": pilot,
         "resource_estimates": resources,
         "task_f_b_specification_sha256": specification,
+        "frozen_inputs": {
+            "research_seeds": {
+                key: list(values)
+                for key, values in TASK_F_FROZEN_RESEARCH_SEEDS.items()
+            },
+            "id_equivalence_margins": {
+                **TASK_F_FROZEN_ID_EQUIVALENCE_MARGINS,
+                "status": "FROZEN",
+            },
+        },
         "approval_boundaries": {
             "pilot_approval": "REQUIRED_BEFORE_EXECUTION_ONLY_PILOT",
             "full_training_approval": "SEPARATE_REQUIRED_BEFORE_RESEARCH_TRAINING",
             "pilot_approval_does_not_authorize_full_training": True,
+            "gpu_resource_approval": "PENDING",
+            "rtmd_gate_3": {
+                "status": "UNRESOLVED",
+                "pilot_prerequisite": False,
+                "main_task_f_training_prerequisite": False,
+            },
         },
         "unresolved_inputs": sorted(unresolved),
     }

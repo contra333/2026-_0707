@@ -225,6 +225,29 @@ def test_execution_only_pilot_is_excluded_and_approval_unknowns_are_explicit():
     assert len(packet["task_f_b_specification_sha256"]) == 64
     assert "task_f_b_specification_sha256" not in packet["unresolved_inputs"]
     assert "exact_pilot_length" not in packet["unresolved_inputs"]
+    assert packet["frozen_inputs"] == {
+        "research_seeds": {
+            "anchor": [0, 1, 2, 3, 4],
+            "adam_factorial": [0, 1, 2],
+            "sgdm": [0, 1, 2],
+        },
+        "id_equivalence_margins": {
+            "accuracy": 0.01,
+            "nll": 0.08,
+            "ece": 0.02,
+            "status": "FROZEN",
+        },
+    }
+    assert packet["approval_boundaries"]["gpu_resource_approval"] == "PENDING"
+    assert packet["approval_boundaries"]["rtmd_gate_3"] == {
+        "status": "UNRESOLVED",
+        "pilot_prerequisite": False,
+        "main_task_f_training_prerequisite": False,
+    }
+    assert packet["unresolved_inputs"] == [
+        "gpu_resource_approval",
+        "update_telemetry_audit_schedule",
+    ]
 
 
 def test_unresolved_pilot_packet_is_deterministic_and_does_not_invent_resources():
@@ -239,9 +262,13 @@ def test_unresolved_pilot_packet_is_deterministic_and_does_not_invent_resources(
     }
     assert {
         "exact_pilot_length",
+        "gpu_resource_approval",
         "pilot_seed",
         "update_telemetry_audit_schedule",
     }.issubset(first["unresolved_inputs"])
+    assert "accuracy_nll_ece_equivalence_margins" not in first["unresolved_inputs"]
+    assert "exact_research_seed_ids" not in first["unresolved_inputs"]
+    assert "rtmd_gate_3_rule" not in first["unresolved_inputs"]
 
 
 def test_execution_only_cannot_be_smuggled_into_research_matrix():

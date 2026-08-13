@@ -60,6 +60,29 @@ and later extension. Resume uses the same run directory and its atomic
 override value and every other effective setting are written to
 `resolved_config.yaml`.
 
+The Task F execution-only pilot additionally supports the runtime-only control
+
+```bash
+python scripts/train_cifar10.py \
+  --config /path/to/execution_only.yaml \
+  --data-root /path/to/openood-v1.5-root \
+  --run-dir /path/to/the-same-pilot-run \
+  --device cuda:0 \
+  --defer-id-test \
+  --stop-after-epoch-boundary 1
+```
+
+This option is accepted only when the resolved Task F record has
+`execution_only: true`. It is not written into the resolved training config or
+its semantic identity. At the requested boundary the runner first completes
+history and telemetry, atomically commits `last.pt`, completes `best_val.pt`
+and any configured fixed snapshot, records the requested and completed runtime
+control in `run_metadata.json`, writes a stopped-boundary `summary.json`, and
+returns normally. Resume omits the stop option and uses the same config, run
+directory, and `last.pt`; the next optimizer step follows the recorded global
+step without replay. Ordinary training does not accept this control and is
+otherwise unchanged.
+
 ## Optional prefix fork versus ordinary resume
 
 Ordinary `--resume` remains a same-run operation: it requires that run

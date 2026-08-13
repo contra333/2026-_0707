@@ -163,6 +163,7 @@ def _run(
     fork_from_prefix=None,
     defer_id_test=False,
     test_loader=None,
+    stop_after_epoch_boundary=None,
 ):
     components = _components(config)
     if test_loader is not None:
@@ -176,6 +177,7 @@ def _run(
         resume_from=resume_from,
         fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
+        stop_after_epoch_boundary=stop_after_epoch_boundary,
     )
     return components["model"], summary
 
@@ -227,6 +229,104 @@ def test_continuous_three_epochs_match_two_plus_one_resumed_epoch(tmp_path):
     _assert_nested_equal(continuous["optimizer_state"], resumed["optimizer_state"])
     _assert_nested_equal(continuous["scheduler_state"], resumed["scheduler_state"])
     _assert_nested_equal(continuous["rng_state"], resumed["rng_state"])
+
+
+def test_task_f_pilot_stops_after_complete_epoch_one_and_resumes_identically(
+    tmp_path, monkeypatch
+):
+    config = generate_execution_only_pilot(
+        base_config=_resolved_fixture_config(2, snapshots=[0, 1]),
+        seed=997,  # fixture-only; not a proposed pilot or research seed
+        max_epochs=2,
+        audit_steps=[1, 3, 4, 6],
+    )
+    continuous_dir = tmp_path / "continuous"
+    split_dir = tmp_path / "split"
+    _run(config, continuous_dir, defer_id_test=True)
+
+    original_complete = training_runner._complete_epoch_boundary_stop_event
+
+    def assert_complete_artifacts_before_stop(paths, **kwargs):
+        last = load_torch_artifact(paths["last"])
+        best = load_torch_artifact(paths["best"])
+        snapshot = load_torch_artifact(paths["snapshots"] / "epoch_0001.pt")
+        assert last["completed_epoch"] == 1
+        assert best["checkpoint_type"] == "best_val"
+        assert snapshot["completed_epoch"] == 1
+        history = [
+            json.loads(line) for line in paths["history"].read_text().splitlines()
+        ]
+        assert [row["epoch"] for row in history] == [1]
+        return original_complete(paths, **kwargs)
+
+    monkeypatch.setattr(
+        training_runner,
+        "_complete_epoch_boundary_stop_event",
+        assert_complete_artifacts_before_stop,
+    )
+    _, stopped = _run(
+        config,
+        split_dir,
+        defer_id_test=True,
+        stop_after_epoch_boundary=1,
+    )
+    assert stopped["status"] == "stopped_at_epoch_boundary"
+    assert stopped["completed_epoch"] == 1
+    assert stopped["target_max_epochs"] == 2
+    assert stopped["global_step"] == 3
+    assert stopped["runtime_control"] == stopped["runtime_control_events"][-1]
+    assert stopped["runtime_control"]["exit_mode"] == (
+        "normal_return_after_complete_epoch_artifacts"
+    )
+    assert yaml.safe_load((split_dir / "resolved_config.yaml").read_text()) == config
+
+    _, resumed_summary = _run(
+        config,
+        split_dir,
+        resume_from=split_dir / "checkpoints/last.pt",
+        defer_id_test=True,
+    )
+    assert resumed_summary["status"] == "completed"
+    assert resumed_summary["completed_epoch"] == 2
+    assert resumed_summary["global_step"] == 6
+    assert resumed_summary["runtime_control_events"] == stopped["runtime_control_events"]
+
+    continuous = load_torch_artifact(continuous_dir / "checkpoints/last.pt")
+    resumed = load_torch_artifact(split_dir / "checkpoints/last.pt")
+    assert [row["global_step"] for row in resumed["history"]] == [3, 6]
+    assert _history_without_timing(continuous["history"]) == _history_without_timing(
+        resumed["history"]
+    )
+    for field in ("model_state", "optimizer_state", "scheduler_state", "rng_state"):
+        _assert_nested_equal(continuous[field], resumed[field])
+
+    telemetry = [
+        json.loads(line)
+        for line in (split_dir / "update_telemetry.jsonl").read_text().splitlines()
+    ]
+    diagnostic_steps = [
+        record["global_step"]
+        for record in telemetry
+        if record["record_type"] == "step_diagnostics"
+    ]
+    assert diagnostic_steps == [1, 3, 4, 6]
+
+
+def test_epoch_boundary_stop_control_is_rejected_for_ordinary_training(tmp_path):
+    rejected_dir = tmp_path / "rejected"
+    with pytest.raises(ValueError, match="only for execution-only Task F"):
+        _run(
+            _resolved_fixture_config(2),
+            rejected_dir,
+            stop_after_epoch_boundary=1,
+        )
+    assert not rejected_dir.exists()
+
+    _, summary = _run(_resolved_fixture_config(2), tmp_path / "ordinary")
+    assert summary["status"] == "completed"
+    assert summary["completed_epoch"] == 2
+    assert "runtime_control" not in summary
+    assert "runtime_control_events" not in summary
 
 
 def _zero_decay_config(max_epochs, *, optimizer_name="sgd", weight_decay=0.0):

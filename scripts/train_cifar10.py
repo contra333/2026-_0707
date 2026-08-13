@@ -40,6 +40,14 @@ def parse_args() -> argparse.Namespace:
         type=int,
         help="Explicit resolved-config override for bounded validation or extension.",
     )
+    parser.add_argument(
+        "--stop-after-epoch-boundary",
+        type=int,
+        help=(
+            "Execution-only Task F runtime control: return normally after all "
+            "artifacts for this completed epoch are committed."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -54,10 +62,17 @@ def main() -> int:
         fork_from_prefix=args.fork_from_prefix,
         max_epochs=args.max_epochs,
         defer_id_test=args.defer_id_test,
+        stop_after_epoch_boundary=args.stop_after_epoch_boundary,
     )
-    print(
-        f"Completed epoch {summary['completed_epoch']} with artifacts in {args.run_dir}"
-    )
+    if summary["status"] == "completed":
+        print(
+            f"Completed epoch {summary['completed_epoch']} with artifacts in {args.run_dir}"
+        )
+    else:
+        print(
+            f"Stopped normally at epoch {summary['completed_epoch']} boundary "
+            f"with artifacts in {args.run_dir}"
+        )
     return 0
 
 
