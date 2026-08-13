@@ -1,0 +1,27 @@
+schema_version: task_f_execution_only_pilot_template_v1
+protocol_id: fixed_readout_pair_ranking_multiplicity_paired_trajectory_v12
+base_training_config: configs/training/cifar10_wrn28_10_holdout_v1.yaml
+branch_policy: adam_mixed_alpha_0_5
+optimizer:
+  name: adam_coupled_decoupled
+  lr: 0.001
+  total_weight_decay: 0.0001
+  coupled_ratio: 0.5
+execution_only: true
+aggregate_eligible: false
+from_scratch: true
+fork_from_prefix: null
+defer_id_test: true
+training_seed:
+  status: REQUIRED_OWNER_INPUT
+  value: null
+max_epochs:
+  status: REQUIRED_OWNER_INPUT
+  value: null
+approval:
+  pilot: REQUIRED_SEPARATELY
+  full_training: NOT_AUTHORIZED_BY_PILOT_APPROVAL
+resource_estimates:
+  expected_gpu_hours: UNKNOWN
+  expected_wall_time: UNKNOWN
+  expected_storage: UNKNOWN

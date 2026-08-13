@@ -11,17 +11,26 @@ import yaml
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from oge.feature_export import (
+    export_task_f_from_files,
+    validate_task_f_checkpoint_payload,
+    verify_task_f_artifact,
+)
+from oge.models import make_model
 from oge.optimizers import make_optimizer
 from oge.studies.hashing import canonical_sha256
 from oge.training import runner as training_runner
 from oge.training import (
     atomic_torch_save,
+    capture_rng_state,
     fit_classifier,
+    generate_execution_only_pilot,
     load_torch_artifact,
     load_training_config,
     make_scheduler,
     resolve_training_config,
     seed_everything,
+    UpdateTelemetryRecorder,
     validate_resume_configuration,
 )
 
@@ -49,6 +58,7 @@ class RandomizedTrainDataset(Dataset):
         return {
             "image": self.images[index] + jitter * 1e-3,
             "class_label": self.labels[index],
+            "sample_id": f"fixture:train-{index}",
         }
 
 
@@ -119,6 +129,7 @@ def _resolved_fixture_config(max_epochs, *, snapshots=None):
 def _components(config):
     training = config["training"]
     generator = seed_everything(training["seed"], deterministic=True)
+    initial_rng_state = capture_rng_state(generator)
     model = TinyClassifier()
     optimizer = make_optimizer(model, config["optimizer"])
     scheduler = make_scheduler(optimizer, config["scheduler"])
@@ -140,6 +151,7 @@ def _components(config):
         "validation_loader": validation_loader,
         "test_loader": test_loader,
         "train_generator": generator,
+        "initial_rng_state": initial_rng_state,
     }
 
 
@@ -160,7 +172,7 @@ def _run(
         resolved_config=config,
         run_dir=run_dir,
         device="cpu",
-        oge_git_sha="fixture-sha",
+        oge_git_sha="f" * 40,
         resume_from=resume_from,
         fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
@@ -510,6 +522,156 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
         "cuda_matmul_allow_tf32",
         "cudnn_allow_tf32",
     }
+
+
+def test_task_f_synthetic_checkpoint_carries_exact_b_input_provenance(
+    tmp_path,
+):
+    config = generate_execution_only_pilot(
+        base_config=_resolved_fixture_config(1, snapshots=[0, 1]),
+        seed=997,  # fixture-only; not a proposed pilot or research seed
+        max_epochs=1,
+        audit_steps=[1],
+    )
+    run_dir = tmp_path / "task_f_synthetic"
+    _, summary = _run(config, run_dir, defer_id_test=True)
+
+    last = load_torch_artifact(run_dir / "checkpoints/last.pt")
+    best = load_torch_artifact(run_dir / "checkpoints/best_val.pt")
+    initial = load_torch_artifact(run_dir / "checkpoints/snapshots/epoch_0000.pt")
+    metadata = json.loads((run_dir / "run_metadata.json").read_text())
+    provenance = last["paired_control_provenance"]
+    required = {
+        "sibling_group_id",
+        "initialization_sha256",
+        "initial_python_rng_sha256",
+        "initial_numpy_rng_sha256",
+        "initial_torch_rng_sha256",
+        "initial_dataloader_rng_sha256",
+        "first_minibatch_ordered_sample_id_sha256",
+        "first_minibatch_transformed_image_sha256",
+        "branch_neutral_config_sha256",
+        "execution_only",
+    }
+    assert required.issubset(provenance)
+    assert provenance["first_minibatch_witness_status"] == "observed"
+    assert provenance["execution_only"] is True
+    assert initial["paired_control_provenance"] == provenance
+    assert metadata["paired_control_provenance"] == provenance
+    assert summary["paired_control_provenance"] == provenance
+    assert summary["id_test"]["status"] == "deferred"
+    assert summary["update_telemetry"]["record_count"] > 0
+    assert validate_task_f_checkpoint_payload(last)["checkpoint_role"] == "last"
+    assert validate_task_f_checkpoint_payload(best)["checkpoint_role"] == "best_val"
+    assert validate_task_f_checkpoint_payload(initial)["checkpoint_role"] == "snapshot"
+    assert last["run_id"] == config["task_f"]["run_id"]
+
+
+def test_task_f_synthetic_wrn_checkpoint_is_consumed_by_b_exporter(tmp_path):
+    base = _resolved_fixture_config(1, snapshots=[0, 1])
+    base["training"]["batch_size"] = 6
+    base["model"].update(
+        {"depth": 28, "widen_factor": 10, "init_policy": "msr_fan_in"}
+    )
+    config = generate_execution_only_pilot(
+        base_config=base,
+        seed=991,  # fixture-only; not a proposed pilot or research seed
+        max_epochs=1,
+        audit_steps=[1],
+    )
+    generator = seed_everything(config["training"]["seed"], deterministic=True)
+    initial_rng_state = capture_rng_state(generator)
+    model = make_model(config["model"])
+    optimizer = make_optimizer(model, config["optimizer"])
+    scheduler = make_scheduler(optimizer, config["scheduler"])
+    train_loader = DataLoader(
+        RandomizedTrainDataset(),
+        batch_size=6,
+        shuffle=True,
+        generator=generator,
+        num_workers=0,
+    )
+    evaluation_loader = DataLoader(FixedEvaluationDataset(), batch_size=2)
+    run_dir = tmp_path / "task_f_wrn"
+    fit_classifier(
+        model=model,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        criterion=nn.CrossEntropyLoss(),
+        train_loader=train_loader,
+        validation_loader=evaluation_loader,
+        test_loader=evaluation_loader,
+        train_generator=generator,
+        initial_rng_state=initial_rng_state,
+        resolved_config=config,
+        run_dir=run_dir,
+        device="cpu",
+        oge_git_sha="e" * 40,
+        defer_id_test=True,
+    )
+    checkpoint_path = run_dir / "checkpoints/last.pt"
+    checkpoint = load_torch_artifact(checkpoint_path)
+    validate_task_f_checkpoint_payload(checkpoint)
+
+    dataset = FixedEvaluationDataset()
+    input_path = tmp_path / "synthetic_id_input.npz"
+    np.savez(
+        input_path,
+        images=dataset.images.numpy().astype(np.float32),
+        sample_ids=np.asarray([f"fixture:{index}" for index in range(len(dataset))]),
+        is_id=np.ones(len(dataset), dtype=np.bool_),
+    )
+    artifact = export_task_f_from_files(
+        checkpoint_path=checkpoint_path,
+        input_npz_path=input_path,
+        artifact_root=tmp_path / "artifacts",
+        dataset_split="synthetic_id_fixture",
+        depth_tap="penultimate",
+        batch_size=2,
+    )
+    verified = verify_task_f_artifact(artifact)
+    assert verified["manifest"]["run_id"] == config["task_f"]["run_id"]
+    assert verified["manifest"]["execution_only"] is True
+
+
+def test_instrumentation_on_off_preserves_trajectory_and_checkpoint_state(tmp_path):
+    config = _resolved_fixture_config(1, snapshots=[])
+    without_dir = tmp_path / "without_telemetry"
+    with_dir = tmp_path / "with_telemetry"
+
+    without = _components(config)
+    fit_classifier(
+        **without,
+        resolved_config=config,
+        run_dir=without_dir,
+        device="cpu",
+        oge_git_sha="f" * 40,
+    )
+    with_telemetry = _components(config)
+    recorder = UpdateTelemetryRecorder(
+        model=with_telemetry["model"],
+        optimizer=with_telemetry["optimizer"],
+        audit_steps=[1, 2, 3],
+        include_batch_norm=False,
+    )
+    fit_classifier(
+        **with_telemetry,
+        resolved_config=config,
+        run_dir=with_dir,
+        device="cpu",
+        oge_git_sha="f" * 40,
+        update_telemetry_recorder=recorder,
+    )
+
+    checkpoint_without = load_torch_artifact(without_dir / "checkpoints/last.pt")
+    checkpoint_with = load_torch_artifact(with_dir / "checkpoints/last.pt")
+    for field in ("model_state", "optimizer_state", "scheduler_state", "rng_state"):
+        _assert_nested_equal(checkpoint_without[field], checkpoint_with[field])
+    assert _history_without_timing(checkpoint_without["history"]) == _history_without_timing(
+        checkpoint_with["history"]
+    )
+    assert (with_dir / "update_telemetry.jsonl").is_file()
+    assert not (without_dir / "update_telemetry.jsonl").exists()
 
 
 class ExplodingIDTestLoader:

@@ -1,0 +1,31 @@
+schema_version: task_f_paired_run_plan_v1
+protocol_id: fixed_readout_pair_ranking_multiplicity_paired_trajectory_v12
+study_id: card13_v12_fresh_paired_mechanism
+base_training_config: configs/training/cifar10_wrn28_10_holdout_v1.yaml
+
+# Exact IDs are intentionally not frozen here. Supply them to the generator.
+research_seed_inputs:
+  anchor_seeds:
+    status: REQUIRED_5_UNIQUE
+    values: null
+  adam_factorial_seeds:
+    status: REQUIRED_3_UNIQUE_SUBSET_OF_ANCHOR
+    values: null
+  sgdm_seeds:
+    status: REQUIRED_3_UNIQUE
+    values: null
+
+snapshot_epochs: [0, 1, 10, 30, 60, 61, 120, 121, 160, 161, 200]
+update_telemetry:
+  schema_version: task_f_update_telemetry_v1
+  audit_steps:
+    status: REQUIRED_PRE_EXECUTION_ADDENDUM
+    values: null
+  include_batch_norm: true
+  activation_residual_diagnostics: []
+
+output_policy:
+  full_launch_bundle_root: artifacts/
+  commit_generated_bundle: false
+  protected_ood_allowed: false
+  gpu_launch_allowed: false

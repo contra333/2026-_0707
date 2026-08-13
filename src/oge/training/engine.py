@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import math
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
+from typing import Any
 
 import torch
 from torch import nn
@@ -43,6 +44,9 @@ def train_one_epoch(
     criterion: nn.Module,
     *,
     device: str | torch.device,
+    start_global_step: int = 0,
+    first_batch_observer: Callable[[Mapping[str, Any]], None] | None = None,
+    update_telemetry: Any | None = None,
 ) -> dict[str, float | int]:
     """Train for exactly one complete epoch through the common logits API."""
     model.train()
@@ -53,6 +57,8 @@ def train_one_epoch(
     step_count = 0
 
     for batch in loader:
+        if step_count == 0 and first_batch_observer is not None:
+            first_batch_observer(batch)
         images = batch["image"].to(target_device)
         labels = batch["class_label"].to(target_device)
         optimizer.zero_grad(set_to_none=True)
@@ -61,7 +67,14 @@ def train_one_epoch(
         if not bool(torch.isfinite(loss)):
             raise FloatingPointError("training loss is not finite")
         loss.backward()
+        telemetry_capture = (
+            update_telemetry.before_step(global_step=start_global_step + step_count + 1)
+            if update_telemetry is not None
+            else None
+        )
         optimizer.step()
+        if telemetry_capture is not None:
+            update_telemetry.after_step(telemetry_capture)
 
         batch_size = int(labels.shape[0])
         loss_sum += float(loss.detach().item()) * batch_size
