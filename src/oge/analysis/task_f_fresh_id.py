@@ -966,6 +966,221 @@ def analyze_alignment_arrays(
     return record, states
 
 
+def _verify_alignment_directory(path: str | Path) -> dict[str, Any]:
+    root = Path(path)
+    manifest_path = root / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest_path.read_bytes() != canonical_json_bytes(manifest) + b"\n":
+        raise ValueError("alignment manifest is not canonical JSON")
+    if manifest.get("schema_version") != ALIGNMENT_SCHEMA_VERSION:
+        raise ValueError("unsupported alignment artifact schema")
+    if manifest.get("protected_data_access") is not False:
+        raise ValueError("alignment artifact is not ID-only")
+    if root.name != manifest.get("output_identity_sha256"):
+        raise ValueError("alignment directory differs from output identity")
+    expected = {"alignment_state.npz", "checksums.sha256", "manifest.json"}
+    if {item.name for item in root.iterdir()} != expected:
+        raise ValueError("alignment artifact contains unexpected files")
+    observed = {}
+    for line in (root / "checksums.sha256").read_text(encoding="utf-8").splitlines():
+        digest, name = line.split("  ", 1)
+        if name in observed or name not in expected - {"checksums.sha256"}:
+            raise ValueError("alignment checksum catalog is invalid")
+        if _sha256_file(root / name) != digest:
+            raise ValueError("alignment output checksum mismatch")
+        observed[name] = digest
+    if set(observed) != expected - {"checksums.sha256"}:
+        raise ValueError("alignment checksum catalog is incomplete")
+    with np.load(root / "alignment_state.npz", allow_pickle=False) as payload:
+        if set(payload.files) != set(manifest["state_arrays"]):
+            raise ValueError("alignment state array catalog differs")
+        for name in payload.files:
+            value = payload[name]
+            record = manifest["state_arrays"][name]
+            if list(value.shape) != record["shape"] or str(value.dtype) != record["dtype"]:
+                raise ValueError(f"alignment state shape or dtype mismatch: {name}")
+            if _array_sha256(value) != record["array_sha256"]:
+                raise ValueError(f"alignment state identity mismatch: {name}")
+    return {"manifest": manifest, "verified_files": observed}
+
+
+def analyze_bound_alignment(
+    *,
+    left_train_binding: Mapping[str, Any],
+    left_validation_binding: Mapping[str, Any],
+    right_train_binding: Mapping[str, Any],
+    right_validation_binding: Mapping[str, Any],
+    pair_direction: str,
+    output_root: str | Path,
+    chunk_size: int = 2048,
+) -> Path:
+    """Publish one checksummed sibling affine/gauge/principal-angle bundle."""
+
+    if pair_direction not in {name for name, _, _ in PAIR_DIRECTIONS}:
+        raise ValueError("unsupported Task F sibling alignment direction")
+    left_train = _verified_binding(left_train_binding, "id_train")
+    left_validation = _verified_binding(left_validation_binding, "id_validation")
+    right_train = _verified_binding(right_train_binding, "id_train")
+    right_validation = _verified_binding(right_validation_binding, "id_validation")
+    values = (left_train, left_validation, right_train, right_validation)
+    shared_fields = (
+        "family",
+        "training_seed",
+        "sibling_group_id",
+        "initialization_sha256",
+        "data_stream_sha256",
+        "checkpoint_role",
+        "depth_tap",
+    )
+    mismatches = [
+        field
+        for field in shared_fields
+        if len({item["bridge"].get(field) for item in values}) != 1
+    ]
+    if mismatches:
+        raise ValueError(f"alignment sibling bindings differ: {mismatches}")
+    checkpoint_role = str(left_train["bridge"]["checkpoint_role"])
+    checkpoint_epochs = [int(item["bridge"]["checkpoint_epoch"]) for item in values]
+    if checkpoint_role != "best_val" and len(set(checkpoint_epochs)) != 1:
+        raise ValueError("fixed-role alignment checkpoint epochs differ")
+    for train, validation in (
+        (left_train, left_validation),
+        (right_train, right_validation),
+    ):
+        pair_fields = (
+            "run_id",
+            "checkpoint_role",
+            "checkpoint_epoch",
+            "checkpoint_sha256",
+            "depth_tap",
+        )
+        if any(
+            train["bridge"].get(field) != validation["bridge"].get(field)
+            for field in pair_fields
+        ):
+            raise ValueError("alignment train/validation identity differs")
+    if left_train["bridge"]["run_id"] == right_train["bridge"]["run_id"]:
+        raise ValueError("alignment requires two distinct sibling runs")
+    left_role = str(left_train["bridge"]["sibling_role"])
+    right_role = str(right_train["bridge"]["sibling_role"])
+    expected_roles = {
+        name: (left, right) for name, left, right in PAIR_DIRECTIONS
+    }[pair_direction]
+
+    def normalized_role(role: str) -> str:
+        if role == "zero":
+            return "zero"
+        if role in {"alpha_1"} or role.endswith("_coupled"):
+            return "coupled"
+        if role in {"alpha_0"} or role.endswith("_decoupled"):
+            return "decoupled"
+        return role
+
+    if (normalized_role(left_role), normalized_role(right_role)) != expected_roles:
+        raise ValueError("alignment sibling roles differ from pair direction")
+    left_train_features = np.load(
+        left_train["feature_root"] / "features.npy", mmap_mode="r"
+    )
+    right_train_features = np.load(
+        right_train["feature_root"] / "features.npy", mmap_mode="r"
+    )
+    left_validation_features = np.load(
+        left_validation["feature_root"] / "features.npy", mmap_mode="r"
+    )
+    right_validation_features = np.load(
+        right_validation["feature_root"] / "features.npy", mmap_mode="r"
+    )
+    labels = np.load(left_train["bridge_root"] / "labels.npy", mmap_mode="r")
+    right_labels = np.load(right_train["bridge_root"] / "labels.npy", mmap_mode="r")
+    if not np.array_equal(labels, right_labels):
+        raise ValueError("alignment sibling labels differ")
+    reference_role = "zero" if "zero" in expected_roles else None
+    record, states = analyze_alignment_arrays(
+        left_train=left_train_features,
+        right_train=right_train_features,
+        left_validation=left_validation_features,
+        right_validation=right_validation_features,
+        labels=labels,
+        reference_role=reference_role,
+        chunk_size=chunk_size,
+    )
+    identity = {
+        "schema_version": ALIGNMENT_SCHEMA_VERSION,
+        "pair_direction": pair_direction,
+        "left_run_id": left_train["bridge"]["run_id"],
+        "right_run_id": right_train["bridge"]["run_id"],
+        "left_role": left_role,
+        "right_role": right_role,
+        "cell_id": left_train["bridge"]["cell_id"],
+        "checkpoint_epoch": (
+            "selected_by_id_validation"
+            if checkpoint_role == "best_val"
+            else checkpoint_epochs[0]
+        ),
+        "left_checkpoint_epoch": checkpoint_epochs[0],
+        "right_checkpoint_epoch": checkpoint_epochs[2],
+        "left_checkpoint_sha256": left_train["bridge"]["checkpoint_sha256"],
+        "right_checkpoint_sha256": right_train["bridge"]["checkpoint_sha256"],
+        **{field: left_train["bridge"][field] for field in shared_fields},
+        "left_train_feature_identity": left_train["bridge"][
+            "feature_output_identity_sha256"
+        ],
+        "left_validation_feature_identity": left_validation["bridge"][
+            "feature_output_identity_sha256"
+        ],
+        "right_train_feature_identity": right_train["bridge"][
+            "feature_output_identity_sha256"
+        ],
+        "right_validation_feature_identity": right_validation["bridge"][
+            "feature_output_identity_sha256"
+        ],
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+    }
+    output_identity = canonical_sha256(identity)
+    destination = Path(output_root) / output_identity
+    if destination.exists():
+        _verify_alignment_directory(destination)
+        return destination
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.parent / f".{destination.name}.{uuid.uuid4().hex}.tmp"
+    temporary.mkdir()
+    try:
+        np.savez(temporary / "alignment_state.npz", **states)
+        manifest = {
+            **identity,
+            **record,
+            "output_identity_sha256": output_identity,
+            "runtime_policy": {
+                "feature_load": "numpy_mmap",
+                "fit_scope": "id_train_only",
+                "heldout_scope": "id_validation",
+                "chunk_size": int(chunk_size),
+            },
+            "state_arrays": {
+                name: {
+                    "shape": list(value.shape),
+                    "dtype": str(value.dtype),
+                    "array_sha256": _array_sha256(value),
+                }
+                for name, value in sorted(states.items())
+            },
+        }
+        (temporary / "manifest.json").write_bytes(
+            canonical_json_bytes(manifest) + b"\n"
+        )
+        names = ("alignment_state.npz", "manifest.json")
+        (temporary / "checksums.sha256").write_text(
+            "".join(f"{_sha256_file(temporary / name)}  {name}\n" for name in names),
+            encoding="utf-8",
+        )
+        os.replace(temporary, destination)
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
+    _verify_alignment_directory(destination)
+    return destination
+
+
 def paired_t_interval(
     values: Sequence[float], *, confidence: float = 0.90
 ) -> dict[str, Any]:

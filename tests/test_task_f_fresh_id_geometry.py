@@ -1,4 +1,5 @@
 import hashlib
+import json
 import math
 
 import numpy as np
@@ -9,6 +10,7 @@ from oge.analysis.task_f_fresh_id import (
     adjudicate_id_equivalence,
     aggregate_paired_records,
     analyze_alignment_arrays,
+    analyze_bound_alignment,
     analyze_geometry_arrays,
     build_aggregation_contract,
     classify_alpha_interior,
@@ -18,6 +20,7 @@ from oge.analysis.task_f_fresh_id import (
     render_table_templates,
     write_aggregation_artifacts,
 )
+import oge.analysis.task_f_fresh_id as fresh_id_module
 from oge.evaluation.task_f_fresh import build_fresh_evaluation_plan
 from oge.training import generate_research_run_matrix
 
@@ -206,6 +209,91 @@ def test_raw_l2_alignment_pipeline_records_zero_common_frame():
     )
     assert states["raw__matrix"].shape == (4, 4)
     assert states["l2__rotation"].shape == (4, 4)
+
+
+def test_bound_alignment_publishes_checksummed_sibling_artifact(tmp_path, monkeypatch):
+    fixture = _geometry_fixture()
+    rotation, _ = np.linalg.qr(
+        np.asarray(
+            [
+                [1.0, 0.2, -0.1, 0.0],
+                [-0.2, 1.0, 0.1, 0.2],
+                [0.1, 0.0, 1.0, -0.2],
+                [0.0, -0.2, 0.2, 1.0],
+            ]
+        )
+    )
+    data = {
+        "left_train": fixture["train"],
+        "left_validation": fixture["validation"],
+        "right_train": fixture["train"] @ rotation,
+        "right_validation": fixture["validation"] @ rotation,
+    }
+    verified = {}
+    for name, values in data.items():
+        feature_root = tmp_path / name / "feature"
+        bridge_root = tmp_path / name / "bridge"
+        feature_root.mkdir(parents=True)
+        bridge_root.mkdir()
+        np.save(feature_root / "features.npy", values)
+        if name.endswith("train"):
+            np.save(bridge_root / "labels.npy", fixture["labels"])
+        role = "alpha_1" if name.startswith("left") else "zero"
+        run_id = "coupled-run" if name.startswith("left") else "zero-run"
+        verified[name] = {
+            "feature_root": feature_root,
+            "bridge_root": bridge_root,
+            "bridge": {
+                "run_id": run_id,
+                "family": "adam",
+                "cell_id": (
+                    "adam_lr1e-3_wd1e-3"
+                    if name.startswith("left")
+                    else "adam_lr1e-3_wd1e-4_anchor"
+                ),
+                "training_seed": 0,
+                "sibling_group_id": "sibling-0",
+                "sibling_role": role,
+                "initialization_sha256": "1" * 64,
+                "data_stream_sha256": "2" * 64,
+                    "checkpoint_role": "last",
+                    "checkpoint_epoch": 200,
+                    "checkpoint_sha256": (
+                        "3" * 64 if name.startswith("left") else "4" * 64
+                    ),
+                "depth_tap": "penultimate",
+                "feature_output_identity_sha256": hashlib.sha256(name.encode()).hexdigest(),
+            },
+        }
+
+    monkeypatch.setattr(
+        fresh_id_module,
+        "_verified_binding",
+        lambda binding, expected_split: verified[binding["name"]],
+    )
+    output = analyze_bound_alignment(
+        left_train_binding={"name": "left_train"},
+        left_validation_binding={"name": "left_validation"},
+        right_train_binding={"name": "right_train"},
+        right_validation_binding={"name": "right_validation"},
+        pair_direction="coupled_minus_zero",
+        output_root=tmp_path / "alignments",
+        chunk_size=17,
+    )
+    manifest = json.loads((output / "manifest.json").read_text())
+    assert manifest["pair_direction"] == "coupled_minus_zero"
+    assert manifest["cell_id"] == "adam_lr1e-3_wd1e-3"
+    assert manifest["transforms"]["raw"]["gauge"]["zero_decay_common_frame"]
+    assert (output / "alignment_state.npz").is_file()
+    assert analyze_bound_alignment(
+        left_train_binding={"name": "left_train"},
+        left_validation_binding={"name": "left_validation"},
+        right_train_binding={"name": "right_train"},
+        right_validation_binding={"name": "right_validation"},
+        pair_direction="coupled_minus_zero",
+        output_root=tmp_path / "alignments",
+        chunk_size=17,
+    ) == output
 
 
 def _seed_record(
