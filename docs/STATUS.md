@@ -39,9 +39,13 @@ reference comparison had maximum absolute feature difference `6.72e-4`,
 maximum per-sample relative L2 difference `3.37e-4`, and minimum cosine
 `0.99999995`. This removes the production export-throughput blocker without
 changing training semantics. The 50-run and pilot launch plans were regenerated
-and validated against the new specification. The immediate next work is a
-separate full-training resource approval and production scheduling. No research
-training or protected-OOD evaluation has started.
+and validated against the new specification. The owner-approved 50-run ID-only
+full fresh training started at execution SHA
+`9eb3c1fa56d880ea5220badac7bc71ba75786d22` on fixed sibling-colocated shards:
+`curie=20`, `lise=11`, and `precision_medicine=19`. All three first research
+runs passed the epoch-1 durable-checkpoint and `global_step=352` launch gate
+before all ten approved GPU slots were filled. Research training is in progress;
+protected-OOD evaluation has not started.
 
 The planned chain is:
 
