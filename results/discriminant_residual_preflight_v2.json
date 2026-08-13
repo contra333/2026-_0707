@@ -1,5 +1,12 @@
 {
   "analysis_role": "historical_id_only_compliance_measurement_v2",
+  "compact_record_correction": {
+    "classification": "TRANSCRIPTION_AND_PROVENANCE_CORRECTION",
+    "corrected_field": "decision.metric_contract_v1_2_relationship.inapplicable_cached_parity_failure_count",
+    "official_production_output": "issue77_2b83279_v2",
+    "preflight_or_diagnostic_reexecuted": false,
+    "scientific_gate_or_conclusion_changed": false
+  },
   "archive": {
     "filename": "discriminant_residual_preflight_v2.tar",
     "hf_uri": "hf://buckets/contra333/ICLR_RUN/artifacts/discriminant_residual_preflight/v2/f93a70897041a213cda63560d5b64ef336f601a8aacb62266f0be31b46365804/discriminant_residual_preflight_v2.tar",
@@ -19,10 +26,13 @@
     "metric_contract_v1_2_relationship": {
       "applicable_cached_parity_failure_count": 0,
       "applicable_unexplained_residual_count": 0,
-      "inapplicable_cached_parity_failure_count": 9,
-      "inapplicable_scope": "outside_full_rank_theorem_scope"
+      "cached_parity_decision_role": "DIAGNOSTIC_ONLY_NOT_USED_BY_REQUIRED_NUMERICAL_PASS_PRIMARY_CHANNEL_GATE_2_OR_RTMD_ACTIVATION",
+      "cached_parity_rmd_scale": "max(1, abs(current_direct_global) + abs(current_direct_class), abs(cached_global_distance) + abs(cached_mahalanobis_score))",
+      "inapplicable_cached_parity_failure_count": 8,
+      "inapplicable_scope": "outside_full_rank_theorem_scope",
+      "legacy_output_scaled_parity_residual_preserved": true
     },
-    "next_action": "FREEZE_FRESH_GATE3_ADDENDUM_AND_EXPORT_SCHEMA_BEFORE_GPU_LAUNCH",
+    "next_action": "TASK_F_CPU_ENGINEERING_AND_FIXTURE_VALIDATION_INDEPENDENT_OF_OPTIONAL_RTMD_SLOT",
     "rmd_cancellation": {
       "classification": "FROZEN_WORDING_AMBIGUITY_COMPLIANCE_CLARIFICATION",
       "historical_pass_rate_used": false,
@@ -35,6 +45,24 @@
     "fit_count": 60,
     "inapplicable_fit_count": 30,
     "numerically_applicable_cancellation_failure_count": 0,
+    "diagnostic_transitions": {
+      "cached_metric_v1_2_parity": {
+        "decision_role": "DIAGNOSTIC_ONLY_NOT_A_REQUIRED_GATE_OR_GATE_2_DECISION",
+        "failed_to_pass_count": 28,
+        "pass_to_failed_count": 0,
+        "v1_failed_count": 36,
+        "v1_pass_count": 24,
+        "v2_failed_count": 8,
+        "v2_pass_count": 52
+      },
+      "common_ridge": {
+        "decision_role": "DIAGNOSTIC_ONLY_NOT_PROMOTED",
+        "failed_to_pass_count": 21,
+        "pass_to_failed_count": 0,
+        "v1_pass_count": 27,
+        "v2_pass_count": 48
+      }
+    },
     "raw_norm_component_correlations": {
       "id_test_complete_count": 30,
       "id_train_complete_count": 30,
@@ -104,6 +132,7 @@
   },
   "validation": {
     "deterministic_reexecution": "PASS_ALL_PAYLOAD_HASHES_IDENTICAL",
+    "deterministic_reexecution_scope": "same host/runtime and fixed four-thread numerical environment; no byte-identical guarantee is made across hosts, BLAS, NumPy/SciPy, or CPU environments",
     "focused_fixtures": "20 passed including diagnostic fixtures",
     "pair_payload_byte_identical_to_v1": "PASS",
     "production_execution": "PASS",
