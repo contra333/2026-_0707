@@ -209,7 +209,8 @@ def test_execution_only_pilot_is_excluded_and_approval_unknowns_are_explicit():
     assert packet["approval_boundaries"][
         "pilot_approval_does_not_authorize_full_training"
     ] is True
-    assert "task_f_b_specification_sha256" in packet["unresolved_inputs"]
+    assert len(packet["task_f_b_specification_sha256"]) == 64
+    assert "task_f_b_specification_sha256" not in packet["unresolved_inputs"]
     assert "exact_pilot_length" not in packet["unresolved_inputs"]
 
 
@@ -226,7 +227,6 @@ def test_unresolved_pilot_packet_is_deterministic_and_does_not_invent_resources(
     assert {
         "exact_pilot_length",
         "pilot_seed",
-        "task_f_b_specification_sha256",
         "update_telemetry_audit_schedule",
     }.issubset(first["unresolved_inputs"])
 

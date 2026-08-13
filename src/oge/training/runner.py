@@ -51,6 +51,7 @@ from .engine import (
 )
 from .fork import restore_fork_checkpoint, sha256_file, validate_fork_configuration
 from .provenance import (
+    build_task_f_checkpoint_provenance,
     create_initial_paired_provenance,
     observe_first_minibatch,
     validate_resume_paired_identity,
@@ -690,6 +691,16 @@ def _checkpoint_payload(
         payload["paired_control_provenance"] = copy.deepcopy(
             paired_control_provenance
         )
+        task_f_provenance = build_task_f_checkpoint_provenance(
+            resolved_config=resolved_config,
+            paired_control_provenance=paired_control_provenance,
+            checkpoint_epoch=completed_epoch,
+            checkpoint_role=checkpoint_type,
+            oge_git_sha=oge_git_sha,
+            run_id=run_id,
+        )
+        if task_f_provenance is not None:
+            payload["task_f_provenance"] = task_f_provenance
     return payload
 
 
@@ -716,6 +727,16 @@ def _snapshot_payload(
         payload["paired_control_provenance"] = copy.deepcopy(
             paired_control_provenance
         )
+        task_f_provenance = build_task_f_checkpoint_provenance(
+            resolved_config=resolved_config,
+            paired_control_provenance=paired_control_provenance,
+            checkpoint_epoch=completed_epoch,
+            checkpoint_role="snapshot",
+            oge_git_sha=oge_git_sha,
+            run_id=run_id,
+        )
+        if task_f_provenance is not None:
+            payload["task_f_provenance"] = task_f_provenance
     return payload
 
 
@@ -801,7 +822,11 @@ def _prepare_artifacts(
         run_dir.mkdir(parents=True, exist_ok=True)
         if any(run_dir.iterdir()):
             raise ValueError("fresh run_dir must be empty")
-        run_id = str(uuid.uuid4())
+        run_id = (
+            str(paired_control_provenance["run_plan_id"])
+            if paired_control_provenance is not None
+            else str(uuid.uuid4())
+        )
         metadata = {
             "schema_version": RUN_SCHEMA_VERSION,
             "run_id": run_id,
@@ -880,6 +905,9 @@ def _persist_observed_paired_provenance(
     *,
     paths: dict[str, Path],
     provenance: dict[str, Any],
+    resolved_config: dict[str, Any],
+    oge_git_sha: str,
+    run_id: str,
 ) -> None:
     metadata = _read_json(paths["metadata"])
     metadata["paired_control_provenance"] = copy.deepcopy(provenance)
@@ -892,6 +920,16 @@ def _persist_observed_paired_provenance(
         ) != 0:
             raise ValueError("Task F epoch-0 snapshot has an invalid identity")
         snapshot["paired_control_provenance"] = copy.deepcopy(provenance)
+        task_f_provenance = build_task_f_checkpoint_provenance(
+            resolved_config=resolved_config,
+            paired_control_provenance=provenance,
+            checkpoint_epoch=0,
+            checkpoint_role="snapshot",
+            oge_git_sha=oge_git_sha,
+            run_id=run_id,
+        )
+        if task_f_provenance is not None:
+            snapshot["task_f_provenance"] = task_f_provenance
         atomic_torch_save(snapshot, initial_snapshot_path)
 
 
@@ -944,6 +982,17 @@ def _reconcile_epoch_artifacts(
             raise ValueError("best_val.pt is missing or inconsistent with last.pt")
         best_payload = dict(checkpoint)
         best_payload["checkpoint_type"] = "best_val"
+        if paired_control_provenance is not None:
+            task_f_provenance = build_task_f_checkpoint_provenance(
+                resolved_config=resolved_config,
+                paired_control_provenance=paired_control_provenance,
+                checkpoint_epoch=completed_epoch,
+                checkpoint_role="best_val",
+                oge_git_sha=oge_git_sha,
+                run_id=run_id,
+            )
+            if task_f_provenance is not None:
+                best_payload["task_f_provenance"] = task_f_provenance
         atomic_torch_save(best_payload, paths["best"])
 
     snapshot_epochs = set(
@@ -1223,6 +1272,9 @@ def fit_classifier(
             _persist_observed_paired_provenance(
                 paths=paths,
                 provenance=paired_control_provenance,
+                resolved_config=resolved_config,
+                oge_git_sha=oge_git_sha,
+                run_id=run_id,
             )
             witness_persisted = True
         global_step += int(train_metrics["step_count"])
@@ -1282,6 +1334,17 @@ def fit_classifier(
         if became_best:
             best_payload = dict(last_payload)
             best_payload["checkpoint_type"] = "best_val"
+            if paired_control_provenance is not None:
+                task_f_provenance = build_task_f_checkpoint_provenance(
+                    resolved_config=resolved_config,
+                    paired_control_provenance=paired_control_provenance,
+                    checkpoint_epoch=epoch,
+                    checkpoint_role="best_val",
+                    oge_git_sha=oge_git_sha,
+                    run_id=run_id,
+                )
+                if task_f_provenance is not None:
+                    best_payload["task_f_provenance"] = task_f_provenance
             atomic_torch_save(best_payload, paths["best"])
         if epoch in snapshot_epochs:
             atomic_torch_save(

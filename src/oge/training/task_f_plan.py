@@ -19,6 +19,13 @@ TASK_F_PROTOCOL_ID = "fixed_readout_pair_ranking_multiplicity_paired_trajectory_
 TASK_F_STUDY_ID = "card13_v12_fresh_paired_mechanism"
 TASK_F_SNAPSHOT_EPOCHS = (0, 1, 10, 30, 60, 61, 120, 121, 160, 161, 200)
 
+_TASK_F_B_ROLE_BY_POLICY = {
+    "zero": "zero",
+    "adamw_alpha_0": "alpha_0",
+    "adam_mixed_alpha_0_5": "alpha_0_5",
+    "adam_alpha_1": "alpha_1",
+}
+
 _EXPECTED_CELL_COUNTS = {
     "adam_lr1e-3_wd1e-4_anchor": 20,
     "adam_lr1e-3_wd1e-3": 6,
@@ -150,6 +157,56 @@ def _record(
         "from_scratch": True,
         "fork_from_prefix": None,
     }
+
+
+def _task_f_b_specification_sha256() -> str:
+    # Import lazily: the feature-export package reads the training checkpoint
+    # loader, while the training package exposes this planning module.
+    from oge.feature_export import specification_payload
+
+    return canonical_sha256(specification_payload())
+
+
+def _task_f_b_sibling_plan(
+    runs: Sequence[Mapping[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    by_policy = {str(run["branch_policy"]): run for run in runs}
+    if set(by_policy) != set(_TASK_F_B_ROLE_BY_POLICY):
+        raise ValueError("Task F-B export requires the complete anchor alpha quartet")
+    plan: dict[str, dict[str, Any]] = {}
+    for policy, role in _TASK_F_B_ROLE_BY_POLICY.items():
+        run = by_policy[policy]
+        optimizer = run["optimizer"]
+        if role == "zero":
+            branch_policy = "zero_decay"
+            total_weight_decay = 0.0
+            coupled_ratio = None
+        else:
+            branch_policy = "adam_coupled_decoupled"
+            total_weight_decay = float(optimizer["total_weight_decay"])
+            coupled_ratio = float(optimizer["coupled_ratio"])
+        plan[role] = {
+            "run_id": str(run["run_id"]),
+            "training_seed": int(run["training_seed"]),
+            "branch_policy": branch_policy,
+            "total_weight_decay": total_weight_decay,
+            "coupled_ratio": coupled_ratio,
+        }
+    return plan
+
+
+def _attach_task_f_b_anchor_identity(runs: Sequence[dict[str, Any]]) -> None:
+    by_group: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for run in runs:
+        if run["cell_id"] == "adam_lr1e-3_wd1e-4_anchor":
+            by_group[str(run["sibling_group_id"])].append(run)
+    for group_runs in by_group.values():
+        members = _task_f_b_sibling_plan(group_runs)
+        for run in group_runs:
+            run["task_f_b_sibling_role"] = _TASK_F_B_ROLE_BY_POLICY[
+                str(run["branch_policy"])
+            ]
+            run["task_f_b_sibling_members"] = copy.deepcopy(members)
 
 
 def generate_research_run_matrix(
@@ -296,6 +353,7 @@ def generate_research_run_matrix(
                 )
             )
 
+    _attach_task_f_b_anchor_identity(runs)
     plan = {
         "schema_version": TASK_F_PLAN_SCHEMA_VERSION,
         "protocol_id": TASK_F_PROTOCOL_ID,
@@ -479,6 +537,15 @@ def build_task_f_training_config(
         "aggregate_eligible": bool(run["aggregate_eligible"]),
         "from_scratch": bool(run["from_scratch"]),
         "defer_id_test": True,
+        "artifact_export": (
+            {
+                "specification_sha256": _task_f_b_specification_sha256(),
+                "sibling_role": str(run["task_f_b_sibling_role"]),
+                "sibling_members": copy.deepcopy(run["task_f_b_sibling_members"]),
+            }
+            if "task_f_b_sibling_role" in run
+            else None
+        ),
         "update_telemetry": {
             "schema_version": "task_f_update_telemetry_v1",
             "audit_steps": list(audit_steps),
@@ -514,11 +581,37 @@ def generate_execution_only_pilot(
     )
     run.update(
         {
-            "run_id": f"task-f-execution-only-alpha0.5-seed{seed}-epochs{max_epochs}",
             "execution_only": True,
             "aggregate_eligible": False,
         }
     )
+    prefix = f"task-f-execution-only-pilot-seed{seed}-epochs{max_epochs}"
+    synthetic_quartet = []
+    for policy, suffix in (
+        ("zero", "zero"),
+        ("adamw_alpha_0", "alpha-0"),
+        ("adam_mixed_alpha_0_5", "alpha-0-5"),
+        ("adam_alpha_1", "alpha-1"),
+    ):
+        nominal_wd = 0.0 if policy == "zero" else 1e-4
+        synthetic_quartet.append(
+            _record(
+                family="adam",
+                cell_id="execution_only_alpha_0_5_pilot",
+                lr=1e-3,
+                nominal_wd=nominal_wd,
+                seed=seed,
+                branch_policy=policy,
+                sibling_group_id=run["sibling_group_id"],
+                optimizer=_adam_optimizer(policy, lr=1e-3, nominal_wd=nominal_wd),
+                zero_reference_run_id=None,
+            )
+        )
+        synthetic_quartet[-1]["run_id"] = f"{prefix}-{suffix}"
+    members = _task_f_b_sibling_plan(synthetic_quartet)
+    run["run_id"] = members["alpha_0_5"]["run_id"]
+    run["task_f_b_sibling_role"] = "alpha_0_5"
+    run["task_f_b_sibling_members"] = members
     config = build_task_f_training_config(base_config, run, audit_steps=audit_steps)
     config["training"]["max_epochs"] = max_epochs
     config["checkpoint"]["snapshot_epochs"] = [
@@ -572,6 +665,7 @@ def validate_task_f_training_config(config: Mapping[str, Any]) -> None:
         "aggregate_eligible",
         "from_scratch",
         "defer_id_test",
+        "artifact_export",
         "update_telemetry",
     }
     missing = required.difference(task_f)
@@ -592,6 +686,36 @@ def validate_task_f_training_config(config: Mapping[str, Any]) -> None:
         raise ValueError("Task F data_stream_id differs from branch-neutral config")
     if int(neutral.get("training_seed", -1)) != int(config["training"]["seed"]):
         raise ValueError("Task F training seed differs from branch-neutral config")
+    validate_no_protected_ood_references(
+        {
+            "run_id": task_f["run_id"],
+            "branch_policy": task_f["branch_policy"],
+            "dataset": {
+                "config_path": config["dataset"]["config_path"],
+                "train_split": config["dataset"]["train_split"],
+                "validation_split": config["dataset"]["validation_split"],
+            },
+            "branch_neutral_dataset": neutral.get("dataset"),
+        }
+    )
+    artifact_export = task_f["artifact_export"]
+    if artifact_export is not None:
+        if not isinstance(artifact_export, Mapping):
+            raise ValueError("Task F artifact_export must be a mapping or null")
+        if artifact_export.get("specification_sha256") != _task_f_b_specification_sha256():
+            raise ValueError("Task F-B specification hash mismatch")
+        role = artifact_export.get("sibling_role")
+        members = artifact_export.get("sibling_members")
+        if role not in {"zero", "alpha_0", "alpha_0_5", "alpha_1"}:
+            raise ValueError("Task F-B sibling_role is invalid")
+        if not isinstance(members, Mapping) or role not in members:
+            raise ValueError("Task F-B sibling plan is incomplete")
+        current = members[role]
+        if (
+            current.get("run_id") != task_f["run_id"]
+            or int(current.get("training_seed", -1)) != int(config["training"]["seed"])
+        ):
+            raise ValueError("Task F-B current sibling identity differs from training config")
     telemetry = task_f["update_telemetry"]
     if not isinstance(telemetry, Mapping):
         raise ValueError("Task F update_telemetry must be a mapping")
@@ -606,18 +730,6 @@ def validate_task_f_training_config(config: Mapping[str, Any]) -> None:
         raise ValueError("Task F audit_steps must be unique increasing positive steps")
     if not bool(task_f["execution_only"]) and tuple(config["checkpoint"]["snapshot_epochs"]) != TASK_F_SNAPSHOT_EPOCHS:
         raise ValueError("Task F research runs require the exact Card 13 v12 snapshot list")
-    validate_no_protected_ood_references(
-        {
-            "run_id": task_f["run_id"],
-            "branch_policy": task_f["branch_policy"],
-            "dataset": {
-                "config_path": config["dataset"]["config_path"],
-                "train_split": config["dataset"]["train_split"],
-                "validation_split": config["dataset"]["validation_split"],
-            },
-            "branch_neutral_dataset": neutral.get("dataset"),
-        }
-    )
 
 
 def generate_approval_packet(
@@ -663,11 +775,9 @@ def generate_approval_packet(
             "max_epochs": int(pilot_config["training"]["max_epochs"]),
             "execution_only": True,
         }
-    specification = task_f_b_specification_sha256 or "UNKNOWN"
+    specification = task_f_b_specification_sha256 or _task_f_b_specification_sha256()
     if specification != "UNKNOWN" and not re.fullmatch(r"[0-9a-f]{64}", specification):
         raise ValueError("Task F-B specification hash must be a lowercase SHA-256")
-    if specification == "UNKNOWN":
-        unresolved.append("task_f_b_specification_sha256")
     if not audit_schedule_frozen:
         unresolved.append("update_telemetry_audit_schedule")
     return {

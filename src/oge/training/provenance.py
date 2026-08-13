@@ -34,6 +34,19 @@ _FULL_SIBLING_IDENTITY_FIELDS = (
     "first_minibatch_transformed_image_sha256",
 )
 
+_DATA_STREAM_DIGEST_FIELDS = (
+    "data_stream_id",
+    "initial_python_rng_sha256",
+    "initial_numpy_rng_sha256",
+    "initial_torch_rng_sha256",
+    "initial_dataloader_rng_sha256",
+    "dataset_membership_sha256",
+    "branch_neutral_config_sha256",
+    "first_minibatch_ordered_sample_id_sha256",
+    "first_minibatch_transformed_image_sha256",
+    "first_minibatch_size",
+)
+
 
 def _update_digest(digest: Any, value: Any) -> None:
     if isinstance(value, torch.Tensor):
@@ -206,3 +219,95 @@ def validate_sibling_provenance(records: Sequence[Mapping[str, Any]]) -> None:
         if not run_plan_id or run_plan_id in run_plan_ids:
             raise ValueError("sibling run-plan identities must be non-empty and unique")
         run_plan_ids.add(run_plan_id)
+
+
+def paired_data_stream_sha256(provenance: Mapping[str, Any]) -> str:
+    """Hash the complete observed, branch-neutral Task F data-stream witness."""
+
+    if provenance.get("first_minibatch_witness_status") != "observed":
+        raise ValueError("Task F data-stream identity requires an observed first batch")
+    missing = [field for field in _DATA_STREAM_DIGEST_FIELDS if provenance.get(field) is None]
+    if missing:
+        raise ValueError(f"Task F data-stream identity is missing fields: {missing}")
+    return canonical_sha256(
+        {field: provenance[field] for field in _DATA_STREAM_DIGEST_FIELDS}
+    )
+
+
+def build_task_f_checkpoint_provenance(
+    *,
+    resolved_config: Mapping[str, Any],
+    paired_control_provenance: Mapping[str, Any],
+    checkpoint_epoch: int,
+    checkpoint_role: str,
+    oge_git_sha: str,
+    run_id: str,
+) -> dict[str, Any] | None:
+    """Build the exact Task F-B checkpoint interface for anchor/pilot exports."""
+
+    task_f = resolved_config.get("task_f")
+    if not isinstance(task_f, Mapping):
+        return None
+    artifact_export = task_f.get("artifact_export")
+    if artifact_export is None:
+        return None
+    if not isinstance(artifact_export, Mapping):
+        raise ValueError("Task F artifact_export must be a mapping")
+    if paired_control_provenance.get("first_minibatch_witness_status") != "observed":
+        if checkpoint_role == "snapshot" and checkpoint_epoch == 0:
+            return None
+        raise ValueError("Task F-B checkpoint provenance requires an observed first batch")
+    if run_id != task_f.get("run_id") or run_id != paired_control_provenance.get(
+        "run_plan_id"
+    ):
+        raise ValueError("Task F checkpoint run_id differs from the frozen run plan")
+    initialization_sha256 = str(
+        paired_control_provenance["initialization_sha256"]
+    )
+    data_stream_sha256 = paired_data_stream_sha256(paired_control_provenance)
+    members = {}
+    planned_members = artifact_export.get("sibling_members")
+    if not isinstance(planned_members, Mapping):
+        raise ValueError("Task F-B sibling plan must be a mapping")
+    for role, member in planned_members.items():
+        if not isinstance(member, Mapping):
+            raise ValueError("Task F-B sibling member must be a mapping")
+        members[str(role)] = {
+            **dict(member),
+            "initialization_sha256": initialization_sha256,
+            "data_stream_sha256": data_stream_sha256,
+        }
+    sibling_role = str(artifact_export["sibling_role"])
+    if sibling_role not in members:
+        raise ValueError("Task F-B current sibling is absent from the sibling plan")
+    current = members[sibling_role]
+    model = resolved_config["model"]
+    provenance = {
+        "schema_version": "task_f_checkpoint_provenance_v1",
+        "run_id": run_id,
+        "training_seed": int(resolved_config["training"]["seed"]),
+        "branch_policy": current["branch_policy"],
+        "total_weight_decay": current["total_weight_decay"],
+        "coupled_ratio": current["coupled_ratio"],
+        "checkpoint_epoch": checkpoint_epoch,
+        "checkpoint_role": checkpoint_role,
+        "oge_git_sha": oge_git_sha,
+        "execution_only": bool(task_f["execution_only"]),
+        "initialization_sha256": initialization_sha256,
+        "data_stream_sha256": data_stream_sha256,
+        "sibling_group_id": str(task_f["sibling_group_id"]),
+        "sibling_role": sibling_role,
+        "sibling_members": members,
+        "model_config": {
+            "name": model["name"],
+            "num_classes": int(model.get("num_classes", 10)),
+            "depth": int(model.get("depth", 28)),
+            "widen_factor": int(model.get("widen_factor", 10)),
+            "dropout_rate": float(model["dropout_rate"]),
+            "init_policy": model.get("init_policy", "msr_fan_in"),
+        },
+    }
+    # The B validator is the authority for this cross-workstream interface.
+    from oge.feature_export import validate_task_f_checkpoint_provenance
+
+    return validate_task_f_checkpoint_provenance(provenance)

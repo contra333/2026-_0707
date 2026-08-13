@@ -11,6 +11,12 @@ import yaml
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from oge.feature_export import (
+    export_task_f_from_files,
+    validate_task_f_checkpoint_payload,
+    verify_task_f_artifact,
+)
+from oge.models import make_model
 from oge.optimizers import make_optimizer
 from oge.studies.hashing import canonical_sha256
 from oge.training import runner as training_runner
@@ -166,7 +172,7 @@ def _run(
         resolved_config=config,
         run_dir=run_dir,
         device="cpu",
-        oge_git_sha="fixture-sha",
+        oge_git_sha="f" * 40,
         resume_from=resume_from,
         fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
@@ -518,7 +524,7 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
     }
 
 
-def test_task_f_synthetic_checkpoint_preserves_b_input_provenance_without_b_schema(
+def test_task_f_synthetic_checkpoint_carries_exact_b_input_provenance(
     tmp_path,
 ):
     config = generate_execution_only_pilot(
@@ -531,6 +537,7 @@ def test_task_f_synthetic_checkpoint_preserves_b_input_provenance_without_b_sche
     _, summary = _run(config, run_dir, defer_id_test=True)
 
     last = load_torch_artifact(run_dir / "checkpoints/last.pt")
+    best = load_torch_artifact(run_dir / "checkpoints/best_val.pt")
     initial = load_torch_artifact(run_dir / "checkpoints/snapshots/epoch_0000.pt")
     metadata = json.loads((run_dir / "run_metadata.json").read_text())
     provenance = last["paired_control_provenance"]
@@ -554,7 +561,77 @@ def test_task_f_synthetic_checkpoint_preserves_b_input_provenance_without_b_sche
     assert summary["paired_control_provenance"] == provenance
     assert summary["id_test"]["status"] == "deferred"
     assert summary["update_telemetry"]["record_count"] > 0
-    assert "specification_sha256" not in provenance
+    assert validate_task_f_checkpoint_payload(last)["checkpoint_role"] == "last"
+    assert validate_task_f_checkpoint_payload(best)["checkpoint_role"] == "best_val"
+    assert validate_task_f_checkpoint_payload(initial)["checkpoint_role"] == "snapshot"
+    assert last["run_id"] == config["task_f"]["run_id"]
+
+
+def test_task_f_synthetic_wrn_checkpoint_is_consumed_by_b_exporter(tmp_path):
+    base = _resolved_fixture_config(1, snapshots=[0, 1])
+    base["training"]["batch_size"] = 6
+    base["model"].update(
+        {"depth": 28, "widen_factor": 10, "init_policy": "msr_fan_in"}
+    )
+    config = generate_execution_only_pilot(
+        base_config=base,
+        seed=991,  # fixture-only; not a proposed pilot or research seed
+        max_epochs=1,
+        audit_steps=[1],
+    )
+    generator = seed_everything(config["training"]["seed"], deterministic=True)
+    initial_rng_state = capture_rng_state(generator)
+    model = make_model(config["model"])
+    optimizer = make_optimizer(model, config["optimizer"])
+    scheduler = make_scheduler(optimizer, config["scheduler"])
+    train_loader = DataLoader(
+        RandomizedTrainDataset(),
+        batch_size=6,
+        shuffle=True,
+        generator=generator,
+        num_workers=0,
+    )
+    evaluation_loader = DataLoader(FixedEvaluationDataset(), batch_size=2)
+    run_dir = tmp_path / "task_f_wrn"
+    fit_classifier(
+        model=model,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        criterion=nn.CrossEntropyLoss(),
+        train_loader=train_loader,
+        validation_loader=evaluation_loader,
+        test_loader=evaluation_loader,
+        train_generator=generator,
+        initial_rng_state=initial_rng_state,
+        resolved_config=config,
+        run_dir=run_dir,
+        device="cpu",
+        oge_git_sha="e" * 40,
+        defer_id_test=True,
+    )
+    checkpoint_path = run_dir / "checkpoints/last.pt"
+    checkpoint = load_torch_artifact(checkpoint_path)
+    validate_task_f_checkpoint_payload(checkpoint)
+
+    dataset = FixedEvaluationDataset()
+    input_path = tmp_path / "synthetic_id_input.npz"
+    np.savez(
+        input_path,
+        images=dataset.images.numpy().astype(np.float32),
+        sample_ids=np.asarray([f"fixture:{index}" for index in range(len(dataset))]),
+        is_id=np.ones(len(dataset), dtype=np.bool_),
+    )
+    artifact = export_task_f_from_files(
+        checkpoint_path=checkpoint_path,
+        input_npz_path=input_path,
+        artifact_root=tmp_path / "artifacts",
+        dataset_split="synthetic_id_fixture",
+        depth_tap="penultimate",
+        batch_size=2,
+    )
+    verified = verify_task_f_artifact(artifact)
+    assert verified["manifest"]["run_id"] == config["task_f"]["run_id"]
+    assert verified["manifest"]["execution_only"] is True
 
 
 def test_instrumentation_on_off_preserves_trajectory_and_checkpoint_state(tmp_path):
@@ -568,7 +645,7 @@ def test_instrumentation_on_off_preserves_trajectory_and_checkpoint_state(tmp_pa
         resolved_config=config,
         run_dir=without_dir,
         device="cpu",
-        oge_git_sha="fixture-sha",
+        oge_git_sha="f" * 40,
     )
     with_telemetry = _components(config)
     recorder = UpdateTelemetryRecorder(
@@ -582,7 +659,7 @@ def test_instrumentation_on_off_preserves_trajectory_and_checkpoint_state(tmp_pa
         resolved_config=config,
         run_dir=with_dir,
         device="cpu",
-        oge_git_sha="fixture-sha",
+        oge_git_sha="f" * 40,
         update_telemetry_recorder=recorder,
     )
 

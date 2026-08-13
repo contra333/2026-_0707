@@ -33,8 +33,10 @@ from .runner import (
 )
 from .provenance import (
     PAIRED_PROVENANCE_SCHEMA_VERSION,
+    build_task_f_checkpoint_provenance,
     create_initial_paired_provenance,
     observe_first_minibatch,
+    paired_data_stream_sha256,
     validate_resume_paired_identity,
     validate_sibling_provenance,
 )
@@ -92,12 +94,14 @@ __all__ = [
     "UpdateTelemetryRecorder",
     "build_task_f_training_config",
     "candidate_optimizer_update",
+    "build_task_f_checkpoint_provenance",
     "counterfactual_candidate_updates",
     "create_initial_paired_provenance",
     "generate_approval_packet",
     "generate_execution_only_pilot",
     "generate_research_run_matrix",
     "observe_first_minibatch",
+    "paired_data_stream_sha256",
     "research_aggregate_runs",
     "validate_research_run_matrix",
     "validate_no_protected_ood_references",
