@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from numbers import Real
+from typing import Final
 
 import torch
 from torch import nn
@@ -14,6 +15,11 @@ from torch import nn
 # `fan_in`. Both official implementations therefore agree on fan_in.
 DEFAULT_INIT_POLICY = "msr_fan_in"
 SUPPORTED_INIT_POLICIES = (DEFAULT_INIT_POLICY,)
+
+# Card 13 v12 multi-depth analysis contract.  The tuple order is part of the
+# serialized Task F identity and must not be inferred from module traversal.
+WRN_FEATURE_TAP_CONTRACT_VERSION: Final = "wrn_multi_depth_feature_taps_v1"
+WRN_FEATURE_TAP_NAMES: Final = ("stage1", "stage2", "stage3", "penultimate")
 
 
 class WideBasicBlock(nn.Module):
@@ -128,6 +134,14 @@ class WideResNet(nn.Module):
         self.dropout_rate = dropout_rate
         self.init_policy = init_policy
         self.feature_dim = widths[3]
+        self.feature_tap_contract_version = WRN_FEATURE_TAP_CONTRACT_VERSION
+        self.feature_tap_names = WRN_FEATURE_TAP_NAMES
+        self.feature_tap_dims = {
+            "stage1": widths[1],
+            "stage2": widths[2],
+            "stage3": widths[3],
+            "penultimate": widths[3],
+        }
 
         self.conv1 = nn.Conv2d(3, widths[0], kernel_size=3, stride=1, padding=1, bias=False)
         self.block1 = WideNetworkBlock(
@@ -175,17 +189,41 @@ class WideResNet(nn.Module):
                 nn.init.zeros_(module.bias)
 
     def forward(
-        self, x: torch.Tensor, return_features: bool = False
-    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
+        self,
+        x: torch.Tensor,
+        return_features: bool = False,
+        return_feature_taps: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor] | tuple[
+        torch.Tensor, dict[str, torch.Tensor]
+    ]:
+        if return_features and return_feature_taps:
+            raise ValueError(
+                "return_features and return_feature_taps are mutually exclusive"
+            )
+
         out = self.conv1(x)
         out = self.block1(out)
+        stage1 = self._global_average_pool(out) if return_feature_taps else None
         out = self.block2(out)
+        stage2 = self._global_average_pool(out) if return_feature_taps else None
         out = self.block3(out)
+        # Card 13 defines stage3 before the final BatchNorm/ReLU pair.
+        stage3 = self._global_average_pool(out) if return_feature_taps else None
         out = self.relu(self.bn(out))
-        out = self.avgpool(out)
-        features = torch.flatten(out, 1)
+        features = self._global_average_pool(out)
         logits = self.classifier(features)
 
+        if return_feature_taps:
+            assert stage1 is not None and stage2 is not None and stage3 is not None
+            return logits, {
+                "stage1": stage1,
+                "stage2": stage2,
+                "stage3": stage3,
+                "penultimate": features,
+            }
         if return_features:
             return logits, features
         return logits
+
+    def _global_average_pool(self, value: torch.Tensor) -> torch.Tensor:
+        return torch.flatten(self.avgpool(value), 1)
