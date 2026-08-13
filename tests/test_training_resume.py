@@ -16,12 +16,15 @@ from oge.studies.hashing import canonical_sha256
 from oge.training import runner as training_runner
 from oge.training import (
     atomic_torch_save,
+    capture_rng_state,
     fit_classifier,
+    generate_execution_only_pilot,
     load_torch_artifact,
     load_training_config,
     make_scheduler,
     resolve_training_config,
     seed_everything,
+    UpdateTelemetryRecorder,
     validate_resume_configuration,
 )
 
@@ -49,6 +52,7 @@ class RandomizedTrainDataset(Dataset):
         return {
             "image": self.images[index] + jitter * 1e-3,
             "class_label": self.labels[index],
+            "sample_id": f"fixture:train-{index}",
         }
 
 
@@ -119,6 +123,7 @@ def _resolved_fixture_config(max_epochs, *, snapshots=None):
 def _components(config):
     training = config["training"]
     generator = seed_everything(training["seed"], deterministic=True)
+    initial_rng_state = capture_rng_state(generator)
     model = TinyClassifier()
     optimizer = make_optimizer(model, config["optimizer"])
     scheduler = make_scheduler(optimizer, config["scheduler"])
@@ -140,6 +145,7 @@ def _components(config):
         "validation_loader": validation_loader,
         "test_loader": test_loader,
         "train_generator": generator,
+        "initial_rng_state": initial_rng_state,
     }
 
 
@@ -510,6 +516,85 @@ def test_run_artifacts_checkpoint_schema_and_reload_logits(tmp_path):
         "cuda_matmul_allow_tf32",
         "cudnn_allow_tf32",
     }
+
+
+def test_task_f_synthetic_checkpoint_preserves_b_input_provenance_without_b_schema(
+    tmp_path,
+):
+    config = generate_execution_only_pilot(
+        base_config=_resolved_fixture_config(1, snapshots=[0, 1]),
+        seed=997,  # fixture-only; not a proposed pilot or research seed
+        max_epochs=1,
+        audit_steps=[1],
+    )
+    run_dir = tmp_path / "task_f_synthetic"
+    _, summary = _run(config, run_dir, defer_id_test=True)
+
+    last = load_torch_artifact(run_dir / "checkpoints/last.pt")
+    initial = load_torch_artifact(run_dir / "checkpoints/snapshots/epoch_0000.pt")
+    metadata = json.loads((run_dir / "run_metadata.json").read_text())
+    provenance = last["paired_control_provenance"]
+    required = {
+        "sibling_group_id",
+        "initialization_sha256",
+        "initial_python_rng_sha256",
+        "initial_numpy_rng_sha256",
+        "initial_torch_rng_sha256",
+        "initial_dataloader_rng_sha256",
+        "first_minibatch_ordered_sample_id_sha256",
+        "first_minibatch_transformed_image_sha256",
+        "branch_neutral_config_sha256",
+        "execution_only",
+    }
+    assert required.issubset(provenance)
+    assert provenance["first_minibatch_witness_status"] == "observed"
+    assert provenance["execution_only"] is True
+    assert initial["paired_control_provenance"] == provenance
+    assert metadata["paired_control_provenance"] == provenance
+    assert summary["paired_control_provenance"] == provenance
+    assert summary["id_test"]["status"] == "deferred"
+    assert summary["update_telemetry"]["record_count"] > 0
+    assert "specification_sha256" not in provenance
+
+
+def test_instrumentation_on_off_preserves_trajectory_and_checkpoint_state(tmp_path):
+    config = _resolved_fixture_config(1, snapshots=[])
+    without_dir = tmp_path / "without_telemetry"
+    with_dir = tmp_path / "with_telemetry"
+
+    without = _components(config)
+    fit_classifier(
+        **without,
+        resolved_config=config,
+        run_dir=without_dir,
+        device="cpu",
+        oge_git_sha="fixture-sha",
+    )
+    with_telemetry = _components(config)
+    recorder = UpdateTelemetryRecorder(
+        model=with_telemetry["model"],
+        optimizer=with_telemetry["optimizer"],
+        audit_steps=[1, 2, 3],
+        include_batch_norm=False,
+    )
+    fit_classifier(
+        **with_telemetry,
+        resolved_config=config,
+        run_dir=with_dir,
+        device="cpu",
+        oge_git_sha="fixture-sha",
+        update_telemetry_recorder=recorder,
+    )
+
+    checkpoint_without = load_torch_artifact(without_dir / "checkpoints/last.pt")
+    checkpoint_with = load_torch_artifact(with_dir / "checkpoints/last.pt")
+    for field in ("model_state", "optimizer_state", "scheduler_state", "rng_state"):
+        _assert_nested_equal(checkpoint_without[field], checkpoint_with[field])
+    assert _history_without_timing(checkpoint_without["history"]) == _history_without_timing(
+        checkpoint_with["history"]
+    )
+    assert (with_dir / "update_telemetry.jsonl").is_file()
+    assert not (without_dir / "update_telemetry.jsonl").exists()
 
 
 class ExplodingIDTestLoader:

@@ -50,6 +50,13 @@ from .engine import (
     train_one_epoch,
 )
 from .fork import restore_fork_checkpoint, sha256_file, validate_fork_configuration
+from .provenance import (
+    create_initial_paired_provenance,
+    observe_first_minibatch,
+    validate_resume_paired_identity,
+)
+from .task_f_plan import validate_task_f_training_config
+from .telemetry import UpdateTelemetryRecorder
 
 RUN_SCHEMA_VERSION = "1.0"
 PROTOCOL_NAME = "oge_cifar10_holdout_v1"
@@ -94,6 +101,23 @@ def _read_json(path: Path) -> dict[str, Any]:
 def _write_history(path: Path, history: list[dict[str, object]]) -> None:
     lines = [json.dumps(row, sort_keys=True, allow_nan=False) for row in history]
     _atomic_text_write(path, "".join(f"{line}\n" for line in lines))
+
+
+def _write_jsonl(path: Path, records: list[dict[str, object]]) -> None:
+    lines = [json.dumps(record, sort_keys=True, allow_nan=False) for record in records]
+    _atomic_text_write(path, "".join(f"{line}\n" for line in lines))
+
+
+def _read_jsonl(path: Path) -> list[dict[str, object]]:
+    if not path.is_file():
+        return []
+    records = []
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        value = json.loads(line)
+        if not isinstance(value, dict):
+            raise ValueError(f"expected a JSON mapping at {path}:{line_number}")
+        records.append(value)
+    return records
 
 
 def load_training_config(path: str | Path) -> dict[str, Any]:
@@ -239,6 +263,8 @@ def _validate_training_config(config: dict[str, Any]) -> None:
         raise ValueError(
             "checkpoint.snapshot_epochs must be unique increasing non-negative epochs"
         )
+    if "task_f" in config:
+        validate_task_f_training_config(config)
 
 
 def _resolve_path(path: str | Path, *, repository_root: Path) -> Path:
@@ -642,8 +668,9 @@ def _checkpoint_payload(
     oge_git_sha: str,
     run_id: str,
     history: list[dict[str, object]],
+    paired_control_provenance: dict[str, Any] | None,
 ) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "schema_version": CHECKPOINT_SCHEMA_VERSION,
         "checkpoint_type": checkpoint_type,
         "completed_epoch": completed_epoch,
@@ -659,6 +686,11 @@ def _checkpoint_payload(
         "run_id": run_id,
         "history": copy.deepcopy(history),
     }
+    if paired_control_provenance is not None:
+        payload["paired_control_provenance"] = copy.deepcopy(
+            paired_control_provenance
+        )
+    return payload
 
 
 def _snapshot_payload(
@@ -668,8 +700,9 @@ def _snapshot_payload(
     resolved_config: dict[str, Any],
     oge_git_sha: str,
     run_id: str,
+    paired_control_provenance: dict[str, Any] | None,
 ) -> dict[str, object]:
-    return {
+    payload: dict[str, object] = {
         "schema_version": SNAPSHOT_SCHEMA_VERSION,
         "checkpoint_type": "snapshot",
         "completed_epoch": completed_epoch,
@@ -679,6 +712,11 @@ def _snapshot_payload(
         "oge_git_sha": oge_git_sha,
         "run_id": run_id,
     }
+    if paired_control_provenance is not None:
+        payload["paired_control_provenance"] = copy.deepcopy(
+            paired_control_provenance
+        )
+    return payload
 
 
 def _validate_checkpoint(payload: dict[str, object]) -> None:
@@ -737,6 +775,7 @@ def _artifact_paths(run_dir: Path) -> dict[str, Path]:
         "metadata": run_dir / "run_metadata.json",
         "environment": run_dir / "environment.json",
         "history": run_dir / "history.jsonl",
+        "update_telemetry": run_dir / "update_telemetry.jsonl",
         "summary": run_dir / "summary.json",
         "fork_manifest": run_dir / "fork_manifest.json",
         "last": checkpoint_dir / "last.pt",
@@ -755,6 +794,7 @@ def _prepare_artifacts(
     resume_payload: dict[str, object] | None,
     resume_from: Path | None,
     defer_id_test: bool,
+    paired_control_provenance: dict[str, Any] | None,
 ) -> tuple[dict[str, Path], str]:
     paths = _artifact_paths(run_dir)
     if resume_payload is None:
@@ -774,6 +814,10 @@ def _prepare_artifacts(
             "created_at": _utc_now(),
             "resume_events": [],
         }
+        if paired_control_provenance is not None:
+            metadata["paired_control_provenance"] = copy.deepcopy(
+                paired_control_provenance
+            )
         environments = {"schema_version": RUN_SCHEMA_VERSION, "executions": []}
     else:
         run_dir.mkdir(parents=True, exist_ok=True)
@@ -799,6 +843,12 @@ def _prepare_artifacts(
         expected_id_test_mode = "deferred" if defer_id_test else "enabled"
         if metadata.get("id_test_evaluation", "enabled") != expected_id_test_mode:
             raise ValueError("resume cannot change the ID-test evaluation mode")
+        saved_provenance = resume_payload.get("paired_control_provenance")
+        metadata_provenance = metadata.get("paired_control_provenance")
+        if saved_provenance != metadata_provenance:
+            raise ValueError(
+                "run metadata and checkpoint paired-control provenance do not match"
+            )
         environments = (
             _read_json(paths["environment"])
             if paths["environment"].is_file()
@@ -824,6 +874,25 @@ def _prepare_artifacts(
     )
     _write_json(paths["environment"], environments)
     return paths, run_id
+
+
+def _persist_observed_paired_provenance(
+    *,
+    paths: dict[str, Path],
+    provenance: dict[str, Any],
+) -> None:
+    metadata = _read_json(paths["metadata"])
+    metadata["paired_control_provenance"] = copy.deepcopy(provenance)
+    _write_json(paths["metadata"], metadata)
+    initial_snapshot_path = paths["snapshots"] / "epoch_0000.pt"
+    if initial_snapshot_path.is_file():
+        snapshot = load_torch_artifact(initial_snapshot_path, map_location="cpu")
+        if snapshot.get("checkpoint_type") != "snapshot" or int(
+            snapshot.get("completed_epoch", -1)
+        ) != 0:
+            raise ValueError("Task F epoch-0 snapshot has an invalid identity")
+        snapshot["paired_control_provenance"] = copy.deepcopy(provenance)
+        atomic_torch_save(snapshot, initial_snapshot_path)
 
 
 def _evaluation_payload(
@@ -854,6 +923,7 @@ def _reconcile_epoch_artifacts(
     resolved_config: dict[str, Any],
     oge_git_sha: str,
     run_id: str,
+    paired_control_provenance: dict[str, Any] | None,
 ) -> None:
     """Finish artifacts belonging to the epoch committed by atomic last.pt."""
     completed_epoch = int(checkpoint["completed_epoch"])
@@ -900,6 +970,7 @@ def _reconcile_epoch_artifacts(
                     resolved_config=resolved_config,
                     oge_git_sha=oge_git_sha,
                     run_id=run_id,
+                    paired_control_provenance=paired_control_provenance,
                 ),
                 snapshot_path,
             )
@@ -923,6 +994,8 @@ def fit_classifier(
     resume_from: str | Path | None = None,
     fork_from_prefix: str | Path | None = None,
     defer_id_test: bool = False,
+    initial_rng_state: dict[str, object] | None = None,
+    update_telemetry_recorder: UpdateTelemetryRecorder | None = None,
 ) -> dict[str, object]:
     """Run, strictly resume, or start a decay branch from a zero-decay prefix."""
     target_device = _target_device(device)
@@ -935,6 +1008,21 @@ def fit_classifier(
     output_dir = Path(run_dir)
     resume_path = Path(resume_from) if resume_from is not None else None
     fork_path = Path(fork_from_prefix) if fork_from_prefix is not None else None
+    task_f = resolved_config.get("task_f")
+    paired_control_provenance: dict[str, Any] | None = None
+    if task_f is not None:
+        validate_task_f_training_config(resolved_config)
+        if initial_rng_state is None:
+            raise ValueError("Task F training requires pre-initialization RNG provenance")
+        if fork_path is not None:
+            raise ValueError("Task F fresh main/pilot runs cannot use fork_from_prefix")
+        if not defer_id_test or not bool(task_f["defer_id_test"]):
+            raise ValueError("Task F training requires deferred ID-test evaluation")
+        paired_control_provenance = create_initial_paired_provenance(
+            resolved_config=resolved_config,
+            model=model,
+            initial_rng_state=initial_rng_state,
+        )
     if resume_path is not None and fork_path is not None:
         raise ValueError("resume_from and fork_from_prefix are mutually exclusive")
     if resume_path is not None:
@@ -958,6 +1046,15 @@ def fit_classifier(
         )
         if resume_payload["oge_git_sha"] != oge_git_sha:
             raise ValueError("resume checkpoint repository Git SHA differs from the current run")
+        saved_provenance = resume_payload.get("paired_control_provenance")
+        if paired_control_provenance is not None:
+            if not isinstance(saved_provenance, dict):
+                raise ValueError("Task F resume checkpoint is missing paired provenance")
+            validate_resume_paired_identity(
+                saved_provenance,
+                paired_control_provenance,
+            )
+            paired_control_provenance = copy.deepcopy(saved_provenance)
     if fork_payload is not None:
         _validate_checkpoint(fork_payload)
         validate_fork_configuration(
@@ -989,6 +1086,7 @@ def fit_classifier(
         resume_payload=resume_payload,
         resume_from=resume_path,
         defer_id_test=defer_id_test,
+        paired_control_provenance=paired_control_provenance,
     )
     snapshot_epochs = set(int(value) for value in resolved_config["checkpoint"]["snapshot_epochs"])
 
@@ -1006,6 +1104,7 @@ def fit_classifier(
                     resolved_config=resolved_config,
                     oge_git_sha=oge_git_sha,
                     run_id=run_id,
+                    paired_control_provenance=paired_control_provenance,
                 ),
                 paths["snapshots"] / "epoch_0000.pt",
             )
@@ -1033,6 +1132,7 @@ def fit_classifier(
             resolved_config=resolved_config,
             oge_git_sha=oge_git_sha,
             run_id=run_id,
+            paired_control_provenance=paired_control_provenance,
         )
     else:
         assert fork_payload is not None
@@ -1072,6 +1172,7 @@ def fit_classifier(
                     resolved_config=resolved_config,
                     oge_git_sha=oge_git_sha,
                     run_id=run_id,
+                    paired_control_provenance=paired_control_provenance,
                 ),
                 paths["snapshots"] / f"epoch_{completed_epoch:04d}.pt",
             )
@@ -1087,6 +1188,22 @@ def fit_classifier(
         metadata["fork_event"] = fork_manifest
         _write_json(paths["metadata"], metadata)
 
+    if update_telemetry_recorder is None and task_f is not None:
+        update_telemetry_recorder = UpdateTelemetryRecorder.from_config(
+            model=model,
+            optimizer=optimizer,
+            config=task_f["update_telemetry"],
+        )
+    existing_telemetry = _read_jsonl(paths["update_telemetry"])
+    if update_telemetry_recorder is not None and not paths["update_telemetry"].is_file():
+        _write_jsonl(paths["update_telemetry"], [])
+    first_batch_observer = None
+    witness_persisted = paired_control_provenance is None or resume_payload is not None
+    if paired_control_provenance is not None and resume_payload is None:
+        first_batch_observer = lambda batch: observe_first_minibatch(
+            paired_control_provenance, batch
+        )
+
     max_epochs = int(resolved_config["training"]["max_epochs"])
     for epoch in range(completed_epoch + 1, max_epochs + 1):
         epoch_started = time.perf_counter()
@@ -1097,7 +1214,17 @@ def fit_classifier(
             optimizer,
             criterion,
             device=target_device,
+            start_global_step=global_step,
+            first_batch_observer=first_batch_observer,
+            update_telemetry=update_telemetry_recorder,
         )
+        first_batch_observer = None
+        if not witness_persisted and paired_control_provenance is not None:
+            _persist_observed_paired_provenance(
+                paths=paths,
+                provenance=paired_control_provenance,
+            )
+            witness_persisted = True
         global_step += int(train_metrics["step_count"])
         validation_metrics = evaluate_classifier(
             model,
@@ -1130,6 +1257,11 @@ def fit_classifier(
         }
         history.append(row)
         _write_history(paths["history"], history)
+        if update_telemetry_recorder is not None:
+            _write_jsonl(
+                paths["update_telemetry"],
+                existing_telemetry + update_telemetry_recorder.records,
+            )
         assert best_validation is not None
         last_payload = _checkpoint_payload(
             checkpoint_type="last",
@@ -1144,6 +1276,7 @@ def fit_classifier(
             oge_git_sha=oge_git_sha,
             run_id=run_id,
             history=history,
+            paired_control_provenance=paired_control_provenance,
         )
         atomic_torch_save(last_payload, paths["last"])
         if became_best:
@@ -1158,6 +1291,7 @@ def fit_classifier(
                     resolved_config=resolved_config,
                     oge_git_sha=oge_git_sha,
                     run_id=run_id,
+                    paired_control_provenance=paired_control_provenance,
                 ),
                 paths["snapshots"] / f"epoch_{epoch:04d}.pt",
             )
@@ -1210,6 +1344,22 @@ def fit_classifier(
             "summary": str(paths["summary"]),
         },
     }
+    if paired_control_provenance is not None:
+        summary["paired_control_provenance"] = copy.deepcopy(
+            paired_control_provenance
+        )
+    if update_telemetry_recorder is not None:
+        summary["update_telemetry"] = {
+            "schema_version": task_f["update_telemetry"]["schema_version"]
+            if task_f is not None
+            else "task_f_update_telemetry_v1",
+            "record_count": len(existing_telemetry)
+            + len(update_telemetry_recorder.records),
+            "artifact_path": str(paths["update_telemetry"]),
+        }
+        summary["artifact_paths"]["update_telemetry"] = str(
+            paths["update_telemetry"]
+        )
     if fork_payload is not None:
         summary["fork"] = {
             "status": "completed",
@@ -1260,6 +1410,7 @@ def run_training_from_config(
         int(training["seed"]),
         deterministic=bool(training["deterministic"]),
     )
+    initial_rng_state = capture_rng_state(train_generator)
     dataset_config = resolved_config["dataset"]["definition"]
     loaders = build_openood_cifar10_loaders(
         dataset_config,
@@ -1299,4 +1450,5 @@ def run_training_from_config(
         resume_from=resume_from,
         fork_from_prefix=fork_from_prefix,
         defer_id_test=defer_id_test,
+        initial_rng_state=initial_rng_state,
     )

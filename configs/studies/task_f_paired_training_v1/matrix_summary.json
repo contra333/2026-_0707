@@ -1,0 +1,18 @@
+{
+  "schema_version": "task_f_paired_run_plan_summary_v1",
+  "total_research_runs": 50,
+  "family_counts": {
+    "adam": 41,
+    "sgdm": 9
+  },
+  "cell_counts": {
+    "adam_lr1e-3_wd1e-4_anchor": 20,
+    "adam_lr1e-3_wd1e-3": 6,
+    "adam_lr3e-4_wd1e-4": 9,
+    "adam_lr3e-4_wd1e-3": 6,
+    "sgdm_lr0.1_wd5e-4": 9
+  },
+  "zero_baseline_policy": "one shared zero run per optimizer family, LR, and paired seed",
+  "research_seed_ids": "UNRESOLVED_OWNER_INPUT",
+  "generated_launch_bundle_policy": "ignored artifacts only"
+}
