@@ -21,9 +21,12 @@ all payload hashes on the same runtime with the fixed four-thread numerical
 environment.
 
 RtMD is an optional sidecar, not a prerequisite for Task F or the main fresh
-paired mechanism study. No exact Gate 3 rule is frozen. The immediate next
-work is bounded Task F CPU engineering and fixture validation; fresh training
-still requires its separate pre-execution contracts and resource approval.
+paired mechanism study. No exact Gate 3 rule is frozen. Task F model/export
+and paired-training CPU engineering are complete, including full-matrix
+sibling provenance and a candidate serialization specification identity of
+`301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e`.
+The immediate next work is the fresh-training pre-execution addendum and owner
+approval package; no fresh training has started.
 
 The planned chain is:
 
@@ -45,7 +48,14 @@ same initialization and data stream
 - Optimizer factory, shared parameter groups, CIFAR training/checkpoint/resume, and
   `fork_from_prefix` are implemented and tested.
 - `wrn28_10`, CIFAR `resnet18`, and the common logits/penultimate-feature API are
-  implemented. WRN multi-depth taps are not.
+  implemented. WRN stage1/stage2/stage3/penultimate taps and the separate
+  CPU-only Task F ID-feature artifact contract are implemented and tested.
+- The Task F run-plan generator conserves 41 Adam-family and nine SGDM-family
+  runs, preserves same-initialization/data-stream witnesses, exact snapshot
+  identities, strict resume, execution-only exclusion, and non-mutating update
+  telemetry. Every planned run now emits the versioned checkpoint provenance
+  required by the feature exporter. These are fixture-validated engineering
+  records, not completed research runs.
 - CIFAR-10 membership and OpenOOD-compatible roles are frozen and validated.
 - The WRN-28-10/CIFAR-10 v1.2 population completed: 36 seed-0 grid cells plus the
   frozen-role follow-up population.

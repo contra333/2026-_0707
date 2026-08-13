@@ -1306,9 +1306,11 @@ The manifest must explicitly encode the zero / `alpha=0` / `alpha=0.5` /
 `alpha=1` sibling relationship and preserve verifiable same-initialization and
 data-stream identity across siblings. Protected-OOD paths and dataset
 identities are excluded from this pre-Task-F interface. The concrete
-serialization schema, validation rules, and specification-hash generation
-belong to a later bounded Task F implementation Issue; v12 creates no
-code/config/schema implementation.
+serialization schema, validation rules, and specification-hash generation were
+implemented in bounded Task F Issues after v12 was frozen. The current
+pre-execution candidate specification identity is
+`301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e`;
+the fresh-training addendum must carry this identity forward before launch.
 
 ### 12.2 Full-study records and checks
 
@@ -1382,10 +1384,12 @@ The current repository implements the historical v1 preflight, its bounded
 ID-only archive diagnostic, and the completed v2 compliance rerun. V2 left
 estimator applicability unchanged at `30/60`, and all 30 applicable fits
 passed every required numerical gate. Historical Gate 2 remains permanently
-`INCONCLUSIVE`. Fresh v12 paired training, multi-depth extraction, expanded
-trajectory snapshots, update logging, fresh Gate 3, GPU work, the full RtMD
-detector, protected OOD, and scale regimes remain `NOT_RUN`/not yet implemented
-until their respective contracts and approvals are satisfied.
+`INCONCLUSIVE`. Task F CPU engineering now implements multi-depth taps,
+versioned ID-only export, the 50-run matrix, paired provenance, expanded
+snapshot identities, resume checks, and update-telemetry plumbing with
+synthetic fixtures. Fresh v12 training and production extraction, fresh Gate
+3, GPU work, the full RtMD detector, protected OOD, and scale regimes remain
+`NOT_RUN` until their respective contracts and approvals are satisfied.
 
 ## 13. Pre-execution addendum and stopping rules
 
