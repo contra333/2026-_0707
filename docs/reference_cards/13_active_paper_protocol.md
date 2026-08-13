@@ -1596,3 +1596,142 @@ evaluation may be implemented, connected, or executed.
 Null and adverse results remain reportable. Do not rescue them by adding a
 detector, selecting a matching checkpoint, changing the primary epoch, or
 pooling cells whose effects disagree.
+
+### 13.5 Task F fresh-training pre-execution addendum v1
+
+This subsection is the frozen pre-execution contract for the Task F
+execution-only pilot and later main fresh training. It is frozen before any
+fresh result is inspected. The pilot remains a separate execution, resume, and
+export check; it is not research evidence and is excluded from every research
+aggregation.
+
+The only authorized pilot proposal is:
+
+```yaml
+execution_only_pilot:
+  seed: 9000
+  max_epochs: 2
+  first_leg: run_to_epoch_1_boundary
+  resume_leg: resume_the_identical_max_epochs_2_config
+  research_evidence: false
+  audit_steps: [1, 352, 353, 704]
+  export_check:
+    checkpoint: epoch_2_last.pt
+    depth_tap: penultimate
+    dataset_split: id_train
+    device: cpu
+```
+
+Both legs use the same configuration with `max_epochs=2` from the start.
+Running with `max_epochs=1` and changing it to `2` for resume is prohibited.
+The first leg may stop only after the durable epoch-1 checkpoint and provenance
+boundary using a documented safe procedure for this exact process; an
+arbitrary kill is not an allowed substitute. The synthetic sibling quartet in
+pilot metadata declares artifact identity only and must not be interpreted as
+four executed pilot runs.
+
+The frozen research seed allocation is:
+
+```yaml
+research_seeds:
+  anchor: [0, 1, 2, 3, 4]
+  adam_factorial: [0, 1, 2]
+  sgdm: [0, 1, 2]
+  reuse_seed_numbers_across_families: true
+  historical_seed_number_overlap: allowed_but_not_replication
+```
+
+Reusing a seed number across families intentionally controls initialization
+and data-stream inputs. The number alone is not evidence that the realized
+controls match: every applicable sibling comparison must verify both
+`initialization_sha256` and `data_stream_sha256`. Overlap with a historical
+seed number is never described as replication.
+
+For the frozen 45,000-member training split and batch size 128,
+
+```text
+S = ceil(45000 / 128) = 352.
+```
+
+All 50 research runs use the same audit schedule:
+
+```yaml
+research_audit_steps:
+  [1, 352, 3520, 10560, 21120, 21121,
+   42240, 42241, 56320, 56321, 70400]
+```
+
+It is determined by
+
+```text
+{1}
+∪ {S*e : e ∈ [1, 10, 30, 200]}
+∪ {S*m, S*m+1 : m ∈ [60, 120, 160]}.
+```
+
+Resume must not add, remove, or change an audit step.
+
+The following main-study ID interpretation guardrail is frozen before fresh
+results are seen. It does not apply to the execution-only pilot.
+
+```yaml
+id_equivalence:
+  primary_endpoint: epoch_200_last.pt
+  secondary_control: best_val.pt_selected_by_id_validation_only
+  accuracy_margin: 0.01
+  nll_margin: 0.08
+  ece_margin: 0.02
+  joint_rule: all_three_required_for_comparable_id
+  uncertainty: paired_90_percent_ci_reported
+  formal_tost_claim: false
+  failure_action:
+    keep_all_runs: true
+    exclude_or_retrain_runs: false
+    interpretation: report_failed_guardrail_and_id_ood_pareto
+```
+
+Failure of any one guardrail forbids `comparable-ID` language. It does not
+discard a run, stop training, retrain a run, or authorize post-hoc checkpoint
+selection. The `0.08` NLL margin is a prospective practical margin grounded in
+existing ID-only, same-policy seed dispersion. It is not derived from fresh
+results or protected OOD.
+
+Alpha confirmation uses exactly the three existing points and this
+classification:
+
+```yaml
+alpha_interior_compatibility:
+  rule: >
+    seed-mean Y(0.5) is interior-compatible when it lies in the closed interval
+    [min(Y(0),Y(1)), max(Y(0),Y(1))]
+  endpoint_tie_rule: >
+    when |Y(1)-Y(0)| <= 1e-12 * max(1,|Y(0)|,|Y(1)|), classify the outcome as
+    undefined_degenerate_endpoints
+  role: reported_alpha_confirmation_classification_not_a_gate
+```
+
+This is a reported confirmation classification, not a training-launch gate or
+primary-result gate. No alpha point may be added.
+
+The Task F serialization specification SHA-256, re-derived from the current
+generator and validator before this addendum was frozen, is:
+
+```text
+301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e
+```
+
+This specification identity is distinct from runtime and output identity.
+Runtime/output records separately bind the exact execution Git SHA, host and
+device, environment, data root, run and output paths, checkpoints, exports,
+and their artifact hashes. Neither kind of identity substitutes for the other.
+
+Any change to the specification identity, pilot seed or pilot configuration,
+research seed lists, or telemetry audit schedule invalidates the existing
+approval and requires a new pre-execution approval. A concrete pilot approval
+also binds its reported execution SHA and runtime/output proposal.
+
+Pilot approval and full-training approval are separate. Approval of the one
+`alpha=0.5`, seed-9000, two-epoch execution-only run never authorizes any of
+the 50 research runs. Task F pilot and main ID training do not require
+protected-OOD access, an RtMD Gate 3 rule, or RtMD activation. Protected OOD
+remains prohibited until its own later contract and approval.

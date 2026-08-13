@@ -25,8 +25,11 @@ paired mechanism study. No exact Gate 3 rule is frozen. Task F model/export
 and paired-training CPU engineering are complete, including full-matrix
 sibling provenance and a candidate serialization specification identity of
 `301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e`.
-The immediate next work is the fresh-training pre-execution addendum and owner
-approval package; no fresh training has started.
+The Task F fresh-training pre-execution addendum v1 is now frozen in Card 13.
+It fixes the execution-only pilot, research seeds, update-audit schedule,
+ID-equivalence guardrail, alpha classification, and specification identity.
+The immediate next work is the read-only resource and owner-approval package;
+no fresh training or GPU process has started.
 
 The planned chain is:
 
