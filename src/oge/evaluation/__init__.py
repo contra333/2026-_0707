@@ -15,6 +15,17 @@ from .extraction import extract_checkpoint_artifact, verify_raw_feature_artifact
 from .metrics import compute_ood_metrics, macro_average_ood_metrics
 from .msp import evaluate_msp_protocol, infer_msp
 from .runtime import FittedMetricRuntime, load_raw_feature_cache, write_bounded_smoke_result
+from .task_f_fresh import (
+    BINDINGS_SCHEMA_VERSION as TASK_F_FRESH_BINDINGS_SCHEMA_VERSION,
+    PLAN_SCHEMA_VERSION as TASK_F_FRESH_PLAN_SCHEMA_VERSION,
+    build_fresh_evaluation_plan,
+    build_id_input,
+    summarize_export_coverage,
+    validate_bound_inventory,
+    verify_bridge_artifact,
+    verify_id_input,
+    write_bridge_artifact,
+)
 
 __all__ = [
     "augrc",
@@ -33,6 +44,15 @@ __all__ = [
     "misclassification_auroc",
     "negative_log_likelihood",
     "top1_accuracy",
+    "TASK_F_FRESH_BINDINGS_SCHEMA_VERSION",
+    "TASK_F_FRESH_PLAN_SCHEMA_VERSION",
+    "build_fresh_evaluation_plan",
+    "build_id_input",
+    "summarize_export_coverage",
+    "validate_bound_inventory",
+    "verify_bridge_artifact",
+    "verify_id_input",
+    "write_bridge_artifact",
     "verify_raw_feature_artifact",
     "write_bounded_smoke_result",
 ]
