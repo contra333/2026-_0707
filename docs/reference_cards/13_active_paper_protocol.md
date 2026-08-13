@@ -1308,8 +1308,8 @@ data-stream identity across siblings. Protected-OOD paths and dataset
 identities are excluded from this pre-Task-F interface. The concrete
 serialization schema, validation rules, and specification-hash generation were
 implemented in bounded Task F Issues after v12 was frozen. The current
-pre-execution candidate specification identity is
-`301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e`;
+pre-execution specification identity is
+`0ac3101e6d6aaed1a5a0d4891792d4700540bac5247cca8f7d6e67d664ffe9ba`;
 the fresh-training addendum must carry this identity forward before launch.
 
 ### 12.2 Full-study records and checks
@@ -1597,13 +1597,26 @@ Null and adverse results remain reportable. Do not rescue them by adding a
 detector, selecting a matching checkpoint, changing the primary epoch, or
 pooling cells whose effects disagree.
 
-### 13.5 Task F fresh-training pre-execution addendum v1
+### 13.5 Task F fresh-training pre-execution addendum v2
 
 This subsection is the frozen pre-execution contract for the Task F
 execution-only pilot and later main fresh training. It is frozen before any
 fresh result is inspected. The pilot remains a separate execution, resume, and
 export check; it is not research evidence and is excluded from every research
 aggregation.
+
+V2 retains every v1 training, seed, telemetry, ID-equivalence, and alpha
+decision. The completed v1 pilot used the frozen CPU export check below. Its
+execution-only throughput exposed a production export bottleneck but supplied
+no research result and changed no scientific rule. Bounded Issue #89 and PR
+#90 added explicit `cuda:<local-index>` feature export while keeping CPU as a
+supported default. Export device selection is a runtime control, not a
+training semantic: every artifact remains float32, ordered by the same sample
+identity, and bound to the same checkpoint, sibling, and specification
+contract. Exact CUDA device/runtime identity and the resulting feature bytes
+are recorded in runtime and output identity. A GPU artifact must pass its own
+shape, finiteness, ordering, provenance, checksum, and CPU-reference numerical
+parity validation before production use.
 
 The only authorized pilot proposal is:
 
@@ -1717,7 +1730,7 @@ The Task F serialization specification SHA-256, re-derived from the current
 generator and validator before this addendum was frozen, is:
 
 ```text
-301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e
+0ac3101e6d6aaed1a5a0d4891792d4700540bac5247cca8f7d6e67d664ffe9ba
 ```
 
 This specification identity is distinct from runtime and output identity.

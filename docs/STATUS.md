@@ -21,15 +21,20 @@ all payload hashes on the same runtime with the fixed four-thread numerical
 environment.
 
 RtMD is an optional sidecar, not a prerequisite for Task F or the main fresh
-paired mechanism study. No exact Gate 3 rule is frozen. Task F model/export
-and paired-training CPU engineering are complete, including full-matrix
-sibling provenance and a candidate serialization specification identity of
-`301335c944c85089e9b7976d5cbb0b46005413d8d0652f8487bf79b4b5da2c4e`.
-The Task F fresh-training pre-execution addendum v1 is now frozen in Card 13.
-It fixes the execution-only pilot, research seeds, update-audit schedule,
-ID-equivalence guardrail, alpha classification, and specification identity.
-The immediate next work is the read-only resource and owner-approval package;
-no fresh training or GPU process has started.
+paired mechanism study. No exact Gate 3 rule is frozen. Task F model/export and
+paired-training engineering are complete, including full-matrix sibling
+provenance. The one authorized execution-only pilot completed its safe epoch-1
+stop, identical-config resume through epoch 2, global-step/audit continuity
+checks, and CPU ID-train export; it remains excluded from research evidence.
+The CPU export took 20 minutes 13 seconds and was a confirmed production
+bottleneck. PR #90 therefore added explicit GPU feature export with accelerator
+runtime/output identity and progress reporting; focused tests and the full CPU
+suite pass. The resulting specification identity is
+`0ac3101e6d6aaed1a5a0d4891792d4700540bac5247cca8f7d6e67d664ffe9ba`, now
+frozen in the Task F fresh-training pre-execution addendum v2. The immediate
+next work is GPU re-export/parity/throughput validation on the existing pilot
+checkpoint, launch-plan regeneration, and a separate full-training resource
+approval. No research training or protected-OOD evaluation has started.
 
 The planned chain is:
 
@@ -52,7 +57,7 @@ same initialization and data stream
   `fork_from_prefix` are implemented and tested.
 - `wrn28_10`, CIFAR `resnet18`, and the common logits/penultimate-feature API are
   implemented. WRN stage1/stage2/stage3/penultimate taps and the separate
-  CPU-only Task F ID-feature artifact contract are implemented and tested.
+  CPU/GPU Task F ID-feature artifact contract are implemented and tested.
 - The Task F run-plan generator conserves 41 Adam-family and nine SGDM-family
   runs, preserves same-initialization/data-stream witnesses, exact snapshot
   identities, strict resume, execution-only exclusion, and non-mutating update
@@ -169,7 +174,7 @@ replication rules live only in the active protocol.
 - no fixed residual-retention diagnostic, fresh Gate 3, full `RtMD` detector,
   or `RtMD` OOD evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain
   `NOT_RUN`
-- no fresh active-protocol training, alpha midpoint run, GPU work, checkpoint
-  inference, or protected OOD
+- no fresh active-protocol research training, alpha midpoint research run, or
+  protected OOD; the completed execution-only pilot is not research evidence
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion
