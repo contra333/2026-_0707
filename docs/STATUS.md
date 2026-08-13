@@ -45,7 +45,12 @@ full fresh training started at execution SHA
 `curie=20`, `lise=11`, and `precision_medicine=19`. All three first research
 runs passed the epoch-1 durable-checkpoint and `global_step=352` launch gate
 before all ten approved GPU slots were filled. Research training is in progress;
-protected-OOD evaluation has not started.
+protected-OOD evaluation has not started. The versioned fresh ID evaluation
+bridge now validates the exact 50-run inventory, checkpoint/feature/membership/
+classifier identities, and the complete 1,320-record `id_train` plus
+`id_validation` logical coverage. The existing 310-job export queue is a
+validated subset; the 1,010 supplemental exports have not started and remain
+gated on terminal training and terminal completion of that queue.
 
 The planned chain is:
 
@@ -185,7 +190,8 @@ replication rules live only in the active protocol.
 - no fixed residual-retention diagnostic, fresh Gate 3, full `RtMD` detector,
   or `RtMD` OOD evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain
   `NOT_RUN`
-- no fresh active-protocol research training, alpha midpoint research run, or
-  protected OOD; the completed execution-only pilot is not research evidence
+- no completed fresh active-protocol research result or protected OOD; the
+  research training now in progress and the completed execution-only pilot are
+  not yet research evidence
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion
