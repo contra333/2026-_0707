@@ -31,10 +31,17 @@ bottleneck. PR #90 therefore added explicit GPU feature export with accelerator
 runtime/output identity and progress reporting; focused tests and the full CPU
 suite pass. The resulting specification identity is
 `0ac3101e6d6aaed1a5a0d4891792d4700540bac5247cca8f7d6e67d664ffe9ba`, now
-frozen in the Task F fresh-training pre-execution addendum v2. The immediate
-next work is GPU re-export/parity/throughput validation on the existing pilot
-checkpoint, launch-plan regeneration, and a separate full-training resource
-approval. No research training or protected-OOD evaluation has started.
+frozen in the Task F fresh-training pre-execution addendum v2. A production
+A6000 re-export of the existing pilot checkpoint completed twice in 19.89 and
+19.67 seconds at batch size 512, versus 20 minutes 13 seconds on the bounded
+four-thread CPU run. The repeated GPU artifact was byte-identical; its CPU
+reference comparison had maximum absolute feature difference `6.72e-4`,
+maximum per-sample relative L2 difference `3.37e-4`, and minimum cosine
+`0.99999995`. This removes the production export-throughput blocker without
+changing training semantics. The 50-run and pilot launch plans were regenerated
+and validated against the new specification. The immediate next work is a
+separate full-training resource approval and production scheduling. No research
+training or protected-OOD evaluation has started.
 
 The planned chain is:
 
