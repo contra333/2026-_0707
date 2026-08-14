@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 ## Current phase
 
@@ -69,6 +69,16 @@ completion. Only then will the fixed 1,010 supplemental GPU exports, 660
 ID-only geometry units, 657 sibling alignments, host uploads, and central
 paired aggregation run automatically. No supplemental export, protected
 `id_test`, OOD, or RtMD execution has started at this gate.
+
+PR #98 fixed the source-host finalizer so absent and actively `RUNNING` export
+shards remain `WAITING`; only explicit failure states fail the gate. The fixed
+finalizer execution SHA is
+`1b3f7eb89ecb1d1f4033f2d6f3678170d1a4906c`. Clean detached worktrees at that
+SHA are running on all three hosts. Only the finalizer processes were replaced;
+the frozen training worktrees, training processes, existing export watchers,
+and their artifacts were not changed. The three host finalizers now remain
+`WAITING` for normal incomplete export states, so automatic evaluation can open
+after every required source export reaches terminal completion.
 
 The planned chain is:
 
