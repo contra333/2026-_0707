@@ -484,6 +484,111 @@ def validate_source_gate_documents(documents: Mapping[str, Mapping[str, Any]]) -
     }
 
 
+def validate_local_source_gate(
+    *,
+    source_root: str | Path,
+    host_id: str,
+    manifest: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Validate one host's completed local source witness before evaluation compute."""
+
+    if host_id not in HOSTS:
+        raise SupervisorBlockedError(f"unsupported Task F host: {host_id}")
+    source = Path(source_root)
+    validation_path = source / "host_validation.json"
+    status_path = source / "control" / "host_finalizer.status"
+    if not validation_path.is_file() or not status_path.is_file():
+        raise SupervisorBlockedError("local Task F source validation witness is absent")
+    finalizer_status = status_path.read_text(encoding="utf-8").strip()
+    if finalizer_status != "UPLOADING" and not finalizer_status.startswith(
+        "COMPLETE REMOTE_VERIFIED"
+    ):
+        raise SupervisorBlockedError(
+            f"local Task F source finalizer is not upload-ready: {finalizer_status}"
+        )
+    validation = json.loads(validation_path.read_text(encoding="utf-8"))
+    if not isinstance(validation, Mapping):
+        raise SupervisorBlockedError("local Task F source validation is not a mapping")
+    expected = HOST_COUNTS[host_id]
+    if (
+        validation.get("status") != "PASS"
+        or validation.get("host_id") != host_id
+        or validation.get("execution_sha") != SOURCE_TRAINING_SHA
+        or validation.get("specification_sha256") != EXPECTED_SPECIFICATION_SHA256
+        or int(validation.get("run_count", -1)) != expected["runs"]
+        or int(validation.get("export_count", -1)) != expected["source_exports"]
+    ):
+        raise SupervisorBlockedError("local Task F source validation identity mismatch")
+    validated_manifest = validate_task_f_pipeline_manifest(manifest)
+    host_jobs = [job for job in validated_manifest["jobs"] if job["host_id"] == host_id]
+    expected_run_ids = {
+        str(job["record"]["run_id"])
+        for job in host_jobs
+        if job["stage"] == "feature_export"
+    }
+    expected_source_exports = {
+        _record_key(job["record"])
+        for job in host_jobs
+        if job["stage"] == "feature_export" and job["materialization"] == "source"
+    }
+    rows = validation.get("runs")
+    if not isinstance(rows, list) or not all(isinstance(row, Mapping) for row in rows):
+        raise SupervisorBlockedError("local Task F source run witnesses are invalid")
+    actual_run_ids = [str(row.get("run_id")) for row in rows]
+    if len(actual_run_ids) != len(set(actual_run_ids)) or set(actual_run_ids) != expected_run_ids:
+        raise SupervisorBlockedError("local Task F source run coverage mismatch")
+    if sum(int(row.get("export_count", -1)) for row in rows) != len(
+        expected_source_exports
+    ):
+        raise SupervisorBlockedError("local Task F source export accounting mismatch")
+    for row in rows:
+        run_id = str(row["run_id"])
+        checkpoint = source / "runs" / run_id / "checkpoints" / "last.pt"
+        if not checkpoint.is_file() or checkpoint.stat().st_size != int(
+            row.get("last_pt_bytes", -1)
+        ):
+            raise SupervisorBlockedError(
+                f"local Task F source checkpoint witness mismatch: {run_id}"
+            )
+    return {
+        "status": "PASS",
+        "host_id": host_id,
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "run_count": expected["runs"],
+        "export_count": expected["source_exports"],
+        "finalizer_status_at_start": finalizer_status,
+        "validation_sha256": canonical_sha256(validation),
+        "validation_file_sha256": sha256_file(validation_path),
+        "pipeline_manifest_sha256": validated_manifest["manifest_sha256"],
+    }
+
+
+def validate_remote_source_gate_matches_local(
+    *,
+    local_gate: Mapping[str, Any],
+    remote_gate: Mapping[str, Any],
+) -> None:
+    """Require the eventual remote witness to match the local compute witness."""
+
+    host_id = str(local_gate.get("host_id"))
+    if (
+        local_gate.get("status") != "PASS"
+        or remote_gate.get("status") != "PASS"
+        or remote_gate.get("source_training_sha") != SOURCE_TRAINING_SHA
+        or remote_gate.get("task_f_specification_sha256")
+        != EXPECTED_SPECIFICATION_SHA256
+    ):
+        raise SupervisorBlockedError("Task F local/remote source gate identity mismatch")
+    remote_host = remote_gate.get("hosts", {}).get(host_id)
+    if not isinstance(remote_host, Mapping) or remote_host.get(
+        "validation_sha256"
+    ) != local_gate.get("validation_sha256"):
+        raise SupervisorBlockedError(
+            f"Task F remote source witness differs from local compute witness: {host_id}"
+        )
+
+
 def fresh_sha256_file_from_payload(payload: Mapping[str, Any]) -> str:
     return canonical_sha256(payload)
 
@@ -507,7 +612,11 @@ def load_source_gate_directory(path: str | Path) -> dict[str, Any]:
 
 
 def refresh_source_gate_from_hf(
-    *, hf_cli: str | Path, destination: str | Path, bucket: str = "contra333/ICLR_RUN"
+    *,
+    hf_cli: str | Path,
+    destination: str | Path,
+    bucket: str = "contra333/ICLR_RUN",
+    command_timeout_seconds: float = 30.0,
 ) -> dict[str, Any]:
     """Download three small source witnesses and publish them only after validation."""
 
@@ -530,6 +639,7 @@ def refresh_source_gate_from_hf(
                     check=True,
                     capture_output=True,
                     text=True,
+                    timeout=command_timeout_seconds,
                 )
         result = load_source_gate_directory(temporary)
         if root.exists():
@@ -552,14 +662,26 @@ def wait_for_global_source_gate(
     gate_root: str | Path,
     poll_seconds: float = 60.0,
     timeout_hours: float = 72.0,
+    command_timeout_seconds: float = 30.0,
     sleep: Callable[[float], None] = time.sleep,
 ) -> dict[str, Any]:
     deadline = time.monotonic() + timeout_hours * 3600.0
     last_error = "not checked"
     while time.monotonic() < deadline:
         try:
-            return refresh_source_gate_from_hf(hf_cli=hf_cli, destination=gate_root)
-        except (OSError, ValueError, KeyError, subprocess.CalledProcessError, SupervisorBlockedError) as exc:
+            return refresh_source_gate_from_hf(
+                hf_cli=hf_cli,
+                destination=gate_root,
+                command_timeout_seconds=command_timeout_seconds,
+            )
+        except (
+            OSError,
+            ValueError,
+            KeyError,
+            subprocess.CalledProcessError,
+            subprocess.TimeoutExpired,
+            SupervisorBlockedError,
+        ) as exc:
             last_error = str(exc)
             sleep(poll_seconds)
     raise SupervisorBlockedError(f"global source gate timed out: {last_error}")
@@ -652,7 +774,7 @@ def execute_task_f_host(
     blas_threads: int = 4,
     minimum_free_gb: float = 100.0,
 ) -> dict[str, Any]:
-    """Execute one source-local host shard after the global source gate PASS."""
+    """Compute one source-local host shard without publishing a remote terminal."""
 
     if host_id not in HOSTS:
         raise ValueError("unsupported Task F host")
@@ -1061,6 +1183,61 @@ def execute_task_f_host(
             },
         )
         build_artifact_manifest(operational)
+    atomic_write_json(state / "HOST_COMPUTE_COMPLETE.json", summary)
+    return summary
+
+
+def publish_task_f_host_result(
+    *,
+    artifact_root: str | Path,
+    state_root: str | Path,
+    host_id: str,
+    expected_evaluation_git_sha: str,
+    hf_cli: str | Path,
+    remote_source_gate: Mapping[str, Any],
+    local_source_gate: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Publish a computed host shard only after the global source remote gate."""
+
+    if host_id not in HOSTS:
+        raise ValueError("unsupported Task F host")
+    if (
+        remote_source_gate.get("status") != "PASS"
+        or remote_source_gate.get("source_training_sha") != SOURCE_TRAINING_SHA
+        or remote_source_gate.get("task_f_specification_sha256")
+        != EXPECTED_SPECIFICATION_SHA256
+        or int(remote_source_gate.get("run_count", -1)) != 50
+        or int(remote_source_gate.get("export_count", -1)) != 310
+        or set(remote_source_gate.get("hosts", {})) != set(HOSTS)
+    ):
+        raise SupervisorBlockedError(
+            "Task F host publication requires the exact global source remote gate"
+        )
+    if local_source_gate is not None:
+        validate_remote_source_gate_matches_local(
+            local_gate=local_source_gate,
+            remote_gate=remote_source_gate,
+        )
+    artifact = Path(artifact_root)
+    state = Path(state_root)
+    operational = artifact / "operational_bundle"
+    compute_path = state / "HOST_COMPUTE_COMPLETE.json"
+    terminal_path = operational / "HOST_COMPLETE.json"
+    if not compute_path.is_file() or not terminal_path.is_file():
+        raise SupervisorBlockedError("Task F host compute terminal is absent")
+    compute = json.loads(compute_path.read_text(encoding="utf-8"))
+    terminal = json.loads(terminal_path.read_text(encoding="utf-8"))
+    if compute != terminal:
+        raise SupervisorBlockedError("Task F host compute terminal differs from bundle")
+    if (
+        terminal.get("status") != "PASS"
+        or terminal.get("host_id") != host_id
+        or terminal.get("source_training_sha") != SOURCE_TRAINING_SHA
+        or terminal.get("evaluation_git_sha") != expected_evaluation_git_sha
+        or terminal.get("task_f_specification_sha256")
+        != EXPECTED_SPECIFICATION_SHA256
+    ):
+        raise SupervisorBlockedError("Task F host compute identity mismatch")
     destination = (
         f"hf://buckets/contra333/ICLR_RUN/evaluations/task_f_fresh_id_v1/"
         f"{expected_evaluation_git_sha}/{host_id}"
@@ -1075,9 +1252,9 @@ def execute_task_f_host(
             destination=destination,
             control_root=upload_control,
         )
-    summary = {**summary, "remote": evidence}
-    atomic_write_json(state / "HOST_COMPLETE.json", summary)
-    return summary
+    result = {**terminal, "remote": evidence}
+    atomic_write_json(state / "HOST_COMPLETE.json", result)
+    return result
 
 
 def collect_task_f_host_summaries(

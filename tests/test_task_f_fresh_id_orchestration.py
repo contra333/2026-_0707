@@ -3,6 +3,7 @@ import json
 import threading
 import time
 from collections import Counter
+from types import SimpleNamespace
 
 import pytest
 
@@ -13,10 +14,14 @@ from oge.evaluation.task_f_fresh_orchestration import (
     SOURCE_TRAINING_SHA,
     build_task_f_pipeline_manifest,
     collect_task_f_host_summaries,
+    publish_task_f_host_result,
+    validate_local_source_gate,
+    validate_remote_source_gate_matches_local,
     validate_source_gate_documents,
     validate_task_f_pipeline_manifest,
 )
 from oge.studies.artifacts import atomic_write_json
+from oge.studies.hashing import canonical_sha256
 from oge.studies.supervisor import build_artifact_manifest
 from oge.studies.staged_pipeline import (
     PIPELINE_SCHEMA_VERSION,
@@ -230,6 +235,228 @@ def test_global_source_gate_requires_all_three_exact_terminal_witnesses():
     drift["curie"]["validation"]["export_count"] -= 1
     with pytest.raises(RuntimeError, match="accounting"):
         validate_source_gate_documents(drift)
+
+
+def _local_source_fixture(tmp_path, host, manifest):
+    source = tmp_path / host
+    (source / "control").mkdir(parents=True)
+    (source / "control" / "host_finalizer.status").write_text(
+        "UPLOADING\n", encoding="utf-8"
+    )
+    source_jobs = [
+        job
+        for job in manifest["jobs"]
+        if job["host_id"] == host
+        and job["stage"] == "feature_export"
+        and job["materialization"] == "source"
+    ]
+    export_counts = Counter(job["record"]["run_id"] for job in source_jobs)
+    rows = []
+    for run_id, export_count in sorted(export_counts.items()):
+        checkpoint = source / "runs" / run_id / "checkpoints" / "last.pt"
+        checkpoint.parent.mkdir(parents=True)
+        checkpoint.write_bytes(b"")
+        rows.append(
+            {
+                "run_id": run_id,
+                "last_pt_bytes": 0,
+                "export_count": export_count,
+            }
+        )
+    validation = {
+        "status": "PASS",
+        "host_id": host,
+        "execution_sha": SOURCE_TRAINING_SHA,
+        "specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "run_count": HOST_COUNTS[host]["runs"],
+        "export_count": HOST_COUNTS[host]["source_exports"],
+        "runs": rows,
+    }
+    atomic_write_json(source / "host_validation.json", validation)
+    return source, validation
+
+
+def test_local_source_gate_starts_from_pass_witness_without_remote_marker(tmp_path):
+    _, manifest = _manifest()
+    source, validation = _local_source_fixture(tmp_path, "curie", manifest)
+    result = validate_local_source_gate(
+        source_root=source,
+        host_id="curie",
+        manifest=manifest,
+    )
+    assert result["status"] == "PASS"
+    assert result["run_count"] == 20
+    assert result["export_count"] == 124
+    assert result["finalizer_status_at_start"] == "UPLOADING"
+    assert not (source / "remote_marker" / "REMOTE_COMPLETE.json").exists()
+    assert result["validation_sha256"] == canonical_sha256(validation)
+
+    (source / "control" / "host_finalizer.status").write_text(
+        "FAILED upload\n", encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match="not upload-ready"):
+        validate_local_source_gate(
+            source_root=source,
+            host_id="curie",
+            manifest=manifest,
+        )
+
+
+def test_overlap_publication_requires_matching_global_remote_source_gate(
+    tmp_path, monkeypatch
+):
+    import oge.evaluation.task_f_fresh_orchestration as orchestration
+
+    remote_gate = validate_source_gate_documents(_source_documents())
+    local_gate = {
+        "status": "PASS",
+        "host_id": "curie",
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "validation_sha256": remote_gate["hosts"]["curie"]["validation_sha256"],
+    }
+    validate_remote_source_gate_matches_local(
+        local_gate=local_gate,
+        remote_gate=remote_gate,
+    )
+    drift = copy.deepcopy(remote_gate)
+    drift["hosts"]["curie"]["validation_sha256"] = "0" * 64
+    with pytest.raises(RuntimeError, match="differs"):
+        validate_remote_source_gate_matches_local(
+            local_gate=local_gate,
+            remote_gate=drift,
+        )
+
+    artifact = tmp_path / "artifacts"
+    state = tmp_path / "state"
+    operational = artifact / "operational_bundle"
+    operational.mkdir(parents=True)
+    state.mkdir()
+    terminal = {
+        "schema_version": "task_f_fresh_id_host_terminal_v1",
+        "status": "PASS",
+        "host_id": "curie",
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "evaluation_git_sha": "e" * 40,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "parent_manifest_sha256": "m" * 64,
+        "stage_counts": {"geometry": 264},
+        "protected_data_access": False,
+    }
+    atomic_write_json(operational / "HOST_COMPLETE.json", terminal)
+    atomic_write_json(state / "HOST_COMPUTE_COMPLETE.json", terminal)
+    uploads = []
+
+    def fake_upload(source, *, hf_cli, bucket, destination, control_root):
+        uploads.append(destination)
+        return {"status": "REMOTE_VERIFIED", "destination": destination}
+
+    monkeypatch.setattr(orchestration, "upload_artifact_tree", fake_upload)
+    with pytest.raises(RuntimeError, match="differs"):
+        publish_task_f_host_result(
+            artifact_root=artifact,
+            state_root=state,
+            host_id="curie",
+            expected_evaluation_git_sha="e" * 40,
+            hf_cli="hf",
+            remote_source_gate=drift,
+            local_source_gate=local_gate,
+        )
+    assert uploads == []
+    assert not (state / "HOST_COMPLETE.json").exists()
+
+    result = publish_task_f_host_result(
+        artifact_root=artifact,
+        state_root=state,
+        host_id="curie",
+        expected_evaluation_git_sha="e" * 40,
+        hf_cli="hf",
+        remote_source_gate=remote_gate,
+        local_source_gate=local_gate,
+    )
+    assert result["remote"]["status"] == "REMOTE_VERIFIED"
+    assert len(uploads) == 1
+    assert json.loads((state / "HOST_COMPLETE.json").read_text())["remote"][
+        "status"
+    ] == "REMOTE_VERIFIED"
+
+
+@pytest.mark.parametrize(
+    ("overlap", "expected_order"),
+    [
+        (False, ["remote", "compute", "publish"]),
+        (True, ["local", "compute", "remote", "match", "publish"]),
+    ],
+)
+def test_run_host_overlap_changes_only_source_gate_order(
+    tmp_path, monkeypatch, overlap, expected_order
+):
+    import scripts.supervise_task_f_fresh_id as supervisor
+
+    _, manifest = _manifest()
+    remote_gate = validate_source_gate_documents(_source_documents())
+    local_gate = {
+        "status": "PASS",
+        "host_id": "curie",
+        "validation_sha256": remote_gate["hosts"]["curie"]["validation_sha256"],
+    }
+    order = []
+    state = tmp_path / "state"
+    state.mkdir()
+    validation_input = tmp_path / "id_validation.npz"
+    validation_input.write_bytes(b"fixture")
+    args = SimpleNamespace(
+        hf_cli=tmp_path / "hf",
+        manifest=tmp_path / "manifest.json",
+        overlap_source_upload=overlap,
+        source_root=tmp_path / "source",
+        host_id="curie",
+        state_root=state,
+        gate_poll_seconds=0.0,
+        gate_timeout_hours=1.0,
+        hf_command_timeout_seconds=1.0,
+        id_validation_input=validation_input,
+        dataset_config=tmp_path / "dataset.yaml",
+        data_root=tmp_path / "data",
+        id_train_input=tmp_path / "id_train.npz",
+        expected_evaluation_git_sha="e" * 40,
+        artifact_root=tmp_path / "artifacts",
+        python=tmp_path / "python",
+        batch_size=512,
+        blas_threads=4,
+        minimum_free_gb=0.0,
+    )
+    monkeypatch.setattr(supervisor, "_json", lambda path: manifest)
+    monkeypatch.setattr(supervisor, "verify_hf_preflight", lambda *a, **k: None)
+    monkeypatch.setattr(supervisor, "verify_id_input", lambda *a, **k: None)
+    monkeypatch.setattr(supervisor, "build_id_input", lambda *a, **k: None)
+
+    def local(**kwargs):
+        order.append("local")
+        return local_gate
+
+    def remote(**kwargs):
+        order.append("remote")
+        return remote_gate
+
+    def compute(**kwargs):
+        order.append("compute")
+        return {"status": "PASS"}
+
+    def match(**kwargs):
+        order.append("match")
+
+    def publish(**kwargs):
+        order.append("publish")
+        return {"status": "PASS"}
+
+    monkeypatch.setattr(supervisor, "validate_local_source_gate", local)
+    monkeypatch.setattr(supervisor, "wait_for_global_source_gate", remote)
+    monkeypatch.setattr(supervisor, "execute_task_f_host", compute)
+    monkeypatch.setattr(supervisor, "validate_remote_source_gate_matches_local", match)
+    monkeypatch.setattr(supervisor, "publish_task_f_host_result", publish)
+    assert supervisor._run_host(args) == 0
+    assert order == expected_order
 
 
 def test_generic_pipeline_adapter_exact_resume_dependencies_and_resource_queues(tmp_path):
