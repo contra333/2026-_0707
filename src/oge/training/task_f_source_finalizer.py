@@ -130,6 +130,18 @@ def _load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def parse_hf_json_listing(stdout: str) -> list[dict[str, Any]]:
+    """Parse HF JSON listings while accepting the CLI's empty-prefix output."""
+
+    stripped = stdout.strip()
+    if not stripped:
+        return []
+    value = json.loads(stripped)
+    if not isinstance(value, list) or not all(isinstance(row, dict) for row in value):
+        raise ValueError("HF JSON listing must be a list of mappings")
+    return value
+
+
 def index_source_export_artifacts(
     export_root: str | Path,
     *,
@@ -422,7 +434,7 @@ def finalize_task_f_source_host(
     )
     if listing.returncode != 0:
         fail("remote_preflight")
-    if json.loads(listing.stdout):
+    if parse_hf_json_listing(listing.stdout):
         fail("remote_prefix_not_empty")
     plans = control / "upload_plans"
     plans.mkdir(exist_ok=True)
@@ -495,7 +507,7 @@ def finalize_task_f_source_host(
     )
     if listing.returncode != 0:
         fail("remote_listing")
-    rows = json.loads(listing.stdout)
+    rows = parse_hf_json_listing(listing.stdout)
     paths = {row["path"] for row in rows}
     prefix = f"servers/{host_id}/{SOURCE_EXECUTION_ID}"
     for run_id in run_ids:
@@ -534,10 +546,15 @@ def finalize_task_f_source_host(
         capture_output=True,
         text=True,
     )
+    final_rows = (
+        parse_hf_json_listing(final_listing.stdout)
+        if final_listing.returncode == 0
+        else []
+    )
     if final_listing.returncode != 0 or f"{prefix}/REMOTE_COMPLETE.json" not in {
-        row["path"] for row in json.loads(final_listing.stdout)
+        row["path"] for row in final_rows
     }:
         fail("remote_marker_verify")
     _atomic_write_text(status_path, "COMPLETE REMOTE_VERIFIED\n")
-    log(f"FINALIZER_COMPLETE remote_files={len(json.loads(final_listing.stdout))}")
+    log(f"FINALIZER_COMPLETE remote_files={len(final_rows)}")
     return marker

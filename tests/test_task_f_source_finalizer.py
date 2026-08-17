@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,7 @@ from oge.training.task_f_source_finalizer import (
     EXPORT_GATE_WAITING,
     classify_export_states,
     index_source_export_artifacts,
+    parse_hf_json_listing,
     wait_for_export_completion,
 )
 
@@ -147,3 +149,17 @@ def test_source_export_index_preserves_duplicate_rejection(monkeypatch, tmp_path
             tmp_path / "exports",
             expected_export_keys=set(),
         )
+
+
+@pytest.mark.parametrize("stdout", ["", "\n", "  \n\t"])
+def test_empty_hf_listing_is_an_empty_prefix(stdout):
+    assert parse_hf_json_listing(stdout) == []
+
+
+def test_nonempty_hf_listing_requires_a_json_list_of_mappings():
+    rows = [{"type": "file", "path": "servers/curie/artifact.json"}]
+    assert parse_hf_json_listing(json.dumps(rows)) == rows
+    with pytest.raises(ValueError, match="list of mappings"):
+        parse_hf_json_listing('{"path": "artifact.json"}')
+    with pytest.raises(ValueError, match="list of mappings"):
+        parse_hf_json_listing('["artifact.json"]')
