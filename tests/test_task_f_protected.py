@@ -526,6 +526,9 @@ def _score_manifest(seed, role, offset):
         "checkpoint_role": "last",
         "checkpoint_epoch": 200,
         "checkpoint_sha256": f"{seed + (1 if role == 'coupled' else 21):064x}",
+        "output_identity_sha256": (
+            f"{seed + (101 if role == 'coupled' else 201):064x}"
+        ),
         "depth_tap": "penultimate",
         "sample_order_sha256": {split: f"order-{split}" for split in protected.PROTECTED_SPLITS},
         "id_utility": {
@@ -602,6 +605,142 @@ def test_aggregate_marks_component_attribution_not_applicable(monkeypatch):
     for split in protected.OOD_SPLITS:
         assert primary["datasets"][split]["component_attribution_status"] == "NOT_APPLICABLE"
         assert "component_attribution" not in primary["datasets"][split]
+
+
+def _aggregation_fixtures():
+    fixtures = {}
+    for seed in (0, 1):
+        fixtures[f"{seed}-coupled"] = (
+            _score_manifest(seed, "coupled", 0.03 + seed * 0.005),
+            _score_arrays(0.03 + seed * 0.005),
+        )
+        fixtures[f"{seed}-decoupled"] = (
+            _score_manifest(seed, "decoupled", 0.0),
+            _score_arrays(0.0),
+        )
+    return fixtures
+
+
+def test_parallel_aggregation_is_serial_exact_and_reports_progress(tmp_path, monkeypatch):
+    fixtures = _aggregation_fixtures()
+    monkeypatch.setattr(protected, "_load_score_arrays", lambda path: fixtures[path.name])
+    paths = [Path(name) for name in sorted(fixtures)]
+    serial = protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+    )
+    progress = []
+    parallel = protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+        workers=2,
+        work_dir=tmp_path / "parallel",
+        progress=progress.append,
+    )
+
+    assert parallel == serial
+    assert parallel["terminal_sha256"] == serial["terminal_sha256"]
+    assert [
+        record["phase"]
+        for record in progress
+        if record["phase"].endswith("COMPLETE")
+    ] == [
+        "seed_record:COMPLETE",
+        "r_churn:COMPLETE",
+    ]
+    assert all(
+        record["completed"] == record["total"]
+        for record in progress
+        if record["phase"].endswith("COMPLETE")
+    )
+    assert len(list((tmp_path / "parallel" / "seed_record").glob("*.json"))) == 12
+    assert len(list((tmp_path / "parallel" / "r_churn").glob("*.json"))) == 6
+
+
+def test_aggregation_resumes_only_missing_units(tmp_path, monkeypatch):
+    fixtures = _aggregation_fixtures()
+    monkeypatch.setattr(protected, "_load_score_arrays", lambda path: fixtures[path.name])
+    paths = [Path(name) for name in sorted(fixtures)]
+    work_dir = tmp_path / "resume"
+    original = protected._compute_aggregation_unit
+    attempted = 0
+
+    def interrupt(unit):
+        nonlocal attempted
+        attempted += 1
+        if attempted == 4:
+            raise RuntimeError("simulated interruption")
+        return original(unit)
+
+    monkeypatch.setattr(protected, "_compute_aggregation_unit", interrupt)
+    with pytest.raises(RuntimeError, match="simulated interruption"):
+        protected.aggregate_protected_scores(
+            score_paths=paths,
+            expected_contexts=4,
+            workers=1,
+            work_dir=work_dir,
+        )
+    assert len(list((work_dir / "seed_record").glob("*.json"))) == 3
+
+    monkeypatch.setattr(protected, "_compute_aggregation_unit", original)
+    progress = []
+    resumed = protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+        workers=1,
+        work_dir=work_dir,
+        progress=progress.append,
+    )
+    fresh = protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+    )
+    assert resumed == fresh
+    assert progress[0] == {
+        "phase": "seed_record:START",
+        "completed": 3,
+        "total": 12,
+        "cached": 3,
+        "computed": 0,
+    }
+
+    cached_progress = []
+    assert protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+        workers=2,
+        work_dir=work_dir,
+        progress=cached_progress.append,
+    ) == fresh
+    complete = [
+        record for record in cached_progress if record["phase"].endswith("COMPLETE")
+    ]
+    assert all(record["cached"] == record["total"] for record in complete)
+
+
+def test_aggregation_rejects_and_preserves_corrupt_cached_unit(tmp_path, monkeypatch):
+    fixtures = _aggregation_fixtures()
+    monkeypatch.setattr(protected, "_load_score_arrays", lambda path: fixtures[path.name])
+    paths = [Path(name) for name in sorted(fixtures)]
+    work_dir = tmp_path / "corrupt"
+    protected.aggregate_protected_scores(
+        score_paths=paths,
+        expected_contexts=4,
+        workers=1,
+        work_dir=work_dir,
+    )
+    unit_path = next((work_dir / "seed_record").glob("*.json"))
+    corrupt = b'{"status":"CORRUPT"}\n'
+    unit_path.write_bytes(corrupt)
+
+    with pytest.raises(ValueError, match="preserved"):
+        protected.aggregate_protected_scores(
+            score_paths=paths,
+            expected_contexts=4,
+            workers=2,
+            work_dir=work_dir,
+        )
+    assert unit_path.read_bytes() == corrupt
 
 
 def test_exact_sign_flip_band_and_holm_are_deterministic():

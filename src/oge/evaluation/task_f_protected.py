@@ -10,11 +10,13 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import multiprocessing
 import os
 import shutil
 import uuid
 from collections import Counter, defaultdict
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from itertools import combinations, product
 from pathlib import Path
 from typing import Any
@@ -64,6 +66,7 @@ AUTHORIZATION_SCHEMA_VERSION = "task_f_protected_one_shot_authorization_v1"
 FEATURE_SCHEMA_VERSION = "task_f_protected_feature_record_v1"
 SCORE_SCHEMA_VERSION = "task_f_protected_context_scores_v1"
 TERMINAL_SCHEMA_VERSION = "task_f_protected_terminal_v1"
+AGGREGATION_UNIT_SCHEMA_VERSION = "task_f_protected_aggregation_unit_v1"
 SOURCE_ID_EVALUATION_SHA = "2a22a651001e6466d067493e0966656c79219081"
 RTMD_GATE3_SPECIFICATION_SHA256 = (
     "30e7f212c6e91b84885a7d06568820caa15c48fdcbe924af28818d07c428d270"
@@ -1355,11 +1358,305 @@ def _load_score_arrays(path: Path) -> tuple[dict[str, Any], dict[str, np.ndarray
     return manifest, arrays
 
 
+_AGGREGATION_CONTEXTS: dict[
+    str, tuple[dict[str, Any], dict[str, np.ndarray]]
+] = {}
+
+
+def _aggregation_unit(identity: Mapping[str, Any]) -> dict[str, Any]:
+    normalized = dict(identity)
+    return {
+        "unit_id": canonical_sha256(
+            {
+                "schema_version": AGGREGATION_UNIT_SCHEMA_VERSION,
+                "identity": normalized,
+            }
+        ),
+        "identity": normalized,
+    }
+
+
+def _aggregation_unit_payload(
+    *, unit: Mapping[str, Any], result: Mapping[str, Any]
+) -> dict[str, Any]:
+    payload = {
+        "schema_version": AGGREGATION_UNIT_SCHEMA_VERSION,
+        "status": "PASS",
+        "unit_id": unit["unit_id"],
+        "identity": unit["identity"],
+        "result": dict(result),
+        "result_sha256": canonical_sha256(result),
+    }
+    payload["unit_sha256"] = canonical_sha256(payload)
+    return payload
+
+
+def _verify_aggregation_unit(
+    path: Path, *, expected_unit: Mapping[str, Any]
+) -> dict[str, Any]:
+    try:
+        raw = path.read_bytes()
+        payload = json.loads(raw)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"aggregation unit is unreadable and was preserved: {path}") from exc
+    if raw != canonical_json_bytes(payload) + b"\n":
+        raise ValueError(f"aggregation unit is not canonical JSON and was preserved: {path}")
+    unit_sha256 = payload.pop("unit_sha256", None)
+    if unit_sha256 != canonical_sha256(payload):
+        raise ValueError(f"aggregation unit checksum mismatch and was preserved: {path}")
+    payload["unit_sha256"] = unit_sha256
+    result = payload.get("result")
+    if (
+        payload.get("schema_version") != AGGREGATION_UNIT_SCHEMA_VERSION
+        or payload.get("status") != "PASS"
+        or payload.get("unit_id") != expected_unit["unit_id"]
+        or payload.get("identity") != expected_unit["identity"]
+        or not isinstance(result, Mapping)
+        or payload.get("result_sha256") != canonical_sha256(result)
+    ):
+        raise ValueError(f"aggregation unit identity mismatch and was preserved: {path}")
+    return dict(result)
+
+
+def _persist_aggregation_unit(
+    *, work_dir: Path, unit: Mapping[str, Any], result: Mapping[str, Any]
+) -> dict[str, Any]:
+    kind = str(unit["identity"]["kind"])
+    destination = work_dir / kind / f"{unit['unit_id']}.json"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        cached = _verify_aggregation_unit(destination, expected_unit=unit)
+        if cached != result:
+            raise ValueError(
+                f"aggregation unit result conflict and was preserved: {destination}"
+            )
+        return cached
+    payload = _aggregation_unit_payload(unit=unit, result=result)
+    temporary = destination.parent / f".{destination.name}.{uuid.uuid4().hex}.tmp"
+    try:
+        with temporary.open("xb") as stream:
+            stream.write(canonical_json_bytes(payload) + b"\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        try:
+            os.link(temporary, destination)
+        except FileExistsError:
+            cached = _verify_aggregation_unit(destination, expected_unit=unit)
+            if cached != result:
+                raise ValueError(
+                    f"aggregation unit result conflict and was preserved: {destination}"
+                )
+            return cached
+    finally:
+        temporary.unlink(missing_ok=True)
+    return _verify_aggregation_unit(destination, expected_unit=unit)
+
+
+def _score_context(output_identity: str) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
+    try:
+        return _AGGREGATION_CONTEXTS[output_identity]
+    except KeyError as exc:
+        raise ValueError(
+            f"aggregation unit references unknown score context: {output_identity}"
+        ) from exc
+
+
+def _compute_seed_record_unit(unit: Mapping[str, Any]) -> dict[str, Any]:
+    identity = unit["identity"]
+    left_manifest, left_arrays = _score_context(identity["left_output_identity_sha256"])
+    right_manifest, right_arrays = _score_context(identity["right_output_identity_sha256"])
+    transform = str(identity["transform"])
+    detector = str(identity["detector"])
+    dataset_rows: dict[str, Any] = {}
+    for split in OOD_SPLITS:
+        comparison = compare_score_arrays(
+            left=left_arrays,
+            right=right_arrays,
+            split=split,
+            transform=transform,
+            detector=detector,
+        )
+        if detector == "md":
+            if bool(identity["component_applicable"]):
+                comparison["component_attribution_status"] = "PASS"
+            else:
+                comparison.pop("component_attribution", None)
+                comparison["component_attribution_status"] = "NOT_APPLICABLE"
+        dataset_rows[split] = comparison
+    for metric in ("gain", "loss", "pair_order_churn", "delta_auroc"):
+        dataset_rows[f"near_{metric}"] = float(
+            np.mean([dataset_rows[name][metric] for name in NEAR_SPLITS])
+        )
+        dataset_rows[f"far_{metric}"] = float(
+            np.mean([dataset_rows[name][metric] for name in FAR_SPLITS])
+        )
+    return {
+        "cell_id": identity["cell_id"],
+        "training_seed": identity["training_seed"],
+        "checkpoint_role": identity["checkpoint_role"],
+        "checkpoint_epoch": identity["checkpoint_epoch"],
+        "depth_tap": identity["depth_tap"],
+        "direction": identity["direction"],
+        "transform": transform,
+        "detector": detector,
+        "left_run_id": left_manifest["run_id"],
+        "right_run_id": right_manifest["run_id"],
+        "datasets": dataset_rows,
+    }
+
+
+def _compute_r_churn_unit(unit: Mapping[str, Any]) -> dict[str, Any]:
+    identity = unit["identity"]
+    transform = str(identity["transform"])
+    detector = str(identity["detector"])
+    r_churn: dict[str, Any] = {}
+    for split in OOD_SPLITS:
+        same_policy = []
+        for first_identity, second_identity in identity["same_policy_pairs"]:
+            first_manifest, first_arrays = _score_context(first_identity)
+            second_manifest, second_arrays = _score_context(second_identity)
+            if (
+                first_manifest["sample_order_sha256"]
+                != second_manifest["sample_order_sha256"]
+            ):
+                raise ValueError("same-policy protected records have different sample order")
+            transition = pair_transition_summary(
+                first_arrays[f"{transform}__id_test__{detector}"],
+                first_arrays[f"{transform}__{split}__{detector}"],
+                second_arrays[f"{transform}__id_test__{detector}"],
+                second_arrays[f"{transform}__{split}__{detector}"],
+            )
+            same_policy.append(transition_rates(transition)[2])
+        numerator = float(np.median(identity["cross_policy_churn"][split]))
+        denominator = float(np.median(same_policy))
+        pair_count = int(identity["pair_count_by_split"][split])
+        floor = max(1.0e-4, 10.0 / pair_count)
+        r_churn[split] = {
+            "cross_policy_median": numerator,
+            "same_policy_median": denominator,
+            "same_policy_pair_count": len(same_policy),
+            "denominator_floor": floor,
+            "value": None if denominator < floor else numerator / denominator,
+            "status": "UNDEFINED_SMALL_DENOMINATOR" if denominator < floor else "PASS",
+        }
+    return r_churn
+
+
+def _compute_aggregation_unit(unit: Mapping[str, Any]) -> dict[str, Any]:
+    kind = unit["identity"]["kind"]
+    if kind == "seed_record":
+        return _compute_seed_record_unit(unit)
+    if kind == "r_churn":
+        return _compute_r_churn_unit(unit)
+    raise ValueError(f"unknown aggregation unit kind: {kind}")
+
+
+def _emit_aggregation_progress(
+    callback: Callable[[Mapping[str, Any]], None] | None,
+    *, phase: str,
+    completed: int,
+    total: int,
+    cached: int,
+) -> None:
+    if callback is not None:
+        callback(
+            {
+                "phase": phase,
+                "completed": completed,
+                "total": total,
+                "cached": cached,
+                "computed": completed - cached,
+            }
+        )
+
+
+def _run_aggregation_units(
+    units: Sequence[Mapping[str, Any]],
+    *,
+    workers: int,
+    work_dir: Path | None,
+    progress: Callable[[Mapping[str, Any]], None] | None,
+) -> dict[str, dict[str, Any]]:
+    if workers < 1:
+        raise ValueError("aggregation workers must be at least one")
+    results: dict[str, dict[str, Any]] = {}
+    pending: list[Mapping[str, Any]] = []
+    seen: set[str] = set()
+    cached = 0
+    unit_kind = "empty" if not units else str(units[0]["identity"]["kind"])
+    for unit in units:
+        unit_id = str(unit["unit_id"])
+        if unit_id in seen:
+            raise ValueError("aggregation plan contains a duplicate unit identity")
+        seen.add(unit_id)
+        if work_dir is not None:
+            path = work_dir / str(unit["identity"]["kind"]) / f"{unit['unit_id']}.json"
+            if path.exists():
+                results[unit_id] = _verify_aggregation_unit(
+                    path, expected_unit=unit
+                )
+                cached += 1
+                continue
+        pending.append(unit)
+    completed = cached
+    _emit_aggregation_progress(
+        progress,
+        phase=f"{unit_kind}:START",
+        completed=completed,
+        total=len(units),
+        cached=cached,
+    )
+
+    def accept(unit: Mapping[str, Any], result: Mapping[str, Any]) -> None:
+        nonlocal completed
+        value = dict(result)
+        if work_dir is not None:
+            value = _persist_aggregation_unit(work_dir=work_dir, unit=unit, result=value)
+        results[str(unit["unit_id"])] = value
+        completed += 1
+        _emit_aggregation_progress(
+            progress,
+            phase=f"{unit_kind}:RUNNING",
+            completed=completed,
+            total=len(units),
+            cached=cached,
+        )
+
+    if workers == 1 or len(pending) < 2:
+        for unit in pending:
+            accept(unit, _compute_aggregation_unit(unit))
+    else:
+        if "fork" not in multiprocessing.get_all_start_methods():
+            raise RuntimeError("parallel protected aggregation requires multiprocessing fork")
+        context = multiprocessing.get_context("fork")
+        with ProcessPoolExecutor(max_workers=workers, mp_context=context) as executor:
+            futures = {
+                executor.submit(_compute_aggregation_unit, unit): unit for unit in pending
+            }
+            for future in as_completed(futures):
+                unit = futures[future]
+                accept(unit, future.result())
+    _emit_aggregation_progress(
+        progress,
+        phase=f"{unit_kind}:COMPLETE",
+        completed=completed,
+        total=len(units),
+        cached=cached,
+    )
+    return results
+
+
 def aggregate_protected_scores(
-    *, score_paths: Sequence[str | Path], expected_contexts: int = 360,
+    *,
+    score_paths: Sequence[str | Path],
+    expected_contexts: int = 360,
+    workers: int = 1,
+    work_dir: str | Path | None = None,
+    progress: Callable[[Mapping[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """Create complete seed, paired, ID-equivalence, and confirmatory records."""
 
+    global _AGGREGATION_CONTEXTS
     loaded = [_load_score_arrays(Path(path)) for path in score_paths]
     if len(loaded) != expected_contexts:
         return {
@@ -1379,6 +1676,13 @@ def aggregate_protected_scores(
         if key in keyed:
             raise ValueError("protected score contexts contain a duplicate role")
         keyed[key] = (manifest, arrays)
+    by_output_identity = {
+        str(manifest["output_identity_sha256"]): (manifest, arrays)
+        for manifest, arrays in loaded
+    }
+    if len(by_output_identity) != len(loaded):
+        raise ValueError("protected score contexts contain a duplicate output identity")
+    _AGGREGATION_CONTEXTS = by_output_identity
     if expected_contexts == 360:
         manifests = [manifest for manifest, _ in loaded]
         if len({manifest["run_id"] for manifest in manifests}) != 50:
@@ -1417,7 +1721,7 @@ def aggregate_protected_scores(
         for manifest, arrays in loaded
         if _role(manifest) == "zero"
     }
-    seed_records: list[dict[str, Any]] = []
+    seed_units: list[dict[str, Any]] = []
     context_stems = sorted({key[:-1] for key in keyed}, key=str)
     for stem in context_stems:
         cell, seed, checkpoint_role, epoch, depth = stem
@@ -1433,8 +1737,8 @@ def aggregate_protected_scores(
                 )
             if left is None or right is None:
                 continue
-            left_manifest, left_arrays = left
-            right_manifest, right_arrays = right
+            left_manifest = left[0]
+            right_manifest = right[0]
             for field in ("sibling_group_id", "initialization_sha256", "data_stream_sha256"):
                 if left_manifest[field] != right_manifest[field]:
                     raise ValueError("paired protected records have different sibling identity")
@@ -1446,38 +1750,38 @@ def aggregate_protected_scores(
                     for manifest in (left_manifest, right_manifest)
                 )
                 for detector in DETECTORS:
-                    dataset_rows = {}
-                    for split in OOD_SPLITS:
-                        comparison = compare_score_arrays(
-                            left=left_arrays, right=right_arrays, split=split,
-                            transform=transform, detector=detector,
+                    seed_units.append(
+                        _aggregation_unit(
+                            {
+                                "kind": "seed_record",
+                                "cell_id": cell,
+                                "training_seed": seed,
+                                "checkpoint_role": checkpoint_role,
+                                "checkpoint_epoch": epoch,
+                                "depth_tap": depth,
+                                "direction": direction,
+                                "transform": transform,
+                                "detector": detector,
+                                "component_applicable": component_applicable,
+                                "left_output_identity_sha256": left_manifest[
+                                    "output_identity_sha256"
+                                ],
+                                "right_output_identity_sha256": right_manifest[
+                                    "output_identity_sha256"
+                                ],
+                            }
                         )
-                        if detector == "md":
-                            if component_applicable:
-                                comparison["component_attribution_status"] = "PASS"
-                            else:
-                                comparison.pop("component_attribution", None)
-                                comparison["component_attribution_status"] = "NOT_APPLICABLE"
-                        dataset_rows[split] = comparison
-                    for metric in ("gain", "loss", "pair_order_churn", "delta_auroc"):
-                        dataset_rows[f"near_{metric}"] = float(np.mean([dataset_rows[name][metric] for name in NEAR_SPLITS]))
-                        dataset_rows[f"far_{metric}"] = float(np.mean([dataset_rows[name][metric] for name in FAR_SPLITS]))
-                    seed_records.append(
-                        {
-                            "cell_id": cell,
-                            "training_seed": seed,
-                            "checkpoint_role": checkpoint_role,
-                            "checkpoint_epoch": epoch,
-                            "depth_tap": depth,
-                            "direction": direction,
-                            "transform": transform,
-                            "detector": detector,
-                            "left_run_id": left_manifest["run_id"],
-                            "right_run_id": right_manifest["run_id"],
-                            "datasets": dataset_rows,
-                        }
                     )
-    aggregates: list[dict[str, Any]] = []
+    resolved_work_dir = None if work_dir is None else Path(work_dir)
+    seed_results = _run_aggregation_units(
+        seed_units,
+        workers=workers,
+        work_dir=resolved_work_dir,
+        progress=progress,
+    )
+    seed_records = [seed_results[str(unit["unit_id"])] for unit in seed_units]
+    aggregate_drafts: list[tuple[dict[str, Any], str | None]] = []
+    r_churn_units: list[dict[str, Any]] = []
     group_keys = sorted(
         {
             (row["cell_id"], row["checkpoint_role"], row["checkpoint_epoch"], row["depth_tap"], row["direction"], row["transform"], row["detector"])
@@ -1494,53 +1798,84 @@ def aggregate_protected_scores(
             name: paired_t_interval([float(row["datasets"][name]) for row in rows])
             for name in metric_names
         }
-        r_churn = {}
+        r_churn_unit_id = None
         if key[4] == "coupled_minus_decoupled":
             cell, checkpoint_role, epoch, depth, _, transform, detector = key
             seeds = sorted(int(row["training_seed"]) for row in rows)
-            for split in OOD_SPLITS:
-                same_policy = []
-                for role in ("coupled", "decoupled"):
-                    role_items = [
-                        keyed[(cell, seed, checkpoint_role, epoch, depth, role)]
-                        for seed in seeds
-                        if (cell, seed, checkpoint_role, epoch, depth, role) in keyed
-                    ]
-                    for first, second in combinations(role_items, 2):
-                        if first[0]["sample_order_sha256"] != second[0]["sample_order_sha256"]:
-                            raise ValueError("same-policy protected records have different sample order")
-                        first_arrays = first[1]
-                        second_arrays = second[1]
-                        transition = pair_transition_summary(
-                            first_arrays[f"{transform}__id_test__{detector}"],
-                            first_arrays[f"{transform}__{split}__{detector}"],
-                            second_arrays[f"{transform}__id_test__{detector}"],
-                            second_arrays[f"{transform}__{split}__{detector}"],
-                        )
-                        same_policy.append(transition_rates(transition)[2])
-                numerator = float(
-                    np.median([row["datasets"][split]["pair_order_churn"] for row in rows])
-                )
-                denominator = float(np.median(same_policy))
-                pair_count = int(rows[0]["datasets"][split]["pair_count"])
-                floor = max(1.0e-4, 10.0 / pair_count)
-                r_churn[split] = {
-                    "cross_policy_median": numerator,
-                    "same_policy_median": denominator,
-                    "same_policy_pair_count": len(same_policy),
-                    "denominator_floor": floor,
-                    "value": None if denominator < floor else numerator / denominator,
-                    "status": (
-                        "UNDEFINED_SMALL_DENOMINATOR" if denominator < floor else "PASS"
-                    ),
+            same_policy_pairs: list[list[str]] = []
+            for role in ("coupled", "decoupled"):
+                role_items = [
+                    keyed[(cell, seed, checkpoint_role, epoch, depth, role)]
+                    for seed in seeds
+                    if (cell, seed, checkpoint_role, epoch, depth, role) in keyed
+                ]
+                for first, second in combinations(role_items, 2):
+                    if first[0]["sample_order_sha256"] != second[0]["sample_order_sha256"]:
+                        raise ValueError("same-policy protected records have different sample order")
+                    same_policy_pairs.append(
+                        [
+                            str(first[0]["output_identity_sha256"]),
+                            str(second[0]["output_identity_sha256"]),
+                        ]
+                    )
+            r_churn_unit = _aggregation_unit(
+                {
+                    "kind": "r_churn",
+                    "cell_id": cell,
+                    "checkpoint_role": checkpoint_role,
+                    "checkpoint_epoch": epoch,
+                    "depth_tap": depth,
+                    "direction": "coupled_minus_decoupled",
+                    "transform": transform,
+                    "detector": detector,
+                    "seeds": seeds,
+                    "same_policy_pairs": same_policy_pairs,
+                    "cross_policy_churn": {
+                        split: [
+                            float(row["datasets"][split]["pair_order_churn"])
+                            for row in rows
+                        ]
+                        for split in OOD_SPLITS
+                    },
+                    "pair_count_by_split": {
+                        split: int(rows[0]["datasets"][split]["pair_count"])
+                        for split in OOD_SPLITS
+                    },
                 }
-        aggregates.append({
-            "cell_id": key[0], "checkpoint_role": key[1], "checkpoint_epoch": key[2],
-            "depth_tap": key[3], "direction": key[4], "transform": key[5],
-            "detector": key[6], "seeds": [row["training_seed"] for row in rows],
-            "summaries": summaries,
-            "r_churn": r_churn,
-        })
+            )
+            r_churn_units.append(r_churn_unit)
+            r_churn_unit_id = str(r_churn_unit["unit_id"])
+        aggregate_drafts.append(
+            (
+                {
+                    "cell_id": key[0],
+                    "checkpoint_role": key[1],
+                    "checkpoint_epoch": key[2],
+                    "depth_tap": key[3],
+                    "direction": key[4],
+                    "transform": key[5],
+                    "detector": key[6],
+                    "seeds": [row["training_seed"] for row in rows],
+                    "summaries": summaries,
+                },
+                r_churn_unit_id,
+            )
+        )
+    r_churn_results = _run_aggregation_units(
+        r_churn_units,
+        workers=workers,
+        work_dir=resolved_work_dir,
+        progress=progress,
+    )
+    _AGGREGATION_CONTEXTS = {}
+    aggregates = []
+    for draft, unit_id in aggregate_drafts:
+        aggregates.append(
+            {
+                **draft,
+                "r_churn": {} if unit_id is None else r_churn_results[unit_id],
+            }
+        )
     id_equivalence = {}
     for cell in sorted({manifest["cell_id"] for manifest, _ in loaded}):
         deltas: dict[str, list[float]] = defaultdict(list)

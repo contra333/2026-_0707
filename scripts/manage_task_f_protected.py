@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import sys
 from pathlib import Path
 
 from oge.evaluation.task_f_protected import (
@@ -81,6 +83,11 @@ def _parser() -> argparse.ArgumentParser:
     collect.add_argument("--score-path", type=Path, action="append", required=True)
     collect.add_argument("--expected-contexts", type=int, default=360)
     collect.add_argument("--output", type=Path, required=True)
+    collect.add_argument(
+        "--workers", type=int, default=max(1, min(8, os.cpu_count() or 1))
+    )
+    collect.add_argument("--work-dir", type=Path)
+    collect.add_argument("--progress-every", type=int, default=25)
 
     verify = commands.add_parser("verify")
     verify.add_argument(
@@ -175,8 +182,31 @@ def main() -> int:
         )
         print(output)
     elif args.command == "collect":
+        if args.output.exists():
+            raise FileExistsError(f"refusing to overwrite {args.output}")
+        if args.workers < 1:
+            raise ValueError("--workers must be at least one")
+        if args.progress_every < 1:
+            raise ValueError("--progress-every must be at least one")
+        work_dir = args.work_dir or args.output.with_name(f"{args.output.name}.work")
+
+        def report_progress(record: dict) -> None:
+            if (
+                record["phase"].endswith(("START", "COMPLETE"))
+                or record["completed"] % args.progress_every == 0
+            ):
+                print(
+                    json.dumps({"status": "PROGRESS", **record}, sort_keys=True),
+                    file=sys.stderr,
+                    flush=True,
+                )
+
         payload = aggregate_protected_scores(
-            score_paths=args.score_path, expected_contexts=args.expected_contexts
+            score_paths=args.score_path,
+            expected_contexts=args.expected_contexts,
+            workers=args.workers,
+            work_dir=work_dir,
+            progress=report_progress,
         )
         _write_new(args.output, payload)
         print(json.dumps({"status": payload["status"], "output": str(args.output)}, sort_keys=True))
