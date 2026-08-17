@@ -128,6 +128,10 @@ def _array_sha256(value: np.ndarray) -> str:
     return hashlib.sha256(contiguous.view(np.uint8)).hexdigest()
 
 
+def _normalized_gpu_uuid(value: Any) -> str:
+    return str(value).removeprefix("GPU-").lower()
+
+
 def _record_id(
     run_id: str, role: str, epoch: int | None, tap: str, split: str
 ) -> str:
@@ -843,7 +847,8 @@ def export_protected_checkpoint_bundle(
     runtime = collect_runtime_provenance(device)
     accelerator = runtime.get("accelerator")
     if not isinstance(accelerator, Mapping) or (
-        accelerator.get("device_uuid") != bundle["gpu_uuid"]
+        _normalized_gpu_uuid(accelerator.get("device_uuid"))
+        != _normalized_gpu_uuid(bundle["gpu_uuid"])
     ):
         raise ValueError("protected runtime GPU UUID differs from the planned bundle")
     authorization_sha256 = canonical_sha256(authorization)

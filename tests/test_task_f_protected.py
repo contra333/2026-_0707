@@ -245,7 +245,9 @@ def test_checkpoint_bundle_loads_once_and_emits_all_taps_atomically(
         "collect_runtime_provenance",
         lambda device: {
             "device_type": "fixture",
-            "accelerator": {"device_uuid": bundle["gpu_uuid"]},
+            "accelerator": {
+                "device_uuid": str(bundle["gpu_uuid"]).removeprefix("GPU-")
+            },
         },
     )
     monkeypatch.setattr(protected.torch, "device", lambda value: real_device("cpu"))
