@@ -29,13 +29,19 @@ from oge.evaluation.task_f_fresh_orchestration import (
     execute_task_f_host,
     load_completed_upload_evidence,
     publish_task_f_host_result,
+    publish_task_f_local_compute_relay,
     validate_local_source_gate,
     validate_remote_source_gate_matches_local,
     wait_for_global_source_gate,
 )
 from oge.studies.artifacts import atomic_write_json
 from oge.studies.hashing import canonical_json_bytes
-from oge.studies.supervisor import build_artifact_manifest, upload_artifact_tree, verify_hf_preflight
+from oge.studies.supervisor import (
+    build_artifact_manifest,
+    upload_artifact_tree,
+    verify_clean_git,
+    verify_hf_preflight,
+)
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
@@ -100,14 +106,20 @@ def _worker(args: argparse.Namespace) -> int:
 
 
 def _download_host_shards(
-    *, evaluation_git_sha: str, hf_cli: Path, download_root: Path
+    *,
+    evaluation_git_sha: str,
+    hf_cli: Path,
+    download_root: Path,
+    collector_git_sha: str | None = None,
 ) -> dict[str, Path]:
     roots: dict[str, Path] = {}
     for host_id in HOSTS:
-        source = (
-            f"hf://buckets/{BUCKET}/evaluations/task_f_fresh_id_v1/"
+        prefix = (
             f"{evaluation_git_sha}/{host_id}"
+            if collector_git_sha is None
+            else f"{evaluation_git_sha}/_local_compute/{collector_git_sha}/{host_id}"
         )
+        source = f"hf://buckets/{BUCKET}/evaluations/task_f_fresh_id_v1/{prefix}"
         destination = download_root / host_id
         if destination.exists():
             if not (destination / "REMOTE_COMPLETE.json").is_file():
@@ -208,6 +220,25 @@ def _parser() -> argparse.ArgumentParser:
     collect.add_argument("--hf-cli", type=Path, required=True)
     collect.add_argument("--poll-seconds", type=float, default=60.0)
     collect.add_argument("--timeout-hours", type=float, default=72.0)
+
+    relay = subparsers.add_parser("relay-local-host")
+    relay.add_argument("--host-id", choices=HOSTS, required=True)
+    relay.add_argument("--artifact-root", type=Path, required=True)
+    relay.add_argument("--state-root", type=Path, required=True)
+    relay.add_argument("--expected-evaluation-git-sha", required=True)
+    relay.add_argument("--collector-git-sha", required=True)
+    relay.add_argument("--hf-cli", type=Path, required=True)
+
+    collect_local = subparsers.add_parser("collect-local")
+    collect_local.add_argument("--evaluation-git-sha", required=True)
+    collect_local.add_argument("--collector-git-sha", required=True)
+    collect_local.add_argument("--evaluation-plan", type=Path, required=True)
+    collect_local.add_argument("--download-root", type=Path, required=True)
+    collect_local.add_argument("--output-directory", type=Path, required=True)
+    collect_local.add_argument("--state-root", type=Path, required=True)
+    collect_local.add_argument("--hf-cli", type=Path, required=True)
+    collect_local.add_argument("--poll-seconds", type=float, default=60.0)
+    collect_local.add_argument("--timeout-hours", type=float, default=72.0)
 
     for name in ("_bridge-worker", "_geometry-worker", "_alignment-worker"):
         worker = subparsers.add_parser(name)
@@ -325,7 +356,11 @@ def main() -> int:
             "local_source_gate": args.state_root / "LOCAL_SOURCE_GATE_PASS.json",
             "source_gate": args.state_root / "SOURCE_GATE_PASS.json",
             "host_compute_complete": args.state_root / "HOST_COMPUTE_COMPLETE.json",
+            "local_compute_relay_complete": (
+                args.state_root / "LOCAL_COMPUTE_RELAY_COMPLETE.json"
+            ),
             "host_complete": args.state_root / "HOST_COMPLETE.json",
+            "local_central_complete": args.state_root / "LOCAL_CENTRAL_COMPLETE.json",
             "central_complete": args.state_root / "CENTRAL_COMPLETE.json",
         }
         output = {
@@ -336,6 +371,23 @@ def main() -> int:
         return 0
     if args.command == "run-host":
         return _run_host(args)
+    if args.command == "relay-local-host":
+        verify_clean_git(REPOSITORY_ROOT, args.collector_git_sha)
+        verify_hf_preflight(args.hf_cli, account="contra333", bucket=BUCKET)
+        result = publish_task_f_local_compute_relay(
+            artifact_root=args.artifact_root,
+            state_root=args.state_root,
+            host_id=args.host_id,
+            expected_evaluation_git_sha=args.expected_evaluation_git_sha,
+            collector_git_sha=args.collector_git_sha,
+            hf_cli=args.hf_cli,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    local_collection = args.command == "collect-local"
+    if local_collection:
+        verify_clean_git(REPOSITORY_ROOT, args.collector_git_sha)
 
     verify_hf_preflight(args.hf_cli, account="contra333", bucket=BUCKET)
     deadline = time.monotonic() + args.timeout_hours * 3600.0
@@ -347,6 +399,7 @@ def main() -> int:
                 evaluation_git_sha=args.evaluation_git_sha,
                 hf_cli=args.hf_cli,
                 download_root=args.download_root,
+                collector_git_sha=args.collector_git_sha if local_collection else None,
             )
             if all((root / "REMOTE_COMPLETE.json").is_file() for root in host_roots.values()):
                 break
@@ -366,6 +419,9 @@ def main() -> int:
         if (
             terminal.get("status") != "PASS"
             or terminal.get("source_training_sha") != SOURCE_TRAINING_SHA
+            or terminal.get("evaluation_git_sha") != args.evaluation_git_sha
+            or terminal.get("collection_mode")
+            != ("local_compute_relay" if local_collection else "remote_final")
         ):
             raise ValueError("preserved Task F central terminal identity mismatch")
     else:
@@ -373,8 +429,28 @@ def main() -> int:
             host_roots=host_roots,
             evaluation_plan=_json(args.evaluation_plan),
             output_directory=args.output_directory,
+            expected_evaluation_git_sha=args.evaluation_git_sha,
+            collection_mode=(
+                "local_compute_relay" if local_collection else "remote_final"
+            ),
+            expected_collector_git_sha=(
+                args.collector_git_sha if local_collection else None
+            ),
         )
         build_artifact_manifest(args.output_directory)
+    if local_collection:
+        if (
+            terminal.get("collection_mode") != "local_compute_relay"
+            or terminal.get("evaluation_git_sha") != args.evaluation_git_sha
+            or terminal.get("collector_git_sha") != args.collector_git_sha
+            or terminal.get("source_remote_gate_satisfied") is not False
+            or terminal.get("final_research_terminal") is not False
+        ):
+            raise ValueError("preserved Task F local central identity mismatch")
+        final = {**terminal, "transport": "LOCAL_VERIFIED_SUMMARY_RELAY"}
+        atomic_write_json(args.state_root / "LOCAL_CENTRAL_COMPLETE.json", final)
+        print(json.dumps(final, indent=2, sort_keys=True))
+        return 0
     destination = (
         f"hf://buckets/{BUCKET}/evaluations/task_f_fresh_id_v1/"
         f"{args.evaluation_git_sha}/_aggregate"

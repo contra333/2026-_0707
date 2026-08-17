@@ -3,6 +3,7 @@ import json
 import threading
 import time
 from collections import Counter
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -11,11 +12,14 @@ from oge.evaluation.task_f_fresh import build_fresh_evaluation_plan
 from oge.evaluation.task_f_fresh_orchestration import (
     EXPECTED_SPECIFICATION_SHA256,
     HOST_COUNTS,
+    LOCAL_RELAY_SCHEMA_VERSION,
     SOURCE_TRAINING_SHA,
     build_task_f_pipeline_manifest,
     collect_task_f_host_summaries,
     index_feature_artifacts,
     publish_task_f_host_result,
+    publish_task_f_local_compute_relay,
+    stage_task_f_local_compute_relay,
     validate_local_source_gate,
     validate_remote_source_gate_matches_local,
     validate_source_gate_documents,
@@ -396,6 +400,91 @@ def test_overlap_publication_requires_matching_global_remote_source_gate(
     ] == "REMOTE_VERIFIED"
 
 
+def test_local_compute_relay_is_atomic_identity_bound_and_not_a_final_terminal(
+    tmp_path, monkeypatch
+):
+    import oge.evaluation.task_f_fresh_orchestration as orchestration
+
+    artifact = tmp_path / "artifacts"
+    operational = artifact / "operational_bundle"
+    state = tmp_path / "state"
+    operational.mkdir(parents=True)
+    state.mkdir()
+    evaluation_sha = "e" * 40
+    collector_sha = "c" * 40
+    terminal = {
+        "schema_version": "task_f_fresh_id_host_terminal_v1",
+        "status": "PASS",
+        "host_id": "curie",
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "evaluation_git_sha": evaluation_sha,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "stage_counts": {"geometry": HOST_COUNTS["curie"]["geometry"]},
+        "protected_data_access": False,
+    }
+    local_gate = {
+        "status": "PASS",
+        "host_id": "curie",
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "run_count": HOST_COUNTS["curie"]["runs"],
+        "export_count": HOST_COUNTS["curie"]["source_exports"],
+    }
+    atomic_write_json(operational / "HOST_COMPLETE.json", terminal)
+    atomic_write_json(
+        operational / "seed_records.json", {"record_count": 1, "records": [{}]}
+    )
+    atomic_write_json(
+        operational / "alignment_inventory.json",
+        {"alignment_count": 0, "artifacts": []},
+    )
+    build_artifact_manifest(operational)
+    atomic_write_json(state / "HOST_COMPUTE_COMPLETE.json", terminal)
+    atomic_write_json(state / "LOCAL_SOURCE_GATE_PASS.json", local_gate)
+
+    capsule = stage_task_f_local_compute_relay(
+        artifact_root=artifact,
+        state_root=state,
+        host_id="curie",
+        expected_evaluation_git_sha=evaluation_sha,
+        collector_git_sha=collector_sha,
+    )
+    relay = json.loads((capsule / "LOCAL_COMPUTE_RELAY.json").read_text())
+    assert relay["status"] == "LOCAL_COMPUTE_VERIFIED"
+    assert not relay["source_remote_gate_required_for_this_relay"]
+    assert not relay["final_research_terminal"]
+    assert not relay["protected_data_access"]
+    assert stage_task_f_local_compute_relay(
+        artifact_root=artifact,
+        state_root=state,
+        host_id="curie",
+        expected_evaluation_git_sha=evaluation_sha,
+        collector_git_sha=collector_sha,
+    ) == capsule
+
+    uploads = []
+
+    def fake_upload(source, *, hf_cli, bucket, destination, control_root):
+        uploads.append((Path(source), destination))
+        return {"status": "REMOTE_VERIFIED", "destination": destination}
+
+    monkeypatch.setattr(orchestration, "upload_artifact_tree", fake_upload)
+    result = publish_task_f_local_compute_relay(
+        artifact_root=artifact,
+        state_root=state,
+        host_id="curie",
+        expected_evaluation_git_sha=evaluation_sha,
+        collector_git_sha=collector_sha,
+        hf_cli="hf",
+    )
+    assert result["status"] == "LOCAL_COMPUTE_RELAY_VERIFIED"
+    assert not result["source_remote_gate_satisfied"]
+    assert not result["final_research_terminal"]
+    assert uploads[0][1].endswith(
+        f"/{evaluation_sha}/_local_compute/{collector_sha}/curie"
+    )
+
+
 @pytest.mark.parametrize(
     ("overlap", "expected_order"),
     [
@@ -539,7 +628,7 @@ def test_generic_pipeline_rejects_unknown_dependency_and_cycle():
         )
 
 
-def test_central_collector_requires_three_complete_host_summaries(tmp_path, monkeypatch):
+def _collector_roots(tmp_path, *, evaluation_sha, collector_sha=None):
     alignment_counts = {"curie": 270, "lise": 126, "precision_medicine": 261}
     seed_counts = {"curie": 768, "lise": 444, "precision_medicine": 708}
     roots = {}
@@ -547,19 +636,19 @@ def test_central_collector_requires_three_complete_host_summaries(tmp_path, monk
         root = tmp_path / host
         root.mkdir()
         destination = f"hf://fixture/{host}"
-        atomic_write_json(
-            root / "HOST_COMPLETE.json",
-            {
-                "status": "PASS",
-                "host_id": host,
-                "source_training_sha": SOURCE_TRAINING_SHA,
-                "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
-                "stage_counts": {
-                    "geometry": HOST_COUNTS[host]["geometry"],
-                    "alignment": alignment_counts[host],
-                },
+        terminal = {
+            "status": "PASS",
+            "host_id": host,
+            "source_training_sha": SOURCE_TRAINING_SHA,
+            "evaluation_git_sha": evaluation_sha,
+            "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+            "stage_counts": {
+                "geometry": HOST_COUNTS[host]["geometry"],
+                "alignment": alignment_counts[host],
             },
-        )
+            "protected_data_access": False,
+        }
+        atomic_write_json(root / "HOST_COMPLETE.json", terminal)
         atomic_write_json(
             root / "seed_records.json",
             {
@@ -580,6 +669,41 @@ def test_central_collector_requires_three_complete_host_summaries(tmp_path, monk
                 ],
             },
         )
+        if collector_sha is not None:
+            local_gate = {
+                "status": "PASS",
+                "host_id": host,
+                "source_training_sha": SOURCE_TRAINING_SHA,
+                "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+                "run_count": HOST_COUNTS[host]["runs"],
+                "export_count": HOST_COUNTS[host]["source_exports"],
+            }
+            atomic_write_json(root / "HOST_COMPUTE_COMPLETE.json", terminal)
+            atomic_write_json(root / "LOCAL_SOURCE_GATE_PASS.json", local_gate)
+            atomic_write_json(
+                root / "LOCAL_COMPUTE_RELAY.json",
+                {
+                    "schema_version": LOCAL_RELAY_SCHEMA_VERSION,
+                    "status": "LOCAL_COMPUTE_VERIFIED",
+                    "host_id": host,
+                    "source_training_sha": SOURCE_TRAINING_SHA,
+                    "evaluation_git_sha": evaluation_sha,
+                    "collector_git_sha": collector_sha,
+                    "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+                    "host_terminal_sha256": __import__("hashlib").sha256(
+                        (root / "HOST_COMPLETE.json").read_bytes()
+                    ).hexdigest(),
+                    "host_compute_sha256": __import__("hashlib").sha256(
+                        (root / "HOST_COMPUTE_COMPLETE.json").read_bytes()
+                    ).hexdigest(),
+                    "local_source_gate_sha256": __import__("hashlib").sha256(
+                        (root / "LOCAL_SOURCE_GATE_PASS.json").read_bytes()
+                    ).hexdigest(),
+                    "source_remote_gate_required_for_this_relay": False,
+                    "final_research_terminal": False,
+                    "protected_data_access": False,
+                },
+            )
         artifact_manifest = build_artifact_manifest(root)
         marker = {
             "status": "REMOTE_VERIFIED",
@@ -592,7 +716,10 @@ def test_central_collector_requires_three_complete_host_summaries(tmp_path, monk
             json.dumps(marker, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
         roots[host] = root
+    return roots
 
+
+def _stub_aggregation(monkeypatch):
     import oge.analysis.task_f_fresh_id as analysis
 
     monkeypatch.setattr(
@@ -611,12 +738,58 @@ def test_central_collector_requires_three_complete_host_summaries(tmp_path, monk
         return output_directory
 
     monkeypatch.setattr(analysis, "write_aggregation_artifacts", fake_write)
+
+
+def test_central_collector_requires_three_complete_host_summaries(tmp_path, monkeypatch):
+    evaluation_sha = "e" * 40
+    roots = _collector_roots(tmp_path, evaluation_sha=evaluation_sha)
+    _stub_aggregation(monkeypatch)
     terminal = collect_task_f_host_summaries(
         host_roots=roots,
         evaluation_plan={"fixture": True},
         output_directory=tmp_path / "central",
+        expected_evaluation_git_sha=evaluation_sha,
     )
     assert terminal["status"] == "PASS"
+    assert terminal["collection_mode"] == "remote_final"
+    assert terminal["source_remote_gate_satisfied"]
+    assert terminal["final_research_terminal"]
     assert terminal["seed_record_count"] == 1920
     assert terminal["alignment_count"] == 657
     assert terminal["id_equivalence"] == "PENDING_PROTECTED_ID_TEST"
+
+
+def test_local_collector_uses_verified_compute_capsules_without_remote_source_gate(
+    tmp_path, monkeypatch
+):
+    evaluation_sha = "e" * 40
+    collector_sha = "c" * 40
+    roots = _collector_roots(
+        tmp_path, evaluation_sha=evaluation_sha, collector_sha=collector_sha
+    )
+    _stub_aggregation(monkeypatch)
+    terminal = collect_task_f_host_summaries(
+        host_roots=roots,
+        evaluation_plan={"fixture": True},
+        output_directory=tmp_path / "central-local",
+        expected_evaluation_git_sha=evaluation_sha,
+        collection_mode="local_compute_relay",
+        expected_collector_git_sha=collector_sha,
+    )
+    assert terminal["status"] == "PASS"
+    assert terminal["collection_mode"] == "local_compute_relay"
+    assert not terminal["source_remote_gate_satisfied"]
+    assert not terminal["final_research_terminal"]
+
+    roots["curie"].joinpath("LOCAL_SOURCE_GATE_PASS.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="checksum"):
+        collect_task_f_host_summaries(
+            host_roots=roots,
+            evaluation_plan={"fixture": True},
+            output_directory=tmp_path / "central-corrupt",
+            expected_evaluation_git_sha=evaluation_sha,
+            collection_mode="local_compute_relay",
+            expected_collector_git_sha=collector_sha,
+        )

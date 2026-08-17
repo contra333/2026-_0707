@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
+import uuid
 from collections import Counter, defaultdict
 from collections.abc import Callable, Mapping, Sequence
 from concurrent.futures import Future, ThreadPoolExecutor
@@ -47,6 +49,7 @@ from .task_f_fresh import (
 
 SOURCE_TRAINING_SHA = "9eb3c1fa56d880ea5220badac7bc71ba75786d22"
 SOURCE_EXECUTION_ID = "task_f_full_9eb3c1fa"
+LOCAL_RELAY_SCHEMA_VERSION = "task_f_fresh_id_local_compute_relay_v1"
 HOSTS = ("curie", "lise", "precision_medicine")
 HOST_COUNTS = {
     "curie": {"runs": 20, "source_exports": 124, "supplemental_exports": 404, "geometry": 264, "cpu_workers": 4},
@@ -74,6 +77,45 @@ def _reject_protected(value: Any, label: str) -> None:
     normalized = str(value).lower().replace("-", "_")
     if any(token in normalized for token in PROTECTED_TOKENS):
         raise ValueError(f"{label} contains a protected reference")
+
+
+def _verify_manifest_tree(
+    root: str | Path, *, allowed_unlisted: Sequence[str] = ()
+) -> dict[str, Any]:
+    directory = Path(root)
+    manifest_path = directory / "artifact_manifest.json"
+    sidecar = directory / "artifact_manifest.json.sha256"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    fields = sidecar.read_text(encoding="utf-8").strip().split()
+    if len(fields) < 2 or fields[0] != sha256_file(manifest_path):
+        raise ValueError(f"artifact manifest sidecar mismatch: {directory}")
+    expected = {
+        str(row["path"]): (int(row["size"]), str(row["sha256"]))
+        for row in manifest.get("files", ())
+    }
+    if len(expected) != int(manifest.get("file_count", -1)):
+        raise ValueError(f"artifact manifest count mismatch: {directory}")
+    if sum(size for size, _ in expected.values()) != int(
+        manifest.get("total_size", -1)
+    ):
+        raise ValueError(f"artifact manifest size mismatch: {directory}")
+    for relative, (size, digest) in expected.items():
+        path = directory / relative
+        if not path.is_file() or path.stat().st_size != size or sha256_file(path) != digest:
+            raise ValueError(f"artifact checksum mismatch: {directory}/{relative}")
+    actual = {
+        path.relative_to(directory).as_posix()
+        for path in directory.rglob("*")
+        if path.is_file()
+    }
+    permitted = set(expected) | {
+        "artifact_manifest.json",
+        "artifact_manifest.json.sha256",
+        *allowed_unlisted,
+    }
+    if actual != permitted:
+        raise ValueError(f"artifact file inventory mismatch: {directory}")
+    return manifest
 
 
 def _record_key(value: Mapping[str, Any]) -> tuple[Any, ...]:
@@ -1192,6 +1234,154 @@ def execute_task_f_host(
     return summary
 
 
+def stage_task_f_local_compute_relay(
+    *,
+    artifact_root: str | Path,
+    state_root: str | Path,
+    host_id: str,
+    expected_evaluation_git_sha: str,
+    collector_git_sha: str,
+) -> Path:
+    """Build a tiny verified host capsule without asserting source remote completion."""
+
+    if host_id not in HOSTS:
+        raise ValueError("unsupported Task F host")
+    if len(collector_git_sha) != 40:
+        raise ValueError("collector Git SHA must be full length")
+    artifact = Path(artifact_root)
+    state = Path(state_root)
+    operational = artifact / "operational_bundle"
+    _verify_manifest_tree(operational)
+    terminal = json.loads((operational / "HOST_COMPLETE.json").read_text(encoding="utf-8"))
+    compute = json.loads((state / "HOST_COMPUTE_COMPLETE.json").read_text(encoding="utf-8"))
+    local_gate = json.loads((state / "LOCAL_SOURCE_GATE_PASS.json").read_text(encoding="utf-8"))
+    if terminal != compute:
+        raise SupervisorBlockedError("Task F local relay terminal differs from compute witness")
+    if (
+        terminal.get("status") != "PASS"
+        or terminal.get("host_id") != host_id
+        or terminal.get("source_training_sha") != SOURCE_TRAINING_SHA
+        or terminal.get("evaluation_git_sha") != expected_evaluation_git_sha
+        or terminal.get("task_f_specification_sha256") != EXPECTED_SPECIFICATION_SHA256
+        or terminal.get("protected_data_access") is not False
+    ):
+        raise SupervisorBlockedError("Task F local relay terminal identity mismatch")
+    if (
+        local_gate.get("status") != "PASS"
+        or local_gate.get("host_id") != host_id
+        or local_gate.get("source_training_sha") != SOURCE_TRAINING_SHA
+        or local_gate.get("task_f_specification_sha256")
+        != EXPECTED_SPECIFICATION_SHA256
+    ):
+        raise SupervisorBlockedError("Task F local relay source witness mismatch")
+    expected = HOST_COUNTS[host_id]
+    if int(local_gate.get("run_count", -1)) != int(expected["runs"]) or int(
+        local_gate.get("export_count", -1)
+    ) != int(expected["source_exports"]):
+        raise SupervisorBlockedError("Task F local relay source accounting mismatch")
+    _reject_protected(terminal, "Task F local relay terminal")
+    _reject_protected(local_gate, "Task F local relay source witness")
+
+    destination = state / "local_compute_relay_bundle"
+    if destination.exists():
+        _verify_manifest_tree(destination)
+        existing = json.loads(
+            (destination / "LOCAL_COMPUTE_RELAY.json").read_text(encoding="utf-8")
+        )
+        if (
+            existing.get("host_id") != host_id
+            or existing.get("evaluation_git_sha") != expected_evaluation_git_sha
+            or existing.get("collector_git_sha") != collector_git_sha
+        ):
+            raise FileExistsError("preserved Task F local relay identity differs")
+        return destination
+
+    temporary = destination.with_name(f".{destination.name}.{uuid.uuid4().hex}.tmp")
+    try:
+        temporary.mkdir(parents=True)
+        for name in ("HOST_COMPLETE.json", "seed_records.json", "alignment_inventory.json"):
+            atomic_write_json(
+                temporary / name,
+                json.loads((operational / name).read_text(encoding="utf-8")),
+            )
+        atomic_write_json(temporary / "HOST_COMPUTE_COMPLETE.json", compute)
+        atomic_write_json(temporary / "LOCAL_SOURCE_GATE_PASS.json", local_gate)
+        relay = {
+            "schema_version": LOCAL_RELAY_SCHEMA_VERSION,
+            "status": "LOCAL_COMPUTE_VERIFIED",
+            "host_id": host_id,
+            "source_training_sha": SOURCE_TRAINING_SHA,
+            "evaluation_git_sha": expected_evaluation_git_sha,
+            "collector_git_sha": collector_git_sha,
+            "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+            "host_terminal_sha256": sha256_file(temporary / "HOST_COMPLETE.json"),
+            "host_compute_sha256": sha256_file(temporary / "HOST_COMPUTE_COMPLETE.json"),
+            "local_source_gate_sha256": sha256_file(
+                temporary / "LOCAL_SOURCE_GATE_PASS.json"
+            ),
+            "source_remote_gate_required_for_this_relay": False,
+            "final_research_terminal": False,
+            "protected_data_access": False,
+        }
+        atomic_write_json(temporary / "LOCAL_COMPUTE_RELAY.json", relay)
+        build_artifact_manifest(temporary)
+        os.replace(temporary, destination)
+    except BaseException:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
+    _verify_manifest_tree(destination)
+    return destination
+
+
+def publish_task_f_local_compute_relay(
+    *,
+    artifact_root: str | Path,
+    state_root: str | Path,
+    host_id: str,
+    expected_evaluation_git_sha: str,
+    collector_git_sha: str,
+    hf_cli: str | Path,
+) -> dict[str, Any]:
+    """Upload only the small local-compute capsule, independent of source upload."""
+
+    capsule = stage_task_f_local_compute_relay(
+        artifact_root=artifact_root,
+        state_root=state_root,
+        host_id=host_id,
+        expected_evaluation_git_sha=expected_evaluation_git_sha,
+        collector_git_sha=collector_git_sha,
+    )
+    destination = (
+        "hf://buckets/contra333/ICLR_RUN/evaluations/task_f_fresh_id_v1/"
+        f"{expected_evaluation_git_sha}/_local_compute/{collector_git_sha}/{host_id}"
+    )
+    control = Path(state_root) / "local_compute_relay_upload"
+    evidence = load_completed_upload_evidence(control, destination)
+    if evidence is None:
+        evidence = upload_artifact_tree(
+            capsule,
+            hf_cli=hf_cli,
+            bucket="contra333/ICLR_RUN",
+            destination=destination,
+            control_root=control,
+        )
+    result = {
+        "schema_version": LOCAL_RELAY_SCHEMA_VERSION,
+        "status": "LOCAL_COMPUTE_RELAY_VERIFIED",
+        "host_id": host_id,
+        "source_training_sha": SOURCE_TRAINING_SHA,
+        "evaluation_git_sha": expected_evaluation_git_sha,
+        "collector_git_sha": collector_git_sha,
+        "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
+        "final_research_terminal": False,
+        "source_remote_gate_satisfied": False,
+        "protected_data_access": False,
+        "remote": evidence,
+    }
+    atomic_write_json(Path(state_root) / "LOCAL_COMPUTE_RELAY_COMPLETE.json", result)
+    return result
+
+
 def publish_task_f_host_result(
     *,
     artifact_root: str | Path,
@@ -1267,50 +1457,33 @@ def collect_task_f_host_summaries(
     host_roots: Mapping[str, str | Path],
     evaluation_plan: Mapping[str, Any],
     output_directory: str | Path,
+    expected_evaluation_git_sha: str,
+    collection_mode: str = "remote_final",
+    expected_collector_git_sha: str | None = None,
 ) -> dict[str, Any]:
-    """Verify three small host shards and run deterministic central aggregation."""
+    """Verify three small host shards and run deterministic central aggregation.
+
+    ``local_compute_relay`` consumes the same checksummed compute payload without
+    claiming that the large source or final host uploads are complete.
+    """
 
     if set(host_roots) != set(HOSTS):
         raise ValueError("Task F collection requires exactly three host roots")
+    if len(expected_evaluation_git_sha) != 40:
+        raise ValueError("Task F collection requires a full evaluation Git SHA")
+    if collection_mode not in {"remote_final", "local_compute_relay"}:
+        raise ValueError("unsupported Task F collection mode")
+    if collection_mode == "local_compute_relay" and (
+        expected_collector_git_sha is None or len(expected_collector_git_sha) != 40
+    ):
+        raise ValueError("local Task F collection requires a full collector Git SHA")
     all_records: list[dict[str, Any]] = []
     host_records: dict[str, Any] = {}
     total_alignments = 0
     for host_id in HOSTS:
         root = Path(host_roots[host_id])
         artifact_manifest_path = root / "artifact_manifest.json"
-        artifact_manifest = json.loads(
-            artifact_manifest_path.read_text(encoding="utf-8")
-        )
-        sidecar = root / "artifact_manifest.json.sha256"
-        fields = sidecar.read_text(encoding="utf-8").strip().split()
-        if len(fields) < 2 or fields[0] != sha256_file(artifact_manifest_path):
-            raise ValueError(f"host {host_id} artifact manifest sidecar mismatch")
-        expected_files = {
-            str(row["path"]): (int(row["size"]), str(row["sha256"]))
-            for row in artifact_manifest.get("files", ())
-        }
-        if len(expected_files) != int(artifact_manifest.get("file_count", -1)):
-            raise ValueError(f"host {host_id} artifact manifest count mismatch")
-        if sum(size for size, _ in expected_files.values()) != int(
-            artifact_manifest.get("total_size", -1)
-        ):
-            raise ValueError(f"host {host_id} artifact manifest size mismatch")
-        for relative, (size, digest) in expected_files.items():
-            path = root / relative
-            if not path.is_file() or path.stat().st_size != size or sha256_file(path) != digest:
-                raise ValueError(f"host {host_id} artifact checksum mismatch: {relative}")
-        actual_files = {
-            path.relative_to(root).as_posix()
-            for path in root.rglob("*")
-            if path.is_file()
-        }
-        expected_actual = set(expected_files) | {
-            "artifact_manifest.json",
-            "artifact_manifest.json.sha256",
-            "REMOTE_COMPLETE.json",
-        }
-        if actual_files != expected_actual:
-            raise ValueError(f"host {host_id} downloaded file inventory mismatch")
+        _verify_manifest_tree(root, allowed_unlisted=("REMOTE_COMPLETE.json",))
         marker = json.loads((root / "REMOTE_COMPLETE.json").read_text(encoding="utf-8"))
         terminal = json.loads((root / "HOST_COMPLETE.json").read_text(encoding="utf-8"))
         records = json.loads((root / "seed_records.json").read_text(encoding="utf-8"))
@@ -1321,12 +1494,65 @@ def collect_task_f_host_summaries(
             artifact_manifest_path
         ):
             raise ValueError(f"host {host_id} remote marker manifest mismatch")
+        if collection_mode == "local_compute_relay":
+            relay = json.loads(
+                (root / "LOCAL_COMPUTE_RELAY.json").read_text(encoding="utf-8")
+            )
+            compute = json.loads(
+                (root / "HOST_COMPUTE_COMPLETE.json").read_text(encoding="utf-8")
+            )
+            local_gate = json.loads(
+                (root / "LOCAL_SOURCE_GATE_PASS.json").read_text(encoding="utf-8")
+            )
+            if terminal != compute:
+                raise ValueError(f"host {host_id} compute witness mismatch")
+            if (
+                relay.get("schema_version") != LOCAL_RELAY_SCHEMA_VERSION
+                or relay.get("status") != "LOCAL_COMPUTE_VERIFIED"
+                or relay.get("host_id") != host_id
+                or relay.get("source_training_sha") != SOURCE_TRAINING_SHA
+                or relay.get("evaluation_git_sha") != expected_evaluation_git_sha
+                or relay.get("collector_git_sha") != expected_collector_git_sha
+                or relay.get("task_f_specification_sha256")
+                != EXPECTED_SPECIFICATION_SHA256
+                or relay.get("source_remote_gate_required_for_this_relay") is not False
+                or relay.get("final_research_terminal") is not False
+                or relay.get("protected_data_access") is not False
+            ):
+                raise ValueError(f"host {host_id} local relay identity mismatch")
+            if (
+                relay.get("host_terminal_sha256")
+                != sha256_file(root / "HOST_COMPLETE.json")
+                or relay.get("host_compute_sha256")
+                != sha256_file(root / "HOST_COMPUTE_COMPLETE.json")
+                or relay.get("local_source_gate_sha256")
+                != sha256_file(root / "LOCAL_SOURCE_GATE_PASS.json")
+            ):
+                raise ValueError(f"host {host_id} local relay witness mismatch")
+            expected_source = HOST_COUNTS[host_id]
+            if (
+                local_gate.get("status") != "PASS"
+                or local_gate.get("host_id") != host_id
+                or local_gate.get("source_training_sha") != SOURCE_TRAINING_SHA
+                or local_gate.get("task_f_specification_sha256")
+                != EXPECTED_SPECIFICATION_SHA256
+                or int(local_gate.get("run_count", -1)) != int(expected_source["runs"])
+                or int(local_gate.get("export_count", -1))
+                != int(expected_source["source_exports"])
+            ):
+                raise ValueError(f"host {host_id} local source witness mismatch")
+            _reject_protected(relay, f"host {host_id} local relay")
+            _reject_protected(local_gate, f"host {host_id} local source witness")
         if terminal.get("status") != "PASS" or terminal.get("host_id") != host_id:
             raise ValueError(f"host {host_id} terminal identity mismatch")
         if terminal.get("source_training_sha") != SOURCE_TRAINING_SHA:
             raise ValueError(f"host {host_id} source SHA mismatch")
+        if terminal.get("evaluation_git_sha") != expected_evaluation_git_sha:
+            raise ValueError(f"host {host_id} evaluation SHA mismatch")
         if terminal.get("task_f_specification_sha256") != EXPECTED_SPECIFICATION_SHA256:
             raise ValueError(f"host {host_id} specification mismatch")
+        if terminal.get("protected_data_access") is not False:
+            raise ValueError(f"host {host_id} protected-data boundary mismatch")
         expected_geometry = int(HOST_COUNTS[host_id]["geometry"])
         if int(terminal["stage_counts"].get("geometry", -1)) != expected_geometry:
             raise ValueError(f"host {host_id} geometry coverage mismatch")
@@ -1384,7 +1610,10 @@ def collect_task_f_host_summaries(
     terminal = {
         "schema_version": "task_f_fresh_id_central_terminal_v1",
         "status": "PASS",
+        "collection_mode": collection_mode,
         "source_training_sha": SOURCE_TRAINING_SHA,
+        "evaluation_git_sha": expected_evaluation_git_sha,
+        "collector_git_sha": expected_collector_git_sha,
         "task_f_specification_sha256": EXPECTED_SPECIFICATION_SHA256,
         "host_count": 3,
         "logical_export_count": 1320,
@@ -1392,6 +1621,8 @@ def collect_task_f_host_summaries(
         "seed_record_count": len(all_records),
         "alignment_count": total_alignments,
         "protected_data_access": False,
+        "source_remote_gate_satisfied": collection_mode == "remote_final",
+        "final_research_terminal": collection_mode == "remote_final",
         "id_equivalence": "PENDING_PROTECTED_ID_TEST",
         "hosts": host_records,
         "aggregation_sha256": aggregation["aggregate_sha256"],
