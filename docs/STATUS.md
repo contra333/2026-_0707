@@ -21,7 +21,9 @@ all payload hashes on the same runtime with the fixed four-thread numerical
 environment.
 
 RtMD is an optional sidecar, not a prerequisite for Task F or the main fresh
-paired mechanism study. No exact Gate 3 rule is frozen. Task F model/export and
+paired mechanism study. The prospectively frozen fresh-ID Gate 3 now uses the
+five-seed raw penultimate anchor tail-shape contrast and closes only the RtMD
+slot on failure; its verdict remains `NOT_RUN`. Task F model/export and
 paired-training engineering are complete, including full-matrix sibling
 provenance. The one authorized execution-only pilot completed its safe epoch-1
 stop, identical-config resume through epoch 2, global-step/audit continuity
@@ -82,6 +84,15 @@ exact three-host source remote gate. A detached collector gate on
 `precision_medicine` waits for both all source and all evaluation terminal
 markers before central paired aggregation. This chain is independent of the
 local workstation. No protected `id_test`, OOD, or RtMD execution has started.
+
+The bounded local-compute relay and collector preserve that final remote path
+but can collect the three checksummed host summaries as soon as host compute is
+terminal, without waiting for the large source upload. The relay is explicitly
+not a final research terminal. The pre-protected-OOD addendum freezes the exact
+2,520-record one-shot protected schedule, practical margins, multiplicity,
+spectral bands, churn denominator, affine normalization, and the hashed RtMD
+Gate 3 rule. Protected execution still requires a current resource packet and
+new explicit owner approval after the ID-only terminal and Gate 3 verdict.
 
 The planned chain is:
 

@@ -1757,3 +1757,139 @@ Pilot approval and full-training approval are separate. Approval of the one
 the 50 research runs. Task F pilot and main ID training do not require
 protected-OOD access, an RtMD Gate 3 rule, or RtMD activation. Protected OOD
 remains prohibited until its own later contract and approval.
+
+### 13.6 Task F pre-protected-OOD addendum v1
+
+This subsection is frozen before inspecting the fresh Task F ID-only geometry,
+paired aggregates, residual-tail values, protected `id_test`, or OOD results.
+It carries forward the source training SHA
+`9eb3c1fa56d880ea5220badac7bc71ba75786d22`, the Task F specification
+SHA-256
+`0ac3101e6d6aaed1a5a0d4891792d4700540bac5247cca8f7d6e67d664ffe9ba`,
+the seed allocation, and the ID-equivalence margins in Section 13.5 without
+change. A checksummed local-compute relay may aggregate the three host summaries
+before the large source upload finishes. That relay is transport and ID-only
+compute evidence, not the final remote research terminal. It does not authorize
+protected access.
+
+The protected population is the frozen CIFAR-10 `id_test` set of 10,000
+members plus the existing OpenOOD-compatible near sets `cifar100` and `tin`
+and far sets `mnist`, `svhn`, `texture`, and `places365`, in that order. The
+9,000-member compatibility-only `id_test_openood` and the 1,000-member
+`ood_validation_tin` remain excluded. No protected sample is used for fitting,
+temperature selection, checkpoint selection, detector selection, fallback, or
+early stopping.
+
+The one-shot main protected export schedule is:
+
+```yaml
+main_protected_schedule:
+  splits: [id_test, cifar100, tin, mnist, svhn, texture, places365]
+  all_50_runs_penultimate_last_epochs: [10, 60, 120, 160, 200]
+  primary_anchor_20_runs_epoch_200_extra_depths: [stage1, stage2, stage3]
+  all_50_runs_penultimate_best_val: true
+  checkpoint_depth_contexts_per_split: 360
+  logical_feature_records: 2520
+  primary_endpoint: epoch_200_last_penultimate
+  best_val_role: secondary_id_validation_selected_control
+```
+
+The epoch-200 penultimate Raw-MD coupled--decoupled contrast in the five-seed
+Adam anchor remains primary. Near and far summaries are arithmetic means of
+the per-dataset seed-level metrics after each dataset is reported separately.
+The four primary confirmatory hypotheses are `DeltaAUROC` and
+`PairOrderChurn`, each for the near and far macro summaries. Two-sided paired
+seed tests use familywise alpha `0.10` with Holm adjustment across these four
+hypotheses. Paired mean, sample SD, and paired 90% intervals are always shown.
+Dataset-specific, other-cell, SGDM, depth, L2, RMD, component, affine, and
+`best_val` results are prespecified secondary or descriptive outputs and are
+not expanded into a grid of unadjusted claims.
+
+The five-epoch anchor trajectory uses one simultaneous 90% max-absolute-t
+band over `[10,60,120,160,200]`, obtained from all exact paired-seed sign
+flips. Its functional summary is the normalized trapezoidal area over epoch
+10--200, and its early slope is the signed change from epoch 10 to 60 divided
+by 50. A first practical-threshold crossing is called detectability time only.
+For a two-sided `alpha=0.10`, power `0.80` paired-t design, the approximate
+minimum detectable standardized paired effects are `1.36` for five seeds and
+`2.30` for three seeds. Smaller uncertainty intervals may still be reported,
+but absence of significance at this seed count is not evidence of no effect.
+
+The prospective practical interpretation margins are `0.01` absolute AUROC
+and `0.03` absolute FPR95. They are effect-size labels and RtMD
+non-inferiority guardrails, not run-exclusion, checkpoint-selection, or
+training gates. Higher AUROC and lower FPR95 are better. The primary mechanism
+result remains reportable when a practical margin is not reached.
+
+`R_churn` is undefined when its same-policy denominator is below
+`max(1e-4, 10/(N_ID*N_OOD))`; the numerator and denominator are still reported.
+The spectral allocation diagnostic sorts branch-internal covariance
+eigenvalues in descending order and uses cumulative trace bands
+`[0%,50%]`, `(50%,90%]`, and `(90%,100%]`. An equal-eigenvalue tie is never
+split across a boundary; an empty band is `NOT_APPLICABLE`. Individual
+eigenvectors are not promoted after inspection.
+
+The ID-train affine map is evaluated with the same-image residual
+`e=z_C-(A z_D+b)`. The normalized residual divides `||e||_2` by
+`max(||z_C-mu_C||_2, ||A(z_D-mu_D)||_2, 1e-12)`. Each OOD dataset reports the
+raw and normalized distribution plus its median excess over protected
+`id_test`. The propagated quadratic-score check uses the stored fitted
+precision and the exact first-order-plus-quadratic perturbation bound; a score
+gap beyond that certified bound is an estimator/implementation failure, not a
+scientific effect.
+
+The fresh ID-only RtMD Gate 3 is exactly one test on the primary anchor's
+coupled and decoupled roles, five paired seeds, epoch-200 `last.pt`,
+penultimate raw features, and held-out `id_validation`. For each branch, the
+tail statistic is
+`log(Q_0.99(q_perp,id_validation)/chi2_ppf(0.99,k))`. The deterministic
+class-stratified two-fold ID-train fit, finite-`nu` domain, Gaussian candidate,
+and BIC-style selection in Section 7.5 are unchanged. Gate 3 passes only when:
+
+```text
+RtMD Gate 3 specification SHA-256:
+30e7f212c6e91b84885a7d06568820caa15c48fdcbe924af28818d07c428d270
+```
+
+1. all ten role-by-seed fits are present and numerically applicable;
+2. at least four of five fits in each role select a finite t tail;
+3. the paired 90% t interval for coupled minus decoupled excludes zero;
+4. at least four of five seed effects have the mean-effect sign; and
+5. the absolute paired mean is at least the maximum of `0.10`, `1e-6`, and
+   the pooled within-role median absolute between-seed tail-statistic
+   difference.
+
+This single prospectively declared Gate 3 contrast has no multiplicity search.
+Missingness, numerical inapplicability, fallback frequency, weak effect,
+inconsistent sign, or failure of any item closes the optional RtMD slot for
+this anchor. It does not change, delay, or invalidate the main protected OOD
+study, and no replacement estimator or detector may be introduced.
+
+If and only if Gate 3 passes, the unchanged Section 7.5 RtMD score is added to
+the one-shot protected run for the ten coupled/decoupled anchor models at the
+epoch-200 last penultimate endpoint. Raw is primary and L2 is secondary; there
+is no RtMD checkpoint, depth, `nu`, dataset, or transform search. RtMD's
+separate secondary family requires all of the following at the seed level:
+
+- mean `PairOrderChurn(RtMD)-PairOrderChurn(RawMD) <= -0.02` and its paired
+  90% interval has upper bound below zero;
+- AUROC is no worse than Raw MD by more than `0.01` and FPR95 is no worse by
+  more than `0.03` for both near and far macro summaries; and
+- relative to RMD on the far macro summary, AUROC is no worse by more than
+  `0.01` and FPR95 is no worse by more than `0.03`.
+
+These RtMD outcomes are evaluated jointly as guardrails, with dataset-level
+values visible. Failure closes the method-contribution claim; it cannot rescue
+or reverse the main mechanism conclusion. Passing on WRN-28-10/CIFAR-10 permits
+only an anchor-local secondary finding. A method contribution still requires
+the separately approved replication in Section 10.
+
+Protected execution may be proposed only after the exact 50-run ID-only
+inventory, 1,320 bridge records, 660 geometry units, alignment coverage,
+paired aggregate, and Gate 3 verdict are terminal and checksummed. Completion
+of the large HF source upload is not a scientific prerequisite when these
+local source and compute identities are independently verified, but the final
+remote terminal remains pending until that upload verifies. Immediately before
+protected execution, the owner must receive the execution SHA, exact split and
+context counts, target GPUs, time/storage estimate, Gate 3 verdict, and RtMD
+included/excluded status and must give a new explicit one-shot approval.
