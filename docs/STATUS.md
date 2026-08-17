@@ -107,6 +107,14 @@ frozen aggregation rules. Focused tests and the full CPU suite pass, and the
 Task F specification identity is unchanged. This is implementation readiness,
 not protected execution or a research result.
 
+Issue #113 removes the record-per-process export bottleneck without changing
+that scientific plan or artifact contract. The 2,520 logical records are now
+derived into 300 checkpoint bundles and 2,100 dataset passes: each checkpoint
+is loaded once, all seven protected splits are processed under that loaded
+model, and every required epoch-200 tap is emitted from the same forward pass.
+The existing per-record command remains available for compatibility. Protected
+execution remains `NOT_RUN` and still requires a refreshed exact approval.
+
 The planned chain is:
 
 ```text

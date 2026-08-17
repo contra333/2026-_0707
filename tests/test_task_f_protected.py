@@ -4,6 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 
 import oge.evaluation.task_f_protected as protected
 from oge.analysis.discriminant_residual_preflight import fit_discriminant_geometry
@@ -150,6 +151,142 @@ def test_exact_2520_plan_preserves_host_placement_and_excludes_rtmd(frozen_plan)
     assert not any(row["dataset_split"] in protected._FORBIDDEN_SPLITS for row in frozen_plan["records"])
     assert sum(row["depth_tap"] != "penultimate" for row in frozen_plan["records"]) == 420
     assert sum(row["checkpoint_role"] == "best_val" for row in frozen_plan["records"]) == 350
+
+
+def test_checkpoint_bundle_plan_conserves_records_and_reduces_execution_units(frozen_plan):
+    bundle_plan = protected.build_protected_checkpoint_bundle_plan(frozen_plan)
+    assert bundle_plan["counts"] == {
+        "checkpoint_bundles": 300,
+        "dataset_passes": 2100,
+        "logical_records": 2520,
+        "bundles_by_host": {"curie": 120, "lise": 66, "precision_medicine": 114},
+        "dataset_passes_by_host": {"curie": 840, "lise": 462, "precision_medicine": 798},
+        "logical_records_by_host": {"curie": 1008, "lise": 630, "precision_medicine": 882},
+    }
+    assert all(bundle["dataset_pass_count"] == 7 for bundle in bundle_plan["bundles"])
+    assert sum(bundle["logical_record_count"] for bundle in bundle_plan["bundles"]) == 2520
+    assert sum(bundle["logical_record_count"] == 28 for bundle in bundle_plan["bundles"]) == 20
+    assert sum(bundle["logical_record_count"] == 7 for bundle in bundle_plan["bundles"]) == 280
+    anchor = next(
+        bundle
+        for bundle in bundle_plan["bundles"]
+        if bundle["logical_record_count"] == 28
+    )
+    assert all(
+        dataset_pass["depth_taps"] == ["penultimate", "stage1", "stage2", "stage3"]
+        for dataset_pass in anchor["dataset_passes"]
+    )
+    assert protected.validate_protected_checkpoint_bundle_plan(
+        bundle_plan, plan=frozen_plan
+    ) == bundle_plan
+
+
+def test_checkpoint_bundle_loads_once_and_emits_all_taps_atomically(
+    tmp_path, frozen_plan, monkeypatch
+):
+    bundle_plan = protected.build_protected_checkpoint_bundle_plan(frozen_plan)
+    bundle = next(item for item in bundle_plan["bundles"] if item["logical_record_count"] == 28)
+    calls = {"checkpoint_loads": 0, "dataset_loaders": 0}
+
+    class FixtureModel:
+        def __init__(self):
+            self.forward_calls = 0
+            self.tap_forward_calls = 0
+
+        def eval(self):
+            return self
+
+        def __call__(self, images, return_feature_taps=False):
+            self.forward_calls += 1
+            logits = torch.zeros((len(images), 10), dtype=torch.float32)
+            if not return_feature_taps:
+                return logits
+            self.tap_forward_calls += 1
+            taps = {
+                "stage1": torch.ones((len(images), 160), dtype=torch.float32),
+                "stage2": torch.ones((len(images), 320), dtype=torch.float32),
+                "stage3": torch.ones((len(images), 640), dtype=torch.float32),
+                "penultimate": torch.ones((len(images), 640), dtype=torch.float32),
+            }
+            return logits, taps
+
+    model = FixtureModel()
+
+    def load_checkpoint(path, device):
+        calls["checkpoint_loads"] += 1
+        return (
+            model,
+            {
+                "run_id": bundle["run_id"],
+                "checkpoint_role": bundle["checkpoint_role"],
+                "checkpoint_epoch": bundle["checkpoint_epoch"],
+            },
+            "c" * 64,
+        )
+
+    def build_loader(config, *, dataset_key, **kwargs):
+        calls["dataset_loaders"] += 1
+        is_id = dataset_key == "id_test"
+        sample_ids = [f"{dataset_key}:0", f"{dataset_key}:1"]
+        batch = {
+            "image": torch.zeros((2, 3, 32, 32), dtype=torch.float32),
+            "class_label": torch.asarray([0, 1] if is_id else [-1, -1]),
+            "is_id": torch.asarray([is_id, is_id]),
+            "sample_id": sample_ids,
+        }
+        return [batch], sample_ids, {}
+
+    real_device = torch.device
+    monkeypatch.setattr(protected, "load_task_f_checkpoint", load_checkpoint)
+    monkeypatch.setattr(protected, "load_dataset_config", lambda path: {})
+    monkeypatch.setattr(protected, "build_extraction_loader", build_loader)
+    monkeypatch.setattr(
+        protected,
+        "collect_runtime_provenance",
+        lambda device: {
+            "device_type": "fixture",
+            "accelerator": {"device_uuid": bundle["gpu_uuid"]},
+        },
+    )
+    monkeypatch.setattr(protected.torch, "device", lambda value: real_device("cpu"))
+
+    kwargs = {
+        "plan": frozen_plan,
+        "authorization": _authorization(frozen_plan),
+        "bundle_id": bundle["bundle_id"],
+        "execution_git_sha": "b" * 40,
+        "checkpoint_path": tmp_path / "checkpoint.pt",
+        "dataset_config_path": tmp_path / "dataset.yaml",
+        "data_root": tmp_path,
+        "output_root": tmp_path / "exports",
+        "device": "cuda:0",
+        "batch_size": 512,
+        "num_workers": 0,
+    }
+    first = protected.export_protected_checkpoint_bundle(**kwargs)
+    assert first["status"] == "PASS"
+    assert first["dataset_pass_count"] == 7
+    assert first["logical_record_count"] == 28
+    assert calls == {"checkpoint_loads": 1, "dataset_loaders": 7}
+    assert model.tap_forward_calls == 7
+    assert model.forward_calls == 8  # seven dataset passes plus one parity call
+    assert len(set(first["artifact_paths"])) == 28
+    assert all(Path(path).is_dir() for path in first["artifact_paths"])
+
+    second = protected.export_protected_checkpoint_bundle(**kwargs)
+    assert second["artifact_paths"] == first["artifact_paths"]
+    assert len(list((tmp_path / "exports").iterdir())) == 28
+
+    monkeypatch.setattr(
+        protected,
+        "collect_runtime_provenance",
+        lambda device: {
+            "device_type": "fixture",
+            "accelerator": {"device_uuid": "GPU-wrong"},
+        },
+    )
+    with pytest.raises(ValueError, match="runtime GPU UUID"):
+        protected.export_protected_checkpoint_bundle(**kwargs)
 
 
 def test_plan_and_runtime_authorization_fail_closed(frozen_plan):

@@ -51,13 +51,14 @@ from oge.evaluation.task_f_fresh_orchestration import (
     SOURCE_TRAINING_SHA,
     validate_task_f_pipeline_manifest,
 )
-from oge.feature_export import collect_runtime_provenance, ordered_sample_id_sha256
+from oge.feature_export import collect_runtime_provenance
 from oge.feature_export.task_f import load_task_f_checkpoint
 from oge.studies.hashing import canonical_json_bytes, canonical_sha256
 from oge.training import generate_research_run_matrix, validate_research_run_matrix
 
 
 PLAN_SCHEMA_VERSION = "task_f_protected_one_shot_plan_v1"
+BUNDLE_PLAN_SCHEMA_VERSION = "task_f_protected_checkpoint_bundle_plan_v1"
 AUTHORIZATION_SCHEMA_VERSION = "task_f_protected_one_shot_authorization_v1"
 FEATURE_SCHEMA_VERSION = "task_f_protected_feature_record_v1"
 SCORE_SCHEMA_VERSION = "task_f_protected_context_scores_v1"
@@ -84,8 +85,11 @@ DETECTORS = ("md", "marginal", "rmd")
 PRIMARY_ANCHOR_CELL = "adam_lr1e-3_wd1e-4_anchor"
 HOSTS = ("curie", "lise", "precision_medicine")
 EXPECTED_HOST_RECORDS = {"curie": 1008, "lise": 630, "precision_medicine": 882}
+EXPECTED_HOST_BUNDLES = {"curie": 120, "lise": 66, "precision_medicine": 114}
+EXPECTED_HOST_DATASET_PASSES = {"curie": 840, "lise": 462, "precision_medicine": 798}
 _FORBIDDEN_SPLITS = {"id_test_openood", "ood_validation_tin"}
 _ARRAY_NAMES = ("features", "class_labels", "is_id", "sample_ids")
+_BUNDLE_TAP_ORDER = ("penultimate", "stage1", "stage2", "stage3")
 
 
 def sha256_file(path: str | Path) -> str:
@@ -93,6 +97,25 @@ def sha256_file(path: str | Path) -> str:
     with Path(path).open("rb") as handle:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
+    return digest.hexdigest()
+
+
+def _protected_ordered_sample_id_sha256(sample_ids: Sequence[str] | np.ndarray) -> str:
+    """Hash authorized protected IDs without applying the ID-only name ban."""
+
+    digest = hashlib.sha256()
+    observed: set[str] = set()
+    for index, sample_id in enumerate(sample_ids):
+        value = str(sample_id)
+        if not value or "\0" in value:
+            raise ValueError(f"sample_ids[{index}] must be non-empty and contain no NUL")
+        if value in observed:
+            raise ValueError("sample_ids must be unique and ordered deterministically")
+        observed.add(value)
+        digest.update(value.encode("utf-8"))
+        digest.update(b"\0")
+    if not observed:
+        raise ValueError("sample_ids must not be empty")
     return digest.hexdigest()
 
 
@@ -324,6 +347,201 @@ def validate_protected_plan(value: Mapping[str, Any]) -> dict[str, Any]:
     return json.loads(canonical_json_bytes(payload))
 
 
+def build_protected_checkpoint_bundle_plan(
+    plan: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Derive 300 runtime bundles from the frozen 2,520 logical records."""
+
+    validated = validate_protected_plan(plan)
+    grouped: dict[tuple[Any, ...], list[dict[str, Any]]] = defaultdict(list)
+    for record in validated["records"]:
+        key = (
+            record["run_id"],
+            record["checkpoint_role"],
+            record["checkpoint_epoch"],
+            record["checkpoint_relative_path"],
+            record["host_id"],
+            int(record["gpu_index"]),
+            record["gpu_uuid"],
+        )
+        grouped[key].append(record)
+
+    bundles: list[dict[str, Any]] = []
+    for key, records in sorted(
+        grouped.items(), key=lambda item: tuple(str(value) for value in item[0])
+    ):
+        (
+            run_id,
+            checkpoint_role,
+            checkpoint_epoch,
+            checkpoint_relative_path,
+            host_id,
+            gpu_index,
+            gpu_uuid,
+        ) = key
+        by_split: dict[str, list[dict[str, Any]]] = defaultdict(list)
+        for record in records:
+            by_split[str(record["dataset_split"])].append(record)
+        if set(by_split) != set(PROTECTED_SPLITS):
+            raise ValueError("checkpoint bundle does not cover all protected splits")
+        dataset_passes = []
+        for split in PROTECTED_SPLITS:
+            split_records = by_split[split]
+            by_tap = {str(record["depth_tap"]): record for record in split_records}
+            if len(by_tap) != len(split_records):
+                raise ValueError("checkpoint bundle repeats a split/depth record")
+            taps = [tap for tap in _BUNDLE_TAP_ORDER if tap in by_tap]
+            dataset_passes.append(
+                {
+                    "dataset_split": split,
+                    "depth_taps": taps,
+                    "record_ids": [str(by_tap[tap]["record_id"]) for tap in taps],
+                }
+            )
+        identity = {
+            "plan_sha256": validated["plan_sha256"],
+            "run_id": run_id,
+            "checkpoint_role": checkpoint_role,
+            "checkpoint_epoch": checkpoint_epoch,
+            "checkpoint_relative_path": checkpoint_relative_path,
+            "host_id": host_id,
+            "gpu_index": gpu_index,
+            "gpu_uuid": gpu_uuid,
+        }
+        bundles.append(
+            {
+                **identity,
+                "bundle_id": canonical_sha256(identity),
+                "dataset_passes": dataset_passes,
+                "dataset_pass_count": len(dataset_passes),
+                "logical_record_count": len(records),
+            }
+        )
+
+    bundle_counts = Counter(str(bundle["host_id"]) for bundle in bundles)
+    pass_counts = Counter()
+    record_counts = Counter()
+    for bundle in bundles:
+        host = str(bundle["host_id"])
+        pass_counts[host] += int(bundle["dataset_pass_count"])
+        record_counts[host] += int(bundle["logical_record_count"])
+    payload: dict[str, Any] = {
+        "schema_version": BUNDLE_PLAN_SCHEMA_VERSION,
+        "plan_sha256": validated["plan_sha256"],
+        "protected_data_access": False,
+        "counts": {
+            "checkpoint_bundles": len(bundles),
+            "dataset_passes": sum(pass_counts.values()),
+            "logical_records": sum(record_counts.values()),
+            "bundles_by_host": dict(sorted(bundle_counts.items())),
+            "dataset_passes_by_host": dict(sorted(pass_counts.items())),
+            "logical_records_by_host": dict(sorted(record_counts.items())),
+        },
+        "bundles": bundles,
+    }
+    payload["bundle_plan_sha256"] = canonical_sha256(payload)
+    return validate_protected_checkpoint_bundle_plan(payload, plan=validated)
+
+
+def validate_protected_checkpoint_bundle_plan(
+    value: Mapping[str, Any], *, plan: Mapping[str, Any]
+) -> dict[str, Any]:
+    validated_plan = validate_protected_plan(plan)
+    payload = dict(value)
+    observed_hash = payload.pop("bundle_plan_sha256", None)
+    if observed_hash != canonical_sha256(payload):
+        raise ValueError("protected checkpoint bundle plan hash mismatch")
+    if payload.get("schema_version") != BUNDLE_PLAN_SCHEMA_VERSION:
+        raise ValueError("unsupported protected checkpoint bundle plan schema")
+    if payload.get("plan_sha256") != validated_plan["plan_sha256"]:
+        raise ValueError("checkpoint bundle plan is bound to a different protected plan")
+    if payload.get("protected_data_access") is not False:
+        raise ValueError("checkpoint bundle planning must not claim protected access")
+    bundles = payload.get("bundles")
+    if not isinstance(bundles, list) or len(bundles) != 300:
+        raise ValueError("protected execution requires exactly 300 checkpoint bundles")
+    expected_counts = {
+        "checkpoint_bundles": 300,
+        "dataset_passes": 2100,
+        "logical_records": 2520,
+        "bundles_by_host": EXPECTED_HOST_BUNDLES,
+        "dataset_passes_by_host": EXPECTED_HOST_DATASET_PASSES,
+        "logical_records_by_host": EXPECTED_HOST_RECORDS,
+    }
+    if payload.get("counts") != expected_counts:
+        raise ValueError("protected checkpoint bundle counts changed")
+    bundle_ids = [str(bundle.get("bundle_id")) for bundle in bundles]
+    if len(bundle_ids) != len(set(bundle_ids)):
+        raise ValueError("protected checkpoint bundle plan contains duplicate bundles")
+    records_by_id = {
+        str(record["record_id"]): record for record in validated_plan["records"]
+    }
+    observed_records = []
+    for bundle in bundles:
+        identity = {
+            "plan_sha256": validated_plan["plan_sha256"],
+            "run_id": bundle.get("run_id"),
+            "checkpoint_role": bundle.get("checkpoint_role"),
+            "checkpoint_epoch": bundle.get("checkpoint_epoch"),
+            "checkpoint_relative_path": bundle.get("checkpoint_relative_path"),
+            "host_id": bundle.get("host_id"),
+            "gpu_index": bundle.get("gpu_index"),
+            "gpu_uuid": bundle.get("gpu_uuid"),
+        }
+        if bundle.get("bundle_id") != canonical_sha256(identity):
+            raise ValueError("checkpoint bundle identity changed")
+        passes = bundle.get("dataset_passes")
+        if not isinstance(passes, list) or len(passes) != len(PROTECTED_SPLITS):
+            raise ValueError("checkpoint bundle must contain exactly seven dataset passes")
+        if [item.get("dataset_split") for item in passes] != list(PROTECTED_SPLITS):
+            raise ValueError("checkpoint bundle split order changed")
+        if int(bundle.get("dataset_pass_count", -1)) != 7:
+            raise ValueError("checkpoint bundle dataset-pass count changed")
+        record_ids = []
+        for dataset_pass in passes:
+            split = str(dataset_pass["dataset_split"])
+            split_record_ids = [str(value) for value in dataset_pass.get("record_ids", [])]
+            split_records = [records_by_id.get(record_id) for record_id in split_record_ids]
+            if any(record is None for record in split_records):
+                raise ValueError("checkpoint bundle references an unknown logical record")
+            expected_taps = [str(record["depth_tap"]) for record in split_records]
+            if dataset_pass.get("depth_taps") != expected_taps:
+                raise ValueError("checkpoint bundle depth taps differ from its logical records")
+            for record in split_records:
+                assert record is not None
+                if record["dataset_split"] != split:
+                    raise ValueError("checkpoint bundle mixes protected split identities")
+                record_identity = (
+                    record["run_id"],
+                    record["checkpoint_role"],
+                    record["checkpoint_epoch"],
+                    record["checkpoint_relative_path"],
+                    record["host_id"],
+                    int(record["gpu_index"]),
+                    record["gpu_uuid"],
+                )
+                bundle_identity = (
+                    bundle["run_id"],
+                    bundle["checkpoint_role"],
+                    bundle["checkpoint_epoch"],
+                    bundle["checkpoint_relative_path"],
+                    bundle["host_id"],
+                    int(bundle["gpu_index"]),
+                    bundle["gpu_uuid"],
+                )
+                if record_identity != bundle_identity:
+                    raise ValueError("checkpoint bundle mixes checkpoint or placement identities")
+            record_ids.extend(split_record_ids)
+        if int(bundle.get("logical_record_count", -1)) != len(record_ids):
+            raise ValueError("checkpoint bundle logical-record count changed")
+        observed_records.extend(record_ids)
+    expected_records = [str(record["record_id"]) for record in validated_plan["records"]]
+    if Counter(observed_records) != Counter(expected_records):
+        raise ValueError("checkpoint bundles do not conserve the 2,520 logical records")
+    payload["bundle_plan_sha256"] = observed_hash
+    return json.loads(canonical_json_bytes(payload))
+
+
 def validate_authorization(
     value: Mapping[str, Any], *, plan: Mapping[str, Any], execution_git_sha: str
 ) -> dict[str, Any]:
@@ -375,6 +593,30 @@ def write_protected_feature_artifact(
 ) -> Path:
     validated_plan = validate_protected_plan(plan)
     validate_authorization(authorization, plan=validated_plan, execution_git_sha=execution_git_sha)
+    return _write_protected_feature_artifact_validated(
+        record=record,
+        validated_plan=validated_plan,
+        execution_git_sha=execution_git_sha,
+        checkpoint_sha256=checkpoint_sha256,
+        checkpoint_epoch=checkpoint_epoch,
+        features=features,
+        logits=logits,
+        class_labels=class_labels,
+        is_id=is_id,
+        sample_ids=sample_ids,
+        runtime=runtime,
+        output_root=output_root,
+        reuse_verified=False,
+    )
+
+
+def _write_protected_feature_artifact_validated(
+    *, record: Mapping[str, Any], validated_plan: Mapping[str, Any],
+    execution_git_sha: str, checkpoint_sha256: str, checkpoint_epoch: int,
+    features: Any, logits: Any | None, class_labels: Any, is_id: Any,
+    sample_ids: Any, runtime: Mapping[str, Any], output_root: str | Path,
+    reuse_verified: bool,
+) -> Path:
     expected_record = {row["record_id"]: row for row in validated_plan["records"]}.get(
         record.get("record_id")
     )
@@ -399,7 +641,7 @@ def write_protected_feature_artifact(
             raise ValueError("id_test labels or is_id flags are invalid")
     elif flags.any() or np.any(labels != -1):
         raise ValueError("OOD labels or is_id flags are invalid")
-    ordered_digest = ordered_sample_id_sha256(ids)
+    ordered_digest = _protected_ordered_sample_id_sha256(ids)
     arrays = {
         "features": feature_array,
         "class_labels": labels,
@@ -431,6 +673,8 @@ def write_protected_feature_artifact(
     destination = Path(output_root) / output_identity
     if destination.exists():
         verify_protected_feature_artifact(destination)
+        if reuse_verified:
+            return destination
         raise FileExistsError(f"protected feature artifact already exists: {destination}")
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.parent / f".{destination.name}.{uuid.uuid4().hex}.tmp"
@@ -485,7 +729,7 @@ def verify_protected_feature_artifact(path: str | Path) -> dict[str, Any]:
         if _array_sha256(value) != metadata["array_sha256"]:
             raise ValueError(f"protected {name} array identity mismatch")
     ids = np.load(root / "sample_ids.npy", allow_pickle=False)
-    if ordered_sample_id_sha256(ids.astype(str)) != manifest["ordered_sample_id_sha256"]:
+    if _protected_ordered_sample_id_sha256(ids.astype(str)) != manifest["ordered_sample_id_sha256"]:
         raise ValueError("protected sample order digest mismatch")
     return {"manifest": manifest, "verified_files": verified}
 
@@ -565,6 +809,129 @@ def export_protected_record(
         runtime=collect_runtime_provenance(device),
         output_root=output_root,
     )
+
+
+def export_protected_checkpoint_bundle(
+    *, plan: Mapping[str, Any], authorization: Mapping[str, Any], bundle_id: str,
+    execution_git_sha: str, checkpoint_path: str | Path,
+    dataset_config_path: str | Path, data_root: str | Path,
+    output_root: str | Path, device: str, batch_size: int = 512,
+    num_workers: int = 4,
+) -> dict[str, Any]:
+    """Export one checkpoint's seven splits and all required taps in one load."""
+
+    validated = validate_protected_plan(plan)
+    validate_authorization(authorization, plan=validated, execution_git_sha=execution_git_sha)
+    bundle_plan = build_protected_checkpoint_bundle_plan(validated)
+    bundles = {str(bundle["bundle_id"]): bundle for bundle in bundle_plan["bundles"]}
+    if bundle_id not in bundles:
+        raise ValueError("bundle is outside the protected checkpoint bundle plan")
+    bundle = bundles[bundle_id]
+    if not str(device).startswith("cuda:"):
+        raise ValueError("production protected export requires an explicit CUDA device")
+    model, provenance, checkpoint_sha256 = load_task_f_checkpoint(checkpoint_path, device=device)
+    if (
+        provenance["run_id"] != bundle["run_id"]
+        or provenance["checkpoint_role"] != bundle["checkpoint_role"]
+    ):
+        raise ValueError("protected checkpoint identity differs from the planned bundle")
+    actual_epoch = int(provenance["checkpoint_epoch"])
+    if bundle["checkpoint_epoch"] is not None and actual_epoch != int(bundle["checkpoint_epoch"]):
+        raise ValueError("protected checkpoint epoch differs from the frozen bundle")
+
+    config = load_dataset_config(dataset_config_path)
+    runtime = collect_runtime_provenance(device)
+    accelerator = runtime.get("accelerator")
+    if not isinstance(accelerator, Mapping) or (
+        accelerator.get("device_uuid") != bundle["gpu_uuid"]
+    ):
+        raise ValueError("protected runtime GPU UUID differs from the planned bundle")
+    authorization_sha256 = canonical_sha256(authorization)
+    records = {str(record["record_id"]): record for record in validated["records"]}
+    target = torch.device(device)
+    model.eval()
+    parity_checked = False
+    artifact_paths: list[str] = []
+    with torch.inference_mode():
+        for dataset_pass in bundle["dataset_passes"]:
+            split = str(dataset_pass["dataset_split"])
+            taps = [str(tap) for tap in dataset_pass["depth_taps"]]
+            loader, expected_ids, _ = build_extraction_loader(
+                config,
+                dataset_key=split,
+                data_root=data_root,
+                config_root=Path(dataset_config_path).parent,
+                batch_size=batch_size,
+                num_workers=num_workers,
+                pin_memory=True,
+                protected_authorization=authorization_sha256,
+            )
+            feature_parts: dict[str, list[np.ndarray]] = {tap: [] for tap in taps}
+            logits: list[np.ndarray] = []
+            labels: list[np.ndarray] = []
+            flags: list[np.ndarray] = []
+            sample_ids: list[str] = []
+            for batch in loader:
+                images = batch["image"].to(target, non_blocking=True)
+                batch_logits, batch_taps = model(images, return_feature_taps=True)
+                if not parity_checked:
+                    torch.testing.assert_close(batch_logits, model(images), rtol=0.0, atol=0.0)
+                    parity_checked = True
+                if not torch.isfinite(batch_logits).all():
+                    raise ValueError("protected extraction produced non-finite logits")
+                for tap in taps:
+                    selected = batch_taps[tap]
+                    if not torch.isfinite(selected).all():
+                        raise ValueError("protected extraction produced non-finite features")
+                    feature_parts[tap].append(
+                        selected.detach().cpu().to(torch.float32).numpy()
+                    )
+                if "penultimate" in feature_parts:
+                    logits.append(batch_logits.detach().cpu().to(torch.float32).numpy())
+                labels.append(batch["class_label"].cpu().numpy())
+                flags.append(batch["is_id"].cpu().numpy())
+                sample_ids.extend(batch["sample_id"])
+            if sample_ids != expected_ids:
+                raise ValueError("protected extraction sample order is incomplete or changed")
+            label_array = np.concatenate(labels)
+            flag_array = np.concatenate(flags)
+            sample_id_array = np.asarray(sample_ids, dtype=str)
+            logit_array = np.concatenate(logits) if logits else None
+            for tap, record_id in zip(
+                dataset_pass["depth_taps"], dataset_pass["record_ids"], strict=True
+            ):
+                record = records[str(record_id)]
+                path = _write_protected_feature_artifact_validated(
+                    record=record,
+                    validated_plan=validated,
+                    execution_git_sha=execution_git_sha,
+                    checkpoint_sha256=checkpoint_sha256,
+                    checkpoint_epoch=actual_epoch,
+                    features=np.concatenate(feature_parts[str(tap)]),
+                    logits=logit_array if tap == "penultimate" else None,
+                    class_labels=label_array,
+                    is_id=flag_array,
+                    sample_ids=sample_id_array,
+                    runtime=runtime,
+                    output_root=output_root,
+                    reuse_verified=True,
+                )
+                artifact_paths.append(str(path))
+    if not parity_checked:
+        raise ValueError("protected checkpoint bundle produced no batches")
+    if len(artifact_paths) != int(bundle["logical_record_count"]):
+        raise ValueError("protected checkpoint bundle artifact count changed")
+    return {
+        "status": "PASS",
+        "protected_data_access": True,
+        "bundle_id": bundle_id,
+        "bundle_plan_sha256": bundle_plan["bundle_plan_sha256"],
+        "checkpoint_sha256": checkpoint_sha256,
+        "checkpoint_epoch": actual_epoch,
+        "dataset_pass_count": len(bundle["dataset_passes"]),
+        "logical_record_count": len(artifact_paths),
+        "artifact_paths": artifact_paths,
+    }
 
 
 def _transform(values: Any, transform: str) -> np.ndarray:
