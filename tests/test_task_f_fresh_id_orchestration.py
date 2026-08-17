@@ -14,6 +14,7 @@ from oge.evaluation.task_f_fresh_orchestration import (
     SOURCE_TRAINING_SHA,
     build_task_f_pipeline_manifest,
     collect_task_f_host_summaries,
+    index_feature_artifacts,
     publish_task_f_host_result,
     validate_local_source_gate,
     validate_remote_source_gate_matches_local,
@@ -235,6 +236,20 @@ def test_global_source_gate_requires_all_three_exact_terminal_witnesses():
     drift["curie"]["validation"]["export_count"] -= 1
     with pytest.raises(RuntimeError, match="accounting"):
         validate_source_gate_documents(drift)
+
+
+def test_feature_index_ignores_only_atomic_temporary_bundles(tmp_path):
+    root = tmp_path / "exports"
+    temporary = root / ".task-f-fixture.tmp"
+    temporary.mkdir(parents=True)
+    (temporary / "manifest.json").write_text("{}\n", encoding="utf-8")
+    assert index_feature_artifacts([root]) == {}
+
+    visible = root / "visible-incomplete-bundle"
+    visible.mkdir()
+    (visible / "manifest.json").write_text("{}\n", encoding="utf-8")
+    with pytest.raises((KeyError, ValueError, FileNotFoundError)):
+        index_feature_artifacts([root])
 
 
 def _local_source_fixture(tmp_path, host, manifest):
