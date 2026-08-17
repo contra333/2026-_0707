@@ -50,33 +50,38 @@ research results, and protected-OOD evaluation has not started.
 The versioned fresh ID evaluation bridge validates the exact 50-run inventory,
 checkpoint/feature/membership/classifier identities, and the complete
 1,320-record `id_train` plus `id_validation` logical coverage. The existing 310
-jobs are a validated subset; the 1,010 supplemental exports have not yet
-started. The fresh ID-only geometry and paired-aggregation implementation is
+jobs are a validated subset; the fixed 1,010 supplemental exports are now
+running on their assigned host GPUs. The fresh ID-only geometry and
+paired-aggregation implementation is
 fixture-tested for raw/L2 discriminant-component bundles, NC/norm/spectrum
 records, ID-train affine and gauge alignment with held-out `id_validation`
 residuals, cell-and-seed-matched paired 90% t-intervals, non-dropping terminal
 status, and deterministic table templates. Comparable-ID remains
 `PENDING_PROTECTED_ID_TEST`; no protected inference was run.
 
-PR #96 added the reusable staged-evaluation supervisor and Task F adapter at
-evaluation execution SHA
-`be666c04ec9a1e0075a4b82d788161d850f1663e`. PR #98 corrected the source
+PR #96 added the reusable staged-evaluation supervisor and Task F adapter. PR
+#98 corrected the source
 finalizer's active-`RUNNING` handling, PR #100 corrected indexing of the flat
 hash-addressed feature-artifact layout, and PR #102 made empty Hugging Face
-prefix listings compatible with the installed CLI. The Task F specification
-remains unchanged. All three source hosts now pass local checksum validation for
-their exact run and export shards and are uploading about 153 GiB of training
-bundles plus 34 GiB of existing features with no-delete semantics. Source
+prefix listings compatible with the installed CLI. PR #104 added the explicit
+local-source-validation overlap mode, and PR #106 excluded only hidden atomic
+export temporary directories from concurrent artifact indexing. The active
+evaluation execution SHA is
+`2a22a651001e6466d067493e0966656c79219081`; the Task F specification remains
+unchanged. All three source hosts pass local checksum validation for their exact
+run and export shards and continue uploading about 153 GiB of training bundles
+plus 34 GiB of existing features with no-delete semantics. Source
 `REMOTE_VERIFIED` markers are pending upload completion.
 
-Clean detached evaluation worktrees remain fixed at the evaluation SHA.
-Detached gate watchers on all three hosts wait for the three source terminal
-markers and then start the fixed 1,010 supplemental GPU exports, 1,320 bridge
-bindings, 660 ID-only geometry units, and 657 sibling alignments. A detached
-collector gate on `precision_medicine` waits for all three evaluation terminal
+Clean detached evaluation worktrees remain fixed at that evaluation SHA. All
+three hosts passed the local source gate and first-bundle production correctness
+sentinel, with no failed jobs at launch. Supplemental GPU export is running
+immediately while source upload continues; verified bundles feed the CPU bridge
+and geometry workers as they become ready. Host publication still waits for the
+exact three-host source remote gate. A detached collector gate on
+`precision_medicine` waits for both all source and all evaluation terminal
 markers before central paired aggregation. This chain is independent of the
-local workstation, but it has not crossed the source gate yet. No supplemental
-export, protected `id_test`, OOD, or RtMD execution has started.
+local workstation. No protected `id_test`, OOD, or RtMD execution has started.
 
 The planned chain is:
 
