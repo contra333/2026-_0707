@@ -594,6 +594,122 @@ OOD dataset. Freeze family-wise uncertainty, practical margins, minimum
 detectable effects, spectral bands, and multiplicity handling before protected
 OOD execution.
 
+### Task F protected readout: the coupling effect is large, readout-dependent, and optimizer-family dependent
+
+The frozen Task F protected one-shot evaluation completed on 2026-08-18. The
+main result is not merely hidden churn under an unchanged aggregate: at the
+five-seed Adam anchor, coupled decay substantially worsened Raw-MD OOD ranking
+relative to its same-initialization, same-data-stream decoupled sibling, while
+also changing roughly one third of the tie-aware ID--OOD pair utility. RMD and
+post-hoc L2 refitting strongly attenuated this sensitivity, and the SGDM-family
+control reversed its sign. The evidence therefore supports a training-rule by
+readout interaction, not a universal AdamW leaderboard claim.
+
+The primary comparison is `coupled - decoupled` at epoch-200 `last.pt`,
+penultimate raw features, and MD. Near is the arithmetic mean of CIFAR-100 and
+Tiny ImageNet; far is the arithmetic mean of MNIST, SVHN, Texture, and
+Places365. The seed, not the image pair, is the independent unit.
+
+| Primary outcome | Decoupled AUROC | Coupled AUROC | Paired mean | Paired 90% CI | Holm result |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Near `DeltaAUROC` | 0.5922 | 0.4178 | -0.1743 | [-0.1838, -0.1649] | reject, `p=2.45e-6` |
+| Near `PairOrderChurn` | -- | -- | 0.3486 | [0.3429, 0.3543] | reject, `p=2.04e-8` |
+| Far `DeltaAUROC` | 0.6709 | 0.3874 | -0.2835 | [-0.3350, -0.2319] | reject, `p=3.03e-4` |
+| Far `PairOrderChurn` | -- | -- | 0.3863 | [0.3413, 0.4312] | reject, `p=5.23e-5` |
+
+All five seeds had negative near and far `DeltaAUROC`. Near Gain was 0.0871
+and Loss was 0.2615; far Gain was 0.0514 and Loss was 0.3349. The aggregate
+drop is therefore a strong imbalance toward decoupled-correct/coupled-incorrect
+pairs, not the difference of two tiny effects. Dataset-level Raw-MD
+cross-policy median churn was 1.20--3.33 times its same-policy median reference;
+all six prespecified denominators passed their floor.
+
+The anchor is not `comparable-ID` under the frozen joint rule. Accuracy and ECE
+passed their practical margins, but NLL did not:
+
+| Protected ID metric | Decoupled | Coupled | Paired mean `C-D` | Margin | Guardrail |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Accuracy | 0.9391 | 0.9311 | -0.0080 | 0.01 | PASS |
+| NLL | 0.4803 | 0.3791 | -0.1012 | 0.08 | FAILED |
+| ECE | 0.0502 | 0.0495 | -0.0007 | 0.02 | PASS |
+
+Lower NLL is better, so the failed NLL guardrail records a large coupled-side
+improvement rather than an ID degradation. It still forbids comparable-ID
+language: the anchor must be presented as a multidimensional ID/OOD Pareto
+result, with no run removal or post-hoc checkpoint matching.
+
+The readout comparison is the strongest current localization evidence:
+
+| Readout | Near `DeltaAUROC` | Near churn | Far `DeltaAUROC` | Far churn |
+| --- | ---: | ---: | ---: | ---: |
+| Raw MD | -0.1743 | 0.3486 | -0.2835 | 0.3863 |
+| Raw RMD | -0.0102 | 0.1286 | -0.0105 | 0.1154 |
+| L2-refit MD | -0.0250 | 0.1686 | +0.0101 | 0.0868 |
+
+Raw RMD retained high absolute AUROC (decoupled/coupled 0.8908/0.8806 near
+and 0.9111/0.9006 far) while sharply reducing the policy gap and pair churn.
+L2-refit MD likewise reduced churn and reversed the far signed gap. These
+outcomes are consistent with a detector-sensitive residual channel, while
+also showing that L2 refitting and RMD cancellation are not interchangeable.
+Raw-MD FPR95 moved in the same adverse coupled direction by 0.0610 near and
+0.2143 far; for L2 MD the changes were +0.0242 near and -0.0563 far.
+
+The effect forms late and deep. At the primary anchor, Raw-MD near
+`DeltaAUROC` progressed from -0.0739 at epoch 10 to -0.1072, -0.1771,
+-0.1781, and -0.1743 at epochs 60, 120, 160, and 200. Near churn increased
+from 0.2546 to 0.3486. The simultaneous 90% trajectory bands excluded zero at
+all five epochs for both near/far signed gaps and churn. The epoch-200 depth
+scan localized the near signed gap to stage2 and later: +0.0032 at stage1,
+-0.0313 at stage2, -0.1540 at stage3, and -0.1743 at penultimate. This is not
+a uniform shallow-layer scale shift.
+
+The Adam cells all had negative Raw-MD coupled-minus-decoupled AUROC, whereas
+the SGDM control had the opposite sign. Importantly, the Adam
+`lr=3e-4, wd=1e-4` cell passed all ID guardrails and still showed near/far
+signed gaps of -0.0218/-0.0787 with churn 0.2313/0.2317. The comparable-ID
+SGDM cell showed +0.1575/+0.0880 with churn 0.2291/0.1461. This sign reversal
+supports an optimizer-family interaction and rules out a universal statement
+that coupling alone always helps or harms OOD detection.
+
+At the primary raw-MD endpoint, the alpha midpoint AUROC lay inside the two
+endpoint means for both near (0.5922, 0.4273, 0.4178 for alpha 0, 0.5, 1) and
+far (0.6709, 0.4083, 0.3874), so those outcomes are interior-compatible. The
+corresponding FPR95 midpoint was outside the closed endpoint interval and is a
+non-monotone three-point response. This is confirmation classification, not a
+fitted dose-response curve or a gate.
+
+The estimator boundary matters. Of 360 protected score contexts, 252 raw and
+253 L2 fits passed theorem/component applicability. The primary anchor's raw
+coupled--decoupled component attribution was `NOT_APPLICABLE` for all 30
+seed-by-OOD comparisons. Direct pseudoinverse MD, Marginal, and RMD scores and
+their pair accounting remain valid, but the strongest branch-internal
+`S-perp`/parallel-Marginal Shapley attribution is unavailable at the primary
+endpoint. RMD attenuation is therefore strong diagnostic evidence, not by
+itself proof of unique causal mediation through `S-perp`. The optional RtMD
+slot remains excluded by the failed prospective Gate 3 and was not evaluated.
+
+The current paper may claim a controlled, repeatable, large pair-ranking
+effect of decay coupling at the WRN Adam anchor; strong readout-dependent
+attenuation by RMD and L2 refitting; late/deep formation; and an
+optimizer-family sign reversal. It may not claim universal optimizer
+superiority, comparable ID at the primary anchor, exact primary component
+mediation, an RtMD method contribution, or cross-architecture generality.
+The next scientific priority is the prespecified ResNet-18/CIFAR-10
+replication, followed by the CIFAR-100 discriminant-capacity stress test. The
+next engineering priority is to replace the four-hour single-core exact-pair
+collector with deterministic host-local parallel units, atomic resume, and a
+small central merge without changing any estimand.
+
+The checksummed source for this readout is the server-local
+`PROTECTED_COMPLETE.json` under
+`task_f_protected/06c61f6f/central_b4b19f9`. It contains 360 contexts, 2,106
+seed-pair records, and 594 paired aggregates. Its file SHA-256 is
+`f618ffedbe94af49d69f1456dd6a324086ee0297b91dfb5c3b3b0e9e37cb1521` and
+its internal terminal SHA-256 is
+`6237e6af1fd11bb203fcee337c5f6fd6e36a1233ba7643c31580583426df3737`.
+The large protected feature and score artifacts remain outside Git and have
+not yet been published to Hugging Face.
+
 ## 6. Result map
 
 | Observation | Allowed interpretation |

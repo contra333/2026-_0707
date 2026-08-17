@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-08-17
+Last updated: 2026-08-18
 
 ## Current phase
 
@@ -89,8 +89,7 @@ Clean detached evaluation worktrees remain fixed at that evaluation SHA. The
 three-host local export, bridge, geometry, alignment, and central paired
 aggregation chain is complete and independent of the local workstation. Large
 source publication and its remote terminal remain a separate archival path and
-did not block the checksummed local collector. No protected `id_test` or OOD
-inference has started.
+did not block the checksummed local collector.
 
 The pre-protected-OOD addendum freezes the exact 2,520-record one-shot protected
 schedule, practical margins, multiplicity, spectral bands, churn denominator,
@@ -112,8 +111,43 @@ that scientific plan or artifact contract. The 2,520 logical records are now
 derived into 300 checkpoint bundles and 2,100 dataset passes: each checkpoint
 is loaded once, all seven protected splits are processed under that loaded
 model, and every required epoch-200 tap is emitted from the same forward pass.
-The existing per-record command remains available for compatibility. Protected
-execution remains `NOT_RUN` and still requires a refreshed exact approval.
+The existing per-record command remains available for compatibility.
+
+The owner-approved protected one-shot execution and its bounded recovery are
+now terminal. The original GPU feature artifacts were retained; PR #118 and
+execution SHA `b4b19f915d6272af345fc0d2146967b73620b9c2` preserved valid direct
+pseudoinverse scores for theorem-inapplicable fits, recomputed only the 53
+failed score contexts, and reused the previous 307. All three hosts completed
+their fixed shards (`curie=144`, `lise=90`, `precision_medicine=126`) without
+rerunning protected checkpoint inference. The central terminal is `PASS` with
+360 contexts, 2,106 seed-pair records, and 594 paired aggregates. It is stored
+at
+`/mnt/drive/lab1/oge/artifacts/task_f_protected/06c61f6f/central_b4b19f9/PROTECTED_COMPLETE.json`;
+the file SHA-256 is
+`f618ffedbe94af49d69f1456dd6a324086ee0297b91dfb5c3b3b0e9e37cb1521`
+and the internal terminal SHA-256 is
+`6237e6af1fd11bb203fcee337c5f6fd6e36a1233ba7643c31580583426df3737`.
+
+At the five-seed Adam anchor, epoch-200 raw-MD coupled-minus-decoupled mean
+`DeltaAUROC` is `-0.1743` near and `-0.2835` far; PairOrderChurn is `0.3486`
+and `0.3863`. All four frozen primary Holm tests reject. RMD reduces the signed
+gaps to `-0.0102/-0.0105` and churn to `0.1286/0.1154`; L2-refit MD reduces
+churn to `0.1686/0.0868`. The anchor fails the joint comparable-ID guardrail
+only because the absolute paired NLL mean difference is `0.1012 > 0.08`;
+accuracy and ECE pass, and coupled NLL is lower, so the result is retained as
+an ID/OOD Pareto finding. The Adam `lr=3e-4, wd=1e-4` and SGDM cells pass all
+ID guardrails, with opposite Raw-MD effect signs. Primary raw component
+attribution is `NOT_APPLICABLE`; direct score and pair accounting remain
+valid, and RtMD remains excluded. Full interpretation and claim boundaries
+are recorded once in
+[`paper/intervention_supporting_theory_outline.md`](paper/intervention_supporting_theory_outline.md).
+
+The central exact-pair collector required about four hours on one CPU core.
+This is a production bottleneck in sequential Python pair-transition
+accounting, not GPU inference, dataset forwarding, HF upload, or added
+scientific scope. The next bounded engineering task is deterministic
+host-local parallel aggregation with atomic unit resume, progress reporting,
+and a small central merge that reproduces the same terminal payload.
 
 The planned chain is:
 
