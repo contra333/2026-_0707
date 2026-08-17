@@ -481,6 +481,13 @@ def _verify_output_directory(path: Path, expected_identity: str) -> dict[str, An
     return manifest
 
 
+def verify_geometry_artifact(path: str | Path) -> dict[str, Any]:
+    """Verify one published fresh ID geometry artifact without re-analysis."""
+
+    root = Path(path)
+    return {"manifest": _verify_output_directory(root, root.name)}
+
+
 def analyze_bound_geometry(
     *,
     train_binding: Mapping[str, Any],
