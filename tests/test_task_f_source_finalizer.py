@@ -2,12 +2,14 @@ from pathlib import Path
 
 import pytest
 
+import oge.training.task_f_source_finalizer as finalizer
 from oge.studies.supervisor import SupervisorBlockedError
 from oge.training.task_f_source_finalizer import (
     EXPORT_GATE_COMPLETE,
     EXPORT_GATE_FAILED,
     EXPORT_GATE_WAITING,
     classify_export_states,
+    index_source_export_artifacts,
     wait_for_export_completion,
 )
 
@@ -82,3 +84,66 @@ def test_waiter_fails_only_on_terminal_failed_state(tmp_path):
 def test_empty_export_state_vector_is_rejected():
     with pytest.raises(ValueError, match="at least one"):
         classify_export_states([])
+
+
+def test_flat_output_identity_exports_are_grouped_by_manifest_run(monkeypatch, tmp_path):
+    exports = tmp_path / "exports"
+    first = exports / ("a" * 64)
+    second = exports / ("b" * 64)
+    third = exports / ("c" * 64)
+    indexed = {
+        ("run-a", "last", 10, "penultimate", "id_train"): first,
+        ("run-a", "last", 60, "penultimate", "id_train"): second,
+        ("run-b", "last", 200, "stage1", "id_train"): third,
+    }
+    monkeypatch.setattr(finalizer, "index_feature_artifacts", lambda roots: indexed)
+    expected = {
+        ("run-a", 10, "last", "penultimate", "id_train"),
+        ("run-a", 60, "last", "penultimate", "id_train"),
+        ("run-b", 200, "last", "stage1", "id_train"),
+    }
+
+    grouped = index_source_export_artifacts(
+        exports,
+        expected_export_keys=expected,
+    )
+
+    assert grouped == {"run-a": (first, second), "run-b": (third,)}
+
+
+@pytest.mark.parametrize(
+    "indexed",
+    [
+        {("run-a", "last", 10, "penultimate", "id_train"): Path("a" * 64)},
+        {
+            ("run-a", "last", 10, "penultimate", "id_train"): Path("a" * 64),
+            ("run-x", "last", 10, "penultimate", "id_train"): Path("b" * 64),
+        },
+    ],
+)
+def test_source_export_index_rejects_missing_or_unexpected_coverage(
+    monkeypatch, tmp_path, indexed
+):
+    monkeypatch.setattr(finalizer, "index_feature_artifacts", lambda roots: indexed)
+    expected = {
+        ("run-a", 10, "last", "penultimate", "id_train"),
+        ("run-b", 200, "last", "stage1", "id_train"),
+    }
+
+    with pytest.raises(ValueError, match="source export coverage mismatch"):
+        index_source_export_artifacts(
+            tmp_path / "exports",
+            expected_export_keys=expected,
+        )
+
+
+def test_source_export_index_preserves_duplicate_rejection(monkeypatch, tmp_path):
+    def reject_duplicates(roots):
+        raise ValueError("duplicate Task F feature artifact")
+
+    monkeypatch.setattr(finalizer, "index_feature_artifacts", reject_duplicates)
+    with pytest.raises(ValueError, match="duplicate Task F feature artifact"):
+        index_source_export_artifacts(
+            tmp_path / "exports",
+            expected_export_keys=set(),
+        )

@@ -18,6 +18,7 @@ from oge.evaluation.task_f_fresh_orchestration import (
     HOSTS,
     SOURCE_EXECUTION_ID,
     SOURCE_TRAINING_SHA,
+    index_feature_artifacts,
 )
 from oge.studies.artifacts import sha256_file
 from oge.studies.supervisor import SupervisorBlockedError, verify_clean_git
@@ -129,6 +130,41 @@ def _load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def index_source_export_artifacts(
+    export_root: str | Path,
+    *,
+    expected_export_keys: set[tuple[Any, ...]],
+) -> dict[str, tuple[Path, ...]]:
+    """Verify flat output-identity bundles and group them by declared run ID."""
+
+    indexed = index_feature_artifacts([export_root])
+    observed: dict[tuple[Any, ...], Path] = {}
+    grouped: dict[str, list[Path]] = {}
+    for key, artifact_root in indexed.items():
+        run_id, checkpoint_role, checkpoint_epoch, depth_tap, dataset_split = key
+        source_key = (
+            str(run_id),
+            checkpoint_epoch,
+            str(checkpoint_role),
+            str(depth_tap),
+            str(dataset_split),
+        )
+        observed[source_key] = artifact_root
+        grouped.setdefault(str(run_id), []).append(artifact_root)
+    if set(observed) != expected_export_keys:
+        missing = len(expected_export_keys - set(observed))
+        unexpected = len(set(observed) - expected_export_keys)
+        raise ValueError(
+            "source export coverage mismatch: "
+            f"observed={len(observed)} expected={len(expected_export_keys)} "
+            f"missing={missing} unexpected={unexpected}"
+        )
+    return {
+        run_id: tuple(sorted(artifact_roots))
+        for run_id, artifact_roots in sorted(grouped.items())
+    }
+
+
 def finalize_task_f_source_host(
     *,
     repository_root: str | Path,
@@ -187,8 +223,6 @@ def finalize_task_f_source_host(
     _atomic_write_text(status_path, "VALIDATING\n")
     log("VALIDATION_START")
 
-    from oge.feature_export import verify_task_f_artifact
-
     groups = set(assignment["host_assignments"][host_id]["sibling_group_ids"])
     run_rows = [row for row in matrix["runs"] if row["sibling_group_id"] in groups]
     run_ids = [str(row["run_id"]) for row in run_rows]
@@ -207,6 +241,16 @@ def finalize_task_f_source_host(
         )
         for job in planned_jobs
     }
+    try:
+        export_artifacts_by_run = index_source_export_artifacts(
+            output / "exports",
+            expected_export_keys=expected_export_keys,
+        )
+    except (KeyError, OSError, ValueError) as exc:
+        fail(f"export_index {exc}")
+    if set(export_artifacts_by_run) != set(run_ids):
+        fail("export_run_coverage")
+
     validation_runs: list[dict[str, Any]] = []
     actual_export_keys: set[tuple[Any, ...]] = set()
     group_witness: dict[str, tuple[str, str]] = {}
@@ -264,20 +308,19 @@ def finalize_task_f_source_host(
         ]
         if sorted({item["global_step"] for item in telemetry}) != list(AUDIT_STEPS):
             fail(f"telemetry run={run_id}")
-        manifests = sorted((output / "exports" / run_id).glob("**/manifest.json"))
+        artifact_roots = export_artifacts_by_run[run_id]
         run_jobs = [job for job in planned_jobs if job["run_id"] == run_id]
-        if len(manifests) != len(run_jobs):
+        if len(artifact_roots) != len(run_jobs):
             fail(
-                f"export_count run={run_id} actual={len(manifests)} "
+                f"export_count run={run_id} actual={len(artifact_roots)} "
                 f"expected={len(run_jobs)}"
             )
         initialization_hashes: set[str] = set()
         data_stream_hashes: set[str] = set()
         output_ids: list[str] = []
         last_export_hashes: set[str] = set()
-        for manifest_path in manifests:
-            verified = verify_task_f_artifact(manifest_path.parent)
-            manifest = verified["manifest"]
+        for artifact_root in artifact_roots:
+            manifest = _load_json(artifact_root / "manifest.json")
             if manifest["specification_sha256"] != EXPECTED_SPECIFICATION_SHA256:
                 fail(f"spec run={run_id}")
             if (
@@ -336,7 +379,7 @@ def finalize_task_f_source_host(
                 "data_stream_sha256": data_stream_sha256,
                 "last_pt_sha256": last_sha256,
                 "last_pt_bytes": (checkpoints / "last.pt").stat().st_size,
-                "export_count": len(manifests),
+                "export_count": len(artifact_roots),
                 "export_output_identity_sha256": sorted(output_ids),
             }
         )
@@ -431,11 +474,12 @@ def finalize_task_f_source_host(
             f"{remote}/{run_id}/training",
             f"{run_id}.training",
         )
-        sync_directory(
-            output / "exports" / run_id,
-            f"{remote}/{run_id}/exports",
-            f"{run_id}.exports",
-        )
+        for artifact_root in export_artifacts_by_run[run_id]:
+            sync_directory(
+                artifact_root,
+                f"{remote}/{run_id}/exports/{artifact_root.name}",
+                f"{run_id}.exports.{artifact_root.name}",
+            )
     sync_directory(output / "logs", f"{remote}/logs", "host.logs")
     sync_directory(launch, f"{remote}/launch_bundle", "launch_bundle")
     metadata_directory = output / "upload_metadata"
