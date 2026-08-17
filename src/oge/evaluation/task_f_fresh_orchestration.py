@@ -696,6 +696,11 @@ def index_feature_artifacts(roots: Sequence[str | Path]) -> dict[tuple[Any, ...]
         if not root.exists():
             continue
         for manifest_path in sorted(root.glob("*/manifest.json")):
+            directory_name = manifest_path.parent.name
+            if directory_name.startswith(".task-f-") and directory_name.endswith(
+                ".tmp"
+            ):
+                continue
             verified = verify_task_f_artifact(manifest_path.parent)
             manifest = verified["manifest"]
             _reject_protected(manifest["dataset_split"], "feature artifact split")
