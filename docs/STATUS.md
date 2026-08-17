@@ -98,6 +98,15 @@ affine normalization, and the hashed RtMD Gate 3 rule. Gate 3 is now terminal
 and excludes RtMD from that protected plan. Protected execution still requires
 a current resource packet and new explicit owner approval.
 
+PR #112 implements the frozen protected one-shot evaluator without opening a
+protected split. It binds the original run/GPU placement to the exact 2,520
+feature records, requires a separate checksummed approval manifest, reuses the
+completed ID-only geometry fits, and connects protected ID utility,
+MD/Marginal/RMD component scores, AUROC/FPR95, paired churn accounting, and the
+frozen aggregation rules. Focused tests and the full CPU suite pass, and the
+Task F specification identity is unchanged. This is implementation readiness,
+not protected execution or a research result.
+
 The planned chain is:
 
 ```text
@@ -226,8 +235,6 @@ replication rules live only in the active protocol.
 
 ## Open before protected one-shot execution
 
-- implement and validate the frozen protected evaluator without opening a
-  protected split
 - inspect current host resources and present the exact execution SHA, GPU,
   wall-time, storage, and output-path approval packet
 - obtain a new explicit owner approval for the protected one-shot execution
