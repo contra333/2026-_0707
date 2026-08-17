@@ -23,7 +23,18 @@ environment.
 RtMD is an optional sidecar, not a prerequisite for Task F or the main fresh
 paired mechanism study. The prospectively frozen fresh-ID Gate 3 now uses the
 five-seed raw penultimate anchor tail-shape contrast and closes only the RtMD
-slot on failure; its verdict remains `NOT_RUN`. Task F model/export and
+slot on failure. The exact ten-record ID-only execution completed from
+checksummed `id_train` and `id_validation` features at execution SHA
+`4ad6f45e717bf17fbb78652b5cfa3c7ea80f1c3a`, without checkpoint inference,
+GPU work, or protected-data access. The frozen adjudicator returned
+`FAILED_INAPPLICABLE`: the coupled fit was numerically inapplicable for all
+five seeds. This closes only the optional RtMD slot for this anchor; no fallback
+estimator or threshold change is allowed, and the main protected evaluation
+continues without RtMD. The verified terminal is
+`/mnt/drive/lab1/oge/artifacts/task_f_rtmd_gate3/4ad6f45/terminal/GATE3_COMPLETE.json`
+with SHA-256
+`4dfbf731ea29a02eb83296f03adc23598ba4dc12f74aaf3de2de02744e3fb5ab`.
+Task F model/export and
 paired-training engineering are complete, including full-matrix sibling
 provenance. The one authorized execution-only pilot completed its safe epoch-1
 stop, identical-config resume through epoch 2, global-step/audit continuity
@@ -49,17 +60,15 @@ epoch 200 and `global_step=70400`; the pre-existing GPU feature-export queue
 also completed all 310 planned jobs. These exports are evaluation inputs, not
 research results, and protected-OOD evaluation has not started.
 
-The versioned fresh ID evaluation bridge validates the exact 50-run inventory,
-checkpoint/feature/membership/classifier identities, and the complete
-1,320-record `id_train` plus `id_validation` logical coverage. The existing 310
-jobs are a validated subset; the fixed 1,010 supplemental exports are now
-running on their assigned host GPUs. The fresh ID-only geometry and
-paired-aggregation implementation is
-fixture-tested for raw/L2 discriminant-component bundles, NC/norm/spectrum
-records, ID-train affine and gauge alignment with held-out `id_validation`
-residuals, cell-and-seed-matched paired 90% t-intervals, non-dropping terminal
-status, and deterministic table templates. Comparable-ID remains
-`PENDING_PROTECTED_ID_TEST`; no protected inference was run.
+The versioned fresh ID evaluation bridge and local-compute collector completed
+with status `PASS`: exact 50-run inventory, 1,320 logical exports, 660 geometry
+units, 657 sibling-alignment records, and 1,920 seed records. The central
+aggregation identity is
+`fe5e7606b0340b72c9f9146cba6574f72becf35033853492197c41d6cc8462c4`.
+Its terminal remains explicitly non-final only because the separate large
+source-upload remote gate was not satisfied at collection time. Comparable-ID
+remains `PENDING_PROTECTED_ID_TEST`; this completed stage used only `id_train`
+and held-out `id_validation`, with `protected_data_access=false`.
 
 PR #96 added the reusable staged-evaluation supervisor and Task F adapter. PR
 #98 corrected the source
@@ -71,28 +80,23 @@ export temporary directories from concurrent artifact indexing. The active
 evaluation execution SHA is
 `2a22a651001e6466d067493e0966656c79219081`; the Task F specification remains
 unchanged. All three source hosts pass local checksum validation for their exact
-run and export shards and continue uploading about 153 GiB of training bundles
-plus 34 GiB of existing features with no-delete semantics. Source
-`REMOTE_VERIFIED` markers are pending upload completion.
+run and export shards. The separate archival path covers about 153 GiB of
+training bundles plus 34 GiB of existing features with no-delete semantics;
+the local collector terminal records that its source `REMOTE_VERIFIED` gate was
+not yet satisfied when collection completed.
 
-Clean detached evaluation worktrees remain fixed at that evaluation SHA. All
-three hosts passed the local source gate and first-bundle production correctness
-sentinel, with no failed jobs at launch. Supplemental GPU export is running
-immediately while source upload continues; verified bundles feed the CPU bridge
-and geometry workers as they become ready. Host publication still waits for the
-exact three-host source remote gate. A detached collector gate on
-`precision_medicine` waits for both all source and all evaluation terminal
-markers before central paired aggregation. This chain is independent of the
-local workstation. No protected `id_test`, OOD, or RtMD execution has started.
+Clean detached evaluation worktrees remain fixed at that evaluation SHA. The
+three-host local export, bridge, geometry, alignment, and central paired
+aggregation chain is complete and independent of the local workstation. Large
+source publication and its remote terminal remain a separate archival path and
+did not block the checksummed local collector. No protected `id_test` or OOD
+inference has started.
 
-The bounded local-compute relay and collector preserve that final remote path
-but can collect the three checksummed host summaries as soon as host compute is
-terminal, without waiting for the large source upload. The relay is explicitly
-not a final research terminal. The pre-protected-OOD addendum freezes the exact
-2,520-record one-shot protected schedule, practical margins, multiplicity,
-spectral bands, churn denominator, affine normalization, and the hashed RtMD
-Gate 3 rule. Protected execution still requires a current resource packet and
-new explicit owner approval after the ID-only terminal and Gate 3 verdict.
+The pre-protected-OOD addendum freezes the exact 2,520-record one-shot protected
+schedule, practical margins, multiplicity, spectral bands, churn denominator,
+affine normalization, and the hashed RtMD Gate 3 rule. Gate 3 is now terminal
+and excludes RtMD from that protected plan. Protected execution still requires
+a current resource packet and new explicit owner approval.
 
 The planned chain is:
 
@@ -194,9 +198,10 @@ outside Git at the hash-addressed HF archive recorded there.
   rule, comparison panel, and guardrails are frozen. The direct-collision
   subgate is a narrow `PASS` after WDiscOOD, Linderman/DPMM--RMDS, D-KNN, CORE,
   and MaRS boundary checks. The historical ID-only Gate 2 preflight is
-  `INCONCLUSIVE`; empirical Gates 3--5 are `NOT_RUN`. It closes on any failed
-  gate without changing or stopping the primary paper, Task F, or main fresh
-  mechanism training.
+  `INCONCLUSIVE`; fresh Gate 3 is `FAILED_INAPPLICABLE`, and Gates 4--5 are
+  `NOT_RUN`. The optional slot is therefore closed for this anchor without
+  changing or stopping the primary paper, Task F, or main fresh mechanism
+  evaluation.
 - Core preflight rules are frozen: condition-aware algebra tolerances,
   numerical `dim(S)`, rank-sensitive reporting, gauge-aligned angles,
   classifier alignment, the zero-decay common frame, component covariance,
@@ -219,22 +224,22 @@ outside Git at the hash-addressed HF archive recorded there.
 Exact estimands, checkpoints, geometry channels, theory conditions, claim gates, and
 replication rules live only in the active protocol.
 
-## Open before protected OOD
+## Open before protected one-shot execution
 
-- ID accuracy/NLL/ECE equivalence and Pareto guardrails
-- practical OOD margins and seed/power justification
-- standardized trajectory uncertainty, multiplicity, and spectral-band boundaries
-- exact protected-OOD schedule and launch rule
-- CIFAR-100 and ImageNet-200 data contracts; DenseNet/ConvNeXt implementations
+- implement and validate the frozen protected evaluator without opening a
+  protected split
+- inspect current host resources and present the exact execution SHA, GPU,
+  wall-time, storage, and output-path approval packet
+- obtain a new explicit owner approval for the protected one-shot execution
+- CIFAR-100 and ImageNet-200 replication training contracts and the
+  DenseNet/ConvNeXt implementations remain later replication work
 
 ## Explicitly not run
 
-- no fixed residual-retention diagnostic, fresh Gate 3, full `RtMD` detector,
-  or `RtMD` OOD evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain
-  `NOT_RUN`
-- no completed fresh active-protocol research result or protected OOD; the
-  completed training and 310 source exports are inputs to the still-pending
-  ID-only evaluation, and the execution-only pilot remains excluded from
-  research evidence
+- no protected `id_test` or OOD inference, AUROC/FPR95, PairOrderChurn, or
+  protected ID-equivalence adjudication
+- no full `RtMD` detector or `RtMD` OOD evaluation; fresh Gate 3 ended
+  `FAILED_INAPPLICABLE`, so this anchor's optional RtMD code path is closed
+- the execution-only pilot remains excluded from research evidence
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion
