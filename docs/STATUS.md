@@ -143,11 +143,17 @@ are recorded once in
 [`paper/intervention_supporting_theory_outline.md`](paper/intervention_supporting_theory_outline.md).
 
 The central exact-pair collector required about four hours on one CPU core.
-This is a production bottleneck in sequential Python pair-transition
+This was a production bottleneck in sequential Python pair-transition
 accounting, not GPU inference, dataset forwarding, HF upload, or added
-scientific scope. The next bounded engineering task is deterministic
-host-local parallel aggregation with atomic unit resume, progress reporting,
-and a small central merge that reproduces the same terminal payload.
+scientific scope. PR #121 addresses that exact bottleneck without changing an
+estimand or terminal schema: the existing collector now runs deterministic
+independent units in multiple Linux processes, stores canonical checksummed
+unit results atomically, resumes only missing units, reports progress, and
+preserves corrupt or conflicting cache entries for diagnosis. Serial and
+parallel fixture terminals, including their terminal SHA, are identical; the
+focused tests, all 446 CPU tests, `git diff --check`, and the unchanged Task F
+specification identity pass. A second protected-data analysis or performance
+benchmark was not run for this engineering repair.
 
 The planned chain is:
 

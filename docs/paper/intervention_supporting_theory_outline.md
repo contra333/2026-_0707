@@ -695,10 +695,12 @@ optimizer-family sign reversal. It may not claim universal optimizer
 superiority, comparable ID at the primary anchor, exact primary component
 mediation, an RtMD method contribution, or cross-architecture generality.
 The next scientific priority is the prespecified ResNet-18/CIFAR-10
-replication, followed by the CIFAR-100 discriminant-capacity stress test. The
-next engineering priority is to replace the four-hour single-core exact-pair
-collector with deterministic host-local parallel units, atomic resume, and a
-small central merge without changing any estimand.
+replication, followed by the CIFAR-100 discriminant-capacity stress test. PR
+#121 has addressed the observed four-hour single-core collector bottleneck
+with deterministic process-parallel units, atomic checksummed resume, and
+progress reporting without changing any estimand. Host-local sharding remains
+an optional scale-out step for a future larger study, not a prerequisite for
+interpreting this completed result.
 
 The checksummed source for this readout is the server-local
 `PROTECTED_COMPLETE.json` under
@@ -708,7 +710,12 @@ seed-pair records, and 594 paired aggregates. Its file SHA-256 is
 its internal terminal SHA-256 is
 `6237e6af1fd11bb203fcee337c5f6fd6e36a1233ba7643c31580583426df3737`.
 The large protected feature and score artifacts remain outside Git and have
-not yet been published to Hugging Face.
+not yet been published to Hugging Face. The `curie` and `lise` host roots are
+`/home/ghjin/0707_exp/task_f_protected_06c61f6f_artifacts`; the
+`precision_medicine` root, including the combined score staging and terminal,
+is `/mnt/drive/lab1/oge/artifacts/task_f_protected/06c61f6f`. Git contains the
+human-readable interpretation and provenance pointers, not the protected raw
+arrays.
 
 ## 6. Result map
 
