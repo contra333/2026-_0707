@@ -29,6 +29,7 @@ from oge.analysis.discriminant_residual_preflight import (
     score_discriminant_components,
 )
 from oge.analysis.fixed_readout_component_attribution import (
+    mahalanobis_score_components,
     pair_outcome_summary,
     pair_transition_summary,
     paired_component_attribution,
@@ -981,18 +982,66 @@ def _geometry_fit(root: Path, manifest: Mapping[str, Any], transform: str) -> Ge
     )
 
 
+def _direct_pseudoinverse_scores(
+    fit: GeometryFit, values: np.ndarray
+) -> dict[str, np.ndarray]:
+    queries = np.asarray(values, dtype=np.float64)
+    delta = queries[:, None, :] - fit.class_means[None, :, :]
+    class_distances = np.einsum(
+        "ncd,de,nce->nc", delta, fit.within_precision, delta, optimize=True
+    )
+    centered = queries - fit.mean
+    global_distances = np.einsum(
+        "nd,de,ne->n", centered, fit.global_precision, centered, optimize=True
+    )
+    scores = mahalanobis_score_components(class_distances, global_distances)
+    return {name: np.asarray(scores[name]) for name in DETECTORS}
+
+
 def _score_chunks(fit: GeometryFit, values: np.ndarray, chunk_size: int) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     chunks: dict[str, list[np.ndarray]] = defaultdict(list)
     checks: list[Mapping[str, bool]] = []
     for start in range(0, len(values), chunk_size):
-        record, arrays = score_discriminant_components(fit, values[start : start + chunk_size])
-        checks.append(record["checks"])
+        chunk = values[start : start + chunk_size]
+        if fit.applicable:
+            record, arrays = score_discriminant_components(fit, chunk)
+            checks.append(record["checks"])
+        else:
+            arrays = _direct_pseudoinverse_scores(fit, chunk)
         for name, array in arrays.items():
             chunks[name].append(np.asarray(array))
     combined = {name: np.concatenate(values) for name, values in chunks.items()}
-    if not all(all(item.values()) for item in checks):
+    if not fit.applicable:
+        return {
+            "status": "NOT_APPLICABLE",
+            "reason": "geometry_fit_is_not_full_rank_applicable",
+            "chunk_count": math.ceil(len(values) / chunk_size),
+            "checks_required": False,
+            "checks_pass": None,
+            "observed_checks_pass": None,
+            "failed_checks": [],
+            "component_arrays_emitted": False,
+        }, combined
+    observed_checks_pass = all(all(item.values()) for item in checks)
+    failed_checks = sorted(
+        {
+            name
+            for item in checks
+            for name, passed in item.items()
+            if not passed
+        }
+    )
+    if not observed_checks_pass:
         raise ValueError("protected component reconstruction check failed")
-    return {"chunk_count": len(checks), "checks_pass": True}, combined
+    return {
+        "status": "PASS",
+        "chunk_count": len(checks),
+        "checks_required": True,
+        "checks_pass": True,
+        "observed_checks_pass": True,
+        "failed_checks": failed_checks,
+        "component_arrays_emitted": True,
+    }, combined
 
 
 def evaluate_context_arrays(
@@ -1392,13 +1441,24 @@ def aggregate_protected_scores(
             if left_manifest["sample_order_sha256"] != right_manifest["sample_order_sha256"]:
                 raise ValueError("paired protected records have different sample order")
             for transform in TRANSFORMS:
+                component_applicable = all(
+                    bool(manifest["component_diagnostics"][transform]["fit_applicable"])
+                    for manifest in (left_manifest, right_manifest)
+                )
                 for detector in DETECTORS:
                     dataset_rows = {}
                     for split in OOD_SPLITS:
-                        dataset_rows[split] = compare_score_arrays(
+                        comparison = compare_score_arrays(
                             left=left_arrays, right=right_arrays, split=split,
                             transform=transform, detector=detector,
                         )
+                        if detector == "md":
+                            if component_applicable:
+                                comparison["component_attribution_status"] = "PASS"
+                            else:
+                                comparison.pop("component_attribution", None)
+                                comparison["component_attribution_status"] = "NOT_APPLICABLE"
+                        dataset_rows[split] = comparison
                     for metric in ("gain", "loss", "pair_order_churn", "delta_auroc"):
                         dataset_rows[f"near_{metric}"] = float(np.mean([dataset_rows[name][metric] for name in NEAR_SPLITS]))
                         dataset_rows[f"far_{metric}"] = float(np.mean([dataset_rows[name][metric] for name in FAR_SPLITS]))
@@ -1618,6 +1678,19 @@ def aggregate_protected_scores(
             "contexts": len(loaded),
             "seed_pair_records": len(seed_records),
             "paired_aggregates": len(aggregates),
+        },
+        "component_applicability": {
+            transform: {
+                "applicable_contexts": sum(
+                    bool(manifest["component_diagnostics"][transform]["fit_applicable"])
+                    for manifest, _ in loaded
+                ),
+                "inapplicable_contexts": sum(
+                    not bool(manifest["component_diagnostics"][transform]["fit_applicable"])
+                    for manifest, _ in loaded
+                ),
+            }
+            for transform in TRANSFORMS
         },
         "seed_records": seed_records,
         "paired_aggregates": aggregates,

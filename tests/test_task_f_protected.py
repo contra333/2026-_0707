@@ -394,7 +394,7 @@ def test_context_scoring_reuses_id_fit_and_checks_raw_l2_reconstruction(tmp_path
     summary, arrays = protected.evaluate_context_arrays(
         geometry_path=tmp_path / "geometry",
         protected_artifacts=paths,
-        chunk_size=2,
+        chunk_size=3,
     )
     assert summary["status"] == "PASS"
     assert summary["id_utility"]["accuracy"] == pytest.approx(1.0)
@@ -405,6 +405,75 @@ def test_context_scoring_reuses_id_fit_and_checks_raw_l2_reconstruction(tmp_path
         rtol=1e-9,
         atol=1e-9,
     )
+
+
+def test_inapplicable_fit_preserves_direct_scores_without_component_claim(monkeypatch):
+    train = np.asarray(
+        [[-2.0, 0.0], [-1.0, 0.0], [-0.5, 0.0], [0.5, 0.0], [1.0, 0.0], [2.0, 0.0]],
+        dtype=np.float64,
+    )
+    labels = np.asarray([0, 0, 0, 1, 1, 1])
+    fit = fit_discriminant_geometry(train, labels)
+    assert not fit.applicable
+
+    def unexpected_component_scoring(*_args, **_kwargs):
+        raise AssertionError("component scoring must not run for an inapplicable fit")
+
+    monkeypatch.setattr(
+        protected, "score_discriminant_components", unexpected_component_scoring
+    )
+    queries = np.asarray([[-1.5, 0.2], [1.5, -0.2]], dtype=np.float64)
+
+    record, arrays = protected._score_chunks(
+        fit,
+        queries,
+        chunk_size=2,
+    )
+
+    assert record["status"] == "NOT_APPLICABLE"
+    assert record["checks_required"] is False
+    assert record["checks_pass"] is None
+    assert record["component_arrays_emitted"] is False
+    assert set(arrays) == set(protected.DETECTORS)
+    assert all(np.isfinite(arrays[name]).all() for name in protected.DETECTORS)
+    delta = queries[:, None, :] - fit.class_means[None, :, :]
+    class_distances = np.einsum(
+        "ncd,de,nce->nc", delta, fit.within_precision, delta, optimize=True
+    )
+    centered = queries - fit.mean
+    global_distances = np.einsum(
+        "nd,de,ne->n", centered, fit.global_precision, centered, optimize=True
+    )
+    expected = protected.mahalanobis_score_components(
+        class_distances, global_distances
+    )
+    for detector in protected.DETECTORS:
+        np.testing.assert_allclose(arrays[detector], expected[detector])
+
+
+def test_applicable_fit_still_rejects_reconstruction_failure(monkeypatch):
+    train = np.asarray(
+        [[-2.0, -0.2], [-1.8, 0.1], [-2.1, 0.3], [2.0, -0.3], [1.9, 0.2], [2.2, 0.1]],
+        dtype=np.float64,
+    )
+    labels = np.asarray([0, 0, 0, 1, 1, 1])
+    fit = fit_discriminant_geometry(train, labels)
+    assert fit.applicable
+    original = protected.score_discriminant_components
+
+    def broken_components(fitted, queries):
+        record, arrays = original(fitted, queries)
+        record = copy.deepcopy(record)
+        record["checks"]["score_reconstruction"] = False
+        return record, arrays
+
+    monkeypatch.setattr(protected, "score_discriminant_components", broken_components)
+    with pytest.raises(ValueError, match="component reconstruction"):
+        protected._score_chunks(
+            fit,
+            np.asarray([[-1.5, 0.2], [1.5, -0.2]], dtype=np.float64),
+            chunk_size=2,
+        )
 
 
 def _score_arrays(offset):
@@ -465,6 +534,10 @@ def _score_manifest(seed, role, offset):
             "nll": 0.30 - offset / 10,
             "ece": 0.04 - offset / 20,
         },
+        "component_diagnostics": {
+            transform: {"fit_applicable": True}
+            for transform in protected.TRANSFORMS
+        },
         "ood_metrics": metrics,
     }
 
@@ -491,6 +564,44 @@ def test_pair_accounting_holm_id_equivalence_and_incomplete_terminal(monkeypatch
     incomplete = protected.aggregate_protected_scores(score_paths=paths, expected_contexts=5)
     assert incomplete["status"] == "INCOMPLETE"
     assert not incomplete["missing_or_failed_records_are_excluded"]
+
+
+def test_aggregate_marks_component_attribution_not_applicable(monkeypatch):
+    fixtures = {}
+    for seed in (0, 1):
+        coupled_manifest = _score_manifest(seed, "coupled", 0.03 + seed * 0.005)
+        coupled_manifest["component_diagnostics"] = {
+            transform: {"fit_applicable": False}
+            for transform in protected.TRANSFORMS
+        }
+        fixtures[f"{seed}-coupled"] = (
+            coupled_manifest,
+            _score_arrays(0.03 + seed * 0.005),
+        )
+        fixtures[f"{seed}-decoupled"] = (
+            _score_manifest(seed, "decoupled", 0.0),
+            _score_arrays(0.0),
+        )
+    monkeypatch.setattr(protected, "_load_score_arrays", lambda path: fixtures[path.name])
+
+    result = protected.aggregate_protected_scores(
+        score_paths=[Path(name) for name in sorted(fixtures)],
+        expected_contexts=4,
+    )
+
+    assert result["status"] == "PASS"
+    assert result["component_applicability"] == {
+        "raw": {"applicable_contexts": 2, "inapplicable_contexts": 2},
+        "l2": {"applicable_contexts": 2, "inapplicable_contexts": 2},
+    }
+    primary = next(
+        row
+        for row in result["seed_records"]
+        if row["detector"] == "md" and row["transform"] == "raw"
+    )
+    for split in protected.OOD_SPLITS:
+        assert primary["datasets"][split]["component_attribution_status"] == "NOT_APPLICABLE"
+        assert "component_attribution" not in primary["datasets"][split]
 
 
 def test_exact_sign_flip_band_and_holm_are_deterministic():
