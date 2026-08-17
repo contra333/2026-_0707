@@ -26,9 +26,9 @@ validation logs, and external artifact pointers are under
 - Metric Contract v1.2 feature, geometry, calibration, and OOD evaluation code
 - MD/RMD/Marginal component, pair-transition, size/stretch, and low-rank diagnostics
 
-Fresh paired-trajectory training, multi-depth WRN extraction, CIFAR-100 replication,
-DenseNet, ConvNeXt, and ImageNet-200 are not yet implemented or run. See STATUS for the
-current boundary.
+Fresh paired-trajectory training and multi-depth WRN extraction are implemented.
+Protected execution and the later CIFAR-100, DenseNet, ConvNeXt, and ImageNet-200
+replication work remain governed by STATUS and the active protocol.
 
 ## Development
 

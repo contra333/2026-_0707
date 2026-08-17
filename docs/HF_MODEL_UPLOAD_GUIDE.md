@@ -4,10 +4,14 @@
 
 이 문서는 학습 서버에서 생성한 체크포인트와 모델 파일을 Hugging Face
 bucket에 업로드할 때 사용하는 공통 절차와, 2026-07-28에 세 서버에서
-확인한 HF CLI 환경을 통합해 기록한다.
+확인한 HF CLI 환경의 역사적 bootstrap snapshot을 함께 기록한다. 현재
+실행·artifact 상태는 [`STATUS.md`](STATUS.md)와
+[`history/README.md`](history/README.md)를 따른다.
 
-실제 업로드는 이 작업에서 수행하지 않았다. 아래의 업로드 경로는 서버별
-파일 충돌을 막기 위한 고정 규칙이며, 실제 업로드 성공을 의미하지 않는다.
+2026-07-28의 이 가이드 통합 작업 자체에서는 실제 업로드를 수행하지 않았다.
+아래 2절과 6절의 `파일 0개` 및 `NOT_RUN`은 그 시점의 관찰이지 현재 bucket
+inventory가 아니다. 업로드 경로는 서버별 파일 충돌을 막기 위한 고정 규칙이며,
+경로가 존재하는 것만으로 실제 업로드 성공을 의미하지 않는다.
 
 - 학습용 `candidate-venv`는 변경하지 않는다.
 - Hugging Face CLI는 학습 환경과 분리된 virtual environment에서 실행한다.
@@ -15,7 +19,7 @@ bucket에 업로드할 때 사용하는 공통 절차와, 2026-07-28에 세 서�
 - 공개 bucket에는 공개해도 되는 파일만 업로드한다.
 - 업로드 전에는 반드시 `--dry-run` 결과와 파일 용량을 확인한다.
 
-## 2. 서버별 확인 결과
+## 2. 2026-07-28 서버별 초기 확인 결과
 
 모든 서버에서 확인된 공통 결과는 HF 계정 `contra333`, bucket
 `contra333/ICLR_RUN`, 공개 상태(`private: false`), 확인 당시 파일 0개,
@@ -172,8 +176,9 @@ REMOTE_DIR=hf://buckets/contra333/ICLR_RUN/servers/<server-id>/<run-id>
 - 세 서버에서 HF CLI 설치, 인증, bucket 정보 확인은 완료되었다.
 - 이 문서 통합 작업에서는 서버 명령을 재실행하지 않았고, 실제 모델·체크포인트
   업로드도 수행하지 않았다.
-- 따라서 업로드 결과는 모두 `NOT_RUN`이며, bucket 경로 규칙은 향후 실행을
-  위한 문서상 규칙이다.
+- 따라서 이 2026-07-28 bootstrap snapshot의 업로드 결과는 모두 `NOT_RUN`이며,
+  bucket 경로 규칙은 이후 실행을 위한 문서상 규칙이었다. 현재 상태는
+  `STATUS.md`와 history index에서 확인한다.
 
 ## 7. seed-0 v1.2 production 실행
 

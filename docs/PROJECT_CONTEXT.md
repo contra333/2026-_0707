@@ -36,10 +36,10 @@ size--stretch, spectrum--allocation, radial/angular dynamics는 선행 지식 �
 측정도구다. 중심 논문은 optimizer leaderboard가 아니며, OOD instability의 존재
 자체를 최초로 보였다고 주장하지 않는다. 새 기여 후보는 통제된 same-init 개입,
 pair-level transition accounting, score-component 귀속, 그리고 fixed-total-decay
-`alpha in {0, 0.5, 1}` 확인 설계의 결합이다. 단, Card 13 v10은 residual tail과
-novelty gate를 모두 통과할 때만 평가하는 하나의
-조건부 Residual-t Mahalanobis (`RtMD`) method slot을 사전등록한다. Score
-accounting만으로 완전한 causal mediation을 주장하지 않는다.
+`alpha in {0, 0.5, 1}` 확인 설계의 결합이다. 단, Card 13 v10에서 사전등록되고
+현재 v12가 보존한 조건부 Residual-t Mahalanobis (`RtMD`) method slot은 residual
+tail과 novelty gate를 모두 통과할 때만 평가한다. Score accounting만으로 완전한
+causal mediation을 주장하지 않는다.
 
 ## Active sources
 

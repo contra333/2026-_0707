@@ -11,8 +11,10 @@ fixed_readout_pair_ranking_multiplicity_paired_trajectory_v12
 The stable path of this file is the sole authority for the paper's executable
 experiment design. The protocol version is recorded inside this file and in
 Git history; future revisions replace this content without creating another
-Card 13 filename. The current design version is `v12`, and its fresh
-experiments are `NOT_RUN`.
+Card 13 filename. The current design version is `v12`. When v12 was frozen,
+its fresh experiments were `NOT_RUN`; this is freeze-time provenance, not the
+live execution status. Current execution state lives only in
+[`STATUS.md`](../STATUS.md).
 
 V12 is an owner-approved governance and preservation-record revision. It
 corrects one compact-record transcription error, documents the already-run
@@ -41,7 +43,9 @@ This revision does not change completed evidence:
 - the single v2 compliance rerun is complete and makes the frozen estimator
   eligible for prospective fresh use without re-adjudicating Gate 2 or
   activating RtMD;
-- no fresh v12 trajectory, protected-OOD confirmation, or replication has run.
+- at the v12 freeze point, no fresh v12 trajectory, protected-OOD
+  confirmation, or replication had run; current execution state lives in
+  [`STATUS.md`](../STATUS.md).
 
 Fisher/LDA discriminant subspaces, the known MD--Marginal--RMD relation, L2
 feature normalization, size--stretch, spectrum--allocation, and
@@ -1380,16 +1384,17 @@ Required checks include:
 - ImageNet-200 class-membership and pretrained-leakage checks before scale
   execution.
 
-The current repository implements the historical v1 preflight, its bounded
-ID-only archive diagnostic, and the completed v2 compliance rerun. V2 left
-estimator applicability unchanged at `30/60`, and all 30 applicable fits
-passed every required numerical gate. Historical Gate 2 remains permanently
-`INCONCLUSIVE`. Task F CPU engineering now implements multi-depth taps,
-versioned ID-only export, the 50-run matrix, paired provenance, expanded
-snapshot identities, resume checks, and update-telemetry plumbing with
-synthetic fixtures. Fresh v12 training and production extraction, fresh Gate
-3, GPU work, the full RtMD detector, protected OOD, and scale regimes remain
-`NOT_RUN` until their respective contracts and approvals are satisfied.
+When this v12 pre-execution text was frozen, the repository implemented the
+historical v1 preflight, its bounded ID-only archive diagnostic, and the
+completed v2 compliance rerun. V2 left estimator applicability unchanged at
+`30/60`, and all 30 applicable fits passed every required numerical gate.
+Historical Gate 2 remains permanently `INCONCLUSIVE`. At that freeze point,
+Task F CPU engineering implemented multi-depth taps, versioned ID-only export,
+the 50-run matrix, paired provenance, expanded snapshot identities, resume
+checks, and update-telemetry plumbing with synthetic fixtures; fresh v12
+training and production extraction, fresh Gate 3, GPU work, the full RtMD
+detector, protected OOD, and scale regimes remained `NOT_RUN`. Current
+execution state lives only in [`STATUS.md`](../STATUS.md).
 
 ## 13. Pre-execution addendum and stopping rules
 
