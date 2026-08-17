@@ -28,6 +28,9 @@ from oge.evaluation.task_f_fresh_orchestration import (
     collect_task_f_host_summaries,
     execute_task_f_host,
     load_completed_upload_evidence,
+    publish_task_f_host_result,
+    validate_local_source_gate,
+    validate_remote_source_gate_matches_local,
     wait_for_global_source_gate,
 )
 from oge.studies.artifacts import atomic_write_json
@@ -183,6 +186,15 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--minimum-free-gb", type=float, default=100.0)
     run.add_argument("--gate-poll-seconds", type=float, default=60.0)
     run.add_argument("--gate-timeout-hours", type=float, default=72.0)
+    run.add_argument("--hf-command-timeout-seconds", type=float, default=30.0)
+    run.add_argument(
+        "--overlap-source-upload",
+        action="store_true",
+        help=(
+            "start local evaluation after the local source PASS witness, then "
+            "wait for the global remote source gate before host publication"
+        ),
+    )
 
     status = subparsers.add_parser("status")
     status.add_argument("--state-root", type=Path, required=True)
@@ -201,6 +213,93 @@ def _parser() -> argparse.ArgumentParser:
         worker = subparsers.add_parser(name)
         worker.add_argument("--job-spec", type=Path, required=True)
     return parser
+
+
+def _run_host(args: argparse.Namespace) -> int:
+    verify_hf_preflight(args.hf_cli, account="contra333", bucket=BUCKET)
+    manifest = _json(args.manifest)
+    local_gate = None
+    remote_gate = None
+    if args.overlap_source_upload:
+        local_gate = validate_local_source_gate(
+            source_root=args.source_root,
+            host_id=args.host_id,
+            manifest=manifest,
+        )
+        atomic_write_json(args.state_root / "LOCAL_SOURCE_GATE_PASS.json", local_gate)
+    else:
+        remote_gate = wait_for_global_source_gate(
+            hf_cli=args.hf_cli,
+            gate_root=args.state_root / "source_gate",
+            poll_seconds=args.gate_poll_seconds,
+            timeout_hours=args.gate_timeout_hours,
+            command_timeout_seconds=args.hf_command_timeout_seconds,
+        )
+        atomic_write_json(args.state_root / "SOURCE_GATE_PASS.json", remote_gate)
+    if args.id_validation_input.exists():
+        verify_id_input(
+            args.id_validation_input,
+            dataset_config_path=args.dataset_config,
+            split="id_validation",
+        )
+    else:
+        build_id_input(
+            dataset_config_path=args.dataset_config,
+            data_root=args.data_root,
+            split="id_validation",
+            output_path=args.id_validation_input,
+            batch_size=512,
+            num_workers=0,
+        )
+    verify_id_input(
+        args.id_train_input,
+        dataset_config_path=args.dataset_config,
+        split="id_train",
+    )
+    execute_task_f_host(
+        repository_root=REPOSITORY_ROOT,
+        manifest_path=args.manifest,
+        host_id=args.host_id,
+        expected_evaluation_git_sha=args.expected_evaluation_git_sha,
+        source_root=args.source_root,
+        data_root=args.data_root,
+        id_train_input=args.id_train_input,
+        id_validation_input=args.id_validation_input,
+        dataset_config_path=args.dataset_config,
+        artifact_root=args.artifact_root,
+        state_root=args.state_root,
+        python=args.python,
+        hf_cli=args.hf_cli,
+        batch_size=args.batch_size,
+        blas_threads=args.blas_threads,
+        minimum_free_gb=args.minimum_free_gb,
+    )
+    if remote_gate is None:
+        remote_gate = wait_for_global_source_gate(
+            hf_cli=args.hf_cli,
+            gate_root=args.state_root / "source_gate",
+            poll_seconds=args.gate_poll_seconds,
+            timeout_hours=args.gate_timeout_hours,
+            command_timeout_seconds=args.hf_command_timeout_seconds,
+        )
+        if local_gate is None:
+            raise RuntimeError("overlap source gate witness is absent")
+        validate_remote_source_gate_matches_local(
+            local_gate=local_gate,
+            remote_gate=remote_gate,
+        )
+        atomic_write_json(args.state_root / "SOURCE_GATE_PASS.json", remote_gate)
+    result = publish_task_f_host_result(
+        artifact_root=args.artifact_root,
+        state_root=args.state_root,
+        host_id=args.host_id,
+        expected_evaluation_git_sha=args.expected_evaluation_git_sha,
+        hf_cli=args.hf_cli,
+        remote_source_gate=remote_gate,
+        local_source_gate=local_gate,
+    )
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
 
 
 def main() -> int:
@@ -223,6 +322,9 @@ def main() -> int:
     if args.command == "status":
         paths = {
             "ledger": args.state_root / "ledger.json",
+            "local_source_gate": args.state_root / "LOCAL_SOURCE_GATE_PASS.json",
+            "source_gate": args.state_root / "SOURCE_GATE_PASS.json",
+            "host_compute_complete": args.state_root / "HOST_COMPUTE_COMPLETE.json",
             "host_complete": args.state_root / "HOST_COMPLETE.json",
             "central_complete": args.state_root / "CENTRAL_COMPLETE.json",
         }
@@ -233,54 +335,7 @@ def main() -> int:
         print(json.dumps(output, indent=2, sort_keys=True))
         return 0
     if args.command == "run-host":
-        verify_hf_preflight(args.hf_cli, account="contra333", bucket=BUCKET)
-        gate = wait_for_global_source_gate(
-            hf_cli=args.hf_cli,
-            gate_root=args.state_root / "source_gate",
-            poll_seconds=args.gate_poll_seconds,
-            timeout_hours=args.gate_timeout_hours,
-        )
-        atomic_write_json(args.state_root / "SOURCE_GATE_PASS.json", gate)
-        if args.id_validation_input.exists():
-            verify_id_input(
-                args.id_validation_input,
-                dataset_config_path=args.dataset_config,
-                split="id_validation",
-            )
-        else:
-            build_id_input(
-                dataset_config_path=args.dataset_config,
-                data_root=args.data_root,
-                split="id_validation",
-                output_path=args.id_validation_input,
-                batch_size=512,
-                num_workers=0,
-            )
-        verify_id_input(
-            args.id_train_input,
-            dataset_config_path=args.dataset_config,
-            split="id_train",
-        )
-        result = execute_task_f_host(
-            repository_root=REPOSITORY_ROOT,
-            manifest_path=args.manifest,
-            host_id=args.host_id,
-            expected_evaluation_git_sha=args.expected_evaluation_git_sha,
-            source_root=args.source_root,
-            data_root=args.data_root,
-            id_train_input=args.id_train_input,
-            id_validation_input=args.id_validation_input,
-            dataset_config_path=args.dataset_config,
-            artifact_root=args.artifact_root,
-            state_root=args.state_root,
-            python=args.python,
-            hf_cli=args.hf_cli,
-            batch_size=args.batch_size,
-            blas_threads=args.blas_threads,
-            minimum_free_gb=args.minimum_free_gb,
-        )
-        print(json.dumps(result, indent=2, sort_keys=True))
-        return 0
+        return _run_host(args)
 
     verify_hf_preflight(args.hf_cli, account="contra333", bucket=BUCKET)
     deadline = time.monotonic() + args.timeout_hours * 3600.0
