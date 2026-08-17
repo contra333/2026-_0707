@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-08-14
+Last updated: 2026-08-17
 
 ## Current phase
 
@@ -40,45 +40,43 @@ maximum per-sample relative L2 difference `3.37e-4`, and minimum cosine
 `0.99999995`. This removes the production export-throughput blocker without
 changing training semantics. The 50-run and pilot launch plans were regenerated
 and validated against the new specification. The owner-approved 50-run ID-only
-full fresh training started at execution SHA
-`9eb3c1fa56d880ea5220badac7bc71ba75786d22` on fixed sibling-colocated shards:
-`curie=20`, `lise=11`, and `precision_medicine=19`. All three first research
-runs passed the epoch-1 durable-checkpoint and `global_step=352` launch gate
-before all ten approved GPU slots were filled. Research training is in progress;
-protected-OOD evaluation has not started. The versioned fresh ID evaluation
-bridge now validates the exact 50-run inventory, checkpoint/feature/membership/
-classifier identities, and the complete 1,320-record `id_train` plus
-`id_validation` logical coverage. The existing 310-job export queue is a
-validated subset; the 1,010 supplemental exports have not started and remain
-gated on terminal training and terminal completion of that queue. The fresh
-ID-only geometry and paired-aggregation implementation is now fixture-tested:
-it produces raw/L2 discriminant-component bundles, NC/norm/spectrum records,
-ID-train affine and gauge alignment with held-out `id_validation` residuals,
-cell-and-seed-matched paired 90% t-intervals, non-dropping terminal status, and
-deterministic table templates. Comparable-ID remains
+full fresh training completed at execution SHA
+`9eb3c1fa56d880ea5220badac7bc71ba75786d22` on the fixed sibling-colocated
+shards `curie=20`, `lise=11`, and `precision_medicine=19`. All 50 runs reached
+epoch 200 and `global_step=70400`; the pre-existing GPU feature-export queue
+also completed all 310 planned jobs. These exports are evaluation inputs, not
+research results, and protected-OOD evaluation has not started.
+
+The versioned fresh ID evaluation bridge validates the exact 50-run inventory,
+checkpoint/feature/membership/classifier identities, and the complete
+1,320-record `id_train` plus `id_validation` logical coverage. The existing 310
+jobs are a validated subset; the 1,010 supplemental exports have not yet
+started. The fresh ID-only geometry and paired-aggregation implementation is
+fixture-tested for raw/L2 discriminant-component bundles, NC/norm/spectrum
+records, ID-train affine and gauge alignment with held-out `id_validation`
+residuals, cell-and-seed-matched paired 90% t-intervals, non-dropping terminal
+status, and deterministic table templates. Comparable-ID remains
 `PENDING_PROTECTED_ID_TEST`; no protected inference was run.
 
-PR #96 added the reusable staged-evaluation supervisor and the Task F adapter.
-Its evaluation execution SHA is
-`be666c04ec9a1e0075a4b82d788161d850f1663e`; the Task F specification remains
-unchanged. Clean detached evaluation worktrees and host supervisors are now
-running independently on `curie`, `lise`, and `precision_medicine`, and the
-central collector is detached on `precision_medicine`. They are gated on all
-50 training runs and the pre-existing 310 exports reaching verified remote
-completion. Only then will the fixed 1,010 supplemental GPU exports, 660
-ID-only geometry units, 657 sibling alignments, host uploads, and central
-paired aggregation run automatically. No supplemental export, protected
-`id_test`, OOD, or RtMD execution has started at this gate.
+PR #96 added the reusable staged-evaluation supervisor and Task F adapter at
+evaluation execution SHA
+`be666c04ec9a1e0075a4b82d788161d850f1663e`. PR #98 corrected the source
+finalizer's active-`RUNNING` handling, PR #100 corrected indexing of the flat
+hash-addressed feature-artifact layout, and PR #102 made empty Hugging Face
+prefix listings compatible with the installed CLI. The Task F specification
+remains unchanged. All three source hosts now pass local checksum validation for
+their exact run and export shards and are uploading about 153 GiB of training
+bundles plus 34 GiB of existing features with no-delete semantics. Source
+`REMOTE_VERIFIED` markers are pending upload completion.
 
-PR #98 fixed the source-host finalizer so absent and actively `RUNNING` export
-shards remain `WAITING`; only explicit failure states fail the gate. The fixed
-finalizer execution SHA is
-`1b3f7eb89ecb1d1f4033f2d6f3678170d1a4906c`. Clean detached worktrees at that
-SHA are running on all three hosts. Only the finalizer processes were replaced;
-the frozen training worktrees, training processes, existing export watchers,
-and their artifacts were not changed. The three host finalizers now remain
-`WAITING` for normal incomplete export states, so automatic evaluation can open
-after every required source export reaches terminal completion.
+Clean detached evaluation worktrees remain fixed at the evaluation SHA.
+Detached gate watchers on all three hosts wait for the three source terminal
+markers and then start the fixed 1,010 supplemental GPU exports, 1,320 bridge
+bindings, 660 ID-only geometry units, and 657 sibling alignments. A detached
+collector gate on `precision_medicine` waits for all three evaluation terminal
+markers before central paired aggregation. This chain is independent of the
+local workstation, but it has not crossed the source gate yet. No supplemental
+export, protected `id_test`, OOD, or RtMD execution has started.
 
 The planned chain is:
 
@@ -219,7 +217,8 @@ replication rules live only in the active protocol.
   or `RtMD` OOD evaluation; Gate 2 is `INCONCLUSIVE` and Gates 3--5 remain
   `NOT_RUN`
 - no completed fresh active-protocol research result or protected OOD; the
-  research training now in progress and the completed execution-only pilot are
-  not yet research evidence
+  completed training and 310 source exports are inputs to the still-pending
+  ID-only evaluation, and the execution-only pilot remains excluded from
+  research evidence
 - no new architecture/dataset replication
 - no comparable-ID, causal decay-coupling, or cross-regime conclusion
