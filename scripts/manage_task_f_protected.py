@@ -9,10 +9,13 @@ from pathlib import Path
 
 from oge.evaluation.task_f_protected import (
     aggregate_protected_scores,
+    build_protected_checkpoint_bundle_plan,
     build_protected_plan,
     default_run_plan,
+    export_protected_checkpoint_bundle,
     export_protected_record,
     load_json_or_yaml,
+    validate_protected_checkpoint_bundle_plan,
     validate_protected_plan,
     verify_context_scores,
     verify_protected_feature_artifact,
@@ -38,6 +41,10 @@ def _parser() -> argparse.ArgumentParser:
     plan.add_argument("--planning-git-sha", required=True)
     plan.add_argument("--output", type=Path, required=True)
 
+    bundle_plan = commands.add_parser("bundle-plan")
+    bundle_plan.add_argument("--plan", type=Path, required=True)
+    bundle_plan.add_argument("--output", type=Path, required=True)
+
     export = commands.add_parser("export-record")
     export.add_argument("--plan", type=Path, required=True)
     export.add_argument("--authorization", type=Path, required=True)
@@ -51,6 +58,19 @@ def _parser() -> argparse.ArgumentParser:
     export.add_argument("--batch-size", type=int, default=512)
     export.add_argument("--num-workers", type=int, default=4)
 
+    export_bundle = commands.add_parser("export-bundle")
+    export_bundle.add_argument("--plan", type=Path, required=True)
+    export_bundle.add_argument("--authorization", type=Path, required=True)
+    export_bundle.add_argument("--bundle-id", required=True)
+    export_bundle.add_argument("--execution-git-sha", required=True)
+    export_bundle.add_argument("--checkpoint", type=Path, required=True)
+    export_bundle.add_argument("--dataset-config", type=Path, required=True)
+    export_bundle.add_argument("--data-root", type=Path, required=True)
+    export_bundle.add_argument("--output-root", type=Path, required=True)
+    export_bundle.add_argument("--device", required=True)
+    export_bundle.add_argument("--batch-size", type=int, default=512)
+    export_bundle.add_argument("--num-workers", type=int, default=4)
+
     score = commands.add_parser("score-context")
     score.add_argument("--geometry", type=Path, required=True)
     score.add_argument("--protected", action="append", required=True, metavar="SPLIT=PATH")
@@ -63,8 +83,11 @@ def _parser() -> argparse.ArgumentParser:
     collect.add_argument("--output", type=Path, required=True)
 
     verify = commands.add_parser("verify")
-    verify.add_argument("--kind", choices=("plan", "feature", "scores"), required=True)
+    verify.add_argument(
+        "--kind", choices=("plan", "bundle-plan", "feature", "scores"), required=True
+    )
     verify.add_argument("--path", type=Path, required=True)
+    verify.add_argument("--plan", type=Path)
     return parser
 
 
@@ -88,7 +111,31 @@ def main() -> int:
             planning_git_sha=args.planning_git_sha,
         )
         _write_new(args.output, payload)
-        print(json.dumps({"status": "PASS", "records": 2520, "plan_sha256": payload["plan_sha256"]}, sort_keys=True))
+        print(
+            json.dumps(
+                {
+                    "status": "PASS",
+                    "records": 2520,
+                    "plan_sha256": payload["plan_sha256"],
+                },
+                sort_keys=True,
+            )
+        )
+    elif args.command == "bundle-plan":
+        payload = build_protected_checkpoint_bundle_plan(load_json_or_yaml(args.plan))
+        _write_new(args.output, payload)
+        print(
+            json.dumps(
+                {
+                    "status": "PASS",
+                    "checkpoint_bundles": 300,
+                    "dataset_passes": 2100,
+                    "logical_records": 2520,
+                    "bundle_plan_sha256": payload["bundle_plan_sha256"],
+                },
+                sort_keys=True,
+            )
+        )
     elif args.command == "export-record":
         output = export_protected_record(
             plan=load_json_or_yaml(args.plan),
@@ -104,6 +151,21 @@ def main() -> int:
             num_workers=args.num_workers,
         )
         print(output)
+    elif args.command == "export-bundle":
+        output = export_protected_checkpoint_bundle(
+            plan=load_json_or_yaml(args.plan),
+            authorization=load_json_or_yaml(args.authorization),
+            bundle_id=args.bundle_id,
+            execution_git_sha=args.execution_git_sha,
+            checkpoint_path=args.checkpoint,
+            dataset_config_path=args.dataset_config,
+            data_root=args.data_root,
+            output_root=args.output_root,
+            device=args.device,
+            batch_size=args.batch_size,
+            num_workers=args.num_workers,
+        )
+        print(json.dumps(output, sort_keys=True))
     elif args.command == "score-context":
         output = write_context_scores(
             geometry_path=args.geometry,
@@ -121,6 +183,12 @@ def main() -> int:
     else:
         if args.kind == "plan":
             payload = validate_protected_plan(load_json_or_yaml(args.path))
+        elif args.kind == "bundle-plan":
+            if args.plan is None:
+                raise ValueError("bundle-plan verification requires --plan")
+            payload = validate_protected_checkpoint_bundle_plan(
+                load_json_or_yaml(args.path), plan=load_json_or_yaml(args.plan)
+            )
         elif args.kind == "feature":
             payload = verify_protected_feature_artifact(args.path)["manifest"]
         else:
