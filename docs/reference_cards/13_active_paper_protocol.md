@@ -2178,3 +2178,42 @@ An unsupported deterministic CUDA operator, any numerical mismatch, or any
 identity/provenance mismatch is `BLOCKED`. It is not repaired by weakening the
 policy. A passing re-pilot supplies a measured packet for a later decision;
 it does not authorize the 20 research runs or protected evaluation.
+
+### 15.5 CuBLAS deterministic-process addendum v3
+
+The v2 re-pilot at `5bc7e0c0e2d0bfc6b8be2fb3cd5fcb7ce98673ff`
+stopped in all four arms at the first backward call, before epoch 1. Strict
+PyTorch determinism correctly rejected CuBLAS execution because
+`CUBLAS_WORKSPACE_CONFIG` had not been set before process initialization. Only
+the four epoch-0 initial snapshots were created. The v2 terminal status is
+`BLOCKED_MISSING_CUBLAS_WORKSPACE_CONFIG`, terminal SHA-256
+`a1eb0c00e8c6abefa39d5740407e97bbb8c7d8f99338cd34a4be982d12f52efb`.
+
+This is a missing prerequisite for strict determinism, not evidence that the
+required operation lacks a deterministic implementation. The corrected
+collision-free contract is:
+
+```yaml
+study_id: resnet18_cifar10_replication_v3
+protocol_id: protocol_fixed_branch_refitted_md_architecture_replication_v3
+training_schema: resnet18_cifar10_replication_training_v3
+numerical_policy_id: strict_cuda_deterministic_cublas4096_v3
+cublas_workspace_config: ":4096:8"
+training:
+  precision: fp32
+  deterministic: true
+```
+
+The training entrypoint must set `CUBLAS_WORKSPACE_CONFIG=:4096:8` before
+importing the PyTorch training runtime. The runner must reject a deterministic
+CUDA v3 run when the observed process environment differs and must record the
+value in numerical-policy provenance. The v3 plan, approval, paired-control,
+checkpoint, feature-artifact, evaluation, study, and run identities must not
+mix with v1 or v2.
+
+The owner's 2026-08-18 deterministic re-pilot request covers this necessary
+strict-process correction in Issue #133. The seed, arms, epochs, execution-only
+status, exact continuous-versus-resume gate, and all non-authorization
+boundaries remain those of Section 15.4. Another unsupported deterministic
+operation or any exact-state mismatch is terminal `BLOCKED`; `warn_only`, a
+different workspace setting, and retry under a weaker policy remain forbidden.

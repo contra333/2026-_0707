@@ -16,18 +16,19 @@ from typing import Any
 from oge.studies.hashing import canonical_sha256
 
 
-RESNET18_REPLICATION_PLAN_SCHEMA_VERSION = "resnet18_cifar10_replication_plan_v2"
+RESNET18_REPLICATION_PLAN_SCHEMA_VERSION = "resnet18_cifar10_replication_plan_v3"
 RESNET18_REPLICATION_TRAINING_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_training_v2"
+    "resnet18_cifar10_replication_training_v3"
 )
 RESNET18_REPLICATION_APPROVAL_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_approval_packet_v2"
+    "resnet18_cifar10_replication_approval_packet_v3"
 )
 RESNET18_REPLICATION_PROTOCOL_ID = (
-    "protocol_fixed_branch_refitted_md_architecture_replication_v2"
+    "protocol_fixed_branch_refitted_md_architecture_replication_v3"
 )
-RESNET18_REPLICATION_STUDY_ID = "resnet18_cifar10_replication_v2"
-RESNET18_REPLICATION_NUMERICAL_POLICY_ID = "strict_cuda_deterministic_v2"
+RESNET18_REPLICATION_STUDY_ID = "resnet18_cifar10_replication_v3"
+RESNET18_REPLICATION_NUMERICAL_POLICY_ID = "strict_cuda_deterministic_cublas4096_v3"
+RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG = ":4096:8"
 RESNET18_REPLICATION_SEEDS = (0, 1, 2, 3, 4)
 RESNET18_REPLICATION_LRS = (1e-3, 3e-4)
 RESNET18_REPLICATION_WEIGHT_DECAY = 1e-4
@@ -81,7 +82,7 @@ def _optimizer(role: str, *, lr: float) -> dict[str, Any]:
 
 def _run_id(*, lr: float, seed: int, role: str) -> str:
     return (
-        f"resnet18-c10-rep-v2-lr{_float_token(lr)}-"
+        f"resnet18-c10-rep-v3-lr{_float_token(lr)}-"
         f"wd{_float_token(RESNET18_REPLICATION_WEIGHT_DECAY)}-seed{seed}-"
         f"{role.replace('_', '-')}"
     )
@@ -89,8 +90,8 @@ def _run_id(*, lr: float, seed: int, role: str) -> str:
 
 def _record(*, lr: float, seed: int, role: str) -> dict[str, Any]:
     lr_token = _float_token(lr)
-    sibling_group_id = f"resnet18-c10-rep-v2-lr{lr_token}-seed{seed}"
-    cross_lr_pairing_block_id = f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
+    sibling_group_id = f"resnet18-c10-rep-v3-lr{lr_token}-seed{seed}"
+    cross_lr_pairing_block_id = f"resnet18-c10-rep-v3-cross-lr-seed{seed}"
     return {
         "run_id": _run_id(lr=lr, seed=seed, role=role),
         "cell_id": f"resnet18_c10_lr{lr_token}_wd1e-4",
@@ -152,6 +153,7 @@ def generate_resnet18_replication_matrix(
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
         "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
+        "cublas_workspace_config": RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
         "research_seeds": list(seeds),
         "snapshot_epochs": list(RESNET18_REPLICATION_SNAPSHOT_EPOCHS),
         "runs": runs,
@@ -180,6 +182,11 @@ def validate_resnet18_replication_matrix(plan: Mapping[str, Any]) -> None:
         raise ValueError("ResNet-18 replication study identity mismatch")
     if plan.get("numerical_policy_id") != RESNET18_REPLICATION_NUMERICAL_POLICY_ID:
         raise ValueError("ResNet-18 replication numerical policy mismatch")
+    if (
+        plan.get("cublas_workspace_config")
+        != RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise ValueError("ResNet-18 replication CuBLAS workspace policy mismatch")
     runs = plan.get("runs")
     if not isinstance(runs, list) or len(runs) != 20:
         raise ValueError("ResNet-18 replication matrix must contain exactly 20 runs")
@@ -212,7 +219,7 @@ def validate_resnet18_replication_matrix(plan: Mapping[str, Any]) -> None:
     if len(by_seed) != 5:
         raise ValueError("ResNet-18 replication must contain five paired seeds")
     for seed, seed_runs in by_seed.items():
-        expected_block = f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
+        expected_block = f"resnet18-c10-rep-v3-cross-lr-seed{seed}"
         if {run["cross_lr_pairing_block_id"] for run in seed_runs} != {expected_block}:
             raise ValueError("cross-LR pairing block identity mismatch")
         combinations = {
@@ -294,6 +301,7 @@ def build_resnet18_replication_training_config(
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
         "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
+        "cublas_workspace_config": RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
         "run_id": str(run["run_id"]),
         "sibling_group_id": str(run["sibling_group_id"]),
         "data_stream_id": str(run["data_stream_id"]),
@@ -339,12 +347,17 @@ def validate_resnet18_replication_training_config(config: Mapping[str, Any]) -> 
     if config["dataset"].get("protocol") != "oge_cifar10_holdout_v1":
         raise ValueError("replication dataset must use oge_cifar10_holdout_v1")
     if config["training"].get("deterministic") is not True:
-        raise ValueError("replication v2 requires training.deterministic=true")
+        raise ValueError("replication v3 requires training.deterministic=true")
     if (
         replication.get("numerical_policy_id")
         != RESNET18_REPLICATION_NUMERICAL_POLICY_ID
     ):
-        raise ValueError("replication v2 numerical policy identity mismatch")
+        raise ValueError("replication v3 numerical policy identity mismatch")
+    if (
+        replication.get("cublas_workspace_config")
+        != RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise ValueError("replication v3 CuBLAS workspace policy mismatch")
     if not bool(replication.get("from_scratch")):
         raise ValueError("ResNet-18 replication must start from scratch")
     if not bool(replication.get("defer_id_test")):
@@ -464,6 +477,7 @@ def generate_resnet18_approval_packet(
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
         "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
+        "cublas_workspace_config": RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
         "execution_sha": execution_sha,
         "research_matrix": {
             "run_count": 20,

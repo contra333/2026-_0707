@@ -1,0 +1,35 @@
+schema_version: resnet18_cifar10_replication_evaluation_template_v3
+study_id: resnet18_cifar10_replication_v3
+numerical_policy_id: strict_cuda_deterministic_cublas4096_v3
+cublas_workspace_config: ":4096:8"
+source:
+  checkpoint_role: last
+  checkpoint_epoch: 200
+  depth_tap: penultimate
+  feature_dim: 512
+  artifact_namespace: resnet18_cifar10_replication_v3
+id_fit:
+  split: id_train
+  branch_refit: true
+score_panel:
+  targets: [raw_md, raw_rmd, raw_marginal, l2_md]
+  pair_metrics: [gain, loss, pair_order_churn, delta_auroc]
+  near: [cifar100, tin]
+  far: [mnist, svhn, texture, places365]
+protected_paths:
+  id_test: null
+  cifar100: null
+  tin: null
+  mnist: null
+  svhn: null
+  texture: null
+  places365: null
+authorization:
+  protected_data_access: false
+  launch: PENDING_EXPLICIT_OWNER_APPROVAL
+  executor: NOT_IMPLEMENTED_IN_PREAPPROVAL_SCAFFOLD
+outputs:
+  statistical_unit: training_seed
+  expected_runs: 20
+  expected_paired_seed_records: 10
+  commit_generated_artifacts: false

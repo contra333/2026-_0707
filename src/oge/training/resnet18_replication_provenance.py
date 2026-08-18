@@ -15,6 +15,7 @@ from .provenance import (
     model_initialization_sha256,
 )
 from .resnet18_replication_plan import (
+    RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
     RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
     RESNET18_REPLICATION_STUDY_ID,
     validate_resnet18_replication_training_config,
@@ -22,10 +23,10 @@ from .resnet18_replication_plan import (
 
 
 RESNET18_REPLICATION_PAIRED_PROVENANCE_SCHEMA_VERSION = (
-    "resnet18_cifar10_paired_control_provenance_v2"
+    "resnet18_cifar10_paired_control_provenance_v3"
 )
 RESNET18_REPLICATION_CHECKPOINT_PROVENANCE_SCHEMA_VERSION = (
-    "resnet18_cifar10_checkpoint_provenance_v2"
+    "resnet18_cifar10_checkpoint_provenance_v3"
 )
 
 _RESUME_FIELDS = (
@@ -43,6 +44,7 @@ _RESUME_FIELDS = (
     "cross_lr_neutral_config_sha256",
     "execution_only",
     "numerical_policy_id",
+    "cublas_workspace_config",
 )
 _DATA_STREAM_FIELDS = (
     "data_stream_id",
@@ -75,6 +77,7 @@ def create_initial_resnet18_replication_provenance(
         "data_stream_id": str(replication["data_stream_id"]),
         "branch_policy": str(replication["branch_policy"]),
         "numerical_policy_id": str(replication["numerical_policy_id"]),
+        "cublas_workspace_config": str(replication["cublas_workspace_config"]),
         "initialization_sha256": model_initialization_sha256(model),
         **initial_rng_state_hashes(initial_rng_state),
         "dataset_membership_sha256": dataset_membership_sha256(resolved_config),
@@ -153,6 +156,7 @@ def build_resnet18_replication_checkpoint_provenance(
         "schema_version": RESNET18_REPLICATION_CHECKPOINT_PROVENANCE_SCHEMA_VERSION,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
         "numerical_policy_id": str(replication["numerical_policy_id"]),
+        "cublas_workspace_config": str(replication["cublas_workspace_config"]),
         "run_id": run_id,
         "training_seed": int(resolved_config["training"]["seed"]),
         "branch_policy": str(current["branch_policy"]),
@@ -186,6 +190,7 @@ def validate_resnet18_replication_checkpoint_provenance(
         "schema_version",
         "study_id",
         "numerical_policy_id",
+        "cublas_workspace_config",
         "run_id",
         "training_seed",
         "branch_policy",
@@ -206,13 +211,18 @@ def validate_resnet18_replication_checkpoint_provenance(
         "model_config",
     }
     if set(value) != required:
-        raise ValueError("replication checkpoint provenance fields differ from v2")
+        raise ValueError("replication checkpoint provenance fields differ from v3")
     if value["schema_version"] != RESNET18_REPLICATION_CHECKPOINT_PROVENANCE_SCHEMA_VERSION:
         raise ValueError("unsupported replication checkpoint provenance schema")
     if value["study_id"] != RESNET18_REPLICATION_STUDY_ID:
         raise ValueError("replication checkpoint study_id mismatch")
     if value["numerical_policy_id"] != RESNET18_REPLICATION_NUMERICAL_POLICY_ID:
         raise ValueError("replication checkpoint numerical policy mismatch")
+    if (
+        value["cublas_workspace_config"]
+        != RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG
+    ):
+        raise ValueError("replication checkpoint CuBLAS workspace policy mismatch")
     if value["model_config"] != {
         "name": "resnet18",
         "variant": "cifar",

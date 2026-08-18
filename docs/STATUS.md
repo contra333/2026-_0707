@@ -198,6 +198,18 @@ coupling-harm language are prohibited.
    without fallback. Main training and protected evaluation remain separately
    unauthorized.
 
+   The merged v2 re-pilot at `5bc7e0c0e2d0bfc6b8be2fb3cd5fcb7ce98673ff`
+   then stopped in all four arms at the first backward call because strict
+   CuBLAS determinism additionally requires process-start
+   `CUBLAS_WORKSPACE_CONFIG=:4096:8`. It produced only four epoch-0 snapshots,
+   no completed epoch, and no research evidence. The failure terminal SHA-256
+   is `a1eb0c00e8c6abefa39d5740407e97bbb8c7d8f99338cd34a4be982d12f52efb`.
+   Issue #133 versions this prerequisite as
+   `strict_cuda_deterministic_cublas4096_v3`, sets it before the training
+   runtime import, validates and records it, and preserves the v1/v2 failures.
+   Only the already-approved execution-only re-pilot may follow its merge;
+   main training and protected evaluation remain unauthorized.
+
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to
 stop training and write; after `PARTIAL` or `FAIL`, do not open a rescue grid.

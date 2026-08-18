@@ -1,0 +1,25 @@
+schema_version: resnet18_cifar10_replication_plan_v3
+protocol_id: protocol_fixed_branch_refitted_md_architecture_replication_v3
+study_id: resnet18_cifar10_replication_v3
+base_training_config: configs/training/cifar10_resnet18_replication_v3.yaml
+numerical_policy_id: strict_cuda_deterministic_cublas4096_v3
+cublas_workspace_config: ":4096:8"
+
+matrix:
+  learning_rates: [0.001, 0.0003]
+  weight_decay: 0.0001
+  roles: [adam_coupled, adamw_decoupled]
+  research_seeds: [0, 1, 2, 3, 4]
+  total_runs: 20
+
+pairing:
+  within_lr: same_seed_initialization_and_data_stream
+  across_lr: same_seed_initialization_and_data_stream
+  cross_lr_pairing_block_id: required
+
+output_policy:
+  launch_bundle_root: artifacts/
+  artifact_namespace: resnet18_cifar10_replication_v3
+  commit_generated_bundle: false
+  protected_evaluation_allowed: false
+  gpu_launch_allowed: false

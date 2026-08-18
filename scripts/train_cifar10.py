@@ -4,7 +4,13 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
+
+# PyTorch requires this process-level setting before the first CuBLAS call when
+# strict deterministic algorithms are enabled. It is harmless for ordinary
+# nondeterministic configs and is recorded by the runner environment payload.
+os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
 from oge.training import run_training_from_config
 

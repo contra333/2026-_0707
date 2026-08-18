@@ -15,6 +15,7 @@ from oge.training.resnet18_replication_provenance import (
     create_initial_resnet18_replication_provenance,
 )
 from oge.training.resnet18_replication_plan import (
+    RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
     RESNET18_REPLICATION_LRS,
     RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
     RESNET18_REPLICATION_ROLES,
@@ -34,12 +35,12 @@ ROOT = Path(__file__).parents[1]
 
 def _base_config():
     return load_training_config(
-        ROOT / "configs/training/cifar10_resnet18_replication_v2.yaml"
+        ROOT / "configs/training/cifar10_resnet18_replication_v3.yaml"
     )
 
 
 def test_committed_replication_templates_are_parseable_and_gpu_safe():
-    root = ROOT / "configs/studies/resnet18_cifar10_replication_v2"
+    root = ROOT / "configs/studies/resnet18_cifar10_replication_v3"
     matrix = yaml.safe_load((root / "run_matrix.template.yaml").read_text())
     pilot = yaml.safe_load((root / "pilot_execution_only.template.yaml").read_text())
     summary = json.loads((root / "matrix_summary.json").read_text())
@@ -70,10 +71,10 @@ def test_exact_20_run_matrix_and_four_arms_per_seed():
     for seed, runs in by_seed.items():
         assert {(run["initial_lr"], run["branch_policy"]) for run in runs} == expected
         assert {run["cross_lr_pairing_block_id"] for run in runs} == {
-            f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
+            f"resnet18-c10-rep-v3-cross-lr-seed{seed}"
         }
         assert {run["data_stream_id"] for run in runs} == {
-            f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
+            f"resnet18-c10-rep-v3-cross-lr-seed{seed}"
         }
 
 
@@ -95,6 +96,10 @@ def test_config_keeps_task_f_frozen_and_hashes_within_lr_and_cross_lr_controls()
         assert (
             config["resnet18_replication"]["numerical_policy_id"]
             == RESNET18_REPLICATION_NUMERICAL_POLICY_ID
+        )
+        assert (
+            config["resnet18_replication"]["cublas_workspace_config"]
+            == RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG
         )
         by_seed[run["training_seed"]].append(config)
     for configs in by_seed.values():
@@ -137,6 +142,24 @@ def test_matrix_and_training_validation_reject_identity_and_shape_drift():
     config["training"]["deterministic"] = False
     with pytest.raises(ValueError, match="deterministic=true"):
         validate_resnet18_replication_training_config(config)
+
+
+def test_v3_cuda_process_environment_requires_bound_cublas_workspace(monkeypatch):
+    plan = generate_resnet18_replication_matrix()
+    config = build_resnet18_replication_training_config(
+        _base_config(), plan["runs"][0]
+    )
+    monkeypatch.delenv("CUBLAS_WORKSPACE_CONFIG", raising=False)
+    with pytest.raises(RuntimeError, match="CUBLAS_WORKSPACE_CONFIG"):
+        training_runner._validate_deterministic_cuda_process_environment(
+            config, device="cuda"
+        )
+    monkeypatch.setenv(
+        "CUBLAS_WORKSPACE_CONFIG", RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG
+    )
+    training_runner._validate_deterministic_cuda_process_environment(
+        config, device="cuda"
+    )
 
 
 def test_seed9000_four_arm_two_epoch_pilot_and_approval_packet():

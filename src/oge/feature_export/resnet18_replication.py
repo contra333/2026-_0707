@@ -28,10 +28,10 @@ from .task_f import collect_runtime_provenance, ordered_sample_id_sha256
 
 
 RESNET18_REPLICATION_ARTIFACT_SCHEMA_VERSION = (
-    "resnet18_cifar10_id_feature_artifact_v2"
+    "resnet18_cifar10_id_feature_artifact_v3"
 )
 RESNET18_REPLICATION_ARTIFACT_SPECIFICATION_VERSION = (
-    "resnet18_cifar10_id_feature_specification_v2"
+    "resnet18_cifar10_id_feature_specification_v3"
 )
 RESNET18_REPLICATION_ID_SPLITS = (
     "id_train",
@@ -237,6 +237,7 @@ def write_resnet18_replication_artifact(
             "schema_version": RESNET18_REPLICATION_ARTIFACT_SCHEMA_VERSION,
             "artifact_namespace": RESNET18_REPLICATION_STUDY_ID,
             "numerical_policy_id": provenance["numerical_policy_id"],
+            "cublas_workspace_config": provenance["cublas_workspace_config"],
             "run_id": provenance["run_id"],
             "training_seed": provenance["training_seed"],
             "branch_policy": provenance["branch_policy"],
