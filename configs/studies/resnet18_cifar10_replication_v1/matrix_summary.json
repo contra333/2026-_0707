@@ -1,0 +1,11 @@
+{
+  "schema_version": "resnet18_cifar10_replication_plan_summary_v1",
+  "total_research_runs": 20,
+  "learning_rates": [0.001, 0.0003],
+  "weight_decay": 0.0001,
+  "roles": ["adam_coupled", "adamw_decoupled"],
+  "research_seeds": [0, 1, 2, 3, 4],
+  "runs_per_seed": 4,
+  "artifact_namespace": "resnet18_cifar10_replication_v1",
+  "generated_launch_bundle_policy": "ignored artifacts only"
+}

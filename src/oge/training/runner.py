@@ -56,12 +56,66 @@ from .provenance import (
     observe_first_minibatch,
     validate_resume_paired_identity,
 )
+from .resnet18_replication_plan import (
+    validate_resnet18_replication_training_config,
+)
+from .resnet18_replication_provenance import (
+    RESNET18_REPLICATION_PAIRED_PROVENANCE_SCHEMA_VERSION,
+    build_resnet18_replication_checkpoint_provenance,
+    create_initial_resnet18_replication_provenance,
+    validate_resume_resnet18_replication_identity,
+)
 from .task_f_plan import validate_task_f_training_config
 from .telemetry import UpdateTelemetryRecorder
 
 RUN_SCHEMA_VERSION = "1.0"
 PROTOCOL_NAME = "oge_cifar10_holdout_v1"
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _paired_study_config(config: dict[str, Any]) -> tuple[str, dict[str, Any]] | None:
+    present = [key for key in ("task_f", "resnet18_replication") if key in config]
+    if len(present) > 1:
+        raise ValueError("a training config may declare only one paired study schema")
+    if not present:
+        return None
+    key = present[0]
+    value = config[key]
+    if not isinstance(value, dict):
+        raise ValueError(f"{key} must be a mapping")
+    return key, value
+
+
+def _attach_paired_study_checkpoint_provenance(
+    payload: dict[str, object],
+    *,
+    resolved_config: dict[str, Any],
+    paired_control_provenance: dict[str, Any],
+    checkpoint_epoch: int,
+    checkpoint_role: str,
+    oge_git_sha: str,
+    run_id: str,
+) -> None:
+    task_f_provenance = build_task_f_checkpoint_provenance(
+        resolved_config=resolved_config,
+        paired_control_provenance=paired_control_provenance,
+        checkpoint_epoch=checkpoint_epoch,
+        checkpoint_role=checkpoint_role,
+        oge_git_sha=oge_git_sha,
+        run_id=run_id,
+    )
+    if task_f_provenance is not None:
+        payload["task_f_provenance"] = task_f_provenance
+    replication_provenance = build_resnet18_replication_checkpoint_provenance(
+        resolved_config=resolved_config,
+        paired_control_provenance=paired_control_provenance,
+        checkpoint_epoch=checkpoint_epoch,
+        checkpoint_role=checkpoint_role,
+        oge_git_sha=oge_git_sha,
+        run_id=run_id,
+    )
+    if replication_provenance is not None:
+        payload["resnet18_replication_provenance"] = replication_provenance
 
 
 def _utc_now() -> str:
@@ -139,12 +193,13 @@ def _require_mapping(config: dict[str, Any], key: str) -> dict[str, Any]:
 def _materialize_config_defaults(config: dict[str, Any]) -> None:
     model = _require_mapping(config, "model")
     model.setdefault("num_classes", 10)
-    model.setdefault("depth", 28)
-    model.setdefault("widen_factor", 10)
-    # Initialization changes penultimate geometry through effective learning
-    # rate, so it belongs in the resolved config and the canonical scientific
-    # config hash rather than staying an implicit code constant.
-    model.setdefault("init_policy", DEFAULT_INIT_POLICY)
+    if model.get("name") == "wrn28_10":
+        model.setdefault("depth", 28)
+        model.setdefault("widen_factor", 10)
+        # Initialization changes penultimate geometry through effective learning
+        # rate, so it belongs in the resolved config and the canonical scientific
+        # config hash rather than staying an implicit code constant.
+        model.setdefault("init_policy", DEFAULT_INIT_POLICY)
 
     loss = _require_mapping(config, "loss")
     loss.setdefault("label_smoothing", 0.0)
@@ -210,7 +265,10 @@ def _validate_training_config(config: dict[str, Any]) -> None:
     for key, expected in expected_splits.items():
         if dataset[key] != expected:
             raise ValueError(f"dataset.{key} must be {expected!r}")
-    if model.get("name") != "wrn28_10" or float(model.get("dropout_rate", -1.0)) != 0.0:
+    if "resnet18_replication" not in config and (
+        model.get("name") != "wrn28_10"
+        or float(model.get("dropout_rate", -1.0)) != 0.0
+    ):
         raise ValueError("the first training protocol requires wrn28_10 dropout_rate=0.0")
     if loss.get("name") != "cross_entropy":
         raise ValueError("only loss.name='cross_entropy' is supported")
@@ -266,6 +324,8 @@ def _validate_training_config(config: dict[str, Any]) -> None:
         )
     if "task_f" in config:
         validate_task_f_training_config(config)
+    if "resnet18_replication" in config:
+        validate_resnet18_replication_training_config(config)
 
 
 def _resolve_path(path: str | Path, *, repository_root: Path) -> Path:
@@ -691,7 +751,8 @@ def _checkpoint_payload(
         payload["paired_control_provenance"] = copy.deepcopy(
             paired_control_provenance
         )
-        task_f_provenance = build_task_f_checkpoint_provenance(
+        _attach_paired_study_checkpoint_provenance(
+            payload,
             resolved_config=resolved_config,
             paired_control_provenance=paired_control_provenance,
             checkpoint_epoch=completed_epoch,
@@ -699,8 +760,6 @@ def _checkpoint_payload(
             oge_git_sha=oge_git_sha,
             run_id=run_id,
         )
-        if task_f_provenance is not None:
-            payload["task_f_provenance"] = task_f_provenance
     return payload
 
 
@@ -727,7 +786,8 @@ def _snapshot_payload(
         payload["paired_control_provenance"] = copy.deepcopy(
             paired_control_provenance
         )
-        task_f_provenance = build_task_f_checkpoint_provenance(
+        _attach_paired_study_checkpoint_provenance(
+            payload,
             resolved_config=resolved_config,
             paired_control_provenance=paired_control_provenance,
             checkpoint_epoch=completed_epoch,
@@ -735,8 +795,6 @@ def _snapshot_payload(
             oge_git_sha=oge_git_sha,
             run_id=run_id,
         )
-        if task_f_provenance is not None:
-            payload["task_f_provenance"] = task_f_provenance
     return payload
 
 
@@ -966,9 +1024,10 @@ def _persist_observed_paired_provenance(
         if snapshot.get("checkpoint_type") != "snapshot" or int(
             snapshot.get("completed_epoch", -1)
         ) != 0:
-            raise ValueError("Task F epoch-0 snapshot has an invalid identity")
+            raise ValueError("paired-study epoch-0 snapshot has an invalid identity")
         snapshot["paired_control_provenance"] = copy.deepcopy(provenance)
-        task_f_provenance = build_task_f_checkpoint_provenance(
+        _attach_paired_study_checkpoint_provenance(
+            snapshot,
             resolved_config=resolved_config,
             paired_control_provenance=provenance,
             checkpoint_epoch=0,
@@ -976,8 +1035,6 @@ def _persist_observed_paired_provenance(
             oge_git_sha=oge_git_sha,
             run_id=run_id,
         )
-        if task_f_provenance is not None:
-            snapshot["task_f_provenance"] = task_f_provenance
         atomic_torch_save(snapshot, initial_snapshot_path)
 
 
@@ -1031,7 +1088,8 @@ def _reconcile_epoch_artifacts(
         best_payload = dict(checkpoint)
         best_payload["checkpoint_type"] = "best_val"
         if paired_control_provenance is not None:
-            task_f_provenance = build_task_f_checkpoint_provenance(
+            _attach_paired_study_checkpoint_provenance(
+                best_payload,
                 resolved_config=resolved_config,
                 paired_control_provenance=paired_control_provenance,
                 checkpoint_epoch=completed_epoch,
@@ -1039,8 +1097,6 @@ def _reconcile_epoch_artifacts(
                 oge_git_sha=oge_git_sha,
                 run_id=run_id,
             )
-            if task_f_provenance is not None:
-                best_payload["task_f_provenance"] = task_f_provenance
         atomic_torch_save(best_payload, paths["best"])
 
     snapshot_epochs = set(
@@ -1107,6 +1163,8 @@ def fit_classifier(
     resume_path = Path(resume_from) if resume_from is not None else None
     fork_path = Path(fork_from_prefix) if fork_from_prefix is not None else None
     task_f = resolved_config.get("task_f")
+    resnet18_replication = resolved_config.get("resnet18_replication")
+    paired_study = _paired_study_config(resolved_config)
     paired_control_provenance: dict[str, Any] | None = None
     if task_f is not None:
         validate_task_f_training_config(resolved_config)
@@ -1117,6 +1175,21 @@ def fit_classifier(
         if not defer_id_test or not bool(task_f["defer_id_test"]):
             raise ValueError("Task F training requires deferred ID-test evaluation")
         paired_control_provenance = create_initial_paired_provenance(
+            resolved_config=resolved_config,
+            model=model,
+            initial_rng_state=initial_rng_state,
+        )
+    if resnet18_replication is not None:
+        validate_resnet18_replication_training_config(resolved_config)
+        if initial_rng_state is None:
+            raise ValueError(
+                "ResNet-18 replication requires pre-initialization RNG provenance"
+            )
+        if fork_path is not None:
+            raise ValueError("ResNet-18 replication cannot use fork_from_prefix")
+        if not defer_id_test or not bool(resnet18_replication["defer_id_test"]):
+            raise ValueError("ResNet-18 replication requires deferred ID-test evaluation")
+        paired_control_provenance = create_initial_resnet18_replication_provenance(
             resolved_config=resolved_config,
             model=model,
             initial_rng_state=initial_rng_state,
@@ -1142,9 +1215,10 @@ def fit_classifier(
             or not isinstance(stop_after_epoch_boundary, int)
         ):
             raise ValueError("stop_after_epoch_boundary must be an integer")
-        if task_f is None or not bool(task_f["execution_only"]):
+        if paired_study is None or not bool(paired_study[1]["execution_only"]):
             raise ValueError(
-                "stop_after_epoch_boundary is allowed only for execution-only Task F"
+                "stop_after_epoch_boundary is allowed only for execution-only Task F "
+                "or ResNet-18 replication"
             )
 
     if resume_payload is not None:
@@ -1159,11 +1233,20 @@ def fit_classifier(
         saved_provenance = resume_payload.get("paired_control_provenance")
         if paired_control_provenance is not None:
             if not isinstance(saved_provenance, dict):
-                raise ValueError("Task F resume checkpoint is missing paired provenance")
-            validate_resume_paired_identity(
-                saved_provenance,
-                paired_control_provenance,
-            )
+                raise ValueError("paired-study resume checkpoint is missing provenance")
+            if (
+                paired_control_provenance.get("schema_version")
+                == RESNET18_REPLICATION_PAIRED_PROVENANCE_SCHEMA_VERSION
+            ):
+                validate_resume_resnet18_replication_identity(
+                    saved_provenance,
+                    paired_control_provenance,
+                )
+            else:
+                validate_resume_paired_identity(
+                    saved_provenance,
+                    paired_control_provenance,
+                )
             paired_control_provenance = copy.deepcopy(saved_provenance)
     if fork_payload is not None:
         _validate_checkpoint(fork_payload)
@@ -1417,7 +1500,8 @@ def fit_classifier(
             best_payload = dict(last_payload)
             best_payload["checkpoint_type"] = "best_val"
             if paired_control_provenance is not None:
-                task_f_provenance = build_task_f_checkpoint_provenance(
+                _attach_paired_study_checkpoint_provenance(
+                    best_payload,
                     resolved_config=resolved_config,
                     paired_control_provenance=paired_control_provenance,
                     checkpoint_epoch=epoch,
@@ -1425,8 +1509,6 @@ def fit_classifier(
                     oge_git_sha=oge_git_sha,
                     run_id=run_id,
                 )
-                if task_f_provenance is not None:
-                    best_payload["task_f_provenance"] = task_f_provenance
             atomic_torch_save(best_payload, paths["best"])
         if epoch in snapshot_epochs:
             atomic_torch_save(

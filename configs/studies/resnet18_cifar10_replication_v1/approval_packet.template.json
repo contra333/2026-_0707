@@ -1,0 +1,22 @@
+{
+  "schema_version": "resnet18_cifar10_replication_approval_packet_v1",
+  "execution_sha": "REQUIRED_AFTER_MERGE",
+  "pilot": {
+    "seed": 9000,
+    "arm_count": 4,
+    "max_epochs": 2,
+    "status": "NOT_RUN"
+  },
+  "resource_estimates": {
+    "seconds_per_epoch": "PENDING_PILOT",
+    "peak_vram_bytes": "PENDING_PILOT",
+    "expected_gpu_hours": "PENDING_PILOT",
+    "expected_storage_bytes": "PENDING_PILOT"
+  },
+  "approval_boundaries": {
+    "pilot_gpu_approval": "REQUIRED_BEFORE_EXECUTION",
+    "main_training_gpu_approval": "SEPARATE_REQUIRED_AFTER_PILOT",
+    "protected_evaluation": "NOT_AUTHORIZED",
+    "pilot_is_research_evidence": false
+  }
+}
