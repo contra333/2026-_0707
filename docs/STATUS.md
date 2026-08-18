@@ -160,7 +160,7 @@ coupling-harm language are prohibited.
    hash-addressed bundle above is remotely verified. All macros are formed
    within seed before Near/Far aggregation; the inferential unit remains the
    training seed.
-2. **ResNet-18/CIFAR-10 replication -- DETERMINISTIC V3 REPILOT PASS; MAIN
+2. **ResNet-18/CIFAR-10 replication -- MAIN TRAINING 20/20 PASS; ID INFERENCE
    APPROVAL PENDING.** PR #129 was merged at
    `b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. The ignored materialized packet
    is at `artifacts/resnet18_cifar10_replication_v1/plan_b5a4593c/`; it contains
@@ -225,8 +225,26 @@ coupling-harm language are prohibited.
    Mean pilot time was 28.86 seconds/epoch and peak incremental VRAM was
    1,356--1,357 MiB. The measured projection is 32.07 A5000 GPU-hours, 3.21
    hours in two 10-GPU waves, and 7.34 GiB checkpoint storage with 10% reserve.
-   This is infrastructure evidence only, not research evidence. The 20-run
-   main training and protected evaluation remain separately unauthorized.
+   This is infrastructure evidence only, not research evidence. That re-pilot
+   did not itself authorize main training or protected evaluation.
+
+   The owner subsequently approved the exact v3 20-run matrix in Issue #135
+   and explicitly authorized direct training. All 20 runs completed exactly
+   200 epochs at clean execution SHA
+   `e2f6845e88b22bc0783c5fda58186f9930083ef7`: Curie ran seeds 0/3 (8 runs),
+   Lise seed 2 (4 runs), and Precision Medicine seeds 1/4 (8 runs). Every run
+   exited zero and retained deferred ID test. Host-local validation passed
+   checkpoint structure/provenance/checksums, strict deterministic process and
+   GPU identity, 200-epoch/70,400-step coverage, same-LR sibling identity, and
+   four-arm cross-LR identity. The merged 20-run/five-seed terminal validation
+   SHA-256 is
+   `780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5`;
+   the remotely reverified metadata/config bundle is
+   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_training_20260818/780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5/`.
+   Large checkpoints remain on their execution hosts. This is a training-only
+   PASS, not the scientific `FULL` gate. Checkpoint inference, ID feature
+   export, ID-test guardrails, detector fitting, and protected OOD evaluation
+   have not run and remain approval-gated.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to

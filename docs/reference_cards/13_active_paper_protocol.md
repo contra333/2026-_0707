@@ -2233,3 +2233,45 @@ metadata-only bundle is
 This execution validates the v3 training contract only. It is not research
 evidence and does not authorize the 20 research runs, checkpoint inference, or
 protected evaluation.
+
+### 15.6 Main-training execution record
+
+The owner separately approved the exact 20-run v3 research matrix in Issue
+#135 and then explicitly authorized direct training. The execution remained at
+`e2f6845e88b22bc0783c5fda58186f9930083ef7` with
+`training.deterministic=true`,
+`numerical_policy_id=strict_cuda_deterministic_cublas4096_v3`, and
+`CUBLAS_WORKSPACE_CONFIG=:4096:8`. It used the Section 15.2 matrix without
+Zero, midpoint, SGDM, trajectory/depth taps, feature export, ID-test inference,
+detector fitting, or protected OOD access.
+
+The first launch harness attempt imported an older installed `oge` because it
+did not set the exact worktree on `PYTHONPATH`. All ten processes stopped
+before GPU computation or a completed epoch. That attempt is preserved under
+each server's `failed_attempts/attempt001_preimport_missing_pythonpath/` and is
+not a research run. The corrected harness changed only the process import path
+to the already frozen source tree; no research configuration or code SHA
+changed.
+
+The corrected execution completed all 20 research runs for 200 epochs:
+
+- Curie: seeds 0 and 3, eight runs;
+- Lise: seed 2, four runs; and
+- Precision Medicine: seeds 1 and 4, eight runs.
+
+Every run exited zero and produced `summary.json`, `last.pt`, `best_val.pt`,
+and epoch-0/epoch-200 snapshots. Host-local validation checked the exact clean
+execution SHA, 200-epoch/70,400-step coverage, deferred ID test, strict CUDA
+determinism and physical GPU identity, checkpoint-provenance schema,
+`[10,512]` classifier shape, finite classifier parameters, checkpoint SHA-256,
+same-LR sibling identity, and four-arm cross-LR seed identity. The merged
+terminal validation passed 20 unique runs and five complete seeds. Its SHA-256
+is `780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5`;
+the metadata/config/validation bundle is
+`hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_training_20260818/780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5/`.
+The large checkpoints remain server-local.
+
+This is a terminal **training-only PASS**, not the Section 15.3 scientific
+`FULL` gate. Checkpoint inference, ID feature export, ID-test guardrails,
+branch-refitted detector fitting, and protected OOD evaluation remain
+unexecuted and require their applicable separate approval gates.
