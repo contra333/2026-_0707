@@ -1,7 +1,7 @@
 # Task F result analysis
 
 Last updated: 2026-08-18
-Repository HEAD: `e0f35285f0edbc5f88077cc2e3a7f136e42554d7`
+Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
 사전등록 estimand를 바꾸지 않으며, Evidence Pack 두 개는 원자료 inventory와
@@ -33,6 +33,38 @@ same initialization and data stream
 그 크기는 near에서 `-0.0218`부터 `-0.1780`, far에서 `-0.0787`부터 `-0.2835`로
 context마다 다르다. Primary의 large effect는 단일 cell 우연으로만 보기는 어렵지만,
 현재 설계는 LR main effect를 인과적으로 식별하지 않는다.
+
+### Candidate Main fast kill 판정: FAIL
+
+**사실:** Card 13 Section 14의 사전 고정 statistic을 14개 C--D endpoint pair에
+적용했다. 14/14가 source identity, checksum, projection reconstruction과 numerical
+validation을 통과했지만 `rho > 1`은 0/14였다. Cell별 결과는 다음과 같다.
+
+| Cell | `rho > 1` | median `rho` | range |
+| --- | ---: | ---: | ---: |
+| `LR=1e-3, WD=1e-4` anchor | 0/5 | 0.00795 | 0.00780--0.00816 |
+| `LR=1e-3, WD=1e-3` | 0/3 | 0.00443 | 0.00426--0.00448 |
+| `LR=3e-4, WD=1e-4` all-PASS cell | 0/3 | 0.01005 | 0.00954--0.01015 |
+| `LR=3e-4, WD=1e-3` | 0/3 | 0.00473 | 0.00454--0.00478 |
+
+Centered classifier rowspace rank는 모든 context에서 9였다. Maximum projection-energy
+reconstruction error는 `5.53e-8`이었고, anchor seed 0 GPU float32--CPU float64
+`rho` relative difference는 `1.25e-8`로 판정 부호가 유지됐다. 경계
+`abs(log(rho)) < 0.05` context는 없었다.
+
+**판정:** coverage와 precision criterion은 통과했지만 anchor, all-PASS cell,
+high-WD support criterion이 모두 실패했다. Frozen statistic 아래에서 held-out
+D-to-C non-affine residual은 차원당 classifier-insensitive complement가 아니라
+classifier-sensitive rowspace에 훨씬 더 집중됐다. 따라서
+`training rule -> classifier-insensitive deformation -> OOD readout` Candidate Main은
+채택하지 않는다.
+
+**해석 경계:** 이 결과는 모든 종류의 classifier-insensitive geometry가 존재하지
+않는다는 명제가 아니다. 이번 논문에 필요하다고 사전 지정한 carrier가 관찰되지
+않았다는 빠른 기각이다. Supporting logit diagnostics는 저장했지만 새로운
+equivalence threshold로 gate를 구조하지 않았다. 양방향 affine refit, 작은 singular
+subspace, normalization, trajectory, projected OOD score를 후속 rescue로 실행하지
+않고 아래 Raw-MD pair-instability Plan B를 유지한다.
 
 **재계산:** 같은 LR 안의 WD contrast는 실제 sibling identity가 일치한다. Low-LR에서
 WD를 `1e-4 -> 1e-3`로 바꾸면 coupled branch Raw MD가 near/far
@@ -406,3 +438,20 @@ python scripts/summarize_task_f_result_analysis.py \
 이번 분석은 checkpoint loading, training, protected inference, detector refitting,
 band-removal score, clipping, 새 detector를 실행하지 않았다. 기존 score/feature/fit과
 telemetry의 결정론적 summary만 계산했다.
+
+## 14. Classifier-insensitive fast kill artifact
+
+- analysis code SHA: `ecba28ef22fc4b8893119f5224880876ecbd76df`
+- merged canonical JSON SHA-256:
+  `90f4fc447a32b14748ef992878ca8ba1e87e8a148f6810677e4819d2d56a4b27`
+- merged payload identity:
+  `bcebc1a002555d14e526d5734de8c8b1b31dc7372c4aef7ce3b637411e3908e9`
+- bundle `SHA256SUMS` SHA-256:
+  `d45d077673ffcded30144ee23e776f79ae8285f71739a7318c52cb0af7c05c11`
+- HF bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/task_f_classifier_insensitive_kill_20260818/bcebc1a002555d14e526d5734de8c8b1b31dc7372c4aef7ce3b637411e3908e/`
+
+Host-local execution used the live idle-GPU check and scheduled 6/2/6 contexts
+on curie/lise/precision_medicine. Only the small canonical host JSON files were
+collected. The run loaded no checkpoint, performed no feature inference or
+affine/detector refit, and accessed no protected ID/OOD data.
