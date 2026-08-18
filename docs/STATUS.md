@@ -1,15 +1,16 @@
 # Project status
 
 Last updated: 2026-08-18
-Repository HEAD used for analysis: `e0f35285f0edbc5f88077cc2e3a7f136e42554d7`
+Repository HEAD used for the fast kill analysis:
+`ecba28ef22fc4b8893119f5224880876ecbd76df`
 
 ## Current phase
 
 Task F의 50-run training, ID-only geometry/alignment, protected one-shot
-evaluation, bounded score recovery, central aggregation이 완료됐다. 현재 단계는 새
-학습이나 protected evaluation이 아니라 **기존 ID-only artifact를 사용하는 14-context
-classifier-insensitive geometry fast kill gate**다. 이 gate는 Candidate Main과 현재
-Raw-MD pair-instability Plan B 사이의 paper routing만 결정한다.
+evaluation, bounded score recovery, central aggregation이 완료됐다. 14-context
+classifier-insensitive geometry fast kill gate도 완료됐고 판정은 **FAIL**이다.
+14/14 context가 기술 검증을 통과했지만 `rho > 1`은 0/14였다. Candidate Main은
+종료하고, 현재 **Raw-MD pair-instability Plan B**를 논문 본체로 유지한다.
 
 Current source of interpretation:
 
@@ -46,6 +47,13 @@ The read-only post-result extraction verified:
 - primary time/depth formation, flip-burden structure, fixed geometry panel;
 - within-fixed-LR WD contrasts and `WD x coupling` difference-in-differences;
 - primary Marginal spectral allocation gate.
+- 14/14 endpoint classifier-insensitive fast-kill contexts; all identity,
+  checksum, projection-reconstruction, and required precision checks passed.
+
+Fast-kill cell medians were `0.00795` for the primary anchor, `0.00443` for
+high-LR/high-WD, `0.01005` for the all-ID-guardrail-PASS low-LR/low-WD cell,
+and `0.00473` for low-LR/high-WD. Every seed had `rho < 1`, so the proposed
+classifier-insensitive carrier is not supported under the frozen statistic.
 
 Compact tracked result:
 [`results/task_f_result_analysis_v1.json`](../results/task_f_result_analysis_v1.json),
@@ -59,6 +67,13 @@ the portable `SHA256SUMS` file SHA-256 is
 `e4c1bf9363321097bd3f3c3beae9c0183e33f8ddf37ac5873e17011bc07a3ad4`.
 The bundle contains the detailed CSV/figures and both Evidence Packs; raw
 checkpoints and feature/score arrays remain in the recorded server roots.
+
+Fast-kill bundle:
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_classifier_insensitive_kill_20260818/bcebc1a002555d14e526d5734de8c8b1b31dc7372c4aef7ce3b637411e3908e/`.
+The merged file SHA-256 is
+`90f4fc447a32b14748ef992878ca8ba1e87e8a148f6810677e4819d2d56a4b27`;
+the bundle `SHA256SUMS` SHA-256 is
+`d45d077673ffcded30144ee23e776f79ae8285f71739a7318c52cb0af7c05c11`.
 
 No checkpoint was loaded. No training, protected inference, detector refit,
 band ablation, clipping, or new detector was run.
@@ -126,14 +141,13 @@ identified a unique spectrum or `S_perp` mediator.
 
 ## Next decisions
 
-1. Run the Card 13 Section 14 fast kill gate on the 14 stored Adam C-D endpoint
-   pairs without checkpoint or protected-data access.
-2. On `GO`, freeze bidirectional ID-only confirmation before proposing any new
-   protected projected-readout evaluation.
-3. On `FAIL` or mixed evidence, retain the current Plan B and run the
-   ResNet-18/CIFAR-10 focal replication next.
-4. Keep a common-stream LR factorial and additional optimizer/architecture axes
-   after this routing decision.
+1. Retain the controlled Raw-MD pair-instability/Marginal-localization Plan B;
+   do not rescue the failed classifier-insensitive carrier with a new subspace,
+   threshold, normalization, or reverse alignment.
+2. Freeze a separate ResNet-18/CIFAR-10 focal-replication addendum for one
+   large-effect and one small-effect context before requesting new GPU runs.
+3. Keep a common-stream LR factorial and additional optimizer/architecture axes
+   after the focal replication rather than broadening the current paper now.
 
 ## Not active
 
@@ -143,6 +157,6 @@ identified a unique spectrum or `S_perp` mediator.
 - no causal LR conclusion from current Task F;
 - no claim that stronger WD monotonically amplifies coupling damage;
 - no architecture-general conclusion before replication.
-- no classifier-insensitive-geometry claim before the Section 14 gate passes;
-- no projected OOD score, reverse affine refit, or trajectory expansion in the
-  fast kill test.
+- no classifier-insensitive-geometry main claim; the Section 14 gate failed;
+- no reverse affine rescue, small-singular subspace search, normalization rescue,
+  projected OOD score, or trajectory expansion for this failed gate.
