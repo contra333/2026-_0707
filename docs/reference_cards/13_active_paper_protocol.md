@@ -2004,3 +2004,126 @@ pattern is treated as `FAIL`. A `GO` permits only a separately frozen
 bidirectional affine confirmation and anchor formation analysis. Any projected
 OOD readout still requires a new pre-protected addendum and explicit owner
 approval.
+
+## 15. Post-result Plan B freeze and ResNet-18 replication v1
+
+This section is a post-result addendum. It does not alter Sections 1--14, the
+completed Task F training, its protected evaluation, or any frozen estimand.
+Section 14 has now completed: all 14 contexts passed source and numerical
+validation, but zero of 14 had `rho > 1`. Its candidate route is therefore
+`FAIL` and is closed without reverse-alignment, subspace, normalization,
+trajectory, or projected-OOD rescue.
+
+### 15.1 Frozen paper identity
+
+The working title is:
+
+> **Training-Rule-Induced Pair-Ranking Multiplicity in Mahalanobis OOD
+> Detection**
+
+The paper question is:
+
+> Holding architecture, data, objective, initialization, and minibatch order
+> fixed, how much can changing only the decay-coupling rule reorganize the
+> same ID--OOD pair ordering of a protocol-fixed, branch-refitted Mahalanobis
+> detector; in which score component, epoch, and depth does that sensitivity
+> appear?
+
+`Protocol-fixed, branch-refitted` is required terminology: each branch uses
+the same ID-only fitting procedure but refits its own means and covariance.
+`Fixed detector parameters`, `same ID performance`, `Marginal causal
+mediator`, and a universal claim that coupling is harmful are prohibited.
+
+The completed WRN-28-10/CIFAR-10 paper body is fixed to five results:
+
+1. controlled Raw-MD C--D pair-ranking non-invariance;
+2. Gain/Loss cancellation and Churn hidden by net AUROC;
+3. predominantly Marginal score localization, with RMD and L2 as prior-work
+   probes rather than new methods;
+4. early-detectable, later-amplified and deep-layer formation; and
+5. local LR/WD dependence, SGDM reversal, ID Pareto status, and failed
+   mechanism gates as explicit boundaries.
+
+### 15.2 Prospective ResNet-18/CIFAR-10 matrix
+
+Architecture replication precedes any broader WRN LR/WD grid. The research
+matrix is exactly:
+
+```yaml
+study: resnet18_cifar10_replication_v1
+model:
+  name: resnet18
+  variant: cifar
+  feature_dim: 512
+dataset: cifar10
+epochs: 200
+endpoint: last.pt_epoch_200_penultimate
+learning_rates: [1.0e-3, 3.0e-4]
+weight_decay: 1.0e-4
+roles: [adam_coupled, adamw_decoupled]
+seeds: [0, 1, 2, 3, 4]
+research_runs: 20
+```
+
+For each seed, all four LR-by-role arms share one initialization and one
+minibatch stream. Each same-LR C--D pair has a sibling identity, and the four
+arms also store a `cross_lr_pairing_block_id`. This identifies the ResNet
+fixed-WD LR-by-coupling comparison; it does not retroactively identify a WRN
+LR effect. Zero, midpoint, SGDM, depth taps, epoch trajectories, and new
+mechanism metrics are excluded.
+
+Before research execution, one seed-9000, two-epoch, four-arm
+execution-only pilot must validate:
+
+- 20-run planner coverage and four-arm identity construction;
+- logits `[B,10]`, penultimate features `[B,512]`, and classifier weight
+  `[10,512]`;
+- seconds per epoch, peak GPU memory, checkpoint size, and projected storage;
+  and
+- deterministic restart and artifact/provenance identity.
+
+The pilot is not research evidence. Neither the pilot nor this addendum
+authorizes main GPU training. Main training requires a separate owner approval
+after the measured execution packet. Protected evaluation requires another
+approval after all 20 checkpoints and ID-only guardrails are complete.
+
+### 15.3 Endpoint evaluation and prospective gate
+
+The protected population and Near/Far dataset roles remain exactly those in
+Section 13.6. The new study runs one endpoint-only, penultimate,
+branch-refitted Raw MD/RMD/Marginal/L2 evaluation. Statistical units are the
+five paired seeds; dataset observations and ID--OOD pairs are not independent
+replicates. Report seed means, sample SD, paired 90% intervals, and every
+dataset before Near/Far macro averaging.
+
+The two LR settings are named by their WRN roles:
+
+- `large-context`: `LR=1e-3, WD=1e-4`;
+- `small-context`: `LR=3e-4, WD=1e-4`.
+
+The replication status is `FULL` only if all conditions hold:
+
+1. all 20 run identities, checksums, and numerical checks pass;
+2. in the large-context, Near and Far Raw-MD mean C--D are negative and at
+   least four of five seeds have that sign in each region;
+3. large-context Raw-MD Churn is at least `0.10` in both regions;
+4. the absolute small-context Raw-MD C--D mean is smaller than the
+   large-context mean in both regions;
+5. in the large-context, `abs(Delta RMD) < abs(Delta Raw MD)`, Marginal
+   accounting has the Raw-MD effect sign, and its absolute contribution is
+   greater than 50% of `abs(Delta Raw MD)` in both regions; and
+6. the small-context Accuracy, NLL, and ECE equivalence guardrails all pass.
+
+If items 2--3 pass but any of items 4--6 fails, the status is `PARTIAL`. If
+item 2 or 3 fails, the status is `FAIL`. A technical coverage failure is
+`BLOCKED`, not scientific evidence.
+
+- `FULL` permits an architecture-replicated Plan B claim.
+- `PARTIAL` is reported as an architecture boundary and stops ICLR main-paper
+  promotion; it does not trigger a rescue grid or new mechanism.
+- `FAIL` closes the current ICLR direction without a replacement hypothesis.
+
+No WRN common-stream LR factorial or CIFAR-100 extension runs before this
+gate. After `FULL`, the default is to stop new training and finish the paper;
+those extensions remain post-submission work unless separately frozen and
+approved.

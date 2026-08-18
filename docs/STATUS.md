@@ -1,8 +1,9 @@
 # Project status
 
 Last updated: 2026-08-18
-Repository HEAD used for the fast kill analysis:
-`ecba28ef22fc4b8893119f5224880876ecbd76df`
+Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
+Plan B freeze base on `main`:
+`fb759f334a6568eda2fc6de5a6067273a9f6f8e7`
 
 ## Current phase
 
@@ -124,30 +125,41 @@ multidimensional ID/OOD Pareto result, not a same-ID result.
 
 ## Active paper framing
 
-The research-program question is:
+Working title:
 
-> Which optimizer-side training choices create representations that are
-> sensitive or incompatible with a fixed Raw Mahalanobis readout, and how does
-> that geometry form during training?
+> **Training-Rule-Induced Pair-Ranking Multiplicity in Mahalanobis OOD
+> Detection**
 
-Task F currently supports a narrower claim:
+The frozen paper question is:
 
-> A controlled decay-coupling/WD intervention can change representation
-> geometry and exact Raw-MD pair ordering, with the adverse movement localized
-> predominantly to the Marginal score channel and amplified over time/depth.
+> Holding architecture, data, objective, initialization, and minibatch order
+> fixed, how much can changing only the decay-coupling rule reorganize the
+> same ID--OOD pair ordering of a protocol-fixed, branch-refitted Mahalanobis
+> detector; in which score component, epoch, and depth does that sensitivity
+> appear?
 
-Do not claim that Task F has already mapped optimizer recipes generally or
-identified a unique spectrum or `S_perp` mediator.
+The current supported claim is a controlled decay-coupling case study, not a
+general optimizer-recipe map. Raw-MD pair-ranking non-invariance, Gain/Loss
+cancellation, predominantly Marginal score localization, time/depth formation,
+and local-context boundaries are the five body results. `Fixed detector
+parameters`, `same ID performance`, `Marginal causal mediator`, and universal
+coupling-harm language are prohibited.
 
-## Next decisions
+## Active workstreams
 
-1. Retain the controlled Raw-MD pair-instability/Marginal-localization Plan B;
-   do not rescue the failed classifier-insensitive carrier with a new subspace,
-   threshold, normalization, or reverse alignment.
-2. Freeze a separate ResNet-18/CIFAR-10 focal-replication addendum for one
-   large-effect and one small-effect context before requesting new GPU runs.
-3. Keep a common-stream LR factorial and additional optimizer/architecture axes
-   after the focal replication rather than broadening the current paper now.
+1. **WRN paper figure/table pack -- ACTIVE.** Rebuild seed-first Near/Far
+   macros and paired 90% intervals from detailed CSV, then generate the frozen
+   main/appendix figure and table contract. This uses existing artifacts only;
+   it authorizes no new protected access or inference.
+2. **ResNet-18/CIFAR-10 replication -- PROTOCOL FROZEN, ENGINEERING ACTIVE.**
+   Card 13 Section 15 fixes the 20-run `2 LR x 1 WD x 2 roles x 5 seeds`
+   matrix, common four-arm identity, execution-only pilot, endpoint evaluation,
+   and `FULL/PARTIAL/FAIL/BLOCKED` gate. No GPU pilot, main training, or
+   protected evaluation is authorized by the documentation freeze.
+
+The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
+are not parallel rescue workstreams. After ResNet `FULL`, the default is to
+stop training and write; after `PARTIAL` or `FAIL`, do not open a rescue grid.
 
 ## Not active
 

@@ -14,79 +14,55 @@ provenance로 유지한다.
 - **해석:** 관찰과 일치하지만 인과 또는 유일 매개로 확립되지 않은 설명
 - **미확립:** 현재 자료로는 주장할 수 없는 내용
 
-## 1. 결론부터
+## 1. Reader-first summary
 
-### 현재 논문의 중심
+### 동결한 논문 질문
 
-상위 연구 질문은 “어떤 optimizer-side training choice가 Raw MD에 민감한
-representation을 만드는가?”이다. 그러나 Task F가 지금 직접 답한 범위는 더 좁다.
+> Architecture, data, objective, initialization, minibatch order를 고정하고
+> decay-coupling rule만 바꿀 때, protocol-fixed, branch-refitted Mahalanobis
+> detector의 동일 ID--OOD pair ordering은 얼마나 바뀌며 그 민감성은
+> score의 어느 부분과 학습의 언제·어느 depth에서 나타나는가?
 
-```text
-same initialization and data stream
--> controlled decay-coupling / within-LR WD contrasts
--> pair Gain/Loss/Churn and Raw-MD change
--> predominantly Marginal score localization
--> time/depth and covariance-geometry concordance
-```
+`Protocol-fixed, branch-refitted`는 각 branch가 같은 ID-only fitting 절차를
+따르되 자신의 class means과 covariance를 다시 fit한다는 뜻이다.
+동일한 detector parameter를 공유한 실험이 아니다.
 
-**사실:** 네 Adam cell 모두 coupled-minus-decoupled Raw-MD DeltaAUROC가 음수다.
-그 크기는 near에서 `-0.0218`부터 `-0.1780`, far에서 `-0.0787`부터 `-0.2835`로
-context마다 다르다. Primary의 large effect는 단일 cell 우연으로만 보기는 어렵지만,
-현재 설계는 LR main effect를 인과적으로 식별하지 않는다.
+### 다섯 가지 결과
 
-### Candidate Main fast kill 판정: FAIL
+| Finding | 사람이 읽을 결론 | 핵심 근거 | Claim boundary |
+| --- | --- | --- | --- |
+| 1. Controlled non-invariance | 감쇠 coupling 방식만 바꿔도 Raw MD가 동일 pair를 다르게 정렬한다. | 네 Adam cell의 C--D가 모두 음수; primary Near/Far `-0.1743/-0.2835` | 보편적 optimizer law이 아님 |
+| 2. AUROC hides multiplicity | 최종 AUROC가 같아도 내부 pair decision은 다를 수 있다. | Zero--AdamW net AUROC는 거의 0이지만 Churn은 `0.14--0.19` | Churn 자체를 새 detector로 주장하지 않음 |
+| 3. Score localization | Raw-MD adverse movement는 모든 channel의 일괄 붕괴가 아니라 주로 Marginal에 위치한다. | Primary dataset별 Marginal share `69--94%`; RMD는 상대적으로 안정 | Exact accounting이지 causal mediation이 아님 |
+| 4. Formation | 민감성은 endpoint 우연이 아니라 학습과 depth를 따라 형성된다. | epoch 10부터 검출, 120까지 증폭; stage1/2보다 stage3/penultimate에서 큰 효과 | Telemetry는 same-state causal audit가 아님 |
+| 5. Context boundary | Coupling sensitivity의 크기와 부호는 local optimization context에 의존한다. | low-LR WD×coupling DiD `-0.0912/-0.0797`, high-LR `+0.0004/+0.0618`; SGDM reversal | WRN cross-LR causal effect, monotone WD law를 주장하지 않음 |
 
-**사실:** Card 13 Section 14의 사전 고정 statistic을 14개 C--D endpoint pair에
-적용했다. 14/14가 source identity, checksum, projection reconstruction과 numerical
-validation을 통과했지만 `rho > 1`은 0/14였다. Cell별 결과는 다음과 같다.
+### Reader figure map
 
-| Cell | `rho > 1` | median `rho` | range |
-| --- | ---: | ---: | ---: |
-| `LR=1e-3, WD=1e-4` anchor | 0/5 | 0.00795 | 0.00780--0.00816 |
-| `LR=1e-3, WD=1e-3` | 0/3 | 0.00443 | 0.00426--0.00448 |
-| `LR=3e-4, WD=1e-4` all-PASS cell | 0/3 | 0.01005 | 0.00954--0.01015 |
-| `LR=3e-4, WD=1e-3` | 0/3 | 0.00473 | 0.00454--0.00478 |
+| Figure | 이 그림으로 답할 질문 | Evidence |
+| --- | --- | --- |
+| Figure 1 | 무엇을 고정하고 무엇만 바꾸었는가? | parallel sibling design과 유효한 contrast |
+| Figure 2A | 네 cell의 Raw-MD C--D 방향과 크기는? | seed dots, paired mean, 90% interval |
+| Figure 2B | 거의 같은 AUROC 안에 얼마나 큰 Gain/Loss가 있는가? | Zero--AdamW와 AdamW--Adam Gain/Loss/Churn |
+| Figure 3 | 변화가 Raw MD, RMD, L2, Marginal 중 어디에 있는가? | signed `phi_RMD`, `phi_Marginal`, reconstructed total |
+| Figure 4 | 언제, 어느 depth에서 형성되는가? | actual epoch coordinates과 discrete depth axis |
+| Figure 5 | WRN pattern이 ResNet-18에서 재현되는가? | Card 13 Section 15 prospective gate |
 
-Centered classifier rowspace rank는 모든 context에서 9였다. Maximum projection-energy
-reconstruction error는 `5.53e-8`이었고, anchor seed 0 GPU float32--CPU float64
-`rho` relative difference는 `1.25e-8`로 판정 부호가 유지됐다. 경계
-`abs(log(rho)) < 0.05` context는 없었다.
+기존 4-point `geometry_effect_concordance` scatter는 적은 context에서 regression을
+암시하므로 본문 그림으로 쓰지 않는다. Geometry, alignment, SGDM,
+spectral applicability, `S_perp`, classifier-insensitive fast kill은 appendix에서
+진단 또는 negative boundary로 보존한다.
 
-**판정:** coverage와 precision criterion은 통과했지만 anchor, all-PASS cell,
-high-WD support criterion이 모두 실패했다. Frozen statistic 아래에서 held-out
-D-to-C non-affine residual은 차원당 classifier-insensitive complement가 아니라
-classifier-sensitive rowspace에 훨씬 더 집중됐다. 따라서
-`training rule -> classifier-insensitive deformation -> OOD readout` Candidate Main은
-채택하지 않는다.
+### 해석 금지선
 
-**해석 경계:** 이 결과는 모든 종류의 classifier-insensitive geometry가 존재하지
-않는다는 명제가 아니다. 이번 논문에 필요하다고 사전 지정한 carrier가 관찰되지
-않았다는 빠른 기각이다. Supporting logit diagnostics는 저장했지만 새로운
-equivalence threshold로 gate를 구조하지 않았다. 양방향 affine refit, 작은 singular
-subspace, normalization, trajectory, projected OOD score를 후속 rescue로 실행하지
-않고 아래 Raw-MD pair-instability Plan B를 유지한다.
-
-**재계산:** 같은 LR 안의 WD contrast는 실제 sibling identity가 일치한다. Low-LR에서
-WD를 `1e-4 -> 1e-3`로 바꾸면 coupled branch Raw MD가 near/far
-`-0.0962/-0.0779` 이동한 반면 decoupled branch는 `-0.0050/+0.0018`이었다.
-따라서 `WD x coupling` DiD는 `-0.0912/-0.0797`이다. High-LR의 DiD는
-`+0.0004/+0.0618`로 같지 않다. WD가 coupling effect를 보편적으로 단조 증폭한다는
-주장은 기각된다.
-
-**해석:** small-effect low-LR/low-WD cell에서는 covariance difference도 상대적으로
-작고, 나머지 large-effect cells에서는 norm, condition, spectral concentration,
-effective rank 차이가 더 크다. 이는 optimizer-side geometry formation과 Raw-MD
-sensitivity의 concordance를 지지한다. 다만 high-LR 두 WD cell의 geometry와 net
-AUROC가 단조 정렬되지 않으므로 geometry의 유일 mediation은 미확립이다.
-
-### 논문 headline gate
-
-- **현재 사용:** controlled optimizer-side case study of Raw-MD pair-ranking
-  multiplicity and score/geometry formation.
-- **조건부 승격:** common-stream LR factorial까지 통과하면 “which optimizer-side
-  recipes create Raw-MD-incompatible representations?”를 main RQ로 승격한다.
-- **사용 금지:** Task F만으로 optimizer family, LR, WD의 전체 causal landscape를
-  규명했다는 문장.
+- Primary를 `same ID performance`로 부르지 않는다. Accuracy/ECE는 PASS,
+  NLL은 improvement direction으로 FAIL이다.
+- Marginal은 adverse score movement의 localization이지 causal mediator가 아니다.
+- Current WRN cross-LR difference는 stream을 공유하지 않으므로 descriptive다.
+- Geometry panel은 `concordant but not monotone`이며 unique mediator를
+  정하지 않는다.
+- Section 14 carrier는 기술 검증을 통과한 14/14 context에서
+  `rho > 1`이 0/14였다. 재정의하여 rescue하지 않는다.
 
 ## 2. 입력과 검산
 
@@ -270,29 +246,35 @@ PASS했다. Coupled raw fit은 다섯 seed 모두 원래부터 `NOT_APPLICABLE`�
 이 결과는 spectrum 분석을 본문 mechanism의 최종 고리로 승격하기보다 geometry
 appendix/supporting lens로 두라는 gate다.
 
-## 9. 새 논리 뼈대의 타당성
+## 9. 논문 판정
 
-“어떤 optimizer-side choice가 Mahalanobis-sensitive representation을 만드는가?”는
-선행연구와 구분되는 좋은 상위 질문이다. 선행연구가 이미 점유한 것은 RMD, L2
-normalization, spectrum-allocation identity와 representation-side MD failure다. 이
-논문의 차별점은 fixed architecture/data/objective에서 training-side choice를 같은
-init/stream으로 통제하고, geometry가 형성되어 exact pair behavior로 전달되는 과정을
-추적하는 데 있다.
+선행연구가 이미 점유한 것은 RMD, L2 normalization,
+spectrum--allocation identity, size--stretch, representation-side MD failure,
+그리고 training detail이 detector ranking에 영향을 준다는 범위다. 이
+논문의 단위는 더 구체적이다.
+
+```text
+matched decay-coupling intervention
+-> exact same-pair Gain/Loss/Churn
+-> RMD/Marginal score-response localization
+-> matched epoch/depth formation
+```
 
 다만 현재 evidence가 unlock한 문장은 다음 정도다.
 
-> A controlled optimizer-side change can move a representation and its fixed Raw-MD
-> pair ordering, with the effect carried predominantly by the Marginal score channel
-> and amplified over training and depth.
+> A matched decay-coupling intervention can reorganize the pair ordering of a
+> protocol-fixed, branch-refitted Raw Mahalanobis detector; in the tested WRN
+> contexts, adverse movement is predominantly localized to Marginal and is
+> amplified over training and depth.
 
 아직 unlock하지 못한 문장은 다음이다.
 
 > We identify which optimizer recipes generally create Mahalanobis-hostile
 > representations.
 
-후자는 causal LR comparison, architecture replication, 더 넓은 recipe support가
-필요하다. `Mahalanobis-hostile`도 dataset-independent label이 아니라 frozen benchmark의
-operational outcome으로 정의한다.
+현재 Plan B는 후자로 승격하지 않는다. ResNet replication은 현재의
+controlled pattern을 architecture 밖에서 검증하는 것이지 broad recipe map을
+만드는 실험이 아니다.
 
 Adam coupled/decoupled update 차이를 `-eta lambda (P_t-I) theta`로 쓰는 설명은
 frozen-moment local heuristic일 뿐 exact Adam dynamics가 아니다. Coupled decay는
@@ -301,46 +283,36 @@ gradient뿐 아니라 first/second moment history와 denominator를 함께 바�
 이 이론은 motivation/appendix에만 두고 telemetry 및 cross-cell concordance를 넘어서
 인과 결론으로 사용하지 않는다.
 
-## 10. 수정된 논문 구조
+## 10. 동결된 본문 구조
 
-1. **Open problem:** representation-side MD failure는 알려졌지만 optimizer-side origin과
-   formation은 덜 통제되어 있다.
-2. **Controlled design:** Zero/AdamW/Adam sibling과 within-LR WD contrasts.
-3. **Primary phenomenon:** absolute Raw MD, Gain/Loss/Churn, ID/OOD Pareto boundary.
-4. **Local context interaction:** four-cell C-D 반복과 controlled WD x coupling; cross-LR는
-   descriptive.
-5. **Score localization:** RMD/L2 probes, exact MD decomposition, Marginal 중심 accounting;
-   OOD-side pattern의 context boundary.
-6. **Formation:** early detectable/later amplified time trajectory와 deep-layer formation,
-   update telemetry.
-7. **Geometry:** fixed panel의 concordance와 non-monotonic caveat; spectrum은 prior lens.
-8. **Boundaries:** SGDM reversal, primary applicability failure, single architecture.
-9. **Replication/future factorial:** 현재 contribution과 분리해 preregistered next test로 제시.
+1. **Introduction:** aggregate equivalence는 pair-behavior equivalence가 아님.
+2. **Related Work:** geometry, normalization, experiment reliability, optimizer/NC.
+3. **Problem Setup:** parallel siblings, branch refit, Gain/Loss/Churn,
+   RMD/Marginal accounting.
+4. **Controlled Design:** WRN four cells, seeds, ID guardrails, protected
+   population, inferential unit.
+5. **Results:** controlled non-invariance, pair multiplicity, score
+   localization, formation, context/negative boundaries.
+6. **Prospective ResNet Replication:** Card 13 Section 15의 20-run gate.
+7. **Discussion and Limitations:** ID Pareto, causal-LR 금지, single architecture.
+8. **Conclusion:** matched intervention에서 확립한 연결만 요약.
 
-## 11. 다음 의사결정
+## 11. 실행 라우팅
 
-### 기존 artifact로 완료된 것
+현재 artifact로 four-cell endpoint/pair accounting, within-LR WD/DiD,
+Marginal·ID/OOD-side accounting, time/depth, geometry/alignment, telemetry,
+SGDM, spectral applicability과 두 negative mechanism gate가 완료됐다.
 
-- four-cell C-D/D-Z/C-Z endpoint matrix와 exact pair accounting;
-- within-LR WD contrast와 WD x coupling DiD;
-- cross-cell Marginal 및 ID/OOD-side localization;
-- flip-burden concentration과 seed consistency;
-- fixed geometry panel, alignment, time/depth, telemetry;
-- spectral allocation gate: D PASS, C NOT_APPLICABLE.
+두 작업을 병렬로 진행한다.
 
-### 아직 현재 artifact에서 정리할 수 있는 것
+1. 현재 detailed CSV에서 seed-first macro, paired 90% interval, main
+   figure/table pack을 생성한다.
+2. Card 13 Section 15의 ResNet-18/CIFAR-10 planner, pilot, approval packet을
+   구현한다.
 
-- main figure 후보의 seed interval/guardrail annotation과 six-dataset supplement 배치;
-- geometry panel을 `concordant/mixed/discordant` 사전 기준으로 최종 adjudication;
-- alpha=0.5를 새 broad RQ가 아닌 primary interpolation evidence로 재배치;
-- SGDM의 동일 score-localization 표를 boundary supplement로 정리.
-
-### 새 실험 gate
-
-현재 narrow paper를 우선하면 ResNet-18/CIFAR-10 focal replication이 먼저다. 넓은
-optimizer-origin headline을 선택하면 그 전에 seed별 모든 LR arm이 공통 init/stream을
-공유하는 paired LR bridge/factorial이 필요하다. Additional adaptive optimizer,
-ConvNeXt/ViT, broad phase map은 그 다음이다.
+WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
+기본값은 새 학습을 멈추고 논문을 완성하는 것이다. `PARTIAL` 또는
+`FAIL`을 LR grid, new optimizer, 새 mechanism으로 rescue하지 않는다.
 
 ## 12. Claim ledger
 
@@ -358,7 +330,9 @@ ConvNeXt/ViT, broad phase map은 그 다음이다.
 | geometry difference tracks effect magnitude | PARTIALLY SUPPORTED | broad concordance, no monotone mediation |
 | coupled spectral band uniquely carries the gap | NOT AVAILABLE | coupled raw fit NOT_APPLICABLE |
 | S_perp uniquely mediates the effect | NOT ESTABLISHED | primary raw/L2 component theorem 30/30 NOT_APPLICABLE |
-| optimizer-side origin is established generally | NOT YET SUPPORTED | requires paired LR factorial and replication |
+| optimizer-side origin is established generally | NOT SUPPORTED | Plan B is a controlled decay-coupling case study |
+| classifier-insensitive carrier explains the result | REJECTED FOR THIS PAPER | frozen gate had `rho > 1` in 0/14 contexts |
+| architecture-general pattern | PROSPECTIVE | requires Card 13 Section 15 `FULL` |
 
 ## 13. Provenance
 
@@ -439,7 +413,28 @@ python scripts/summarize_task_f_result_analysis.py \
 band-removal score, clipping, 새 detector를 실행하지 않았다. 기존 score/feature/fit과
 telemetry의 결정론적 summary만 계산했다.
 
-## 14. Classifier-insensitive fast kill artifact
+## 14. Classifier-insensitive fast kill: negative appendix result
+
+Card 13 Section 14의 사전 고정 statistic을 14개 C--D endpoint pair에
+적용했다. 14/14가 identity, checksum, projection reconstruction,
+precision validation을 통과했지만 `rho > 1`은 0/14였다.
+
+| Cell | `rho > 1` | median `rho` | range |
+| --- | ---: | ---: | ---: |
+| `LR=1e-3, WD=1e-4` anchor | 0/5 | 0.00795 | 0.00780--0.00816 |
+| `LR=1e-3, WD=1e-3` | 0/3 | 0.00443 | 0.00426--0.00448 |
+| `LR=3e-4, WD=1e-4` all-PASS | 0/3 | 0.01005 | 0.00954--0.01015 |
+| `LR=3e-4, WD=1e-3` | 0/3 | 0.00473 | 0.00454--0.00478 |
+
+Centered classifier rowspace rank는 모든 context에서 9였다. Maximum
+projection-energy reconstruction error는 `5.53e-8`, anchor seed 0 GPU
+float32--CPU float64 `rho` relative difference는 `1.25e-8`이었고 경계
+context는 없었다. 따라서 이 논문에 사전 지정한
+classifier-insensitive carrier는 지지되지 않는다. 이것은 모든 가능한
+classifier-insensitive geometry의 부재 정리가 아니며, 이 결과를 이용해
+다른 subspace, threshold, normalization으로 rescue하지 않는다.
+
+Artifact identity:
 
 - analysis code SHA: `ecba28ef22fc4b8893119f5224880876ecbd76df`
 - merged canonical JSON SHA-256:

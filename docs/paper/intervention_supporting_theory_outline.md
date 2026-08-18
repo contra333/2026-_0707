@@ -1,4 +1,4 @@
-# Optimizer-side formation of Mahalanobis readout sensitivity
+# Training-Rule-Induced Pair-Ranking Multiplicity in Mahalanobis OOD Detection
 
 This is the human-readable post-result manuscript outline. Exact estimands and
 execution rules remain governed by
@@ -6,381 +6,337 @@ execution rules remain governed by
 Numerical evidence and claim boundaries live in
 [`task_f_result_analysis.md`](task_f_result_analysis.md).
 
-## One-sentence paper
+## Frozen paper identity
 
-Under identical initialization and data streams, controlled optimizer-side
-decay choices can produce different representation geometry and reverse the
-ordering of the same ID--OOD pairs under a fixed Raw Mahalanobis readout; in
-the completed Task F case study, the adverse score movement is predominantly
-Marginal, is detectable early and amplified later/deeper, and is not a general
-loss of class-relative OOD information.
+The paper asks:
 
-## Scope: broad question, bounded answer
+> Holding architecture, data, objective, initialization, and minibatch order
+> fixed, how much can changing only the decay-coupling rule reorganize the same
+> ID--OOD pair ordering of a protocol-fixed, branch-refitted Mahalanobis
+> detector; in which score component, epoch, and depth does that sensitivity
+> appear?
 
-The research-program question is:
+The one-sentence answer supported by completed Task F is:
 
-> Which optimizer-side training choices create representations that are
-> sensitive or incompatible with a fixed Raw Mahalanobis readout, and how does
-> the relevant geometry form during training?
+> Matched decay-coupling siblings can substantially reorganize the ID--OOD
+> pair ordering of branch-refitted Raw Mahalanobis; the adverse movement is
+> predominantly localized to the Marginal score component, is early detectable
+> and later amplified in deep representations, and varies across local LR/WD
+> contexts.
 
-The current paper does not yet answer that question over optimizer recipes in
-general. Its completed controlled answer is:
+`Protocol-fixed, branch-refitted` is important. Every branch follows the same
+ID-only fitting procedure, but refits its own class means and covariance. The
+paper does not compare one frozen set of detector parameters across branches.
 
-```text
-same initialization and data stream
--> zero / decoupled / coupled sibling trajectories
--> exact pair Gain/Loss/Churn
--> Raw-MD versus RMD/L2 readout sensitivity
--> Marginal score localization
--> time/depth and covariance-geometry concordance
-```
-
-`Mahalanobis-hostile` is not used as an intrinsic model label. If used at all,
-it means poor absolute AUROC/FPR95 and adverse paired ordering on the frozen
-benchmark under a specified fit/readout.
+The paper is a high-control empirical study of readout non-invariance, not an
+Adam-versus-AdamW benchmark, a Neural Collapse paper, a new OOD detector, or a
+claim that one geometry metric uniquely mediates the effect.
 
 ## Abstract logic
 
-1. Prior work establishes that Mahalanobis behavior depends on representation
-   geometry and that RMD and L2 normalization can improve the readout.
-2. The less controlled question is where detector-sensitive geometry comes
-   from during training under fixed architecture, data, and objective.
-3. Task F changes decay policy among same-init, same-stream sibling arms and
-   observes exact same-image pair transitions, not only aggregate AUROC.
-4. Raw-MD C-D effects repeat with the same sign in four Adam LR/WD contexts but
-   differ greatly in magnitude. Same-LR WD contrasts show a genuine local
-   `WD x coupling` interaction; cross-LR differences remain descriptive.
-5. RMD retains high absolute performance more consistently, while L2-MD gives
-   strong absolute recovery but heterogeneous signed-gap attenuation.
-6. Exact `MD = RMD + Marginal` replacement accounting localizes adverse movement
-   predominantly to Marginal. Primary OOD-side dominance is strong but not
-   universal across contexts.
-7. The effect is early detectable, later amplified, and concentrated in deep
-   representation stages. Covariance/norm geometry is broadly concordant with
-   effect magnitude but is not a monotone or unique mediator.
-8. Primary component-theorem applicability fails, so neither `S_perp` nor a
-   coupled spectral band receives causal or unique attribution.
+1. Aggregate AUROC is a net probability over ID--OOD pairs; equal AUROC need
+   not mean equal pair behavior.
+2. Prior work explains Mahalanobis through completed representation geometry,
+   but does not isolate this matched training-rule intervention and trace its
+   exact pair reordering through training.
+3. Task F changes decay coupling among same-initialization, same-stream sibling
+   trajectories and measures Gain, Loss, and Churn on identical pairs.
+4. Raw-MD C--D is negative in all four tested Adam cells, but its magnitude is
+   strongly context-dependent. Same-LR WD contrasts are controlled; current
+   cross-LR WRN differences are descriptive.
+5. RMD remains much more stable, and exact two-player replacement accounting
+   localizes most adverse Raw-MD movement to Marginal. This is score
+   localization, not causal mediation.
+6. The effect appears early, grows through epoch 120, and is concentrated in
+   stage3 and penultimate features.
+7. SGDM reversal, ID guardrail failures, non-monotone geometry concordance,
+   `S_perp` inapplicability, and the failed classifier-insensitive gate delimit
+   the claim.
+8. A prospectively frozen ResNet-18/CIFAR-10 study tests whether the complete
+   pattern replicates outside WRN-28-10.
 
 ## 1. Introduction
 
-Start from the training-side origin gap, not from a detector leaderboard.
+Open with the distinction between aggregate and behavioral equivalence.
+
+For two matched policies, define pair transitions as Gain, Loss, and Churn.
+With the frozen tie convention,
 
 ```text
-classifier training choice
--> learned representation
--> fixed post-hoc Gaussian readout
--> exact pair ordering
+DeltaAUROC = Gain - Loss
+Churn      = Gain + Loss.
 ```
 
-Prior representation-side work explains why a completed representation can be
-friendly or unfriendly to Mahalanobis scoring. Broad training-induced OOD work
-shows that training strategies alter detector rankings. The missing controlled
-unit is the formation of readout-sensitive geometry under one optimizer-side
-intervention with architecture/data/objective held fixed.
+Therefore `DeltaAUROC approximately 0` can coexist with large Gain and Loss.
+The Zero--AdamW result supplies the motivating example: net AUROC is nearly
+unchanged while `0.14--0.19` of pair orderings change.
 
-Primary question for the completed paper:
+Then introduce the training-side intervention:
 
-> Can one local optimizer-side rule change alter the geometry read by Raw MD
-> and reorganize the same ID--OOD pairs, and which stored score channel carries
-> that change?
+```text
+matched initialization and minibatch stream
+-> decoupled versus coupled decay
+-> protocol-fixed, branch-refitted Mahalanobis
+-> exact same-pair behavior
+-> score localization and formation
+```
 
-Secondary question:
+Do not open with `same ID performance`. Primary Accuracy and ECE pass, but NLL
+fails in the improvement direction. Present that cell as an ID/OOD Pareto
+result and use the low-LR/low-WD all-PASS cell as the comparable-ID boundary.
 
-> Does the controlled effect vary across local LR/WD contexts, and what does
-> that imply for a future systematic optimizer-recipe study?
+The five contributions are:
 
-Do not open with “same ID accuracy, different OOD.” Primary NLL fails the
-comparable-ID guardrail in the improvement direction. Present it as a
-multidimensional ID/OOD Pareto result and use the low-LR/low-WD all-PASS cell
-as a controlled comparable-ID boundary.
+1. controlled decay-coupling evidence for Raw-MD pair-ranking non-invariance;
+2. cancellation-aware Gain/Loss/Churn evidence hidden by aggregate AUROC;
+3. predominantly Marginal score localization with RMD/L2 as diagnostic probes;
+4. matched epoch/depth evidence for formation during training; and
+5. explicit context and applicability boundaries, followed by a prospective
+   architecture replication.
 
 ## 2. Related work and novelty boundary
 
-Explicitly credit prior work for:
+### Mahalanobis geometry and normalization
 
-- the original Mahalanobis detector and representation-dependent failure;
-- `MD = RMD + Marginal` and RMD as a near-OOD correction;
-- L2 feature normalization and Mahalanobis++;
-- Fisher/LDA discriminant subspaces and the `K-1` bound;
-- size--stretch, eigen-direction, spectrum--allocation, LID, and spectral
-  ablation analyses;
-- optimizer/weight-decay effects on representation and Neural Collapse;
-- broad training-strategy effects on OOD detector rankings.
+Credit prior work for representation-dependent Mahalanobis behavior, RMD and
+Marginal, L2 normalization, size--stretch factorization, spectrum--allocation,
+intrinsic dimension, and post-hoc geometric interventions. These tools are
+explanatory lenses in this paper, not new methods.
 
-Do not claim novelty for RMD, L2-MD, Marginal, spectrum-allocation, a generic
-pair churn concept, or the fact that optimizer choice changes geometry.
+### OOD experimental reliability
 
-The paper-specific combination is:
+Credit prior work showing that seeds, splits, epochs, and training details can
+change detector performance and ranking. The present unit is narrower and
+more controlled: one decay-coupling factor, matched initialization and stream,
+identical evaluated pairs, and formation in the same trajectories.
 
-1. same-init/common-stream zero/decoupled/coupled intervention;
-2. exact ID--OOD Gain/Loss/Churn under that intervention;
-3. controlled local WD contrasts and `WD x coupling` DiD;
-4. paired score replacement and ID/OOD-side accounting;
-5. time/depth formation and update telemetry in the same experimental system;
-6. explicit numerical/applicability boundaries that prevent invalid
-   `S_perp` or spectral attribution.
+### Optimizer-induced representation geometry
 
-Position *A Geometry-Based View* as the detector-side explanatory lens. This
-paper asks how optimizer-side choices move a representation into or out of a
-known readout-sensitive geometry regime.
+Credit optimizer/weight-decay and Neural Collapse work for the proposition that
+training rules can shape representation geometry. Do not transfer their NC
+theory into an OOD-ordering theorem. Our downstream object is a branch-refitted
+post-hoc Gaussian readout.
 
-## 3. Experimental intervention
+### Multiplicity
 
-Zero, AdamW, midpoint, and Adam are parallel sibling arms from a common
-initialization and data stream. Never draw `Zero -> AdamW -> Adam` as a
-sequential causal path.
+Use `pair-ranking multiplicity` operationally. Do not claim novelty for the
+generic idea of churn or conflate this object with predictive multiplicity.
+The paper-specific contribution is the controlled intervention plus exact
+pair accounting, score localization, and matched formation evidence.
 
-- `C-D`: coupling policy at fixed nominal WD;
+## 3. Problem setup and estimands
+
+### Parallel sibling design
+
+Zero, AdamW, midpoint, and Adam are parallel siblings; they are never drawn as
+a sequential path.
+
+- `C-D`: coupled minus decoupled at fixed nominal WD;
 - `D-Z`: adding decoupled WD;
 - `C-Z`: adding coupled decay dynamics;
-- same-LR `WD1e-3 - WD1e-4`: controlled branch-specific WD contrast;
-- `[(C-D)_highWD - (C-D)_lowWD]`: controlled local `WD x coupling` DiD.
+- same-LR `WD1e-3 - WD1e-4`: controlled branch-specific WD contrast; and
+- `[(C-D)_highWD - (C-D)_lowWD]`: local `WD x coupling` DiD.
 
-High-LR and low-LR sibling groups do not share the same data-stream identity.
-Cross-LR differences are context descriptions, not LR causal effects. The 2 x
-2 set is a local factorial, not a phase map or dose-response curve.
+High- and low-LR WRN groups do not share one data-stream identity. Their
+absolute difference is descriptive, not an LR main effect.
 
-## 4. Primary phenomenon: exact pair-ranking multiplicity
+### Branch-refitted readout
 
-Lead with absolute Raw-MD performance and exact pair accounting.
+For every branch, fit class means and covariance only from that branch's ID
+training features. Apply the same fitting and scoring protocol to all branches.
+State the OOD-positive score orientation, tie convention, checkpoint, layer,
+and dataset roles before every aggregate.
 
-Primary C-D:
+### Pair and score accounting
 
-| Region | AdamW | Adam | DeltaAUROC | Gain | Loss | Churn |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Near | 0.5922 | 0.4178 | -0.1743 | 0.0871 | 0.2615 | 0.3486 |
-| Far | 0.6709 | 0.3874 | -0.2835 | 0.0514 | 0.3349 | 0.3863 |
-
-The four Adam cells all have negative C-D Raw-MD signs. The low-LR/low-WD
-cell is a small-effect all-ID-guardrail-PASS control. SGDM has the opposite
-sign and refutes a universal “coupling is bad” claim.
-
-Zero--AdamW has near-zero net AUROC but `0.14-0.19` churn. Use it to show that
-aggregate cancellation is not behavioral equivalence. Flip burden is broadly
-distributed across samples; it is not carried by a tiny fixed set of pairs.
-
-## 5. Local training-context interaction
-
-Show the four cells without averaging over LR/WD. Then show the controlled
-same-LR WD contrast.
-
-- At low LR, higher WD changes coupled Raw MD by `-0.0962/-0.0779` Near/Far,
-  while decoupled changes by `-0.0050/+0.0018`.
-- The low-LR `WD x coupling` DiD is `-0.0912/-0.0797`.
-- At high LR, DiD is `+0.0004/+0.0618`; the same direction does not repeat.
-
-Conclusion: coupling sensitivity depends on the local optimization context.
-Do not infer a monotone WD law or a causal LR main effect.
-
-## 6. Readout localization
-
-Use RMD and L2 as prior-work probes, not new methods.
-
-Primary absolute performance:
-
-- Raw RMD C/D: `0.8806/0.8908` Near and `0.9006/0.9111` Far;
-- L2-MD C/D: `0.8466/0.8716` Near and `0.9435/0.9334` Far.
-
-RMD attenuation repeats more consistently across the four Adam cells. L2
-strongly recovers absolute performance, but local signed-gap attenuation is
-heterogeneous and cannot be stated as universal.
-
-For ID-like scores:
+Report Gain, Loss, Churn, and net AUROC on the same ID--OOD pair population.
+For ID-like scores,
 
 ```text
 s_MD(z) = s_RMD(z) + s_Marginal(z)
-m_MD(i,o) = m_RMD(i,o) + m_Marginal(i,o)
+m_MD(i,o) = m_RMD(i,o) + m_Marginal(i,o).
 ```
 
 Use symmetric two-player replacement accounting for RMD/Marginal and ID/OOD
-sides. It is score accounting, not causal mediation.
+sides. The Shapley terms exactly reconstruct the observed score change but are
+not causal mediators.
 
-- Primary dataset-level Marginal share: `69%-94%` using
-  `abs(mean phi_Marginal) / abs(mean Delta)`.
-- Marginal remains the adverse component in all four Adam cells.
-- Share above one means RMD offsets some Marginal deterioration.
-- OOD-side negative motion dominates primary and high-WD contexts, but not the
-  low-LR/low-WD Near result.
+## 4. Controlled experimental design
 
-The valid conclusion is predominantly Marginal score localization. The stronger
-claim of universal OOD-side mediation is rejected.
+Specify WRN-28-10/CIFAR-10, four Adam LR/WD cells, role and seed counts,
+epoch-200 `last.pt` penultimate primary endpoint, six protected OOD datasets,
+Near/Far macro construction, and the Accuracy/NLL/ECE guardrails.
 
-## 7. Formation over time and depth
+The statistical unit is the seed. Average datasets within seed before Near/Far
+aggregation; report seed means, sample SD, and paired 90% intervals. Samples,
+datasets, and ID--OOD pairs are not independent replicates.
 
-Use `early detectable, later amplified`, not `late formation`.
+Keep the protected evaluation and artifact provenance visible but concise.
+Move implementation inventory and checksum catalogs to the appendix.
 
-Primary Near Raw-MD Delta:
+## 5. Results
+
+### 5.1 Controlled Raw-MD non-invariance
+
+Lead with the four C--D cells. Raw-MD mean C--D is negative in every tested
+Adam cell:
+
+- Near: `-0.0218` to `-0.1780`;
+- Far: `-0.0787` to `-0.2835`.
+
+The primary `LR=1e-3, WD=1e-4` result is `-0.1743/-0.2835` Near/Far with Churn
+`0.3486/0.3863`. Do not average over LR/WD or infer a universal optimizer law.
+
+### 5.2 Aggregate AUROC hides pair multiplicity
+
+Show Zero--AdamW next. Its net AUROC difference is near zero, yet Churn is
+`0.14--0.19`. Plot Gain and Loss separately so their cancellation is visible.
+Pair-burden analysis shows a distributed phenomenon rather than one tiny fixed
+set of OOD samples; retain seed as the inferential unit.
+
+### 5.3 Sensitivity is score-structured
+
+RMD remains high and its C--D gap is smaller in the tested cells. L2-MD strongly
+recovers absolute AUROC, but does not uniformly attenuate the signed gap.
+
+Marginal is the main adverse replacement component in all four Adam cells.
+Primary dataset-level absolute Marginal share is `69%--94%`. A share above one
+means RMD offsets part of the Marginal deterioration; it does not mean more
+than 100% causal mediation. OOD-side dominance is strong in primary and
+high-WD contexts but is not universal.
+
+### 5.4 Sensitivity forms during training
+
+The primary Near C--D sequence is
+`-0.0739, -0.1072, -0.1771, -0.1781, -0.1743` at epochs
+`10, 60, 120, 160, 200`. Say `early detectable, later amplified`, not `late
+formation`.
+
+The depth sequence is small at stage1/2 and large at stage3/penultimate.
+Telemetry is a passive witness at each branch's actual state, not a same-state
+optimizer counterfactual.
+
+### 5.5 Local context and negative boundaries
+
+At low LR, the local `WD x coupling` DiD is `-0.0912/-0.0797` Near/Far. At
+high LR it is `+0.0004/+0.0618`. Stronger WD therefore does not universally
+amplify coupling damage. SGDM has the opposite C--D sign.
+
+The fixed geometry panel is broadly concordant with effect size but not
+monotone. Coupled spectral attribution is unavailable because the relevant fit
+is inapplicable. The `S_perp` and classifier-insensitive gates are reported as
+failed negative diagnostics, not replaced with a new mechanism.
+
+## 6. Prospective ResNet-18/CIFAR-10 replication
+
+Use the exact 20-run Card 13 Section 15 matrix:
 
 ```text
-epoch 10   -0.0739
-epoch 60   -0.1072
-epoch 120  -0.1771
-epoch 160  -0.1781
-epoch 200  -0.1743
+2 LR x 1 WD x 2 coupling roles x 5 common seeds = 20 runs.
 ```
 
-Depth Near Delta:
+This study asks whether the large-versus-small context pattern, Raw-MD sign and
+Churn, RMD attenuation, Marginal localization, and small-context ID guardrails
+replicate under ResNet-18. It is endpoint-only and introduces no new mechanism
+metric. Report `FULL`, `PARTIAL`, `FAIL`, or technical `BLOCKED` exactly as
+defined in Card 13. Before `FULL`, all architecture-general language remains
+locked.
+
+## 7. Discussion and limitations
+
+Discuss the result as training-rule-induced non-invariance of a commonly used
+post-hoc readout. The practical implication is that matching architecture,
+dataset, objective, accuracy, or aggregate AUROC does not certify identical
+feature-OOD decisions.
+
+Bound the conclusions:
+
+- Primary NLL is not equivalent; one tested cell passes all ID guardrails.
+- Current WRN cross-LR comparison is not causal.
+- Marginal is a score localization, not a causal mediator.
+- RMD and L2 are prior methods used as probes.
+- Geometry concordance does not identify a unique carrier.
+- SGDM refutes a universal coupling law.
+- One architecture remains a limitation until the prospective gate passes.
+
+## 8. Conclusion
+
+Conclude with the controlled chain only:
 
 ```text
-stage1       +0.0032
-stage2       -0.0313
-stage3       -0.1540
-penultimate  -0.1743
+matched decay-coupling intervention
+-> exact same-pair Gain/Loss/Churn
+-> predominantly Marginal score localization
+-> matched time/depth formation
 ```
 
-Connect these trajectories to Marginal share, ID/OOD-side motion, fixed
-geometry metrics, and telemetry on the same axes. Telemetry is a passive
-witness at each branch's actual state, not a same-state causal update
-decomposition.
+Do not conclude that Adam coupling is generally harmful or that the study maps
+optimizer recipes broadly.
 
-## 8. Geometry: supporting concordance, not rediscovery
+## Main figure and table contract
 
-Use a fixed panel:
+| Item | Question answered | Placement |
+| --- | --- | --- |
+| Figure 1 | What is held fixed, what changes, and which contrasts are valid? | Main |
+| Figure 2A | How large is C--D Raw-MD non-invariance in each cell? | Main composite |
+| Figure 2B | How do Gain and Loss hide behind net AUROC? | Main composite |
+| Figure 3 | Which readout and score component carries the movement? | Main |
+| Figure 4 | When and at what depth does it form? | Main |
+| Figure 5 | Which WRN predictions replicate in ResNet-18? | Main after gate |
+| Geometry and negative gates | Which explanations were diagnostic or rejected? | Appendix |
 
-- feature norm mean/CV and class-wise norm;
-- within/global numerical and effective rank;
-- retained condition number;
-- trace and top-trace concentration;
-- affine held-out-ID residual;
-- principal-angle profile/chordal distance;
-- applicability status.
+Use individual seed dots plus paired means and 90% intervals. Every delta plot
+has a zero line. Show Gain and Loss in opposite directions. Plot signed
+`phi_RMD`, `phi_Marginal`, and reconstructed total rather than a share alone.
+Use actual epoch coordinates; show depth as a discrete axis without a fitted
+trend. Do not use a four-point geometry regression in the main paper.
 
-The small-effect low-LR/low-WD cell has the smallest geometry differences. The
-three larger-effect contexts show larger concentration/condition differences.
-However, the two high-LR WD levels are not monotone in Raw-MD gap despite a
-large geometry change. Call this `concordant but not monotone`.
+Main tables are:
 
-Exact spectral allocation is a prior-work-informed diagnostic. Decoupled
-primary fits reconstruct Marginal, but coupled raw fits are `NOT_APPLICABLE`.
-Therefore cross-branch spectral-band attribution is `NOT AVAILABLE` and belongs
-in the limitation/supporting appendix, not the headline mechanism.
+1. design, roles, seeds, sibling identity, and ID guardrails;
+2. AdamW/Adam AUROC, C--D interval, Gain, Loss, Churn, and D--Z cancellation;
+3. Raw MD/RMD/L2, signed score accounting, and within-LR WD/DiD results.
 
-## 9. Conditional supporting theory
+Dataset-level values, FPR95, SGDM, geometry/alignment, telemetry, and negative
+gates belong in appendix tables.
 
-Under a numerically full-rank inverse, or one common positive ridge applied to
-all conditional and marginal terms, within-class whitening and the class-mean
-span `S` yield:
+## Human reading ledger for Geometry V3
+
+Read *A Geometry-Based View / Dissecting Mahalanobis* by recording, for every
+major figure:
+
+1. the claim the figure actually establishes;
+2. the comparison or intervention supporting it; and
+3. what our paper must not repeat as novelty.
+
+Prioritize detector definitions and refitting semantics; cross-model versus
+matched-pair experimental units; geometry correlation and the ID-only proxy;
+radial post-hoc interventions; size--stretch and spectrum--allocation; and the
+rotation/smoothing/shaping appendices. Maintain this ledger:
+
+| Prior work establishes | Diagnostic reused here | New matched claim here | Prohibited wording |
+| --- | --- | --- | --- |
+|  |  |  |  |
+
+The novelty boundary is the complete combination, not any single geometry
+quantity:
 
 ```text
-s_Marginal = s_perp + s_parallel_Marginal
-s_MD       = s_perp + s_parallel_Marginal + s_RMD
-s_RMD(x)   = s_RMD(P_S x)
+matched decay-coupling intervention
+-> exact same-pair Gain/Loss/Churn
+-> RMD/Marginal score-response localization
+-> matched epoch/depth formation.
 ```
 
-This identity explains why RMD can cancel a class-orthogonal term. It does not
-predict that coupling changes `S_perp`, which direction OOD scores move, or
-which detector wins.
+## Claim-language guardrails
 
-Primary raw/L2 component fits are 30/30 `NOT_APPLICABLE`. Keep the theorem as
-a conditional interface and limitation. Do not report primary `S_perp`
-mediation.
-
-An optimizer-side local heuristic may motivate directional geometry change:
-coupled Adam places decay inside moment updates, whereas AdamW applies a
-decoupled shrinkage. A frozen-moment expression involving `(P_t-I)theta` is not
-the exact Adam trajectory because moment history and denominators also change.
-Likewise `Delta z approximately J_x Delta theta` motivates covariance drift but
-is not a deep-network causal theorem. Keep this material in motivation or an
-appendix unless a new same-state analysis is preregistered.
-
-## 10. Contributions
-
-State contributions in this order:
-
-1. **Controlled training-side origin case:** decay-policy siblings show large,
-   reproducible Raw-MD same-pair multiplicity.
-2. **Cancellation-aware evidence unit:** Gain/Loss/Churn reveals behavior hidden
-   by near-equal aggregate AUROC.
-3. **Local interaction:** same-LR WD contrasts separate a genuine local
-   `WD x coupling` interaction from invalid cross-LR causal language.
-4. **Score-channel localization:** adverse movement is predominantly Marginal;
-   RMD and L2 reveal distinct cancellation/normalization behavior.
-5. **Formation evidence:** the sensitivity is early detectable, amplified over
-   training, and concentrated in deep representation stages.
-6. **Boundary discipline:** SGDM reversal, ID Pareto status, non-monotone
-   geometry concordance, and applicability failure delimit the claim.
-
-Do not list architecture replication, broad optimizer mapping, RtMD, or a new
-spectral mechanism as completed contributions.
-
-## 11. Figures
-
-1. Parallel Zero/AdamW/Adam sibling design and causal contrast definitions.
-2. Four-cell absolute Raw-MD bars plus C-D Gain/Loss/Churn.
-3. Zero--AdamW cancellation versus AdamW--Adam directional loss.
-4. Raw MD/RMD/L2 and Marginal replacement accounting by context/dataset.
-5. Time and depth formation with Marginal/OOD-side overlay.
-6. Fixed geometry panel with a clearly descriptive four-cell concordance view.
-7. Appendix: flip burden, alignment, SGDM boundary, spectral applicability gate.
-
-## 12. Reviewer-facing boundaries
-
-| Objection | Response |
+| Avoid | Use |
 | --- | --- |
-| AdamW absolute Raw MD is already low | Zero is equally low in the primary context; coupling adds a controlled directional deterioration. Cross-LR baseline differences remain descriptive. |
-| Primary ID is not equivalent | Correct; NLL guardrail fails in the improvement direction. Use Pareto language and the all-PASS low-LR/low-WD cell. |
-| Spectrum/RMD/L2 are prior work | Correct; they are diagnostic lenses, not method novelty. |
-| Marginal attribution is causal | It is not. It is exact score replacement accounting. |
-| `S_perp` theorem fails | Primary applicability failure is explicit; no `S_perp` attribution is made. |
-| WD should have a monotone effect | It does not in current results; report local interaction heterogeneity. |
-| This does not identify optimizer recipes generally | Correct. Task F is a controlled case study; the broad RQ requires a paired LR factorial and replication. |
-| One architecture | Keep generality local until ResNet-18/CIFAR-10 replication passes. |
-
-## 13. Next experiment gates
-
-### If the current narrow paper is retained
-
-Run ResNet-18/CIFAR-10 focal replication first using a large-effect and a
-small-effect representative context. Preserve common init/stream sibling
-pairing. Replicate Raw-MD pair multiplicity, RMD/L2 probes, Marginal accounting,
-and the minimal endpoint geometry panel before extending time/depth.
-
-### If the broad optimizer-origin RQ becomes the headline
-
-First run a paired LR bridge/factorial in which every LR arm within a seed shares
-one initialization and one data stream. This is required to estimate an LR
-main effect and LR interactions. Include zero/decoupled/coupled at minimum;
-include both WD levels only if the current local interaction remains central.
-
-Additional adaptive optimizers, ConvNeXt/ViT, and a broad phase map are later
-external-validity studies, not immediate prerequisites.
-
-## 14. Discussion language
-
-Safe conclusion:
-
-> The results establish a controlled optimizer-side route to Raw-Mahalanobis
-> pair-ranking multiplicity and localize its adverse score movement primarily
-> to the Marginal term. They also show when the sensitivity is amplified and
-> which covariance diagnostics move with it, while leaving a unique spectral or
-> `S_perp` mediation and a general optimizer-recipe map open.
-
-Unsafe conclusion:
-
-> Adam coupling, larger weight decay, or higher learning rate generally creates
-> the spectral tail that causes Mahalanobis failure.
-
-## 15. Conditional classifier-insensitive geometry route
-
-The current body remains the completed Plan B until the Card 13 Section 14
-ID-only gate is run. The candidate main paper asks whether decay coupling forms
-sample-dependent, non-affine representation differences predominantly in
-directions that the trained classifier does not use, and whether feature-space
-OOD readouts subsequently consume that hidden geometry.
-
-```text
-Candidate Main, only after GO:
-training rule
--> classifier-insensitive non-affine representation change
--> feature-space uncertainty-readout sensitivity
-
-Plan B after FAIL, MIXED, or unusable evidence:
-controlled decay-coupling intervention
--> Raw-MD exact pair-ranking multiplicity
--> Marginal score localization and time/depth formation
-```
-
-The fast gate is ID-only and cannot establish the downstream OOD arrow. Neural
-Collapse is not a gate or a proxy for unknown OOD ordering. The completed Task F
-results, including the primary NLL failure and the all-PASS low-LR/low-WD
-boundary, retain their current interpretation in either route.
+| fixed detector/readout parameters | protocol-fixed, branch-refitted readout |
+| same ID performance | ID/OOD Pareto result; all-PASS boundary cell |
+| Marginal mediates the effect | adverse movement is localized to Marginal |
+| coupling is bad | tested Adam C--D direction; SGDM and context boundaries |
+| LR causes the WRN gap | cross-LR descriptive difference |
+| geometry explains the gap | geometry is concordant but not monotone |
+| classifier-insensitive carrier | prespecified carrier gate failed |
+| optimizer-side origin generally established | controlled decay-coupling case study |
