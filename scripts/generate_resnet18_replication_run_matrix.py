@@ -54,7 +54,7 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         default=(
             REPOSITORY_ROOT
-            / "configs/training/cifar10_resnet18_replication_v2.yaml"
+            / "configs/training/cifar10_resnet18_replication_v3.yaml"
         ),
     )
     parser.add_argument("--output-dir", type=Path, required=True)

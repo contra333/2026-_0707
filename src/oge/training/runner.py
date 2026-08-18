@@ -57,6 +57,7 @@ from .provenance import (
     validate_resume_paired_identity,
 )
 from .resnet18_replication_plan import (
+    RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
     validate_resnet18_replication_training_config,
 )
 from .resnet18_replication_provenance import (
@@ -581,6 +582,26 @@ def seed_everything(seed: int, *, deterministic: bool) -> torch.Generator:
     return torch.Generator().manual_seed(seed)
 
 
+def _validate_deterministic_cuda_process_environment(
+    resolved_config: dict[str, Any], *, device: str
+) -> None:
+    replication = resolved_config.get("resnet18_replication")
+    if not isinstance(replication, dict) or not device.startswith("cuda"):
+        return
+    if not bool(resolved_config["training"]["deterministic"]):
+        return
+    expected = str(replication["cublas_workspace_config"])
+    if expected != RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG:
+        raise ValueError("replication CuBLAS workspace config differs from policy")
+    observed = os.environ.get("CUBLAS_WORKSPACE_CONFIG")
+    if observed != expected:
+        raise RuntimeError(
+            "deterministic CUDA replication requires "
+            f"CUBLAS_WORKSPACE_CONFIG={expected} before process initialization; "
+            f"observed {observed!r}"
+        )
+
+
 def _optimizer_parameter_names(
     model: nn.Module,
     optimizer: torch.optim.Optimizer,
@@ -627,6 +648,7 @@ def _numerical_policy() -> dict[str, object]:
                 "TORCH_ALLOW_TF32_CUBLAS_OVERRIDE",
                 "NVIDIA_TF32_OVERRIDE",
                 "TORCH_CUDNN_V8_API_DISABLED",
+                "CUBLAS_WORKSPACE_CONFIG",
             )
         },
     }
@@ -1655,6 +1677,9 @@ def run_training_from_config(
         max_epochs=max_epochs,
     )
     training = resolved_config["training"]
+    _validate_deterministic_cuda_process_environment(
+        resolved_config, device=device
+    )
     train_generator = seed_everything(
         int(training["seed"]),
         deterministic=bool(training["deterministic"]),

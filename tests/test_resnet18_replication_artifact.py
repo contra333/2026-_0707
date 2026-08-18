@@ -17,6 +17,7 @@ from oge.training.resnet18_replication_provenance import (
     validate_resnet18_replication_checkpoint_payload,
 )
 from oge.training.resnet18_replication_plan import (
+    RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
     RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
     RESNET18_REPLICATION_STUDY_ID,
 )
@@ -50,6 +51,7 @@ def _provenance() -> dict:
         "schema_version": RESNET18_REPLICATION_CHECKPOINT_PROVENANCE_SCHEMA_VERSION,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
         "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
+        "cublas_workspace_config": RESNET18_REPLICATION_CUBLAS_WORKSPACE_CONFIG,
         "run_id": "fixture-adam",
         "training_seed": 7,
         "branch_policy": "adam_coupled",

@@ -40,13 +40,13 @@ from oge.training.resnet18_replication_plan import (
 
 
 RESNET18_REPLICATION_EVALUATION_PLAN_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_evaluation_plan_v2"
+    "resnet18_cifar10_replication_evaluation_plan_v3"
 )
 RESNET18_REPLICATION_SEED_RECORD_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_seed_record_v2"
+    "resnet18_cifar10_replication_seed_record_v3"
 )
 RESNET18_REPLICATION_GATE_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_full_gate_v2"
+    "resnet18_cifar10_replication_full_gate_v3"
 )
 EXPECTED_PROTECTED_SPLITS = ("id_test", *OOD_SPLITS)
 LARGE_CELL = "resnet18_c10_lr1e-03_wd1e-4"
