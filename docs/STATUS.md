@@ -2,8 +2,8 @@
 
 Last updated: 2026-08-18
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
-Plan B freeze base on `main`:
-`fb759f334a6568eda2fc6de5a6067273a9f6f8e7`
+Plan B freeze documentation commit:
+`9c88a22357669b7210a53f78d7a43f36126fdcdc`
 
 ## Current phase
 
@@ -76,6 +76,15 @@ The merged file SHA-256 is
 the bundle `SHA256SUMS` SHA-256 is
 `d45d077673ffcded30144ee23e776f79ae8285f71739a7318c52cb0af7c05c11`.
 
+Seed-first paper figure/table pack:
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_paper_pack_20260818/fa2b1535af55b74c64a873734afd11eca9e1ebf01ef50b99d934fac86da61a82/`.
+The generator was merged in PR #128 at
+`aefb7363dcd30a6c7637c5b545b50b69323cbfd4`; the pack is bound to analysis
+commit `1a329474fbf4df00996f204a8e598cfb2c537d5a` and source result SHA-256
+`ec0d235f3e85ba60635998b919b15b24ec6987efd20c7e43f09893881c9c24ed`.
+It contains seed-first Near/Far tables and PDF/SVG/300-dpi PNG for Figures
+1--4 plus appendix geometry and negative-gate panels.
+
 No checkpoint was loaded. No training, protected inference, detector refit,
 band ablation, clipping, or new detector was run.
 
@@ -147,15 +156,18 @@ coupling-harm language are prohibited.
 
 ## Active workstreams
 
-1. **WRN paper figure/table pack -- ACTIVE.** Rebuild seed-first Near/Far
-   macros and paired 90% intervals from detailed CSV, then generate the frozen
-   main/appendix figure and table contract. This uses existing artifacts only;
-   it authorizes no new protected access or inference.
-2. **ResNet-18/CIFAR-10 replication -- PROTOCOL FROZEN, ENGINEERING ACTIVE.**
-   Card 13 Section 15 fixes the 20-run `2 LR x 1 WD x 2 roles x 5 seeds`
-   matrix, common four-arm identity, execution-only pilot, endpoint evaluation,
-   and `FULL/PARTIAL/FAIL/BLOCKED` gate. No GPU pilot, main training, or
-   protected evaluation is authorized by the documentation freeze.
+1. **WRN paper figure/table pack -- COMPLETE.** PR #128 is merged and the
+   hash-addressed bundle above is remotely verified. All macros are formed
+   within seed before Near/Far aggregation; the inferential unit remains the
+   training seed.
+2. **ResNet-18/CIFAR-10 replication -- ENGINEERING COMPLETE; PILOT APPROVAL
+   PENDING.** PR #129 was merged at
+   `b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. The ignored materialized packet
+   is at `artifacts/resnet18_cifar10_replication_v1/plan_b5a4593c/`; it contains
+   exactly 20 research configs, four seed-9000 execution-only pilot configs,
+   and a pending-only endpoint evaluation plan. Its approval packet keeps
+   pilot GPU, main training, and protected evaluation closed. The next action
+   requires explicit owner approval for the two-epoch GPU pilot only.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to

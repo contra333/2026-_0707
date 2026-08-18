@@ -303,12 +303,16 @@ gradient뿐 아니라 first/second moment history와 denominator를 함께 바�
 Marginal·ID/OOD-side accounting, time/depth, geometry/alignment, telemetry,
 SGDM, spectral applicability과 두 negative mechanism gate가 완료됐다.
 
-두 작업을 병렬로 진행한다.
+두 병렬 engineering 작업은 완료됐다.
 
-1. 현재 detailed CSV에서 seed-first macro, paired 90% interval, main
-   figure/table pack을 생성한다.
-2. Card 13 Section 15의 ResNet-18/CIFAR-10 planner, pilot, approval packet을
-   구현한다.
+1. Detailed CSV에서 seed-first macro, paired 90% interval, main
+   figure/table pack을 생성하고 PR #128로 병합했다.
+2. Card 13 Section 15의 ResNet-18/CIFAR-10 planner, provenance, endpoint ID
+   artifact, pending evaluator, pilot와 approval packet을 PR #129로 병합했다.
+
+현재 다음 실행은 seed-9000 four-arm, two-epoch GPU pilot이며 명시적 owner
+승인 전에는 실행하지 않는다. Main 20-run training과 protected evaluation은
+각각 그 뒤의 별도 승인 gate다.
 
 WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
 기본값은 새 학습을 멈추고 논문을 완성하는 것이다. `PARTIAL` 또는
@@ -362,6 +366,25 @@ WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
   `6296464e210668d2c56e5ca08e52438ab4de4e97dad452c5ccfd2c96f61a1712`
 - gap-fill Evidence Pack SHA-256:
   `c25eb90180a572bb918419c960e3ff183e2960e715d420e6de928f44ee9374dd`
+
+### Seed-first paper figure/table pack
+
+- generator analysis commit:
+  `1a329474fbf4df00996f204a8e598cfb2c537d5a`
+- generator merge commit:
+  `aefb7363dcd30a6c7637c5b545b50b69323cbfd4`
+- paper-pack manifest SHA-256:
+  `fa2b1535af55b74c64a873734afd11eca9e1ebf01ef50b99d934fac86da61a82`
+- source merged-result SHA-256:
+  `ec0d235f3e85ba60635998b919b15b24ec6987efd20c7e43f09893881c9c24ed`
+- HF bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/task_f_paper_pack_20260818/fa2b1535af55b74c64a873734afd11eca9e1ebf01ef50b99d934fac86da61a82/`
+- local ignored copy:
+  `artifacts/task_f_paper_pack_1a329474/`
+
+The pack contains deterministic seed rows, summary intervals, Tables 1--3,
+Figures 1--4, and appendix geometry/negative-gate outputs. It performs no new
+checkpoint inference, detector fitting, or protected access.
 
 Portable restore:
 
