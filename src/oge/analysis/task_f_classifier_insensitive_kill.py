@@ -260,10 +260,10 @@ def _energy_torch(
     total = parallel = perpendicular = target_energy = 0.0
     for start in range(0, len(coupled), chunk_size):
         stop = min(start + chunk_size, len(coupled))
-        target = torch.as_tensor(
+        target = torch.tensor(
             np.asarray(coupled[start:stop]), dtype=torch.float32, device=device
         )
-        source = torch.as_tensor(
+        source = torch.tensor(
             np.asarray(decoupled[start:stop]), dtype=torch.float32, device=device
         )
         residual = source @ transform + offset - target
