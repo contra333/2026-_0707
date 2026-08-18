@@ -538,9 +538,10 @@ sources:
   training_induced_ood_wacv2026_paper:
     title: "One Model, Many Behaviors: Training-Induced Effects on Out-of-Distribution Detection"
     authors: Krumpl, Avenhaus, and Possegger
-    stable_source: WACV 2026
+    stable_source: WACV 2026; arXiv:2601.10836v1
+    arxiv_url: https://arxiv.org/abs/2601.10836
     url: https://openaccess.thecvf.com/content/WACV2026/html/Krumpl_One_Model_Many_Behaviors_Training-Induced_Effects_on_Out-of-Distribution_Detection_WACV_2026_paper.html
-    accessed: 2026-08-10
+    accessed: 2026-08-18
     role: modern evidence that training strategy, detector choice, and OOD performance interact non-monotonically with ID accuracy; no controlled paired training-to-geometry trajectory isolation
   optimization_ood_detection_sensitivity_paper:
     title: The Effect of Optimization Methods on the Robustness of Out-of-Distribution Detection Approaches
