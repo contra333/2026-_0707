@@ -7,7 +7,9 @@ Repository HEAD used for analysis: `e0f35285f0edbc5f88077cc2e3a7f136e42554d7`
 
 Task F의 50-run training, ID-only geometry/alignment, protected one-shot
 evaluation, bounded score recovery, central aggregation이 완료됐다. 현재 단계는 새
-실험 실행이 아니라 **완료된 artifact의 post-result analysis와 paper claim gate**다.
+학습이나 protected evaluation이 아니라 **기존 ID-only artifact를 사용하는 14-context
+classifier-insensitive geometry fast kill gate**다. 이 gate는 Candidate Main과 현재
+Raw-MD pair-instability Plan B 사이의 paper routing만 결정한다.
 
 Current source of interpretation:
 
@@ -124,15 +126,14 @@ identified a unique spectrum or `S_perp` mediator.
 
 ## Next decisions
 
-1. Finalize the main/supplement figure allocation and the geometry
-   `concordant/mixed/discordant` adjudication.
-2. Decide whether the current paper remains the narrow controlled case study or
-   adopts the broader optimizer-origin RQ.
-3. For the narrow paper, run ResNet-18/CIFAR-10 focal replication next.
-4. For the broad RQ, first preregister a common-init/common-stream paired LR
-   bridge/factorial; current cross-LR data cannot supply that causal contrast.
-5. Keep additional adaptive optimizers, ConvNeXt/ViT, and a broad phase map
-   after those gates.
+1. Run the Card 13 Section 14 fast kill gate on the 14 stored Adam C-D endpoint
+   pairs without checkpoint or protected-data access.
+2. On `GO`, freeze bidirectional ID-only confirmation before proposing any new
+   protected projected-readout evaluation.
+3. On `FAIL` or mixed evidence, retain the current Plan B and run the
+   ResNet-18/CIFAR-10 focal replication next.
+4. Keep a common-stream LR factorial and additional optimizer/architecture axes
+   after this routing decision.
 
 ## Not active
 
@@ -142,3 +143,6 @@ identified a unique spectrum or `S_perp` mediator.
 - no causal LR conclusion from current Task F;
 - no claim that stronger WD monotonically amplifies coupling damage;
 - no architecture-general conclusion before replication.
+- no classifier-insensitive-geometry claim before the Section 14 gate passes;
+- no projected OOD score, reverse affine refit, or trajectory expansion in the
+  fast kill test.

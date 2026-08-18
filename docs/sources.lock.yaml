@@ -377,6 +377,17 @@ sources:
       classifier-aligned versus orthogonal-residual scoring and normalized
       combination boundary for the conditional RtMD novelty audit; uses a
       different subspace and score construction from within-class-whitened S
+  activation_subspaces_ood_paper:
+    title: "Activation Subspaces for Out-of-Distribution Detection"
+    authors: Zöngür, Hesse, and Roth
+    stable_source: arXiv:2508.21695v1
+    url: https://arxiv.org/abs/2508.21695v1
+    accessed: 2026-08-18
+    role: >-
+      classifier-head SVD decomposition into decisive and insignificant
+      activation subspaces and their Near/Far-OOD use; bounds novelty claims
+      for the generic fact that classifier-insensitive directions can carry OOD
+      information, while not studying controlled decay-coupling formation
   mars_ood_paper:
     title: "MaRS: Robust Out-of-Distribution Detection via Mahalanobis Residual Scoring"
     authors: Di Salvo, Doerrich, and Ledig

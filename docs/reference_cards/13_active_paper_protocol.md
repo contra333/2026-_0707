@@ -1901,3 +1901,106 @@ remote terminal remains pending until that upload verifies. Immediately before
 protected execution, the owner must receive the execution SHA, exact split and
 context counts, target GPUs, time/storage estimate, Gate 3 verdict, and RtMD
 included/excluded status and must give a new explicit one-shot approval.
+
+## 14. Post-result classifier-insensitive geometry fast kill gate v1
+
+This section is a prospective post-result analysis addendum layered on the
+completed v12 experiment. It does not alter the v12 training, protected-OOD
+schedule, stored estimands, or completed results. Its sole purpose is to decide
+whether the paper should test a new candidate mechanism or retain the current
+Raw-MD pair-instability framing. Status before execution is `NOT_RUN`.
+
+### 14.1 Candidate Main and fallback
+
+The candidate question is:
+
+> Does decay coupling produce held-out, sample-dependent representation
+> deformation that is concentrated per dimension in directions to which the
+> trained classifier is insensitive?
+
+If the gate passes, the candidate paper identity becomes training-rule control
+of classifier-insensitive geometry and its downstream feature-OOD readout.
+Passing does not establish an OOD mechanism and does not authorize protected
+evaluation. If the gate fails or is mixed, the paper retains the completed
+controlled Raw-MD pair-ranking-instability result as Plan B. No threshold,
+subspace, normalization, or alternative carrier may be selected after seeing
+this gate.
+
+### 14.2 Frozen inputs and scope
+
+The analysis reads only existing checksum-verified Task F artifacts:
+
+- raw penultimate `id_validation` features for the coupled and decoupled roles;
+- the coupled classifier weight and the two roles' stored validation logits;
+- the stored raw affine matrix and bias from the existing
+  `coupled_minus_decoupled` alignment artifact; and
+- identity and checksum manifests.
+
+The population is the 14 Adam C--D endpoint pairs at epoch-200 `last`,
+penultimate: five anchor seeds and three seeds in each of the other three
+LR--WD cells. The saved alignment direction maps decoupled features into the
+coupled frame. The analysis does not load a checkpoint, reprocess `id_train`,
+refit an affine map or detector, access protected ID/OOD data, or inspect another
+epoch/depth. Large feature arrays remain on their source hosts.
+
+### 14.3 Frozen statistic
+
+Let `T_D_to_C(z)=z A+b` be the already-fitted ID-train affine map and define on
+held-out `id_validation`
+
+```text
+R = T_D_to_C(Z_D) - Z_C.
+```
+
+Remove the common-logit direction from the coupled classifier rows,
+`Wc = W_C - row_mean(W_C)`, and obtain its exact numerical row-space basis `Q`
+using the existing float64 SVD tolerance
+`sigma_max * max(Wc.shape) * eps64`. Let `r=rank(Q)` and `d` be the feature
+dimension. The dimension-normalized residual energies and primary ratio are
+
+```text
+e_parallel = ||R Q||_F^2 / (n r)
+e_perp     = (||R||_F^2 - ||R Q||_F^2) / (n (d-r))
+rho        = e_perp / e_parallel.
+```
+
+`rho > 1` is the prespecified direction supporting classifier-insensitive
+concentration. `rho <= 1` does not support the required carrier. Prediction
+disagreement, predictive-distribution Jensen--Shannon divergence, absolute
+top-two logit-margin difference, and the existing Accuracy/NLL/ECE statuses are
+supporting outputs without new equivalence thresholds.
+
+### 14.4 Numerical and compute policy
+
+Every context must pass source checksum and C--D sibling identity, have
+`1 <= r < d`, finite positive energies, and reconstruct total residual energy
+within relative `1e-5`. GPU float32 is the production path with TF32 disabled.
+Anchor seed 0 is compared with CPU float64 and must have relative `rho`
+difference at most `1e-4`. A context with `abs(log(rho)) < 0.05`, or a failed
+float32 reconstruction check, is rerun once on CPU float64. A persistent failure
+is `NOT_APPLICABLE`; it is not repaired by changing precision or the statistic.
+
+Each source host may use every currently idle GPU with at least 2 GiB free and
+no active compute process, one worker per GPU. Existing processes are never
+stopped or preempted. With no eligible GPU, use the existing host CPU-worker
+limits `curie/lise/precision_medicine = 4/2/4`. Only small canonical JSON host
+summaries are collected centrally.
+
+### 14.5 Decision rule
+
+The gate is `GO` only when all conditions hold:
+
+1. all 14 contexts pass identity, checksum, and numerical validation;
+2. at least four of five anchor seeds have `rho > 1`;
+3. at least two of three seeds in the all-ID-guardrail-PASS
+   `LR=3e-4, WD=1e-4` cell have `rho > 1`;
+4. at least one of the two remaining high-WD cells has at least two of three
+   seeds with `rho > 1`; and
+5. every required CPU confirmation preserves the `rho > 1` decision side.
+
+All other complete outcomes are `FAIL`; missing or technically inapplicable
+coverage is `BLOCKED`, not scientific evidence. For paper routing, a mixed
+pattern is treated as `FAIL`. A `GO` permits only a separately frozen
+bidirectional affine confirmation and anchor formation analysis. Any projected
+OOD readout still requires a new pre-protected addendum and explicit owner
+approval.

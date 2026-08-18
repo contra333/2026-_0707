@@ -359,3 +359,28 @@ Unsafe conclusion:
 
 > Adam coupling, larger weight decay, or higher learning rate generally creates
 > the spectral tail that causes Mahalanobis failure.
+
+## 15. Conditional classifier-insensitive geometry route
+
+The current body remains the completed Plan B until the Card 13 Section 14
+ID-only gate is run. The candidate main paper asks whether decay coupling forms
+sample-dependent, non-affine representation differences predominantly in
+directions that the trained classifier does not use, and whether feature-space
+OOD readouts subsequently consume that hidden geometry.
+
+```text
+Candidate Main, only after GO:
+training rule
+-> classifier-insensitive non-affine representation change
+-> feature-space uncertainty-readout sensitivity
+
+Plan B after FAIL, MIXED, or unusable evidence:
+controlled decay-coupling intervention
+-> Raw-MD exact pair-ranking multiplicity
+-> Marginal score localization and time/depth formation
+```
+
+The fast gate is ID-only and cannot establish the downstream OOD arrow. Neural
+Collapse is not a gate or a proxy for unknown OOD ordering. The completed Task F
+results, including the primary NLL failure and the all-PASS low-LR/low-WD
+boundary, retain their current interpretation in either route.
