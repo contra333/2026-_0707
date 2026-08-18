@@ -16,17 +16,18 @@ from typing import Any
 from oge.studies.hashing import canonical_sha256
 
 
-RESNET18_REPLICATION_PLAN_SCHEMA_VERSION = "resnet18_cifar10_replication_plan_v1"
+RESNET18_REPLICATION_PLAN_SCHEMA_VERSION = "resnet18_cifar10_replication_plan_v2"
 RESNET18_REPLICATION_TRAINING_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_training_v1"
+    "resnet18_cifar10_replication_training_v2"
 )
 RESNET18_REPLICATION_APPROVAL_SCHEMA_VERSION = (
-    "resnet18_cifar10_replication_approval_packet_v1"
+    "resnet18_cifar10_replication_approval_packet_v2"
 )
 RESNET18_REPLICATION_PROTOCOL_ID = (
-    "protocol_fixed_branch_refitted_md_architecture_replication_v1"
+    "protocol_fixed_branch_refitted_md_architecture_replication_v2"
 )
-RESNET18_REPLICATION_STUDY_ID = "resnet18_cifar10_replication_v1"
+RESNET18_REPLICATION_STUDY_ID = "resnet18_cifar10_replication_v2"
+RESNET18_REPLICATION_NUMERICAL_POLICY_ID = "strict_cuda_deterministic_v2"
 RESNET18_REPLICATION_SEEDS = (0, 1, 2, 3, 4)
 RESNET18_REPLICATION_LRS = (1e-3, 3e-4)
 RESNET18_REPLICATION_WEIGHT_DECAY = 1e-4
@@ -80,7 +81,7 @@ def _optimizer(role: str, *, lr: float) -> dict[str, Any]:
 
 def _run_id(*, lr: float, seed: int, role: str) -> str:
     return (
-        f"resnet18-c10-rep-lr{_float_token(lr)}-"
+        f"resnet18-c10-rep-v2-lr{_float_token(lr)}-"
         f"wd{_float_token(RESNET18_REPLICATION_WEIGHT_DECAY)}-seed{seed}-"
         f"{role.replace('_', '-')}"
     )
@@ -88,8 +89,8 @@ def _run_id(*, lr: float, seed: int, role: str) -> str:
 
 def _record(*, lr: float, seed: int, role: str) -> dict[str, Any]:
     lr_token = _float_token(lr)
-    sibling_group_id = f"resnet18-c10-rep-lr{lr_token}-seed{seed}"
-    cross_lr_pairing_block_id = f"resnet18-c10-rep-cross-lr-seed{seed}"
+    sibling_group_id = f"resnet18-c10-rep-v2-lr{lr_token}-seed{seed}"
+    cross_lr_pairing_block_id = f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
     return {
         "run_id": _run_id(lr=lr, seed=seed, role=role),
         "cell_id": f"resnet18_c10_lr{lr_token}_wd1e-4",
@@ -150,6 +151,7 @@ def generate_resnet18_replication_matrix(
         "schema_version": RESNET18_REPLICATION_PLAN_SCHEMA_VERSION,
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
+        "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
         "research_seeds": list(seeds),
         "snapshot_epochs": list(RESNET18_REPLICATION_SNAPSHOT_EPOCHS),
         "runs": runs,
@@ -172,6 +174,12 @@ def resnet18_replication_count_summary(plan: Mapping[str, Any]) -> dict[str, Any
 def validate_resnet18_replication_matrix(plan: Mapping[str, Any]) -> None:
     if plan.get("schema_version") != RESNET18_REPLICATION_PLAN_SCHEMA_VERSION:
         raise ValueError("unsupported ResNet-18 replication plan schema_version")
+    if plan.get("protocol_id") != RESNET18_REPLICATION_PROTOCOL_ID:
+        raise ValueError("ResNet-18 replication protocol identity mismatch")
+    if plan.get("study_id") != RESNET18_REPLICATION_STUDY_ID:
+        raise ValueError("ResNet-18 replication study identity mismatch")
+    if plan.get("numerical_policy_id") != RESNET18_REPLICATION_NUMERICAL_POLICY_ID:
+        raise ValueError("ResNet-18 replication numerical policy mismatch")
     runs = plan.get("runs")
     if not isinstance(runs, list) or len(runs) != 20:
         raise ValueError("ResNet-18 replication matrix must contain exactly 20 runs")
@@ -204,7 +212,7 @@ def validate_resnet18_replication_matrix(plan: Mapping[str, Any]) -> None:
     if len(by_seed) != 5:
         raise ValueError("ResNet-18 replication must contain five paired seeds")
     for seed, seed_runs in by_seed.items():
-        expected_block = f"resnet18-c10-rep-cross-lr-seed{seed}"
+        expected_block = f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
         if {run["cross_lr_pairing_block_id"] for run in seed_runs} != {expected_block}:
             raise ValueError("cross-LR pairing block identity mismatch")
         combinations = {
@@ -275,6 +283,7 @@ def build_resnet18_replication_training_config(
     config["optimizer"] = copy.deepcopy(run["optimizer"])
     config["training"]["seed"] = int(run["training_seed"])
     config["training"]["max_epochs"] = 200
+    config["training"]["deterministic"] = True
     config["checkpoint"]["snapshot_epochs"] = list(
         RESNET18_REPLICATION_SNAPSHOT_EPOCHS
     )
@@ -284,6 +293,7 @@ def build_resnet18_replication_training_config(
         "schema_version": RESNET18_REPLICATION_TRAINING_SCHEMA_VERSION,
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
+        "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
         "run_id": str(run["run_id"]),
         "sibling_group_id": str(run["sibling_group_id"]),
         "data_stream_id": str(run["data_stream_id"]),
@@ -328,6 +338,13 @@ def validate_resnet18_replication_training_config(config: Mapping[str, Any]) -> 
         raise ValueError("replication model must be native ResNet-18 CIFAR with 10 classes")
     if config["dataset"].get("protocol") != "oge_cifar10_holdout_v1":
         raise ValueError("replication dataset must use oge_cifar10_holdout_v1")
+    if config["training"].get("deterministic") is not True:
+        raise ValueError("replication v2 requires training.deterministic=true")
+    if (
+        replication.get("numerical_policy_id")
+        != RESNET18_REPLICATION_NUMERICAL_POLICY_ID
+    ):
+        raise ValueError("replication v2 numerical policy identity mismatch")
     if not bool(replication.get("from_scratch")):
         raise ValueError("ResNet-18 replication must start from scratch")
     if not bool(replication.get("defer_id_test")):
@@ -344,6 +361,10 @@ def validate_resnet18_replication_training_config(config: Mapping[str, Any]) -> 
         "cross_lr_neutral_config_sha256"
     ):
         raise ValueError("replication cross-LR neutral config/hash mismatch")
+    if branch_neutral.get("training") != config["training"]:
+        raise ValueError("replication branch-neutral training policy mismatch")
+    if cross_lr_neutral.get("training") != config["training"]:
+        raise ValueError("replication cross-LR training policy mismatch")
     if branch_neutral.get("sibling_group_id") != replication.get("sibling_group_id"):
         raise ValueError("replication sibling identity differs from neutral config")
     if cross_lr_neutral.get("cross_lr_pairing_block_id") != replication.get(
@@ -410,7 +431,10 @@ def generate_resnet18_execution_only_pilot_configs(
 
 
 def generate_resnet18_approval_packet(
-    *, execution_sha: str, pilot_configs: Sequence[Mapping[str, Any]] | None = None
+    *,
+    execution_sha: str,
+    pilot_configs: Sequence[Mapping[str, Any]] | None = None,
+    pilot_approval_reference: str | None = None,
 ) -> dict[str, Any]:
     if re.fullmatch(r"[0-9a-f]{40}", execution_sha) is None:
         raise ValueError("execution_sha must be a lowercase 40-character Git SHA")
@@ -428,10 +452,18 @@ def generate_resnet18_approval_packet(
             if not bool(config["resnet18_replication"]["execution_only"]):
                 raise ValueError("approval packet pilot configs must be execution-only")
         pilot["status"] = "MATERIALIZED_NOT_RUN"
+    if pilot_approval_reference is not None:
+        if not isinstance(pilot_approval_reference, str) or not pilot_approval_reference:
+            raise ValueError("pilot_approval_reference must be a non-empty string")
+        if pilot_configs is None:
+            raise ValueError("pilot approval requires materialized pilot configs")
+        pilot["status"] = "EXPLICITLY_APPROVED_NOT_RUN"
+        pilot["approval_reference"] = pilot_approval_reference
     return {
         "schema_version": RESNET18_REPLICATION_APPROVAL_SCHEMA_VERSION,
         "protocol_id": RESNET18_REPLICATION_PROTOCOL_ID,
         "study_id": RESNET18_REPLICATION_STUDY_ID,
+        "numerical_policy_id": RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
         "execution_sha": execution_sha,
         "research_matrix": {
             "run_count": 20,
@@ -448,7 +480,11 @@ def generate_resnet18_approval_packet(
             "expected_storage_bytes": "PENDING_PILOT",
         },
         "approval_boundaries": {
-            "pilot_gpu_approval": "REQUIRED_BEFORE_EXECUTION",
+            "pilot_gpu_approval": (
+                "EXPLICITLY_APPROVED"
+                if pilot_approval_reference is not None
+                else "REQUIRED_BEFORE_EXECUTION"
+            ),
             "main_training_gpu_approval": "SEPARATE_REQUIRED_AFTER_PILOT",
             "protected_evaluation": "NOT_AUTHORIZED",
             "pilot_is_research_evidence": False,

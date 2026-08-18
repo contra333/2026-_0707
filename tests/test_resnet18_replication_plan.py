@@ -16,6 +16,7 @@ from oge.training.resnet18_replication_provenance import (
 )
 from oge.training.resnet18_replication_plan import (
     RESNET18_REPLICATION_LRS,
+    RESNET18_REPLICATION_NUMERICAL_POLICY_ID,
     RESNET18_REPLICATION_ROLES,
     build_resnet18_replication_training_config,
     generate_resnet18_approval_packet,
@@ -33,12 +34,12 @@ ROOT = Path(__file__).parents[1]
 
 def _base_config():
     return load_training_config(
-        ROOT / "configs/training/cifar10_resnet18_replication_v1.yaml"
+        ROOT / "configs/training/cifar10_resnet18_replication_v2.yaml"
     )
 
 
 def test_committed_replication_templates_are_parseable_and_gpu_safe():
-    root = ROOT / "configs/studies/resnet18_cifar10_replication_v1"
+    root = ROOT / "configs/studies/resnet18_cifar10_replication_v2"
     matrix = yaml.safe_load((root / "run_matrix.template.yaml").read_text())
     pilot = yaml.safe_load((root / "pilot_execution_only.template.yaml").read_text())
     summary = json.loads((root / "matrix_summary.json").read_text())
@@ -48,6 +49,7 @@ def test_committed_replication_templates_are_parseable_and_gpu_safe():
     assert pilot["arms"]["count"] == 4
     assert matrix["output_policy"]["gpu_launch_allowed"] is False
     assert approval["approval_boundaries"]["protected_evaluation"] == "NOT_AUTHORIZED"
+    assert approval["pilot"]["status"] == "EXPLICITLY_APPROVED_NOT_RUN"
 
 
 def test_exact_20_run_matrix_and_four_arms_per_seed():
@@ -68,10 +70,10 @@ def test_exact_20_run_matrix_and_four_arms_per_seed():
     for seed, runs in by_seed.items():
         assert {(run["initial_lr"], run["branch_policy"]) for run in runs} == expected
         assert {run["cross_lr_pairing_block_id"] for run in runs} == {
-            f"resnet18-c10-rep-cross-lr-seed{seed}"
+            f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
         }
         assert {run["data_stream_id"] for run in runs} == {
-            f"resnet18-c10-rep-cross-lr-seed{seed}"
+            f"resnet18-c10-rep-v2-cross-lr-seed{seed}"
         }
 
 
@@ -89,6 +91,11 @@ def test_config_keeps_task_f_frozen_and_hashes_within_lr_and_cross_lr_controls()
             "variant": "cifar",
             "num_classes": 10,
         }
+        assert config["training"]["deterministic"] is True
+        assert (
+            config["resnet18_replication"]["numerical_policy_id"]
+            == RESNET18_REPLICATION_NUMERICAL_POLICY_ID
+        )
         by_seed[run["training_seed"]].append(config)
     for configs in by_seed.values():
         by_lr = defaultdict(list)
@@ -124,6 +131,13 @@ def test_matrix_and_training_validation_reject_identity_and_shape_drift():
     with pytest.raises(ValueError, match="frozen Task F"):
         validate_resnet18_replication_training_config(config)
 
+    config = build_resnet18_replication_training_config(
+        _base_config(), plan["runs"][0]
+    )
+    config["training"]["deterministic"] = False
+    with pytest.raises(ValueError, match="deterministic=true"):
+        validate_resnet18_replication_training_config(config)
+
 
 def test_seed9000_four_arm_two_epoch_pilot_and_approval_packet():
     configs = generate_resnet18_execution_only_pilot_configs(base_config=_base_config())
@@ -134,6 +148,7 @@ def test_seed9000_four_arm_two_epoch_pilot_and_approval_packet():
     } == set((lr, role) for lr in RESNET18_REPLICATION_LRS for role in RESNET18_REPLICATION_ROLES)
     assert {config["training"]["seed"] for config in configs} == {9000}
     assert {config["training"]["max_epochs"] for config in configs} == {2}
+    assert {config["training"]["deterministic"] for config in configs} == {True}
     assert {tuple(config["checkpoint"]["snapshot_epochs"]) for config in configs} == {
         (0, 1, 2)
     }
@@ -156,9 +171,12 @@ def test_seed9000_four_arm_two_epoch_pilot_and_approval_packet():
         ]["sibling_members"]
     assert all(config["resnet18_replication"]["execution_only"] for config in configs)
     packet = generate_resnet18_approval_packet(
-        execution_sha="a" * 40, pilot_configs=configs
+        execution_sha="a" * 40,
+        pilot_configs=configs,
+        pilot_approval_reference="owner_request_2026-08-18_issue_131",
     )
-    assert packet["pilot"]["status"] == "MATERIALIZED_NOT_RUN"
+    assert packet["pilot"]["status"] == "EXPLICITLY_APPROVED_NOT_RUN"
+    assert packet["approval_boundaries"]["pilot_gpu_approval"] == "EXPLICITLY_APPROVED"
     assert packet["approval_boundaries"]["protected_evaluation"] == "NOT_AUTHORIZED"
     assert set(packet["resource_estimates"].values()) == {"PENDING_PILOT"}
 

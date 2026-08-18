@@ -1,0 +1,26 @@
+{
+  "schema_version": "resnet18_cifar10_replication_approval_packet_v2",
+  "protocol_id": "protocol_fixed_branch_refitted_md_architecture_replication_v2",
+  "study_id": "resnet18_cifar10_replication_v2",
+  "numerical_policy_id": "strict_cuda_deterministic_v2",
+  "execution_sha": "REQUIRED_AFTER_MERGE",
+  "pilot": {
+    "seed": 9000,
+    "arm_count": 4,
+    "max_epochs": 2,
+    "status": "EXPLICITLY_APPROVED_NOT_RUN",
+    "approval_reference": "owner_request_2026-08-18_issue_131"
+  },
+  "resource_estimates": {
+    "seconds_per_epoch": "PENDING_PILOT",
+    "peak_vram_bytes": "PENDING_PILOT",
+    "expected_gpu_hours": "PENDING_PILOT",
+    "expected_storage_bytes": "PENDING_PILOT"
+  },
+  "approval_boundaries": {
+    "pilot_gpu_approval": "EXPLICITLY_APPROVED",
+    "main_training_gpu_approval": "SEPARATE_REQUIRED_AFTER_PILOT",
+    "protected_evaluation": "NOT_AUTHORIZED",
+    "pilot_is_research_evidence": false
+  }
+}

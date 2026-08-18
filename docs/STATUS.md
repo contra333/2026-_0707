@@ -188,6 +188,16 @@ coupling-harm language are prohibited.
    protocol/config change and a separately approved re-pilot, or stop the
    replication.
 
+   The owner approved that bounded re-pilot on 2026-08-18. Issue #131 adds a
+   collision-free `resnet18_cifar10_replication_v2` contract with
+   `numerical_policy_id=strict_cuda_deterministic_v2` and forces
+   `training.deterministic=true`. It preserves the v1 pilot as a failed
+   execution record and does not change the scientific matrix or prospective
+   gate. The v2 pilot may run only after the implementation is merged; strict
+   CUDA operator failure or any exact-restart mismatch remains `BLOCKED`
+   without fallback. Main training and protected evaluation remain separately
+   unauthorized.
+
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to
 stop training and write; after `PARTIAL` or `FAIL`, do not open a rescue grid.

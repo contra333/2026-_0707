@@ -22,15 +22,16 @@ from oge.training.resnet18_replication_provenance import (
     validate_resnet18_replication_checkpoint_payload,
     validate_resnet18_replication_checkpoint_provenance,
 )
+from oge.training.resnet18_replication_plan import RESNET18_REPLICATION_STUDY_ID
 
 from .task_f import collect_runtime_provenance, ordered_sample_id_sha256
 
 
 RESNET18_REPLICATION_ARTIFACT_SCHEMA_VERSION = (
-    "resnet18_cifar10_id_feature_artifact_v1"
+    "resnet18_cifar10_id_feature_artifact_v2"
 )
 RESNET18_REPLICATION_ARTIFACT_SPECIFICATION_VERSION = (
-    "resnet18_cifar10_id_feature_specification_v1"
+    "resnet18_cifar10_id_feature_specification_v2"
 )
 RESNET18_REPLICATION_ID_SPLITS = (
     "id_train",
@@ -69,7 +70,7 @@ def resnet18_replication_specification_payload() -> dict[str, Any]:
     return {
         "specification_version": RESNET18_REPLICATION_ARTIFACT_SPECIFICATION_VERSION,
         "artifact_schema_version": RESNET18_REPLICATION_ARTIFACT_SCHEMA_VERSION,
-        "artifact_namespace": "resnet18_cifar10_replication_v1",
+        "artifact_namespace": RESNET18_REPLICATION_STUDY_ID,
         "model": {
             "name": "resnet18",
             "variant": "cifar",
@@ -234,7 +235,8 @@ def write_resnet18_replication_artifact(
         }
         manifest = {
             "schema_version": RESNET18_REPLICATION_ARTIFACT_SCHEMA_VERSION,
-            "artifact_namespace": "resnet18_cifar10_replication_v1",
+            "artifact_namespace": RESNET18_REPLICATION_STUDY_ID,
+            "numerical_policy_id": provenance["numerical_policy_id"],
             "run_id": provenance["run_id"],
             "training_seed": provenance["training_seed"],
             "branch_policy": provenance["branch_policy"],
