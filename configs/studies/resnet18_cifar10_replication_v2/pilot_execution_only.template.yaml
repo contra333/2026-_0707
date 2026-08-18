@@ -1,0 +1,25 @@
+schema_version: resnet18_cifar10_replication_pilot_template_v2
+protocol_id: protocol_fixed_branch_refitted_md_architecture_replication_v2
+base_training_config: configs/training/cifar10_resnet18_replication_v2.yaml
+numerical_policy_id: strict_cuda_deterministic_v2
+training_deterministic: true
+seed: 9000
+max_epochs: 2
+arms:
+  learning_rates: [0.001, 0.0003]
+  weight_decay: 0.0001
+  roles: [adam_coupled, adamw_decoupled]
+  count: 4
+execution_only: true
+aggregate_eligible: false
+from_scratch: true
+defer_id_test: true
+approval:
+  pilot_gpu: APPROVED_IN_ISSUE_131
+  main_training_gpu: NOT_AUTHORIZED_BY_PILOT_APPROVAL
+  protected_evaluation: NOT_AUTHORIZED
+measurements:
+  seconds_per_epoch: REQUIRED
+  peak_vram_bytes: REQUIRED
+  checkpoint_storage_bytes: REQUIRED
+  exact_duplicate_resume: REQUIRED

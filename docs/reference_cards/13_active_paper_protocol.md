@@ -2127,3 +2127,54 @@ No WRN common-stream LR factorial or CIFAR-100 extension runs before this
 gate. After `FULL`, the default is to stop new training and finish the paper;
 those extensions remain post-submission work unless separately frozen and
 approved.
+
+### 15.4 Deterministic numerical-policy addendum v2
+
+The first Section 15.2 pilot was executed at
+`b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. Its four arms, shape contracts,
+pairing identity, provenance, deferred ID test, and resource measurements
+passed, but duplicate resumes from an identical epoch-1 artifact diverged
+numerically. The terminal status was
+`BLOCKED_BY_NUMERICAL_RESTART_GATE` with terminal SHA-256
+`0fd5eebec8322bd2ecc6a16611199d6293aff3b071465e1d668834a194d82f69`.
+The frozen v1 training configuration had `training.deterministic=false`.
+
+This addendum does not reinterpret that pilot and does not change the
+scientific matrix, endpoint, estimands, gate, or claim boundary in Sections
+15.1--15.3. It creates a collision-free execution contract:
+
+```yaml
+study_id: resnet18_cifar10_replication_v2
+protocol_id: protocol_fixed_branch_refitted_md_architecture_replication_v2
+training_schema: resnet18_cifar10_replication_training_v2
+numerical_policy_id: strict_cuda_deterministic_v2
+training:
+  precision: fp32
+  deterministic: true
+```
+
+The v2 planner must force and validate `deterministic=true`; it may not inherit
+or silently accept `false` from a base config. Plan, approval, paired-control,
+checkpoint-provenance, feature-artifact, evaluation, study, and run IDs are
+versioned so that no v1 artifact can be aggregated into v2. The ordinary
+runner implements the policy with `torch.use_deterministic_algorithms(true)`,
+cuDNN deterministic mode, and cuDNN benchmark disabled. `warn_only`, operator
+fallback, retry under `deterministic=false`, and mixing v1/v2 siblings are
+forbidden.
+
+The owner explicitly approved one v2 re-pilot on 2026-08-18 in Issue #131.
+It remains seed 9000, four LR-by-role arms, two epochs, from scratch,
+execution-only, aggregate-ineligible, and ID-test-deferred. It must run from
+the merged v2 execution SHA. In addition to the Section 15.2 checks, one
+representative arm must be stopped after the complete epoch-1 boundary and
+resumed with the identical two-epoch config. A continuous execution and the
+resumed execution must match exactly after removing elapsed-time fields for:
+
+- model, optimizer, scheduler, RNG, and best-validation state;
+- epoch/global-step history and non-timing metrics; and
+- paired-control and checkpoint provenance.
+
+An unsupported deterministic CUDA operator, any numerical mismatch, or any
+identity/provenance mismatch is `BLOCKED`. It is not repaired by weakening the
+policy. A passing re-pilot supplies a measured packet for a later decision;
+it does not authorize the 20 research runs or protected evaluation.

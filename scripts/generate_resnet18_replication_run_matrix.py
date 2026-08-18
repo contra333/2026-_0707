@@ -54,12 +54,13 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         default=(
             REPOSITORY_ROOT
-            / "configs/training/cifar10_resnet18_replication_v1.yaml"
+            / "configs/training/cifar10_resnet18_replication_v2.yaml"
         ),
     )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--research-seeds", nargs=5, type=int, default=[0, 1, 2, 3, 4])
     parser.add_argument("--execution-sha")
+    parser.add_argument("--pilot-approval-reference")
     return parser.parse_args()
 
 
@@ -103,6 +104,7 @@ def main() -> int:
     packet = generate_resnet18_approval_packet(
         execution_sha=args.execution_sha or _git_sha(),
         pilot_configs=pilot_configs,
+        pilot_approval_reference=args.pilot_approval_reference,
     )
     _write_json(output_dir / "approval_packet.json", packet)
     print(json.dumps(plan["count_summary"], sort_keys=True))
