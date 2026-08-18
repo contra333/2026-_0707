@@ -160,8 +160,8 @@ coupling-harm language are prohibited.
    hash-addressed bundle above is remotely verified. All macros are formed
    within seed before Near/Far aggregation; the inferential unit remains the
    training seed.
-2. **ResNet-18/CIFAR-10 replication -- PILOT EXECUTED; NUMERICAL RESTART GATE
-   BLOCKED.** PR #129 was merged at
+2. **ResNet-18/CIFAR-10 replication -- DETERMINISTIC V3 REPILOT PASS; MAIN
+   APPROVAL PENDING.** PR #129 was merged at
    `b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. The ignored materialized packet
    is at `artifacts/resnet18_cifar10_replication_v1/plan_b5a4593c/`; it contains
    exactly 20 research configs, four seed-9000 execution-only pilot configs,
@@ -207,8 +207,26 @@ coupling-harm language are prohibited.
    Issue #133 versions this prerequisite as
    `strict_cuda_deterministic_cublas4096_v3`, sets it before the training
    runtime import, validates and records it, and preserves the v1/v2 failures.
-   Only the already-approved execution-only re-pilot may follow its merge;
-   main training and protected evaluation remain unauthorized.
+   PR #134 merged that correction at
+   `e2f6845e88b22bc0783c5fda58186f9930083ef7`.
+
+   The approved v3 execution-only re-pilot then **PASSED** on Curie. All four
+   seed-9000 LR-by-role arms completed exactly two epochs with 20/20 planner
+   coverage, 4/4 pilot coverage, four-arm identity, checkpoint provenance,
+   deferred ID test, strict process-environment validation, and the ResNet
+   shape contracts passing. The representative `LR=1e-3` coupled arm was also
+   stopped after epoch 1 and resumed to epoch 2. Continuous and resumed
+   executions matched exactly for model, optimizer, scheduler, RNG,
+   best-validation, epoch/global-step history after excluding elapsed time,
+   paired-control provenance, and ResNet provenance. The terminal SHA-256 is
+   `21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30`;
+   the metadata-only bundle is
+   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_repilot_20260818/21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30/`.
+   Mean pilot time was 28.86 seconds/epoch and peak incremental VRAM was
+   1,356--1,357 MiB. The measured projection is 32.07 A5000 GPU-hours, 3.21
+   hours in two 10-GPU waves, and 7.34 GiB checkpoint storage with 10% reserve.
+   This is infrastructure evidence only, not research evidence. The 20-run
+   main training and protected evaluation remain separately unauthorized.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to

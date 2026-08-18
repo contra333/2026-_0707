@@ -2217,3 +2217,19 @@ status, exact continuous-versus-resume gate, and all non-authorization
 boundaries remain those of Section 15.4. Another unsupported deterministic
 operation or any exact-state mismatch is terminal `BLOCKED`; `warn_only`, a
 different workspace setting, and retry under a weaker policy remain forbidden.
+
+Post-execution record: PR #134 merged the v3 implementation at
+`e2f6845e88b22bc0783c5fda58186f9930083ef7`. The approved Curie re-pilot
+completed all four seed-9000 arms for exactly two epochs and passed planner,
+identity, provenance, shape, deferred-ID-test, and strict-process checks. For
+the representative `LR=1e-3` coupled arm, continuous epoch-2 execution and an
+epoch-1-stop/resume execution matched exactly in model, optimizer, scheduler,
+RNG, best-validation, non-timing history, completed epoch/global step,
+paired-control provenance, and replication provenance. The terminal status is
+`PASS`, terminal SHA-256 is
+`21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30`, and the
+metadata-only bundle is
+`hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_repilot_20260818/21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30/`.
+This execution validates the v3 training contract only. It is not research
+evidence and does not authorize the 20 research runs, checkpoint inference, or
+protected evaluation.
