@@ -160,14 +160,33 @@ coupling-harm language are prohibited.
    hash-addressed bundle above is remotely verified. All macros are formed
    within seed before Near/Far aggregation; the inferential unit remains the
    training seed.
-2. **ResNet-18/CIFAR-10 replication -- ENGINEERING COMPLETE; PILOT APPROVAL
-   PENDING.** PR #129 was merged at
+2. **ResNet-18/CIFAR-10 replication -- PILOT EXECUTED; NUMERICAL RESTART GATE
+   BLOCKED.** PR #129 was merged at
    `b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. The ignored materialized packet
    is at `artifacts/resnet18_cifar10_replication_v1/plan_b5a4593c/`; it contains
    exactly 20 research configs, four seed-9000 execution-only pilot configs,
-   and a pending-only endpoint evaluation plan. Its approval packet keeps
-   pilot GPU, main training, and protected evaluation closed. The next action
-   requires explicit owner approval for the two-epoch GPU pilot only.
+   and a pending-only endpoint evaluation plan. Issue #130 executed the four
+   pilot arms on Curie's four idle A5000 GPUs at the exact code SHA. All four
+   completed two epochs with 20/20 planner coverage, four-arm identity,
+   checkpoint provenance, deferred ID test, and the `[B,10]` logits,
+   `[B,512]` feature, and `[10,512]` classifier contracts passing. Mean pilot
+   time was 28.25 seconds/epoch and peak incremental memory was 1,285 MiB;
+   the 20-run projection is 31.39 A5000 GPU-hours and 7.34 GiB checkpoint
+   storage with 10% reserve.
+
+   The pilot is not terminally PASS. Resume mechanics, scheduler/RNG state,
+   and provenance passed, but two resumes from identical epoch-1 artifacts
+   diverged numerically because the frozen configuration has
+   `training.deterministic=false`: 102 model-state tensors differed and the
+   optimizer/best-validation states were not exact. The terminal status is
+   `BLOCKED_BY_NUMERICAL_RESTART_GATE`, terminal SHA-256 is
+   `0fd5eebec8322bd2ecc6a16611199d6293aff3b071465e1d668834a194d82f69`, and the
+   metadata-only bundle is
+   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_pilot_20260818/0fd5eebec8322bd2ecc6a16611199d6293aff3b071465e1d668834a194d82f69/`.
+   No main training or protected evaluation is authorized. The next action is
+   to resolve the frozen numerical-policy contradiction through a versioned
+   protocol/config change and a separately approved re-pilot, or stop the
+   replication.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to
