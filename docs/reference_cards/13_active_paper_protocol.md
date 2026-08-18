@@ -14,7 +14,10 @@ Git history; future revisions replace this content without creating another
 Card 13 filename. The current design version is `v12`. When v12 was frozen,
 its fresh experiments were `NOT_RUN`; this is freeze-time provenance, not the
 live execution status. Current execution state lives only in
-[`STATUS.md`](../STATUS.md).
+[`STATUS.md`](../STATUS.md). The frozen Task F execution is now complete; its
+post-execution interpretation and claim boundaries are maintained separately in
+[`task_f_result_analysis.md`](../paper/task_f_result_analysis.md). That result
+document does not revise the estimands or decision rules frozen here.
 
 V12 is an owner-approved governance and preservation-record revision. It
 corrects one compact-record transcription error, documents the already-run

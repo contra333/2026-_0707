@@ -26,10 +26,30 @@ The package can be regenerated with `scripts/analyze_metric_contract_v1_2.py`,
 but regenerated tables and figures belong in ignored `artifacts/` or an
 external directory, not under `docs/`.
 
+## Task F result-analysis bundle
+
+The detailed post-result tables, figures, merged JSON, and two Evidence Packs
+are preserved outside Git at:
+
+```text
+hf://buckets/contra333/ICLR_RUN/aggregate/task_f_result_analysis_20260818/ec0d235f3e85ba60635998b919b15b24ec6987efd20c7e43f09893881c9c24ed/
+```
+
+- merged JSON SHA-256:
+  `ec0d235f3e85ba60635998b919b15b24ec6987efd20c7e43f09893881c9c24ed`
+- bundle `SHA256SUMS` SHA-256:
+  `e4c1bf9363321097bd3f3c3beae9c0183e33f8ddf37ac5873e17011bc07a3ad4`
+- active interpretation:
+  [`../paper/task_f_result_analysis.md`](../paper/task_f_result_analysis.md)
+
 ## Historical records
 
 - [`protocols/`](protocols/): superseded experiment and implementation plans
 - [`validation/`](validation/): completed or closed execution records
+- [`validation/task_f_execution_chronology_through_20260818.md`](validation/task_f_execution_chronology_through_20260818.md):
+  pre-consolidation Task F execution and PR chronology
+- [`validation/intervention_supporting_theory_outline_pre_result_20260818.md`](validation/intervention_supporting_theory_outline_pre_result_20260818.md):
+  prospective pre-result manuscript/theory outline, including closed gates
 - historical radial Stage-2: closed `FAILED`; not an active launch dependency
 - historical component attribution: `PASS` discovery evidence; not fresh
   decay-coupling confirmation
