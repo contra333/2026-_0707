@@ -24,7 +24,6 @@ from oge.analysis.task_f_paper_pack import (
     DATASET_REGIONS,
     EXPECTED_SEEDS,
     PRIMARY_CELL,
-    endpoint_macro_seed_rows,
     formation_macro_seed_rows,
     mean_sd_t90,
     validate_source,
@@ -313,6 +312,64 @@ def context_absolute_raw_rows(recovery: Sequence[Mapping[str, Any]]) -> list[dic
             int(row["seed"]),
         ),
     )
+
+
+def context_heatmap_matrices(
+    rows: Sequence[Mapping[str, Any]],
+) -> dict[str, list[list[float]]]:
+    """Return absolute role means and the within-seed Adam-AdamW contrast."""
+
+    _unique(rows, ("cell", "dataset", "seed", "role"), name="context heatmap")
+    expected = {
+        (cell, dataset, seed, role)
+        for cell in CONTEXT_FIGURE_CELLS
+        for dataset in DATASETS
+        for seed in EXPECTED_SEEDS[cell]
+        for role in ("D", "C")
+    }
+    observed = {
+        (row["cell"], row["dataset"], int(row["seed"]), row["role"])
+        for row in rows
+        if row.get("readout") == "Raw MD"
+    }
+    if observed != expected or len(rows) != len(expected):
+        raise ValueError(
+            "context heatmap coverage mismatch: "
+            f"missing={sorted(expected - observed)[:5]}, "
+            f"extra={sorted(observed - expected)[:5]}"
+        )
+
+    index = {
+        (row["cell"], row["dataset"], int(row["seed"]), row["role"]): float(
+            row["auroc"]
+        )
+        for row in rows
+    }
+    adamw: list[list[float]] = []
+    adam: list[list[float]] = []
+    paired_delta: list[list[float]] = []
+    for dataset in DATASETS:
+        adamw_row: list[float] = []
+        adam_row: list[float] = []
+        delta_row: list[float] = []
+        for cell in CONTEXT_FIGURE_CELLS:
+            seeds = EXPECTED_SEEDS[cell]
+            adamw_values = [index[(cell, dataset, seed, "D")] for seed in seeds]
+            adam_values = [index[(cell, dataset, seed, "C")] for seed in seeds]
+            adamw_row.append(statistics.fmean(adamw_values))
+            adam_row.append(statistics.fmean(adam_values))
+            delta_row.append(
+                statistics.fmean(
+                    adam_value - adamw_value
+                    for adam_value, adamw_value in zip(
+                        adam_values, adamw_values, strict=True
+                    )
+                )
+            )
+        adamw.append(adamw_row)
+        adam.append(adam_row)
+        paired_delta.append(delta_row)
+    return {"adamw": adamw, "adam": adam, "paired_delta": paired_delta}
 
 
 def recovery_gain_seed_rows(recovery: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -770,60 +827,146 @@ def figure_context_absolute_raw(
 
 
 def figure_heatmap(
-    heatmap: Sequence[Mapping[str, Any]],
-    macro: Sequence[Mapping[str, Any]],
+    rows: Sequence[Mapping[str, Any]],
     output_dir: Path,
 ) -> list[Path]:
     import matplotlib.pyplot as plt
     import numpy as np
-    from matplotlib.colors import TwoSlopeNorm
+    from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
 
     colors = _style()
-    matrix = np.asarray(
-        [
-            [statistics.fmean(row["delta_auroc"] for row in heatmap if row["dataset"] == dataset and row["cell"] == cell) for cell in CELLS]
-            for dataset in DATASETS
-        ]
+    matrices = {
+        key: np.asarray(value, dtype=float)
+        for key, value in context_heatmap_matrices(rows).items()
+    }
+    delta_bound = max(
+        abs(float(matrices["paired_delta"].min())),
+        abs(float(matrices["paired_delta"].max())),
     )
-    bound = max(abs(float(matrix.min())), abs(float(matrix.max())))
-    figure, axes = plt.subplots(1, 2, figsize=(7.2, 4.0), gridspec_kw={"width_ratios": [1.5, 1.0]}, constrained_layout=True)
-    image = axes[0].imshow(matrix, cmap="RdBu_r", norm=TwoSlopeNorm(vmin=-bound, vcenter=0.0, vmax=bound), aspect="auto")
-    axes[0].set_xticks(range(len(CELLS)), [CELL_LABELS[cell].replace(" / ", "\n") for cell in CELLS])
-    axes[0].set_yticks(range(len(DATASETS)), [DATASET_LABELS[dataset] for dataset in DATASETS])
-    axes[0].set_title("A. Dataset × Adam context", loc="left")
-    for i in range(len(DATASETS)):
-        for j in range(len(CELLS)):
-            axes[0].text(j, i, f"{matrix[i,j]:+.3f}", ha="center", va="center", fontsize=6.7, color="white" if abs(matrix[i,j]) > bound*0.55 else colors["ink"])
-    colorbar = figure.colorbar(image, ax=axes[0], fraction=0.045, pad=0.025)
-    colorbar.set_label("C − D Raw MD AUROC")
+    figure = plt.figure(figsize=(7.2, 6.75), constrained_layout=True)
+    grid = figure.add_gridspec(2, 2, height_ratios=(1.0, 1.08))
+    axes = {
+        "adamw": figure.add_subplot(grid[0, 0]),
+        "adam": figure.add_subplot(grid[0, 1]),
+        "paired_delta": figure.add_subplot(grid[1, :]),
+    }
+    context_labels = [
+        "LR 3e−4\nWD 1e−4",
+        "LR 3e−4\nWD 1e−3",
+        "LR 1e−3\nWD 1e−4\nprimary",
+        "LR 1e−3\nWD 1e−3",
+    ]
+    dataset_labels = [DATASET_LABELS[dataset] for dataset in DATASETS]
+    delta_cmap = LinearSegmentedColormap.from_list(
+        "adamw_to_adam",
+        (colors["blue"], "#F7F7F7", colors["orange"]),
+    )
 
-    y = np.arange(len(CELLS), dtype=float)
-    for region, offset, color, marker in (("Near", -0.12, colors["blue"], "o"), ("Far", 0.12, colors["orange"], "s")):
-        for index, cell in enumerate(CELLS):
-            rows = [
-                row for row in macro
-                if row["scope"] == "endpoint" and row["cell"] == cell and row["contrast"] == "C-D"
-                and row["transform"] == "raw" and row["detector"] == "md" and row["region"] == region
-            ]
-            values = [float(row["delta_auroc"]) for row in rows]
-            jitter = np.linspace(-0.025, 0.025, len(values))
-            axes[1].scatter(values, y[index] + offset + jitter, s=9, color=color, alpha=0.5)
-            stat = _summary(values)
-            axes[1].errorbar(
-                stat["mean"], y[index] + offset,
-                xerr=[[stat["mean"]-stat["t90_low"]], [stat["t90_high"]-stat["mean"]]],
-                fmt=marker, color=color, markerfacecolor="white", capsize=2.2, linewidth=1.0,
-                label=region if index == 0 else None,
-            )
-    axes[1].axvline(0, color=colors["ink"], linewidth=0.75)
-    axes[1].set_yticks(y, [CELL_LABELS[cell] for cell in CELLS])
-    axes[1].invert_yaxis()
-    axes[1].set_xlabel("C − D Raw MD AUROC")
-    axes[1].set_title("B. Paired seed evidence", loc="left")
-    axes[1].grid(axis="x")
-    axes[1].legend(frameon=False)
-    all_values = [float(row["delta_auroc"]) for row in macro if row["scope"] == "endpoint" and row["contrast"] == "C-D" and row["transform"] == "raw" and row["detector"] == "md"]
-    axes[1].set_xlim(min(all_values) - 0.025, max(0.0, max(all_values)) + 0.025)
+    def draw_matrix(
+        axis: Any,
+        matrix: Any,
+        *,
+        title: str,
+        cmap: Any,
+        signed: bool,
+        show_ylabels: bool,
+    ) -> Any:
+        image = axis.imshow(
+            matrix,
+            cmap=cmap,
+            norm=(
+                TwoSlopeNorm(vmin=-delta_bound, vcenter=0.0, vmax=delta_bound)
+                if signed
+                else None
+            ),
+            vmin=None if signed else 0.0,
+            vmax=None if signed else 1.0,
+            aspect="auto",
+        )
+        axis.set_xticks(range(len(CONTEXT_FIGURE_CELLS)), context_labels)
+        axis.set_yticks(
+            range(len(DATASETS)), dataset_labels if show_ylabels else [""] * len(DATASETS)
+        )
+        axis.set_title(title, loc="left", pad=7.0)
+        axis.set_xticks(np.arange(-0.5, len(CONTEXT_FIGURE_CELLS), 1.0), minor=True)
+        axis.set_yticks(np.arange(-0.5, len(DATASETS), 1.0), minor=True)
+        axis.grid(which="minor", color="white", linewidth=0.8, alpha=1.0)
+        axis.tick_params(which="minor", bottom=False, left=False)
+        axis.tick_params(axis="x", labelsize=6.5, pad=3.0)
+        axis.axhline(1.5, color=colors["ink"], linewidth=1.0)
+        threshold = delta_bound * 0.52 if signed else 0.62
+        for row_index in range(len(DATASETS)):
+            for column_index in range(len(CONTEXT_FIGURE_CELLS)):
+                value = float(matrix[row_index, column_index])
+                axis.text(
+                    column_index,
+                    row_index,
+                    f"{value:+.3f}" if signed else f"{value:.3f}",
+                    ha="center",
+                    va="center",
+                    fontsize=6.6,
+                    color="white" if abs(value) > threshold else colors["ink"],
+                )
+        return image
+
+    adamw_image = draw_matrix(
+        axes["adamw"],
+        matrices["adamw"],
+        title="A. AdamW (decoupled)\nRaw MD AUROC",
+        cmap="Blues",
+        signed=False,
+        show_ylabels=True,
+    )
+    draw_matrix(
+        axes["adam"],
+        matrices["adam"],
+        title="B. Adam (coupled)\nRaw MD AUROC",
+        cmap="Blues",
+        signed=False,
+        show_ylabels=False,
+    )
+    delta_image = draw_matrix(
+        axes["paired_delta"],
+        matrices["paired_delta"],
+        title="C. Adam − AdamW\nPaired mean ΔAUROC",
+        cmap=delta_cmap,
+        signed=True,
+        show_ylabels=True,
+    )
+    axes["paired_delta"].text(
+        1.0,
+        1.025,
+        "− AdamW higher  ·  + Adam higher",
+        transform=axes["paired_delta"].transAxes,
+        ha="right",
+        va="bottom",
+        fontsize=7.0,
+        color=colors["gray"],
+    )
+    absolute_colorbar = figure.colorbar(
+        adamw_image,
+        ax=[axes["adamw"], axes["adam"]],
+        fraction=0.035,
+        pad=0.025,
+    )
+    absolute_colorbar.set_label("Raw MD AUROC")
+    delta_colorbar = figure.colorbar(
+        delta_image,
+        ax=axes["paired_delta"],
+        fraction=0.035,
+        pad=0.025,
+    )
+    delta_colorbar.set_label("Paired ΔAUROC")
+    figure.suptitle(
+        "Raw MD across optimizer coupling and training context\n"
+        "WRN-28-10 · CIFAR-10 ID · epoch 200 last · penultimate · cell labels: seed means\n"
+        "shared Raw MD scale 0–1 · primary n=5, other contexts n=3 · "
+        "Δ paired within seed",
+        x=0.012,
+        ha="left",
+        fontsize=8.9,
+        linespacing=1.4,
+    )
     return _save_figure(figure, output_dir, "figure2_context_heatmap")
 
 
@@ -1066,7 +1209,6 @@ def build_pack(
     id_endpoint = id_endpoint_rows(geometry_rows)
     geometry_pairs = pair_geometry_rows(endpoint_geometry)
     formation_geometry = formation_geometry_pairs(geometry_rows)
-    endpoint_macro = endpoint_macro_seed_rows(merged)
     formation_macro = formation_macro_seed_rows(merged)
 
     table_sets: dict[str, list[dict[str, Any]]] = {
@@ -1125,7 +1267,7 @@ def build_pack(
     figure_paths = []
     figure_paths += figure_alpha(alpha, figures_dir)
     figure_paths += figure_context_absolute_raw(context_absolute, figures_dir)
-    figure_paths += figure_heatmap(heatmap, endpoint_macro, figures_dir)
+    figure_paths += figure_heatmap(context_absolute, figures_dir)
     figure_paths += figure_recovery(recovery, figures_dir)
     figure_paths += figure_fpr95_recovery(recovery, figures_dir)
     figure_paths += figure_churn(churn, figures_dir)

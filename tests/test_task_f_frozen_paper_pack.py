@@ -12,6 +12,7 @@ from oge.analysis.task_f_frozen_paper_pack import (
     _paired_effect,
     alpha_region_macro_seed_rows,
     context_absolute_raw_rows,
+    context_heatmap_matrices,
     recovery_gain_seed_rows,
     summarize_rows,
 )
@@ -177,6 +178,49 @@ def test_context_absolute_raw_rows_rejects_missing_role(monkeypatch):
     ]
     with pytest.raises(ValueError, match="coverage mismatch"):
         context_absolute_raw_rows(rows)
+
+
+def test_context_heatmap_matrices_keep_absolute_levels_and_pair_delta(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.CONTEXT_FIGURE_CELLS",
+        ("low", "primary"),
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.EXPECTED_SEEDS",
+        {"low": (0, 1), "primary": (0, 1)},
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS",
+        ("cifar100", "svhn"),
+    )
+    rows = []
+    for cell_index, cell in enumerate(("low", "primary")):
+        for dataset_index, dataset in enumerate(("cifar100", "svhn")):
+            for seed in (0, 1):
+                adamw = 0.60 + 0.10 * cell_index + 0.02 * dataset_index + 0.01 * seed
+                adam = adamw - 0.20 + 0.05 * seed
+                for role, value in (("D", adamw), ("C", adam)):
+                    rows.append(
+                        {
+                            "cell": cell,
+                            "dataset": dataset,
+                            "region": "Near" if dataset == "cifar100" else "Far",
+                            "seed": seed,
+                            "role": role,
+                            "readout": "Raw MD",
+                            "auroc": value,
+                            "fpr95": 1.0 - value,
+                        }
+                    )
+
+    matrices = context_heatmap_matrices(rows)
+
+    assert matrices["adamw"][0][0] == pytest.approx(0.605)
+    assert matrices["adam"][0][0] == pytest.approx(0.43)
+    assert matrices["paired_delta"][0][0] == pytest.approx(-0.175)
+    assert matrices["adam"][1][1] == pytest.approx(0.55)
+    assert matrices["adamw"][1][1] == pytest.approx(0.725)
+    assert matrices["paired_delta"][1][1] == pytest.approx(-0.175)
 
 
 def test_summary_labels_only_within_seed_contrasts_as_paired():
