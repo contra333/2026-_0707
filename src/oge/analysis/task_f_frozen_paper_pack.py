@@ -55,6 +55,13 @@ READOUTS = (
     ("RMD", "raw", "rmd"),
     ("L2-MD", "l2", "md"),
 )
+SGDM_CELL = "sgdm_lr0.1_wd5e-4"
+SGDM_EXPECTED_SEEDS = (0, 1, 2)
+SGDM_ROLE_LABELS = {
+    "Z": "No decay",
+    "D": "SGDW (decoupled)",
+    "C": "SGDM (coupled)",
+}
 GEOMETRY_METRICS = (
     "feature_norm",
     "effective_rank",
@@ -274,6 +281,165 @@ def recovery_seed_rows(merged: Mapping[str, Any]) -> list[dict[str, Any]]:
         len(EXPECTED_SEEDS[cell]) for cell in CELLS
     ):
         raise ValueError("recovery coverage mismatch")
+    return output
+
+
+def sgdm_recovery_seed_rows(
+    score_rows: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Select the frozen SGDM endpoint readouts from manifest-only scalars."""
+
+    readout_lookup = {
+        (transform, detector): label for label, transform, detector in READOUTS
+    }
+    output = [
+        {
+            "cell": row["cell"],
+            "dataset": row["dataset"],
+            "region": DATASET_REGIONS[row["dataset"]],
+            "seed": int(row["seed"]),
+            "role": row["role"],
+            "training_rule": SGDM_ROLE_LABELS[row["role"]],
+            "readout": readout_lookup[(row["transform"], row["detector"])],
+            "auroc": float(row["auroc"]),
+            "fpr95": float(row["fpr95"]),
+            "initialization_sha256": row["initialization_sha256"],
+            "data_stream_sha256": row["data_stream_sha256"],
+            "source_manifest_sha256": row["source_manifest_sha256"],
+        }
+        for row in score_rows
+        if row["cell"] == SGDM_CELL
+        and row["role"] in SGDM_ROLE_LABELS
+        and _endpoint(row)
+        and (row["transform"], row["detector"]) in readout_lookup
+    ]
+    _unique(
+        output,
+        ("dataset", "seed", "role", "readout"),
+        name="SGDM recovery",
+    )
+    expected = {
+        (dataset, seed, role, readout)
+        for dataset in DATASETS
+        for seed in SGDM_EXPECTED_SEEDS
+        for role in SGDM_ROLE_LABELS
+        for readout, _, _ in READOUTS
+    }
+    observed = {
+        (row["dataset"], row["seed"], row["role"], row["readout"])
+        for row in output
+    }
+    if observed != expected:
+        raise ValueError(
+            "SGDM recovery coverage mismatch: "
+            f"missing={sorted(expected - observed)[:5]}, "
+            f"extra={sorted(observed - expected)[:5]}"
+        )
+    role_order = tuple(SGDM_ROLE_LABELS)
+    readout_order = tuple(item[0] for item in READOUTS)
+    return sorted(
+        output,
+        key=lambda row: (
+            DATASETS.index(row["dataset"]),
+            int(row["seed"]),
+            role_order.index(row["role"]),
+            readout_order.index(row["readout"]),
+        ),
+    )
+
+
+def sgdm_paired_raw_effect_seed_rows(
+    rows: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build exact-pair SGDM-minus-SGDW Raw-MD effects by training seed."""
+
+    index = {
+        (row["dataset"], int(row["seed"]), row["role"]): row
+        for row in rows
+        if row["readout"] == "Raw MD" and row["role"] in ("D", "C")
+    }
+    output: list[dict[str, Any]] = []
+    for dataset in DATASETS:
+        for seed in SGDM_EXPECTED_SEEDS:
+            decoupled = index[(dataset, seed, "D")]
+            coupled = index[(dataset, seed, "C")]
+            for identity_field in (
+                "initialization_sha256",
+                "data_stream_sha256",
+            ):
+                if decoupled[identity_field] != coupled[identity_field]:
+                    raise ValueError(
+                        "SGDM paired identity mismatch: "
+                        f"dataset={dataset}, seed={seed}, field={identity_field}"
+                    )
+            output.append(
+                {
+                    "dataset": dataset,
+                    "region": DATASET_REGIONS[dataset],
+                    "seed": seed,
+                    "sgdw_auroc": float(decoupled["auroc"]),
+                    "sgdm_auroc": float(coupled["auroc"]),
+                    "delta_auroc_sgdm_minus_sgdw": float(coupled["auroc"])
+                    - float(decoupled["auroc"]),
+                    "initialization_sha256": decoupled["initialization_sha256"],
+                    "data_stream_sha256": decoupled["data_stream_sha256"],
+                    "sgdw_source_manifest_sha256": decoupled[
+                        "source_manifest_sha256"
+                    ],
+                    "sgdm_source_manifest_sha256": coupled[
+                        "source_manifest_sha256"
+                    ],
+                }
+            )
+    _unique(output, ("dataset", "seed"), name="SGDM paired Raw MD")
+    expected_count = len(DATASETS) * len(SGDM_EXPECTED_SEEDS)
+    if len(output) != expected_count:
+        raise ValueError("SGDM paired Raw-MD coverage mismatch")
+    return output
+
+
+def sgdm_region_recovery_seed_rows(
+    rows: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    """Build equally weighted Near/Far macros within each SGDM training seed."""
+
+    index = {
+        (row["dataset"], int(row["seed"]), row["role"], row["readout"]): row
+        for row in rows
+    }
+    output: list[dict[str, Any]] = []
+    for region in ("Near", "Far"):
+        datasets = [
+            dataset for dataset in DATASETS if DATASET_REGIONS[dataset] == region
+        ]
+        if not datasets:
+            raise ValueError(f"SGDM region has no datasets: {region}")
+        for role, training_rule in SGDM_ROLE_LABELS.items():
+            for seed in SGDM_EXPECTED_SEEDS:
+                macro: dict[str, float] = {}
+                for readout, _, _ in READOUTS:
+                    macro[readout] = statistics.fmean(
+                        float(index[(dataset, seed, role, readout)]["auroc"])
+                        for dataset in datasets
+                    )
+                output.append(
+                    {
+                        "region": region,
+                        "role": role,
+                        "training_rule": training_rule,
+                        "seed": seed,
+                        "dataset_count": len(datasets),
+                        "raw_md_auroc": macro["Raw MD"],
+                        "rmd_auroc": macro["RMD"],
+                        "l2_md_auroc": macro["L2-MD"],
+                        "rmd_minus_raw": macro["RMD"] - macro["Raw MD"],
+                        "l2_md_minus_raw": macro["L2-MD"] - macro["Raw MD"],
+                    }
+                )
+    _unique(output, ("region", "role", "seed"), name="SGDM region recovery")
+    expected_count = 2 * len(SGDM_ROLE_LABELS) * len(SGDM_EXPECTED_SEEDS)
+    if len(output) != expected_count:
+        raise ValueError("SGDM region recovery coverage mismatch")
     return output
 
 
@@ -970,38 +1136,546 @@ def figure_heatmap(
     return _save_figure(figure, output_dir, "figure2_context_heatmap")
 
 
-def figure_recovery(recovery: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]:
+def figure_recovery_matrix(
+    rows: Sequence[Mapping[str, Any]], output_dir: Path
+) -> list[Path]:
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from matplotlib.colors import LinearSegmentedColormap
+    from matplotlib.patches import Rectangle
+
+    colors = _style()
+    context_labels = (
+        "LR 3e−4\nWD 1e−4\nn=3",
+        "LR 3e−4\nWD 1e−3\nn=3",
+        "LR 1e−3\nWD 1e−4\nprimary, n=5",
+        "LR 1e−3\nWD 1e−3\nn=3",
+    )
+    panel_contract = (
+        ("D", "RMD", "A. AdamW (decoupled) · RMD"),
+        ("D", "L2-MD", "B. AdamW (decoupled) · L2-MD"),
+        ("C", "RMD", "C. Adam (coupled) · RMD"),
+        ("C", "L2-MD", "D. Adam (coupled) · L2-MD"),
+    )
+    grouped: dict[tuple[str, str, str, str], list[float]] = defaultdict(list)
+    for row in rows:
+        if row["cell"] in CONTEXT_FIGURE_CELLS:
+            grouped[
+                (row["role"], row["readout"], row["dataset"], row["cell"])
+            ].append(float(row["delta_auroc_from_raw"]))
+    means = {
+        key: statistics.fmean(values) for key, values in grouped.items()
+    }
+    expected = {
+        (role, readout, dataset, cell)
+        for role in ("D", "C")
+        for readout in ("RMD", "L2-MD")
+        for dataset in DATASETS
+        for cell in CONTEXT_FIGURE_CELLS
+    }
+    if set(means) != expected:
+        raise ValueError("Figure 3A recovery-matrix coverage mismatch")
+    maximum = max(means.values())
+    vmax = max(0.05, math.ceil(maximum * 20.0) / 20.0)
+    cmap = LinearSegmentedColormap.from_list(
+        "raw_recovery",
+        ("#F7FBFF", "#9ECAE1", colors["blue"]),
+    )
+    figure, axes = plt.subplots(
+        2,
+        2,
+        figsize=(7.2, 5.75),
+        sharex=True,
+        sharey=True,
+        constrained_layout=True,
+    )
+    images = []
+    primary_index = CONTEXT_FIGURE_CELLS.index(PRIMARY_CELL)
+    for axis, (role, readout, title) in zip(
+        axes.flat, panel_contract, strict=True
+    ):
+        matrix = np.asarray(
+            [
+                [
+                    means[(role, readout, dataset, cell)]
+                    for cell in CONTEXT_FIGURE_CELLS
+                ]
+                for dataset in DATASETS
+            ],
+            dtype=float,
+        )
+        image = axis.imshow(
+            matrix,
+            cmap=cmap,
+            vmin=0.0,
+            vmax=vmax,
+            aspect="auto",
+        )
+        images.append(image)
+        axis.set_title(title, loc="left", fontsize=8.4, pad=6)
+        axis.set_xticks(range(len(CONTEXT_FIGURE_CELLS)), context_labels)
+        axis.set_yticks(
+            range(len(DATASETS)),
+            [DATASET_LABELS[dataset] for dataset in DATASETS],
+        )
+        axis.tick_params(axis="x", labelbottom=True, labelsize=6.1, length=0)
+        axis.tick_params(axis="y", length=0)
+        axis.axhline(1.5, color="white", linewidth=1.4)
+        axis.add_patch(
+            Rectangle(
+                (primary_index - 0.5, -0.5),
+                1.0,
+                len(DATASETS),
+                fill=False,
+                edgecolor=colors["ink"],
+                linewidth=1.0,
+            )
+        )
+        for row_index in range(len(DATASETS)):
+            for column_index in range(len(CONTEXT_FIGURE_CELLS)):
+                value = float(matrix[row_index, column_index])
+                axis.text(
+                    column_index,
+                    row_index,
+                    f"{value:+.2f}",
+                    ha="center",
+                    va="center",
+                    fontsize=6.2,
+                    color="white" if value > 0.56 * vmax else colors["ink"],
+                )
+    colorbar = figure.colorbar(
+        images[0],
+        ax=axes,
+        fraction=0.025,
+        pad=0.02,
+    )
+    colorbar.set_label("Mean recovery ΔAUROC (alternative − Raw MD)")
+    figure.suptitle(
+        "Recovery from Raw MD across LR × WD contexts\n"
+        "WRN-28-10 · CIFAR-10 ID · epoch 200 last · penultimate · "
+        "cell values are seed means · dark outline marks the primary context",
+        x=0.012,
+        ha="left",
+        fontsize=9.0,
+        linespacing=1.35,
+    )
+    return _save_figure(
+        figure, output_dir, "figure3a_all_context_recovery_matrix"
+    )
+
+
+def figure_primary_absolute_profile(
+    recovery: Sequence[Mapping[str, Any]], output_dir: Path
+) -> list[Path]:
     import matplotlib.pyplot as plt
     import numpy as np
 
     colors = _style()
-    figure, axes = plt.subplots(2, 3, figsize=(7.2, 4.75), sharex=True, sharey=True, constrained_layout=True)
-    xbase = np.arange(len(READOUTS), dtype=float)
-    role_style = {"D": (colors["blue"], -0.08, "o"), "C": (colors["orange"], 0.08, "s")}
-    for panel, dataset in enumerate(DATASETS):
-        axis = axes.flat[panel]
-        selected = [row for row in recovery if row["cell"] == PRIMARY_CELL and row["dataset"] == dataset]
-        for role, (color, offset, marker) in role_style.items():
-            role_rows = [row for row in selected if row["role"] == role]
-            for seed in EXPECTED_SEEDS[PRIMARY_CELL]:
-                seed_rows = sorted([row for row in role_rows if row["seed"] == seed], key=lambda row: [item[0] for item in READOUTS].index(row["readout"]))
-                axis.plot(xbase + offset, [row["auroc"] for row in seed_rows], color=color, linewidth=0.55, alpha=0.25)
-            for x, (readout, _, _) in enumerate(READOUTS):
-                values = [row["auroc"] for row in role_rows if row["readout"] == readout]
-                axis.scatter(np.full(len(values), x+offset), values, s=10, color=color, alpha=0.45, linewidths=0)
-                _errorbar(axis, x+offset, _summary(values), color, marker)
-        axis.set_title(f"{chr(65+panel)}. {DATASET_LABELS[dataset]}", loc="left")
-        axis.set_ylim(-0.02, 1.02)
-        axis.set_xticks(xbase, [item[0] for item in READOUTS])
-        axis.grid(axis="y")
-    for axis in axes[:, 0]:
-        axis.set_ylabel("AUROC")
+    readout_style = {
+        "Raw MD": (colors["gray"], "o", 0.18),
+        "RMD": (colors["blue"], "s", 0.0),
+        "L2-MD": (colors["orange"], "^", -0.18),
+    }
+    role_panels = (
+        ("D", "A. AdamW (decoupled)"),
+        ("C", "B. Adam (coupled)"),
+    )
+    y_positions = {
+        dataset: float(len(DATASETS) - 1 - index)
+        for index, dataset in enumerate(DATASETS)
+    }
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(7.2, 3.75),
+        sharex=True,
+        sharey=True,
+    )
+    figure.subplots_adjust(
+        left=0.14,
+        right=0.985,
+        bottom=0.17,
+        top=0.72,
+        wspace=0.10,
+    )
+    for axis, (role, title) in zip(axes, role_panels, strict=True):
+        for dataset in DATASETS:
+            base_y = y_positions[dataset]
+            for readout, (color, marker, offset) in readout_style.items():
+                values = [
+                    float(row["auroc"])
+                    for row in recovery
+                    if row["cell"] == PRIMARY_CELL
+                    and row["dataset"] == dataset
+                    and row["role"] == role
+                    and row["readout"] == readout
+                ]
+                jitter = np.linspace(-0.035, 0.035, len(values))
+                axis.scatter(
+                    values,
+                    base_y + offset + jitter,
+                    marker=marker,
+                    s=RAW_SEED_MARKER_SIZE,
+                    color=color,
+                    alpha=0.34,
+                    linewidths=0,
+                    zorder=2,
+                )
+                axis.scatter(
+                    [statistics.fmean(values)],
+                    [base_y + offset],
+                    marker=marker,
+                    s=MEAN_MARKER_SIZE,
+                    color=color,
+                    edgecolors=colors["ink"],
+                    linewidths=0.55,
+                    zorder=4,
+                )
+        axis.axhline(3.5, color=colors["light"], linewidth=0.8)
+        axis.set_title(title, loc="left", fontsize=8.6)
+        axis.set_xlim(0.0, 1.0)
+        axis.set_xticks(np.linspace(0.0, 1.0, 5))
+        axis.set_ylim(-0.5, len(DATASETS) - 0.5)
+        axis.set_yticks(
+            [y_positions[dataset] for dataset in DATASETS],
+            [DATASET_LABELS[dataset] for dataset in DATASETS],
+        )
+        axis.grid(axis="x")
+        axis.set_xlabel("AUROC (higher is better)")
+        axis.tick_params(axis="y", length=0)
     handles = [
-        plt.Line2D([0], [0], marker=marker, color=color, markerfacecolor="white", label=role, linestyle="-")
-        for role, (color, _, marker) in role_style.items()
+        plt.Line2D(
+            [0],
+            [0],
+            marker=marker,
+            color="none",
+            markerfacecolor=color,
+            markeredgecolor=colors["ink"],
+            markeredgewidth=0.55,
+            markersize=4.2,
+            label=readout,
+        )
+        for readout, (color, marker, _) in readout_style.items()
     ]
-    figure.legend(handles=handles, frameon=False, ncol=2, loc="outside upper center")
-    return _save_figure(figure, output_dir, "figure3_absolute_recovery")
+    figure.legend(
+        handles=handles,
+        frameon=False,
+        ncol=3,
+        loc="upper right",
+        bbox_to_anchor=(0.99, 0.995),
+    )
+    figure.suptitle(
+        "Primary-context absolute AUROC",
+        x=0.012,
+        y=0.985,
+        ha="left",
+        fontsize=9.0,
+    )
+    figure.text(
+        0.012,
+        0.895,
+        "WRN-28-10 · CIFAR-10 ID · LR=1e−3 · WD=1e−4 · n=5 seeds · "
+        "small markers: seeds · outlined markers: means",
+        ha="left",
+        va="top",
+        fontsize=7.4,
+    )
+    return _save_figure(
+        figure, output_dir, "figure3b_primary_absolute_profile"
+    )
+
+
+def figure_sgdm_comparison(
+    rows: Sequence[Mapping[str, Any]],
+    paired_effects: Sequence[Mapping[str, Any]],
+    output_dir: Path,
+) -> list[Path]:
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    colors = _style()
+    y_positions = {
+        dataset: float(len(DATASETS) - 1 - index)
+        for index, dataset in enumerate(DATASETS)
+    }
+    figure, axes = plt.subplots(
+        1,
+        2,
+        figsize=(7.2, 3.75),
+        sharey=True,
+    )
+    figure.subplots_adjust(
+        left=0.17,
+        right=0.985,
+        bottom=0.17,
+        top=0.72,
+        wspace=0.25,
+    )
+    absolute_axis, effect_axis = axes
+    for dataset in DATASETS:
+        y = y_positions[dataset]
+        values_by_role = {
+            role: [
+                float(row["auroc"])
+                for row in rows
+                if row["dataset"] == dataset
+                and row["role"] == role
+                and row["readout"] == "Raw MD"
+            ]
+            for role in ("D", "C")
+        }
+        means = {
+            role: statistics.fmean(values)
+            for role, values in values_by_role.items()
+        }
+        absolute_axis.plot(
+            [means["D"], means["C"]],
+            [y, y],
+            color=colors["light"],
+            linewidth=1.2,
+            zorder=1,
+        )
+        jitter = np.linspace(-0.075, 0.075, len(SGDM_EXPECTED_SEEDS))
+        absolute_axis.scatter(
+            values_by_role["D"],
+            y + jitter,
+            marker="o",
+            s=RAW_SEED_MARKER_SIZE,
+            facecolors="none",
+            edgecolors=colors["blue"],
+            alpha=0.42,
+            linewidths=0.7,
+            zorder=2,
+        )
+        absolute_axis.scatter(
+            values_by_role["C"],
+            y + jitter,
+            marker="^",
+            s=RAW_SEED_MARKER_SIZE,
+            color=colors["orange"],
+            alpha=0.38,
+            linewidths=0,
+            zorder=2,
+        )
+        absolute_axis.scatter(
+            [means["D"]],
+            [y],
+            marker="o",
+            s=MEAN_MARKER_SIZE,
+            facecolors="white",
+            edgecolors=colors["blue"],
+            linewidths=1.0,
+            zorder=4,
+        )
+        absolute_axis.scatter(
+            [means["C"]],
+            [y],
+            marker="^",
+            s=MEAN_MARKER_SIZE,
+            color=colors["orange"],
+            edgecolors=colors["ink"],
+            linewidths=0.55,
+            zorder=4,
+        )
+
+        effect_values = [
+            float(row["delta_auroc_sgdm_minus_sgdw"])
+            for row in paired_effects
+            if row["dataset"] == dataset
+        ]
+        effect_jitter = np.linspace(-0.075, 0.075, len(effect_values))
+        effect_axis.scatter(
+            effect_values,
+            y + effect_jitter,
+            marker="o",
+            s=RAW_SEED_MARKER_SIZE,
+            color=colors["gray"],
+            alpha=0.40,
+            linewidths=0,
+            zorder=2,
+        )
+        effect_mean = statistics.fmean(effect_values)
+        effect_axis.scatter(
+            [effect_mean],
+            [y],
+            marker="D",
+            s=MEAN_MARKER_SIZE,
+            color=colors["blue"],
+            edgecolors=colors["ink"],
+            linewidths=0.55,
+            zorder=4,
+        )
+        effect_axis.text(
+            effect_mean + 0.006,
+            y,
+            f"{effect_mean:+.3f}",
+            ha="left",
+            va="center",
+            fontsize=6.4,
+            color=colors["ink"],
+        )
+
+    dataset_positions = [y_positions[dataset] for dataset in DATASETS]
+    dataset_labels = [DATASET_LABELS[dataset] for dataset in DATASETS]
+    for axis in axes:
+        axis.axhline(3.5, color=colors["light"], linewidth=0.8)
+        axis.set_ylim(-0.5, len(DATASETS) - 0.5)
+        axis.grid(axis="x")
+    absolute_axis.set_yticks(dataset_positions, dataset_labels)
+    absolute_axis.tick_params(axis="y", length=0)
+    effect_axis.tick_params(axis="y", labelleft=False, length=0)
+    absolute_axis.axvline(
+        0.5,
+        color=colors["gray"],
+        linewidth=0.7,
+        linestyle=(0, (2, 2)),
+    )
+    absolute_axis.set_xlim(0.5, 1.0)
+    absolute_axis.set_xticks(np.linspace(0.5, 1.0, 6))
+    absolute_axis.set_xlabel("Raw MD AUROC (focused scale)")
+    absolute_axis.set_title("A. Absolute Raw MD", loc="left", fontsize=8.6)
+    effect_axis.axvline(0.0, color=colors["ink"], linewidth=0.7)
+    effect_axis.set_xlim(-0.01, 0.205)
+    effect_axis.set_xticks((0.0, 0.05, 0.10, 0.15, 0.20))
+    effect_axis.set_xlabel("Paired ΔAUROC (SGDM − SGDW)")
+    effect_axis.set_title("B. Exact-pair effect", loc="left", fontsize=8.6)
+    handles = [
+        plt.Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="none",
+            markerfacecolor="white",
+            markeredgecolor=colors["blue"],
+            markersize=4.3,
+            label="SGDW (decoupled)",
+        ),
+        plt.Line2D(
+            [0],
+            [0],
+            marker="^",
+            color="none",
+            markerfacecolor=colors["orange"],
+            markeredgecolor=colors["ink"],
+            markersize=4.3,
+            label="SGDM (coupled)",
+        ),
+    ]
+    figure.legend(
+        handles=handles,
+        frameon=False,
+        ncol=2,
+        loc="upper right",
+        bbox_to_anchor=(0.99, 0.995),
+    )
+    figure.suptitle(
+        "Momentum-SGD decay comparison",
+        x=0.012,
+        y=0.985,
+        ha="left",
+        fontsize=9.0,
+    )
+    figure.text(
+        0.012,
+        0.895,
+        "WRN-28-10 · CIFAR-10 ID · LR=0.1 · WD=5e−4 · momentum=0.9 · "
+        "Nesterov · n=3 matched seeds",
+        ha="left",
+        va="top",
+        fontsize=7.4,
+    )
+    return _save_figure(
+        figure,
+        output_dir,
+        "supp_figure2_sgdm_absolute_and_paired_effect",
+    )
+
+
+def figure_sgdm_recovery_table(
+    rows: Sequence[Mapping[str, Any]], output_dir: Path
+) -> list[Path]:
+    import matplotlib.pyplot as plt
+
+    colors = _style()
+    metrics = (
+        "raw_md_auroc",
+        "rmd_auroc",
+        "l2_md_auroc",
+        "rmd_minus_raw",
+        "l2_md_minus_raw",
+    )
+    metric_labels = ("Raw MD", "RMD", "L2-MD", "RMD − Raw", "L2-MD − Raw")
+    summary = summarize_rows(
+        rows,
+        ("region", "role", "training_rule"),
+        metrics,
+    )
+    lookup = {
+        (row["region"], row["role"], row["statistic"]): row for row in summary
+    }
+    body = []
+    row_keys = []
+    for region in ("Near", "Far"):
+        for role, training_rule in SGDM_ROLE_LABELS.items():
+            body.append(
+                [
+                    region,
+                    training_rule,
+                    *[
+                        f"{lookup[(region, role, metric)]['mean']:.3f} ± "
+                        f"{lookup[(region, role, metric)]['sd']:.3f}"
+                        for metric in metrics
+                    ],
+                ]
+            )
+            row_keys.append((region, role))
+
+    figure, axis = plt.subplots(figsize=(9.1, 3.65), constrained_layout=True)
+    axis.axis("off")
+    table = axis.table(
+        cellText=body,
+        colLabels=("Region", "Training rule", *metric_labels),
+        colWidths=(0.075, 0.18, 0.12, 0.12, 0.12, 0.15, 0.15),
+        cellLoc="center",
+        colLoc="center",
+        loc="center",
+    )
+    table.auto_set_font_size(False)
+    table.set_fontsize(7.2)
+    table.scale(1.0, 1.55)
+    for (row_index, column_index), cell in table.get_celld().items():
+        cell.set_edgecolor("#C8C8C8")
+        cell.set_linewidth(0.45)
+        if row_index == 0:
+            cell.set_facecolor("#ECECEC")
+            cell.set_text_props(weight="bold", color=colors["ink"])
+        else:
+            region, role = row_keys[row_index - 1]
+            cell.set_facecolor("#F7F7F7" if region == "Near" else "#FFFFFF")
+            if column_index == 1:
+                cell.set_text_props(
+                    color={
+                        "Z": colors["gray"],
+                        "D": colors["blue"],
+                        "C": colors["orange"],
+                    }[role],
+                    weight="bold" if role != "Z" else "normal",
+                )
+            if column_index in (5, 6):
+                cell.set_text_props(color=colors["green"])
+    axis.set_title(
+        "Near/Far AUROC levels and recovery in the momentum-SGD comparison\n"
+        "seed-first, equally weighted dataset macros · mean ± sample SD · n=3 seeds · "
+        "positive recovery means improvement over Raw MD\n"
+        "WRN-28-10 · CIFAR-10 ID · LR=0.1 · WD=5e−4 · momentum=0.9 · Nesterov",
+        loc="left",
+        fontsize=9.0,
+        pad=14,
+        linespacing=1.35,
+    )
+    return _save_figure(
+        figure, output_dir, "supp_figure2_sgdm_recovery_table"
+    )
 
 
 def figure_fpr95_recovery(recovery: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]:
@@ -1204,6 +1878,9 @@ def build_pack(
     recovery = recovery_seed_rows(merged)
     context_absolute = context_absolute_raw_rows(recovery)
     recovery_gain = recovery_gain_seed_rows(recovery)
+    sgdm_recovery = sgdm_recovery_seed_rows(score_rows)
+    sgdm_paired_effect = sgdm_paired_raw_effect_seed_rows(sgdm_recovery)
+    sgdm_region_recovery = sgdm_region_recovery_seed_rows(sgdm_recovery)
     churn = churn_seed_rows(merged)
     endpoint_geometry = endpoint_geometry_rows(geometry_rows)
     id_endpoint = id_endpoint_rows(geometry_rows)
@@ -1239,6 +1916,31 @@ def build_pack(
             ("delta_auroc_from_raw", "delta_fpr95_from_raw"),
             paired=True,
         ),
+        "sgdm_readout_seed_rows.csv": sgdm_recovery,
+        "sgdm_readout_summary.csv": summarize_rows(
+            sgdm_recovery,
+            ("dataset", "region", "role", "training_rule", "readout"),
+            ("auroc", "fpr95"),
+        ),
+        "sgdm_paired_raw_effect_seed_rows.csv": sgdm_paired_effect,
+        "sgdm_paired_raw_effect_summary.csv": summarize_rows(
+            sgdm_paired_effect,
+            ("dataset", "region"),
+            ("delta_auroc_sgdm_minus_sgdw",),
+            paired=True,
+        ),
+        "sgdm_region_recovery_seed_rows.csv": sgdm_region_recovery,
+        "sgdm_region_absolute_summary.csv": summarize_rows(
+            sgdm_region_recovery,
+            ("region", "role", "training_rule"),
+            ("raw_md_auroc", "rmd_auroc", "l2_md_auroc"),
+        ),
+        "sgdm_region_recovery_summary.csv": summarize_rows(
+            sgdm_region_recovery,
+            ("region", "role", "training_rule"),
+            ("rmd_minus_raw", "l2_md_minus_raw"),
+            paired=True,
+        ),
         "churn_seed_rows.csv": churn,
         "churn_summary.csv": summarize_rows(
             churn,
@@ -1268,7 +1970,14 @@ def build_pack(
     figure_paths += figure_alpha(alpha, figures_dir)
     figure_paths += figure_context_absolute_raw(context_absolute, figures_dir)
     figure_paths += figure_heatmap(context_absolute, figures_dir)
-    figure_paths += figure_recovery(recovery, figures_dir)
+    figure_paths += figure_recovery_matrix(recovery_gain, figures_dir)
+    figure_paths += figure_primary_absolute_profile(recovery, figures_dir)
+    figure_paths += figure_sgdm_comparison(
+        sgdm_recovery,
+        sgdm_paired_effect,
+        figures_dir,
+    )
+    figure_paths += figure_sgdm_recovery_table(sgdm_region_recovery, figures_dir)
     figure_paths += figure_fpr95_recovery(recovery, figures_dir)
     figure_paths += figure_churn(churn, figures_dir)
     figure_paths += figure_geometry_endpoint(geometry_pairs, figures_dir)

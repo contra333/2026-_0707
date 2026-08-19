@@ -14,6 +14,9 @@ from oge.analysis.task_f_frozen_paper_pack import (
     context_absolute_raw_rows,
     context_heatmap_matrices,
     recovery_gain_seed_rows,
+    sgdm_paired_raw_effect_seed_rows,
+    sgdm_recovery_seed_rows,
+    sgdm_region_recovery_seed_rows,
     summarize_rows,
 )
 
@@ -221,6 +224,115 @@ def test_context_heatmap_matrices_keep_absolute_levels_and_pair_delta(monkeypatc
     assert matrices["adam"][1][1] == pytest.approx(0.55)
     assert matrices["adamw"][1][1] == pytest.approx(0.725)
     assert matrices["paired_delta"][1][1] == pytest.approx(-0.175)
+
+
+def _synthetic_sgdm_rows():
+    rows = []
+    readouts = (
+        ("raw", "md", 0.0),
+        ("raw", "rmd", 0.2),
+        ("l2", "md", 0.1),
+    )
+    for dataset_index, dataset in enumerate(
+        ("cifar100", "tin", "mnist", "svhn")
+    ):
+        for seed in (0, 1):
+            for role, role_offset in (("Z", 0.0), ("D", 0.1), ("C", 0.2)):
+                for transform, detector, readout_offset in readouts:
+                    auroc = (
+                        0.3
+                        + 0.05 * dataset_index
+                        + 0.01 * seed
+                        + role_offset
+                        + readout_offset
+                    )
+                    rows.append(
+                        {
+                            "cell": "sgdm_lr0.1_wd5e-4",
+                            "dataset": dataset,
+                            "seed": seed,
+                            "role": role,
+                            "checkpoint_epoch": 200,
+                            "checkpoint_role": "last",
+                            "depth_tap": "penultimate",
+                            "transform": transform,
+                            "detector": detector,
+                            "auroc": auroc,
+                            "fpr95": 1.0 - auroc,
+                            "initialization_sha256": f"init-{dataset}-{seed}",
+                            "data_stream_sha256": f"stream-{dataset}-{seed}",
+                            "source_manifest_sha256": f"manifest-{seed}",
+                        }
+                    )
+    return rows
+
+
+def test_sgdm_recovery_and_region_macros_are_seed_first(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS",
+        ("cifar100", "tin", "mnist", "svhn"),
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.SGDM_EXPECTED_SEEDS", (0, 1)
+    )
+
+    readout_rows = sgdm_recovery_seed_rows(_synthetic_sgdm_rows())
+    paired_rows = sgdm_paired_raw_effect_seed_rows(readout_rows)
+    region_rows = sgdm_region_recovery_seed_rows(readout_rows)
+
+    assert len(readout_rows) == 4 * 2 * 3 * 3
+    assert len(paired_rows) == 4 * 2
+    assert len(region_rows) == 2 * 3 * 2
+    assert all(
+        row["delta_auroc_sgdm_minus_sgdw"] == pytest.approx(0.1)
+        for row in paired_rows
+    )
+    near_decoupled_seed0 = next(
+        row
+        for row in region_rows
+        if row["region"] == "Near" and row["role"] == "D" and row["seed"] == 0
+    )
+    assert near_decoupled_seed0["dataset_count"] == 2
+    assert near_decoupled_seed0["raw_md_auroc"] == pytest.approx(0.425)
+    assert near_decoupled_seed0["rmd_auroc"] == pytest.approx(0.625)
+    assert near_decoupled_seed0["rmd_minus_raw"] == pytest.approx(0.2)
+    assert near_decoupled_seed0["l2_md_minus_raw"] == pytest.approx(0.1)
+
+
+def test_sgdm_recovery_rejects_missing_training_rule(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS",
+        ("cifar100", "tin", "mnist", "svhn"),
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.SGDM_EXPECTED_SEEDS", (0, 1)
+    )
+    rows = [row for row in _synthetic_sgdm_rows() if row["role"] != "C"]
+    with pytest.raises(ValueError, match="SGDM recovery coverage mismatch"):
+        sgdm_recovery_seed_rows(rows)
+
+
+def test_sgdm_paired_effect_rejects_identity_mismatch(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS",
+        ("cifar100", "tin", "mnist", "svhn"),
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.SGDM_EXPECTED_SEEDS", (0, 1)
+    )
+    readout_rows = sgdm_recovery_seed_rows(_synthetic_sgdm_rows())
+    mismatched = [dict(row) for row in readout_rows]
+    target = next(
+        row
+        for row in mismatched
+        if row["dataset"] == "cifar100"
+        and row["seed"] == 0
+        and row["role"] == "C"
+        and row["readout"] == "Raw MD"
+    )
+    target["data_stream_sha256"] = "different-stream"
+    with pytest.raises(ValueError, match="SGDM paired identity mismatch"):
+        sgdm_paired_raw_effect_seed_rows(mismatched)
 
 
 def test_summary_labels_only_within_seed_contrasts_as_paired():
