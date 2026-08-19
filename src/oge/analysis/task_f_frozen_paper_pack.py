@@ -42,6 +42,15 @@ DATASET_LABELS = {
     "places365": "Places365",
 }
 ALPHA_BY_ROLE = {"D": 0.0, "M": 0.5, "C": 1.0}
+ALPHA_MARKERS = {"D": "o", "M": "s", "C": "^"}
+RAW_SEED_MARKER_SIZE = 11.5
+MEAN_MARKER_SIZE = 18.0
+CONTEXT_FIGURE_CELLS = (
+    "adam_lr3e-4_wd1e-4",
+    "adam_lr3e-4_wd1e-3",
+    PRIMARY_CELL,
+    "adam_lr1e-3_wd1e-3",
+)
 READOUTS = (
     ("Raw MD", "raw", "md"),
     ("RMD", "raw", "rmd"),
@@ -267,6 +276,43 @@ def recovery_seed_rows(merged: Mapping[str, Any]) -> list[dict[str, Any]]:
     ):
         raise ValueError("recovery coverage mismatch")
     return output
+
+
+def context_absolute_raw_rows(recovery: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    output = [
+        dict(row)
+        for row in recovery
+        if row["cell"] in CONTEXT_FIGURE_CELLS
+        and row["role"] in ("D", "C")
+        and row["readout"] == "Raw MD"
+    ]
+    _unique(output, ("cell", "dataset", "seed", "role"), name="context absolute raw")
+    expected = {
+        (cell, dataset, seed, role)
+        for cell in CONTEXT_FIGURE_CELLS
+        for dataset in DATASETS
+        for seed in EXPECTED_SEEDS[cell]
+        for role in ("D", "C")
+    }
+    observed = {
+        (row["cell"], row["dataset"], int(row["seed"]), row["role"])
+        for row in output
+    }
+    if observed != expected:
+        raise ValueError(
+            "context absolute Raw MD coverage mismatch: "
+            f"missing={sorted(expected - observed)[:5]}, "
+            f"extra={sorted(observed - expected)[:5]}"
+        )
+    return sorted(
+        output,
+        key=lambda row: (
+            DATASETS.index(row["dataset"]),
+            CONTEXT_FIGURE_CELLS.index(row["cell"]),
+            row["role"],
+            int(row["seed"]),
+        ),
+    )
 
 
 def recovery_gain_seed_rows(recovery: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
@@ -561,7 +607,7 @@ def _errorbar(axis: Any, x: float, stat: Mapping[str, Any], color: str, marker: 
     )
 
 
-def figure_alpha(alpha: Sequence[Mapping[str, Any]], zero: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]:
+def figure_alpha(alpha: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]:
     import matplotlib.pyplot as plt
     import numpy as np
 
@@ -587,41 +633,23 @@ def figure_alpha(alpha: Sequence[Mapping[str, Any]], zero: Sequence[Mapping[str,
             axis.scatter(
                 [x + value for value in jitter],
                 [row["auroc"] for row in rows],
-                s=13,
+                marker=ALPHA_MARKERS[role],
+                s=RAW_SEED_MARKER_SIZE,
                 color=role_colors[role],
-                alpha=0.55,
+                alpha=0.45,
                 linewidths=0,
                 zorder=2,
             )
             axis.scatter(
                 [x],
                 [statistics.fmean(float(row["auroc"]) for row in rows)],
-                marker="D",
-                s=31,
+                marker=ALPHA_MARKERS[role],
+                s=MEAN_MARKER_SIZE,
                 color=role_colors[role],
                 edgecolors=colors["ink"],
-                linewidths=0.65,
+                linewidths=0.6,
                 zorder=4,
             )
-        zero_values = [row["auroc"] for row in zero if row["dataset"] == dataset]
-        zero_stat = _summary(zero_values)
-        axis.axhline(
-            zero_stat["mean"],
-            color=colors["gray"],
-            linestyle=(0, (3, 2)),
-            linewidth=0.75,
-            zorder=0,
-        )
-        axis.annotate(
-            "No decay (WD=0)",
-            xy=(2.16, zero_stat["mean"]),
-            xytext=(0, 3),
-            textcoords="offset points",
-            ha="right",
-            va="bottom",
-            fontsize=6.1,
-            color=colors["gray"],
-        )
         axis.set_title(f"{chr(65+panel)}. {DATASET_LABELS[dataset]}", loc="left")
         axis.set_xlim(-0.2, 2.2)
         axis.set_ylim(0.0, 1.0)
@@ -635,13 +663,110 @@ def figure_alpha(alpha: Sequence[Mapping[str, Any]], zero: Sequence[Mapping[str,
     figure.suptitle(
         "Raw MD across decay-coupling allocation\n"
         "WRN-28-10 · CIFAR-10 ID · LR=1e−3 · total WD=1e−4 · epoch 200 last · "
-        "penultimate · n=5 matched seeds · dots: seeds · diamonds: means",
+        "penultimate · n=5 matched seeds · small translucent markers: seeds · "
+        "outlined markers: means",
         x=0.012,
         ha="left",
         fontsize=9.2,
         linespacing=1.4,
     )
     return _save_figure(figure, output_dir, "figure1_alpha_path_raw_md")
+
+
+def figure_context_absolute_raw(
+    rows: Sequence[Mapping[str, Any]], output_dir: Path
+) -> list[Path]:
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    colors = _style()
+    figure, axes = plt.subplots(
+        2,
+        3,
+        figsize=(7.2, 5.25),
+        sharex=True,
+        sharey=True,
+        constrained_layout=True,
+    )
+    xbase = np.arange(len(CONTEXT_FIGURE_CELLS), dtype=float)
+    role_style = {
+        "D": (colors["blue"], -0.10, "o", "AdamW"),
+        "C": (colors["orange"], 0.10, "^", "Adam"),
+    }
+    context_labels = [
+        "LR 3e−4\nWD 1e−4",
+        "LR 3e−4\nWD 1e−3",
+        "LR 1e−3\nWD 1e−4",
+        "LR 1e−3\nWD 1e−3",
+    ]
+    for panel, dataset in enumerate(DATASETS):
+        axis = axes.flat[panel]
+        selected = [row for row in rows if row["dataset"] == dataset]
+        for role, (color, offset, marker, _) in role_style.items():
+            for x, cell in enumerate(CONTEXT_FIGURE_CELLS):
+                values = [
+                    float(row["auroc"])
+                    for row in selected
+                    if row["cell"] == cell and row["role"] == role
+                ]
+                jitter = np.linspace(-0.035, 0.035, len(values))
+                axis.scatter(
+                    xbase[x] + offset + jitter,
+                    values,
+                    marker=marker,
+                    s=RAW_SEED_MARKER_SIZE,
+                    color=color,
+                    alpha=0.42,
+                    linewidths=0,
+                    zorder=2,
+                )
+                axis.scatter(
+                    [xbase[x] + offset],
+                    [statistics.fmean(values)],
+                    marker=marker,
+                    s=MEAN_MARKER_SIZE,
+                    color=color,
+                    edgecolors=colors["ink"],
+                    linewidths=0.6,
+                    zorder=4,
+                )
+        axis.set_title(f"{chr(65+panel)}. {DATASET_LABELS[dataset]}", loc="left")
+        axis.set_xlim(-0.35, len(CONTEXT_FIGURE_CELLS) - 0.65)
+        axis.set_ylim(0.0, 1.0)
+        axis.set_xticks(xbase, context_labels)
+        axis.set_yticks(np.linspace(0, 1, 6))
+        axis.grid(axis="y")
+        axis.tick_params(axis="x", labelbottom=True, labelsize=6.1, pad=2.5)
+    for axis in axes[:, 0]:
+        axis.set_ylabel("Raw MD AUROC")
+    handles = [
+        plt.Line2D(
+            [0],
+            [0],
+            marker=marker,
+            color="none",
+            markerfacecolor=color,
+            markeredgecolor=colors["ink"],
+            markeredgewidth=0.6,
+            markersize=4.2,
+            label=label,
+        )
+        for color, _, marker, label in role_style.values()
+    ]
+    figure.legend(handles=handles, frameon=False, ncol=2, loc="outside upper center")
+    figure.suptitle(
+        "Absolute Raw MD across LR × WD contexts\n"
+        "WRN-28-10 · CIFAR-10 ID · epoch 200 last · penultimate · "
+        "primary n=5, other contexts n=3 · small translucent markers: seeds · "
+        "outlined markers: means",
+        x=0.012,
+        ha="left",
+        fontsize=9.2,
+        linespacing=1.4,
+    )
+    return _save_figure(
+        figure, output_dir, "supp_figure1_context_absolute_raw_md"
+    )
 
 
 def figure_heatmap(
@@ -934,6 +1059,7 @@ def build_pack(
     zero = zero_reference_rows(merged)
     heatmap = heatmap_seed_rows(merged)
     recovery = recovery_seed_rows(merged)
+    context_absolute = context_absolute_raw_rows(recovery)
     recovery_gain = recovery_gain_seed_rows(recovery)
     churn = churn_seed_rows(merged)
     endpoint_geometry = endpoint_geometry_rows(geometry_rows)
@@ -955,6 +1081,12 @@ def build_pack(
             ("cell", "dataset", "region"),
             ("delta_auroc", "delta_fpr95"),
             paired=True,
+        ),
+        "context_absolute_raw_seed_rows.csv": context_absolute,
+        "context_absolute_raw_summary.csv": summarize_rows(
+            context_absolute,
+            ("cell", "dataset", "region", "role", "readout"),
+            ("auroc", "fpr95"),
         ),
         "recovery_absolute_seed_rows.csv": recovery,
         "recovery_absolute_summary.csv": summarize_rows(recovery, ("cell", "dataset", "region", "role", "readout"), ("auroc", "fpr95")),
@@ -991,7 +1123,8 @@ def build_pack(
         table_paths.append(path)
 
     figure_paths = []
-    figure_paths += figure_alpha(alpha, zero, figures_dir)
+    figure_paths += figure_alpha(alpha, figures_dir)
+    figure_paths += figure_context_absolute_raw(context_absolute, figures_dir)
     figure_paths += figure_heatmap(heatmap, endpoint_macro, figures_dir)
     figure_paths += figure_recovery(recovery, figures_dir)
     figure_paths += figure_fpr95_recovery(recovery, figures_dir)

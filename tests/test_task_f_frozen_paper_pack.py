@@ -6,8 +6,12 @@ import pytest
 
 from oge.analysis.task_f_figure_inputs import _top_trace_share, normalized_role
 from oge.analysis.task_f_frozen_paper_pack import (
+    ALPHA_MARKERS,
+    MEAN_MARKER_SIZE,
+    RAW_SEED_MARKER_SIZE,
     _paired_effect,
     alpha_region_macro_seed_rows,
+    context_absolute_raw_rows,
     recovery_gain_seed_rows,
     summarize_rows,
 )
@@ -94,6 +98,85 @@ def test_alpha_macro_is_seed_first(monkeypatch):
     far_d = next(row for row in output if row["role"] == "D" and row["region"] == "Far")
     assert near_d["auroc"] == pytest.approx(0.5)
     assert far_d["auroc"] == pytest.approx(0.6)
+
+
+def test_alpha_marker_contract_is_redundant_and_balanced():
+    assert set(ALPHA_MARKERS) == {"D", "M", "C"}
+    assert len(set(ALPHA_MARKERS.values())) == 3
+    assert RAW_SEED_MARKER_SIZE < MEAN_MARKER_SIZE
+    assert MEAN_MARKER_SIZE / RAW_SEED_MARKER_SIZE < 2.0
+
+
+def test_context_absolute_raw_rows_selects_all_cells_and_only_raw(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.CONTEXT_FIGURE_CELLS",
+        ("cell_a", "cell_b"),
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.EXPECTED_SEEDS",
+        {"cell_a": (0,), "cell_b": (0,)},
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS", ("cifar100",)
+    )
+    rows = []
+    for cell in ("cell_a", "cell_b"):
+        for role, value in (("D", 0.7), ("C", 0.4)):
+            rows.append(
+                {
+                    "cell": cell,
+                    "dataset": "cifar100",
+                    "region": "Near",
+                    "seed": 0,
+                    "role": role,
+                    "readout": "Raw MD",
+                    "auroc": value,
+                    "fpr95": 1.0 - value,
+                }
+            )
+            rows.append(
+                {
+                    "cell": cell,
+                    "dataset": "cifar100",
+                    "region": "Near",
+                    "seed": 0,
+                    "role": role,
+                    "readout": "RMD",
+                    "auroc": 0.9,
+                    "fpr95": 0.2,
+                }
+            )
+    output = context_absolute_raw_rows(rows)
+    assert len(output) == 4
+    assert {row["cell"] for row in output} == {"cell_a", "cell_b"}
+    assert {row["role"] for row in output} == {"C", "D"}
+    assert {row["readout"] for row in output} == {"Raw MD"}
+
+
+def test_context_absolute_raw_rows_rejects_missing_role(monkeypatch):
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.CONTEXT_FIGURE_CELLS", ("cell",)
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.EXPECTED_SEEDS", {"cell": (0,)}
+    )
+    monkeypatch.setattr(
+        "oge.analysis.task_f_frozen_paper_pack.DATASETS", ("cifar100",)
+    )
+    rows = [
+        {
+            "cell": "cell",
+            "dataset": "cifar100",
+            "region": "Near",
+            "seed": 0,
+            "role": "D",
+            "readout": "Raw MD",
+            "auroc": 0.7,
+            "fpr95": 0.3,
+        }
+    ]
+    with pytest.raises(ValueError, match="coverage mismatch"):
+        context_absolute_raw_rows(rows)
 
 
 def test_summary_labels_only_within_seed_contrasts_as_paired():
