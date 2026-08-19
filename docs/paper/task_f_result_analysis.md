@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
-Frozen inspection-pack generator HEAD: `202d1078fbe28e166bdab633978b39219fac54c9`
+Frozen inspection-pack generator HEAD: `d0245f2ad46d2a42c2086b760bb1b6012ce2f3ef`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
 사전등록 estimand를 바꾸지 않으며, Evidence Pack 두 개는 원자료 inventory와
@@ -45,7 +45,10 @@ provenance로 유지한다.
 | Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | AdamW alpha=0, Mixed alpha=0.5, Adam alpha=1의 direct labels와 circle/square/triangle; raw seed와 같은-shape mean만 표시하고 연결선, interval, No-decay reference는 표시하지 않음 |
 | Figure 1 supplement | 네 LR×WD context에서 AdamW/Adam의 absolute Raw MD 수준은 어떻게 달라지는가? | six-dataset 2×3 panels; 네 context의 AdamW circle과 Adam triangle, raw seed와 mean만 표시 |
 | Figure 2 | AdamW와 Adam의 Raw MD 수준 및 그 차이가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | AdamW Raw MD, Adam Raw MD, paired Adam−AdamW ΔAUROC의 세 heatmap; 두 Raw-MD panel은 공통 0--1 scale |
-| Figure 3 | Raw MD 실패 뒤 RMD/L2-MD가 어느 절대 수준까지 회복하는가? | C와 D 각각의 Raw MD/RMD/L2-MD 절대 AUROC와 seed variation |
+| Figure 2 supplement | SGDM family에서도 coupling comparison의 크기와 부호가 같은가? | 여섯 dataset의 SGDW/SGDM Raw MD 절대값과 exact-pair `SGDM−SGDW`; 18/18 pair의 initialization/data-stream identity 확인 |
+| SGDM Near/Far table | No-decay, SGDW, SGDM에서 Raw MD/RMD/L2-MD의 절대값과 recovery는 얼마인가? | seed 안에서 dataset을 동일 가중한 Near/Far mean ± sample SD; Near 2개, Far 4개 dataset |
+| Figure 3A | 네 LR×WD context에서 RMD/L2-MD recovery가 얼마나 반복되는가? | AdamW/Adam × RMD/L2-MD의 dataset×context mean `(alternative − Raw MD)`; context를 pool하지 않음 |
+| Figure 3B | Primary에서 recovery 변화량 뒤의 최종 절대 AUROC는 얼마인가? | AdamW/Adam의 Raw MD/RMD/L2-MD raw seed와 mean; `LR=1e-3`, `WD=1e-4`, n=5 |
 | Figure 4 | Raw-MD net change는 어떤 Gain/Loss 교환으로 만들어지는가? | dataset별 Gain, Loss, Churn; 같은 seed의 C--D pair transition |
 | Figure 5 | OOD 변화와 함께 움직이는 endpoint geometry는 무엇인가? | norm, effective rank, within trace, CDNV, NC0--NC3의 paired effect |
 | Figure 6 | Raw-MD와 geometry 차이가 언제, 어느 depth에서 형성되는가? | epoch/depth trajectory를 나란히 둔 concordance panel |
@@ -97,12 +100,14 @@ trace `+0.20959`, CDNV `-0.04972`가 함께 관찰된다. NC0 `-1.84175`, NC2
 
 재현 가능한 bundle은 다음 위치에 있다.
 
-`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/3019ae9d3d8cceb78c97ce46352ccb167c0df45720763f48d06f340807352426/`
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/8e6b8ab9fe52cfd8f2f7fb33681de4e1f10c8d674fba3597dd6427f6e59759dd/`
 
-Bundle에는 9개 Figure의 PDF/SVG/300-dpi PNG, 22개 CSV table, manifest,
+Bundle에는 12개 Figure/table rendering의 PDF/SVG/300-dpi PNG, 29개 CSV table, manifest,
 `SHA256SUMS`가 있다. Manifest SHA-256은 bundle suffix와 같은
-`3019ae9d3d8cceb78c97ce46352ccb167c0df45720763f48d06f340807352426`다.
-동일 입력/코드로 독립 재생성한 49개 Figure/Table 파일과 manifest는 byte-identical
+`8e6b8ab9fe52cfd8f2f7fb33681de4e1f10c8d674fba3597dd6427f6e59759dd`다.
+Generator는 clean commit `d0245f2ad46d2a42c2086b760bb1b6012ce2f3ef`에
+결박됐다. 동일 입력/코드의 반복 빌드와 HF round-trip에서 67개 pack 파일이
+byte-identical
 했다. 이 과정은 checkpoint, example, feature array, score array를 읽지 않은
 manifest-only post-result analysis다.
 
@@ -116,8 +121,13 @@ LR×WD context의 AdamW/Adam absolute Raw-MD AUROC를 six-dataset 2×3 panel로
 seed panel을 AdamW Raw MD, Adam Raw MD, paired `Adam − AdamW`의 세 dataset ×
 context heatmap으로 바꿨다. 두 Raw-MD panel은 공통 0--1 scale이며 cell은 seed
 mean, difference는 matched seed 안에서 먼저 계산한 뒤 평균한다. 이 변경은 기존
-수치 결과를 바꾸지 않는다. 이전 frozen pack과 비교해 22개 CSV와 Figure 2 이외의
-모든 Figure 파일은 byte-identical하다.
+수치 결과를 바꾸지 않는다. Figure 2 supplement는 SGDW/SGDM의 절대 Raw MD와
+exact-pair effect를 분리하며, 18/18 dataset×seed pair의 initialization/data-stream
+identity를 확인한다. SGDM의 반대 방향은 optimizer-family boundary이지 family
+main effect의 인과 추정이 아니다. Figure 3A는 네 LR×WD context의 RMD/L2-MD
+recovery를 context별로 보여 주고, Figure 3B는 primary의 Raw MD/RMD/L2-MD 절대
+AUROC를 raw seed와 mean으로 보존한다. Recovery와 최종 절대 성능을 혼동하지 않으며
+서로 다른 LR context를 하나의 통계량으로 pool하지 않는다.
 
 ### 해석 금지선
 
