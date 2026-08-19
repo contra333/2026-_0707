@@ -111,6 +111,23 @@ byte-identical
 했다. 이 과정은 checkpoint, example, feature array, score array를 읽지 않은
 manifest-only post-result analysis다.
 
+노트북에서 최신 분석을 복원할 때는 다음 순서를 사용한다.
+
+```bash
+git fetch --prune origin
+git switch main
+git pull --ff-only origin main
+
+hf buckets sync \
+  hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/8e6b8ab9fe52cfd8f2f7fb33681de4e1f10c8d674fba3597dd6427f6e59759dd/ \
+  artifacts/task_f_frozen_paper_pack_20260819_8e6b8ab9
+(cd artifacts/task_f_frozen_paper_pack_20260819_8e6b8ab9 && sha256sum -c SHA256SUMS)
+```
+
+학과 서버의 checkpoint, feature, score 원자료는 기존 `STATUS.md`와 manifest의
+host-local source root를 따른다. 이 reader pack 복원은 새 protected access나
+재평가를 수행하지 않는다.
+
 Figure 1은 reader QA에 따라 α 조건을 x축에 직접 표기하고,
 AdamW/Mixed/Adam을 circle/square/triangle로 구분한다. Raw seed는 작고 투명하게,
 mean은 같은 shape의 작은 outline marker로 표시하며 gray seed line, vertical
