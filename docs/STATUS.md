@@ -5,6 +5,9 @@ Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
 Frozen inspection-pack generator HEAD: `b73857d7223ae164d8c9e9e3324f1fbc23333774`
 Plan B freeze documentation commit:
 `9c88a22357669b7210a53f78d7a43f36126fdcdc`
+ResNet seed-first reader-pack source/merge commits:
+`8973c74edde73375b2db02eb3858757e65a6b470` /
+`7aaf6206b1bebe6139f3fcc7b9817c6ef0b92f78`
 
 ## Current phase
 
@@ -21,6 +24,8 @@ context, Marginal localization, small-cell ID guardrail은 재현됐지만 large
 Near에서 `abs(Delta RMD) < abs(Delta Raw MD)`가 실패했다. Card 13 Section 15.3에
 따라 architecture-general claim은 열리지 않으며 현재 ICLR main-paper promotion은
 중단한다. 새 LR/WD grid나 mechanism으로 구조하지 않는다.
+후속 seed-first reader pack과 post-result ID-only endpoint geometry
+diagnostic도 완료됐으며 기존 `PARTIAL` 판정은 변경되지 않았다.
 
 Current source of interpretation:
 
@@ -119,6 +124,17 @@ from the completed merged analysis and compact server manifest exports; it
 loaded no checkpoint, protected example, feature array, or score array.
 Figure 1의 reader-QA 수정은 수치와 표를 바꾸지 않고 gray seed 연결선과 vertical
 interval을 제거했으며, raw seed dot과 mean diamond만 남겼다.
+
+ResNet-18 seed-first PARTIAL-boundary reader pack:
+`hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_paper_pack_20260819/d8320eb640caa8ea9d6504752ff3d18d54b7e845728cedcd329b4150b1b4b39d/`.
+The manifest SHA-256 is the hash-addressed suffix. It contains 9 Figure
+triplets (R1--R6, with R2A/R2B, and S1--S2), seed/summary CSVs, protocol and
+numerical tables, a unified provenance manifest, and portable checksums.
+Coverage is 20 runs, 10 C--D pairs, six datasets, 84 score arrays per pair,
+and 20 host-local endpoint geometry records. The maximum Gain/Loss/Churn
+identity residual is `1.11e-16`; duplicate builds and the HF round trip were
+byte-identical. Geometry is explicitly post-result ID-only exploratory and
+does not alter the frozen `PARTIAL` verdict.
 
 No checkpoint was loaded. No training, protected inference, detector refit,
 band ablation, clipping, or new detector was run.
@@ -221,6 +237,13 @@ coupling-harm language are prohibited.
    inference or refit. Independent reconstruction reproduced the terminal
    verdict. The canonical terminal, validation identity, and shared bundle are
    recorded above and in Card 13 Section 15.7.
+
+   The post-result reader pack is also complete. PR #143 added a fail-closed
+   CPU analysis CLI, recomputed AUROC/FPR95/Gain/Loss/Churn and exact score
+   accounting from stored score arrays, and computed endpoint geometry from
+   existing host-local `id_train` features. It produced no new endpoint and
+   did not change the verdict. ResNet epoch/depth formation remains
+   `NOT_AVAILABLE_BY_DESIGN`.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to

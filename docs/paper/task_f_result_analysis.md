@@ -382,6 +382,75 @@ heterogeneity다. Far에서는 RMD gap `0.1302`가 Raw-MD gap `0.1758`보다 작
 main-paper promotion을 열지 않으며 LR/WD grid, CIFAR-100, 새 mechanism으로
 rescue하지 않는다. WRN result는 그 실험 범위 안의 결과로 남는다.
 
+### 9.2 ResNet seed-first reader pack: 사람이 읽어야 할 결과
+
+이 절은 Section 9.1의 판정을 다시 내리는 분석이 아니다. 저장된 10개 C--D
+pair record와 동일 sample-order score를 seed-first protocol로 다시 계산하고,
+host-local `id_train` feature에서 post-result endpoint geometry를 계산해
+**왜 `PARTIAL`인지 펼쳐 보이는 reader pack**이다. 분석 전에 Card 13 Section
+15.8에 다음 경계를 고정했다.
+
+- detector 및 primary geometry fit은 `id_train` 45,000장만 사용한다;
+- `id_validation` 5,000장은 held-out geometry control이고 fit에 섞지 않는다;
+- Accuracy/NLL/ECE는 `id_test` 10,000장이다;
+- ResNet에는 C/D만 있으므로 alpha trajectory, M, Z를 주장하지 않는다;
+- endpoint geometry는 post-result, ID-only exploratory diagnostic이며 기존
+  `PARTIAL` 판정을 바꾸지 않는다; 그리고
+- epoch/depth feature는 `NOT_AVAILABLE_BY_DESIGN`이며 새 inference로 채우지 않는다.
+
+#### Dataset별 절대 성능
+
+아래 값은 다섯 training seed의 mean이며 각 칸은 `D/C`, 즉 AdamW/Adam 순서다.
+AUROC는 높을수록 좋고 FPR95는 낮을수록 좋다. sample SD, ordinary 90% interval,
+seed별 raw point, recovery와 paired C--D interval은 reader pack CSV에 보존했다.
+
+| Context | Dataset | Raw AUROC | RMD AUROC | L2 AUROC | Raw FPR95 | RMD FPR95 | L2 FPR95 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| large | CIFAR-100 | 0.562/0.530 | 0.879/0.735 | 0.862/0.729 | 0.925/0.969 | 0.596/0.748 | 0.650/0.834 |
+|  | Tiny ImageNet | 0.537/0.497 | 0.899/0.758 | 0.888/0.745 | 0.951/0.986 | 0.538/0.713 | 0.580/0.832 |
+|  | MNIST | 0.467/0.456 | 0.892/0.772 | 0.865/0.790 | 0.978/0.996 | 0.610/0.704 | 0.794/0.744 |
+|  | SVHN | 0.847/0.417 | 0.893/0.805 | 0.941/0.799 | 0.512/0.994 | 0.655/0.674 | 0.349/0.662 |
+|  | Textures | 0.827/0.618 | 0.921/0.753 | 0.946/0.808 | 0.509/0.854 | 0.456/0.697 | 0.289/0.586 |
+|  | Places365 | 0.564/0.512 | 0.910/0.766 | 0.896/0.766 | 0.946/0.989 | 0.484/0.697 | 0.550/0.816 |
+| small | CIFAR-100 | 0.622/0.616 | 0.874/0.873 | 0.844/0.870 | 0.897/0.915 | 0.616/0.607 | 0.683/0.608 |
+|  | Tiny ImageNet | 0.612/0.592 | 0.896/0.894 | 0.870/0.898 | 0.915/0.945 | 0.557/0.554 | 0.630/0.529 |
+|  | MNIST | 0.619/0.539 | 0.865/0.901 | 0.807/0.881 | 0.926/0.963 | 0.667/0.558 | 0.799/0.628 |
+|  | SVHN | 0.863/0.674 | 0.876/0.883 | 0.901/0.921 | 0.511/0.900 | 0.740/0.671 | 0.545/0.466 |
+|  | Textures | 0.866/0.767 | 0.913/0.903 | 0.936/0.946 | 0.429/0.684 | 0.504/0.533 | 0.313/0.289 |
+|  | Places365 | 0.626/0.605 | 0.909/0.906 | 0.881/0.922 | 0.918/0.946 | 0.507/0.503 | 0.606/0.447 |
+
+이 표에서 `recovery`와 `contrast attenuation`을 구분해야 한다. 예를 들어
+large C에서 RMD/L2는 Raw MD보다 절대 AUROC를 높이지만, Near의 C--D RMD
+gap은 오히려 커졌다. 또한 AUROC recovery가 FPR95 recovery를 보장하지 않는다.
+large-SVHN D의 RMD, small-SVHN D의 RMD/L2, small-Textures D의 RMD는 AUROC는
+올랐지만 FPR95는 나빠졌다. 따라서 tail metric을 AUROC의 중복 요약으로 취급하지
+않는다.
+
+#### Figure별 판독
+
+| Figure | 관찰된 사실 | 가능한 해석 | 주장하면 안 되는 것 |
+| --- | --- | --- | --- |
+| R1 | 두 LR의 여섯 dataset에서 mean Raw-MD C--D가 모두 음수다. Far, 특히 SVHN과 Textures에서 large 효과가 크다. | decay-coupling intervention 아래 Raw-MD pair ordering의 adverse direction이 ResNet에서도 보인다. | C/D 두 점을 alpha trajectory 또는 보편적 Adam 법칙이라 부르지 않는다. |
+| R2A | large에서 Raw MD는 C가 낮고, RMD/L2의 absolute recovery는 크지만 C seed 2ㆍ3의 Near RMD가 크게 낮아 seed heterogeneity가 크다. | representation의 OOD 정보가 전부 사라진 것은 아니지만 WRN식 RMD attenuation은 architecture 밖에서 안정적이지 않다. | RMD가 항상 gap을 줄인다고 말하지 않는다. |
+| R2B | small에서는 C--D Raw gap이 작고 RMD/L2 절대 성능이 높으며 RMD gap은 Near/Far 모두 작다. | local LR context가 readout response의 크기를 제한한다. | LR main effect를 WRN에 소급하거나 ResNet 두 LR만으로 phase map을 주장하지 않는다. |
+| R3 | Raw-MD Churn은 large Near/Far `0.324/0.362`, small `0.276/0.255`다. Gain--Loss와 Gain+Loss 항등식 residual은 최대 `1.11e-16`이다. | aggregate AUROC보다 훨씬 많은 pair가 재배열되며 Loss 우세 정도가 net delta를 만든다. | aggregate AUROC만으로 Churn을 복원했다고 말하지 않는다. |
+| R4 | large Near/Far의 signed `phi_Marginal`은 `-0.0567/-0.1848`, small은 `-0.0522/-0.1342`이며 total의 adverse sign을 운반한다. | tested ResNet score response도 predominantly Marginal에 localization된다. | Shapley accounting을 causal mediation으로 부르지 않는다. |
+| R5 | C는 D보다 feature norm이 크고 effective rankㆍCDNVㆍNC0ㆍNC1이 낮으며 NC2가 높다. large/small의 profile 크기는 metric마다 다르다. | 동일 intervention 아래 endpoint geometry도 체계적으로 달라진다. | post-result geometry를 replication gate, unique mediator, architecture-general mechanism으로 사용하지 않는다. |
+| R6 | WRN과 ResNet 모두 architecture 내부 Raw C--D와 Churn은 같은 방향이지만 ResNet large-Near RMD attenuation이 반전된다. | complete WRN pattern이 아니라 명시적 architecture boundary가 재현 결과다. | architecture 사이 seed를 연결하거나 raw geometry 수준을 직접 비교ㆍ검정하지 않는다. |
+| S1 | AUROC recovery와 FPR95 recovery의 방향이 일부 dataset/readout에서 다르다. | 평균 ranking 개선과 95% ID-TPR tail behavior는 별도 결과다. | AUROC 하나로 tail 성능을 대표하지 않는다. |
+| S2 | large C raw covariance rank는 seed별 `406--417/512`, `applicable=false`지만 score arrays는 모두 finite/checksummed다. large D와 small C/D는 rank 512와 `applicable=true`다. | theorem applicability failure와 detector score 존재는 서로 다른 numerical statement다. | `applicable=false`를 MD score 미계산 또는 invalid evaluation으로 해석하지 않는다. |
+
+Exploratory geometry의 seed-mean effect는 다음과 같다. scale은 사전 고정된
+대로 norm/within trace/NC0에는 `log(C/D)`, 나머지에는 `C-D`를 사용한다.
+
+| Context | norm | eff. rank | within trace | CDNV | NC0 | NC1 | NC2 | NC3 | top-10 share |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| large | +0.1460 | -7.5750 | -0.0055 | -0.1024 | -1.3437 | -0.0811 | +0.2243 | +0.0096 | +0.0698 |
+| small | +0.1738 | -5.1163 | +0.0734 | -0.0699 | -0.3350 | -0.0619 | +0.1990 | -0.0007 | +0.0603 |
+
+이 profile은 concordance diagnostic이지 OOD 성능에 대한 회귀나 mediation이
+아니다. 서로 다른 단위의 metric을 공통 축으로 표준화해 상대 크기를 비교하지 않았다.
+
 ## 10. 동결된 본문 구조
 
 1. **Introduction:** aggregate equivalence는 pair-behavior equivalence가 아님.
@@ -512,6 +581,29 @@ The bundle contains terminal/validation JSON, the ten paired score records and
 score arrays, execution plans, authorization, recovery records, and portable
 checksums. Large checkpoints and exported features remain on the execution
 hosts. The numerical recovery did not rerun inference or detector fitting.
+
+### ResNet-18 seed-first reader pack
+
+- analysis source commit:
+  `8973c74edde73375b2db02eb3858757e65a6b470`
+- analysis PR/merge commit: PR #143 /
+  `7aaf6206b1bebe6139f3fcc7b9817c6ef0b92f78`
+- manifest SHA-256:
+  `d8320eb640caa8ea9d6504752ff3d18d54b7e845728cedcd329b4150b1b4b39d`
+- pinned WRN input manifest SHA-256:
+  `29de87077cedd732b1ffc9b5827664e4e7b96d1bc75442103021a1b7a3acbf0e`
+- HF bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_paper_pack_20260819/d8320eb640caa8ea9d6504752ff3d18d54b7e845728cedcd329b4150b1b4b39d/`
+
+The pack contains R1--R6 and S1--S2 as PDF/SVG/300-dpi PNG, Figure-level
+seed and summary CSVs, protocol/ID/OOD/recovery/geometry/numerical tables,
+one provenance manifest, and portable `SHA256SUMS`. Two builds in the same
+environment were byte-identical; HF round-trip download matched the local
+pack byte-for-byte. All PDF fonts were embedded and the grayscale/deuteranopia
+render QA preserved role/context distinctions through marker and line style.
+The pack loaded no checkpoint, refit no detector, and performed no protected
+OOD access or re-evaluation. Host-local geometry used only the already exported
+ID features.
 
 Portable restore:
 
