@@ -2350,3 +2350,38 @@ Execution identities:
   `a67e9bad5324b06df43d62153fe73aa4fa5f70e6b0c39d78b7fe6c8be51992c0`;
 - verified shared bundle:
   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_evaluation_20260819/f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f/`.
+
+### 15.8 Post-result ID-only endpoint-geometry and reader-pack boundary
+
+The ResNet endpoint-geometry analysis that follows Section 15.7 is a
+**post-result, ID-only exploratory diagnostic**. It was not included in the
+prospective Section 15.3 replication gate, and it may neither change the
+frozen `PARTIAL` verdict nor open an architecture-general claim. It must not
+be described as preregistered or used to rescue a failed gate. ResNet
+epoch/depth formation is `NOT_AVAILABLE_BY_DESIGN`; no new checkpoint
+inference may be used to fill it.
+
+The ID split roles are fixed as follows:
+
+- detector fitting and primary endpoint geometry fitting use only the
+  `id_train` split of 45,000 examples;
+- `id_validation` contains 5,000 held-out examples and is used only for
+  geometry validation or control diagnostics; it is not mixed into class
+  means, within-class covariance, global covariance, or primary geometry
+  estimates; and
+- Accuracy, NLL, and ECE use the `id_test` split of 10,000 examples.
+
+The reader pack may recompute saved endpoint metrics and same-pair
+Gain/Loss/Churn from checksum-verified score arrays, and may compute endpoint
+geometry from the existing host-local ID feature artifacts. This is analysis
+of completed artifacts only: it authorizes no training, checkpoint loading,
+detector refit, protected OOD access, or protected OOD re-evaluation.
+
+Architecture comparison is limited to within-architecture C--D effects. It
+must not connect seed numbers across architectures, test an architecture main
+effect, compare raw geometry levels across feature dimensions, or call the
+two-role ResNet comparison an alpha trajectory. The WRN input for that reader
+pack is frozen to the clean-main regenerated manifest SHA-256
+`29de87077cedd732b1ffc9b5827664e4e7b96d1bc75442103021a1b7a3acbf0e` at
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/29de87077cedd732b1ffc9b5827664e4e7b96d1bc75442103021a1b7a3acbf0e/`.
+Later WRN pack changes do not replace this input automatically.
