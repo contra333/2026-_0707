@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
-Frozen inspection-pack generator HEAD: `0d9f516d55e2989c764e587fc6b5063f8999ae93`
+Frozen inspection-pack generator HEAD: `202d1078fbe28e166bdab633978b39219fac54c9`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
 사전등록 estimand를 바꾸지 않으며, Evidence Pack 두 개는 원자료 inventory와
@@ -44,7 +44,7 @@ provenance로 유지한다.
 | --- | --- | --- |
 | Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | AdamW alpha=0, Mixed alpha=0.5, Adam alpha=1의 direct labels와 circle/square/triangle; raw seed와 같은-shape mean만 표시하고 연결선, interval, No-decay reference는 표시하지 않음 |
 | Figure 1 supplement | 네 LR×WD context에서 AdamW/Adam의 absolute Raw MD 수준은 어떻게 달라지는가? | six-dataset 2×3 panels; 네 context의 AdamW circle과 Adam triangle, raw seed와 mean만 표시 |
-| Figure 2 | Raw-MD C--D가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | dataset x four-Adam-context heatmap; seed-paired DeltaAUROC |
+| Figure 2 | AdamW와 Adam의 Raw MD 수준 및 그 차이가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | AdamW Raw MD, Adam Raw MD, paired Adam−AdamW ΔAUROC의 세 heatmap; 두 Raw-MD panel은 공통 0--1 scale |
 | Figure 3 | Raw MD 실패 뒤 RMD/L2-MD가 어느 절대 수준까지 회복하는가? | C와 D 각각의 Raw MD/RMD/L2-MD 절대 AUROC와 seed variation |
 | Figure 4 | Raw-MD net change는 어떤 Gain/Loss 교환으로 만들어지는가? | dataset별 Gain, Loss, Churn; 같은 seed의 C--D pair transition |
 | Figure 5 | OOD 변화와 함께 움직이는 endpoint geometry는 무엇인가? | norm, effective rank, within trace, CDNV, NC0--NC3의 paired effect |
@@ -97,11 +97,11 @@ trace `+0.20959`, CDNV `-0.04972`가 함께 관찰된다. NC0 `-1.84175`, NC2
 
 재현 가능한 bundle은 다음 위치에 있다.
 
-`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/39e7b15480114e411e08522235e4d4ea78fba3fe0a27166cc89ce6d5927e7e93/`
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/3019ae9d3d8cceb78c97ce46352ccb167c0df45720763f48d06f340807352426/`
 
 Bundle에는 9개 Figure의 PDF/SVG/300-dpi PNG, 22개 CSV table, manifest,
 `SHA256SUMS`가 있다. Manifest SHA-256은 bundle suffix와 같은
-`39e7b15480114e411e08522235e4d4ea78fba3fe0a27166cc89ce6d5927e7e93`다.
+`3019ae9d3d8cceb78c97ce46352ccb167c0df45720763f48d06f340807352426`다.
 동일 입력/코드로 독립 재생성한 49개 Figure/Table 파일과 manifest는 byte-identical
 했다. 이 과정은 checkpoint, example, feature array, score array를 읽지 않은
 manifest-only post-result analysis다.
@@ -112,9 +112,12 @@ mean은 같은 shape의 작은 outline marker로 표시하며 gray seed line, ve
 interval, No-decay reference는 모두 제거했다. 별도 Figure 1 supplement는 네
 LR×WD context의 AdamW/Adam absolute Raw-MD AUROC를 six-dataset 2×3 panel로
 보여 준다. Primary는 seed 5개, 나머지 context는 seed 3개이며 연결선과 interval은
-사용하지 않는다. 이 변경은 기존 수치 결과를 바꾸지 않는다. 새 supplement용 CSV
-두 개를 추가했으며, 기존 CSV와 Figure 2--6/기존 Supplement 파일은 이전 frozen
-pack과 byte-identical하다.
+사용하지 않는다. Figure 2는 역할 약어만 보여주던 difference heatmap과 region-macro
+seed panel을 AdamW Raw MD, Adam Raw MD, paired `Adam − AdamW`의 세 dataset ×
+context heatmap으로 바꿨다. 두 Raw-MD panel은 공통 0--1 scale이며 cell은 seed
+mean, difference는 matched seed 안에서 먼저 계산한 뒤 평균한다. 이 변경은 기존
+수치 결과를 바꾸지 않는다. 이전 frozen pack과 비교해 22개 CSV와 Figure 2 이외의
+모든 Figure 파일은 byte-identical하다.
 
 ### 해석 금지선
 

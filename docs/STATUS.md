@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
-Frozen inspection-pack generator HEAD: `0d9f516d55e2989c764e587fc6b5063f8999ae93`
+Frozen inspection-pack generator HEAD: `202d1078fbe28e166bdab633978b39219fac54c9`
 Plan B freeze documentation commit:
 `9c88a22357669b7210a53f78d7a43f36126fdcdc`
 ResNet seed-first reader-pack source/merge commits:
@@ -115,7 +115,7 @@ It contains seed-first Near/Far tables and PDF/SVG/300-dpi PNG for Figures
 1--4 plus appendix geometry and negative-gate panels.
 
 Frozen result-inspection and paper-quality pack:
-`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/39e7b15480114e411e08522235e4d4ea78fba3fe0a27166cc89ce6d5927e7e93/`.
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/3019ae9d3d8cceb78c97ce46352ccb167c0df45720763f48d06f340807352426/`.
 It contains 9 Figure triplets (PDF/SVG/300-dpi PNG), 22 seed-first CSV
 tables, a manifest, and portable `SHA256SUMS`. The manifest SHA-256 is the
 hash-addressed suffix above. Independent regeneration reproduced all 49
@@ -126,7 +126,10 @@ Figure 1의 reader-QA 수정은 gray seed 연결선, vertical interval, No-decay
 reference를 제거하고 AdamW/Mixed/Adam을 circle/square/triangle로 중복 부호화했다.
 Raw seed는 작고 투명하게, mean은 같은 shape의 outline marker로 표시한다. 별도
 Figure 1 supplement는 네 LR×WD context에서 AdamW/Adam의 absolute Raw-MD
-AUROC를 같은 seed-first 표현으로 보여 준다. 기존 수치 결과는 변경하지 않았다.
+AUROC를 같은 seed-first 표현으로 보여 준다. Figure 2는 같은 네 context에서
+AdamW Raw MD, Adam Raw MD, paired `Adam − AdamW`의 dataset별 seed mean을 세
+heatmap으로 분리하고 두 Raw-MD panel은 공통 0--1 scale을 쓴다. 기존 수치 결과는
+변경하지 않았다.
 
 ResNet-18 seed-first PARTIAL-boundary reader pack:
 `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_paper_pack_20260819/d8320eb640caa8ea9d6504752ff3d18d54b7e845728cedcd329b4150b1b4b39d/`.
