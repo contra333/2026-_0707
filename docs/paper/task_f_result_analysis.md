@@ -2,7 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
-Frozen inspection-pack generator HEAD: `f3dd41cbb4a0eb1fde570fa8f7555348c5eb62a1`
+Frozen inspection-pack generator HEAD: `b73857d7223ae164d8c9e9e3324f1fbc23333774`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
 사전등록 estimand를 바꾸지 않으며, Evidence Pack 두 개는 원자료 inventory와
@@ -42,7 +42,7 @@ provenance로 유지한다.
 
 | Figure | 이 그림으로 답할 질문 | Evidence |
 | --- | --- | --- |
-| Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | AdamW alpha=0, Mixed alpha=0.5, Adam alpha=1의 six-dataset 2x3 dot plots; raw seeds와 mean diamond |
+| Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | AdamW alpha=0, Mixed alpha=0.5, Adam alpha=1의 direct labels; raw seed dots와 mean diamond만 표시하고 연결선과 interval은 표시하지 않음 |
 | Figure 2 | Raw-MD C--D가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | dataset x four-Adam-context heatmap; seed-paired DeltaAUROC |
 | Figure 3 | Raw MD 실패 뒤 RMD/L2-MD가 어느 절대 수준까지 회복하는가? | C와 D 각각의 Raw MD/RMD/L2-MD 절대 AUROC와 seed variation |
 | Figure 4 | Raw-MD net change는 어떤 Gain/Loss 교환으로 만들어지는가? | dataset별 Gain, Loss, Churn; 같은 seed의 C--D pair transition |
@@ -96,14 +96,19 @@ trace `+0.20959`, CDNV `-0.04972`가 함께 관찰된다. NC0 `-1.84175`, NC2
 
 재현 가능한 bundle은 다음 위치에 있다.
 
-`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/c80194480ab557a68b2306fd0c25c5cef7c5533da83b283500375fb0ee9faa99/`
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/ea05c66356c73573cb437571a3733b058cf341d667260f0c6bc559ac0b2673c5/`
 
 Bundle에는 8개 Figure의 PDF/SVG/300-dpi PNG, 20개 CSV table, manifest,
 `SHA256SUMS`가 있다. Manifest SHA-256은 bundle suffix와 같은
-`c80194480ab557a68b2306fd0c25c5cef7c5533da83b283500375fb0ee9faa99`다.
+`ea05c66356c73573cb437571a3733b058cf341d667260f0c6bc559ac0b2673c5`다.
 동일 입력/코드로 독립 재생성한 44개 Figure/Table 파일과 manifest는 byte-identical
 했다. 이 과정은 checkpoint, example, feature array, score array를 읽지 않은
 manifest-only post-result analysis다.
+
+Figure 1은 reader QA에 따라 α 조건을 x축에 직접 표기하고, raw seed dot과 mean
+diamond만 남겼다. 같은 seed를 잇던 gray line과 vertical interval은 제거했다. 이
+변경은 표현만 바꾸며 Figure 1의 입력 row, 모든 CSV와 Figure 2--6/Supplement의
+수치 및 파일은 이전 frozen pack과 동일하다.
 
 ### 해석 금지선
 
