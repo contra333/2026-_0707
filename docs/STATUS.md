@@ -2,6 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
+Frozen inspection-pack generator HEAD: `f3dd41cbb4a0eb1fde570fa8f7555348c5eb62a1`
 Plan B freeze documentation commit:
 `9c88a22357669b7210a53f78d7a43f36126fdcdc`
 
@@ -108,6 +109,15 @@ commit `1a329474fbf4df00996f204a8e598cfb2c537d5a` and source result SHA-256
 It contains seed-first Near/Far tables and PDF/SVG/300-dpi PNG for Figures
 1--4 plus appendix geometry and negative-gate panels.
 
+Frozen result-inspection and paper-quality pack:
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/c80194480ab557a68b2306fd0c25c5cef7c5533da83b283500375fb0ee9faa99/`.
+It contains 8 Figure triplets (PDF/SVG/300-dpi PNG), 20 seed-first CSV
+tables, a manifest, and portable `SHA256SUMS`. The manifest SHA-256 is the
+hash-addressed suffix above. Independent regeneration reproduced all 44
+Figure/Table files and the manifest byte-for-byte. The pack was built only
+from the completed merged analysis and compact server manifest exports; it
+loaded no checkpoint, protected example, feature array, or score array.
+
 No checkpoint was loaded. No training, protected inference, detector refit,
 band ablation, clipping, or new detector was run.
 
@@ -179,10 +189,13 @@ coupling-harm language are prohibited.
 
 ## Active workstreams
 
-1. **WRN paper figure/table pack -- COMPLETE.** PR #128 is merged and the
-   hash-addressed bundle above is remotely verified. All macros are formed
-   within seed before Near/Far aggregation; the inferential unit remains the
-   training seed.
+1. **WRN paper figure/table packs -- COMPLETE.** PR #128's original pack and
+   the 2026-08-19 frozen inspection pack are both remotely verified. The new
+   pack adds the frozen six-dataset alpha small multiples, four-context
+   heatmap, absolute Raw/RMD/L2 recovery, Gain/Loss/Churn, fixed geometry,
+   time/depth concordance, FPR95, and top-10 trace-share supplement. All
+   macros are formed within seed before Near/Far aggregation; the inferential
+   unit remains the training seed.
 2. **ResNet-18/CIFAR-10 replication -- ENDPOINT COMPLETE; `PARTIAL`.** The
    strict deterministic v3 training completed 20/20 runs at
    `e2f6845e88b22bc0783c5fda58186f9930083ef7`. After the owner's separate

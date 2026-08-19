@@ -2,6 +2,7 @@
 
 Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
+Frozen inspection-pack generator HEAD: `f3dd41cbb4a0eb1fde570fa8f7555348c5eb62a1`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
 사전등록 estimand를 바꾸지 않으며, Evidence Pack 두 개는 원자료 inventory와
@@ -41,17 +42,68 @@ provenance로 유지한다.
 
 | Figure | 이 그림으로 답할 질문 | Evidence |
 | --- | --- | --- |
-| Figure 1 | 무엇을 고정하고 무엇만 바꾸었는가? | parallel sibling design과 유효한 contrast |
-| Figure 2A | 네 cell의 Raw-MD C--D 방향과 크기는? | seed dots, paired mean, 90% interval |
-| Figure 2B | 거의 같은 AUROC 안에 얼마나 큰 Gain/Loss가 있는가? | Zero--AdamW와 AdamW--Adam Gain/Loss/Churn |
-| Figure 3 | 변화가 Raw MD, RMD, L2, Marginal 중 어디에 있는가? | signed `phi_RMD`, `phi_Marginal`, reconstructed total |
-| Figure 4 | 언제, 어느 depth에서 형성되는가? | actual epoch coordinates과 discrete depth axis |
-| Figure 5 | WRN pattern 중 무엇이 ResNet-18에서 재현되고 무엇이 깨졌는가? | Appendix architecture-boundary panel; Section 15 `PARTIAL` |
+| Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | D, M, C를 잇는 six-dataset 2x3 small multiples; raw seed points와 mean +/- SD |
+| Figure 2 | Raw-MD C--D가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | dataset x four-Adam-context heatmap; seed-paired DeltaAUROC |
+| Figure 3 | Raw MD 실패 뒤 RMD/L2-MD가 어느 절대 수준까지 회복하는가? | C와 D 각각의 Raw MD/RMD/L2-MD 절대 AUROC와 seed variation |
+| Figure 4 | Raw-MD net change는 어떤 Gain/Loss 교환으로 만들어지는가? | dataset별 Gain, Loss, Churn; 같은 seed의 C--D pair transition |
+| Figure 5 | OOD 변화와 함께 움직이는 endpoint geometry는 무엇인가? | norm, effective rank, within trace, CDNV, NC0--NC3의 paired effect |
+| Figure 6 | Raw-MD와 geometry 차이가 언제, 어느 depth에서 형성되는가? | epoch/depth trajectory를 나란히 둔 concordance panel |
+| Supplement 1 | AUROC 회복이 FPR95에서도 보이는가? | Raw MD/RMD/L2-MD의 절대 FPR95 |
+| Supplement 2 | effective-rank 감소와 spectral concentration 증가는 일치하는가? | top-10 trace share와 별도 CSV table |
 
 기존 4-point `geometry_effect_concordance` scatter는 적은 context에서 regression을
 암시하므로 본문 그림으로 쓰지 않는다. Geometry, alignment, SGDM,
 spectral applicability, `S_perp`, classifier-insensitive fast kill은 appendix에서
 진단 또는 negative boundary로 보존한다.
+
+### 2026-08-19 frozen inspection pack에서 직접 확인한 결과
+
+모든 평균과 불확실성의 통계 단위는 training seed다. Figure에는 raw seed를 숨기지
+않고, 같은 seed의 C--D를 먼저 계산했다. Table은 mean, sample SD, two-sided paired
+90% Student-t interval을 함께 보존한다. 아래 표의 `C / D`는 Adam / AdamW의 seed
+평균이고 Churn은 Raw MD의 C--D 비교다.
+
+| OOD dataset | Raw MD C / D | RMD C / D | L2-MD C / D | Raw C--D | Raw Churn |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CIFAR-100 | 0.4348 / 0.6112 | 0.8707 / 0.8794 | 0.8287 / 0.8584 | -0.1765 | 0.3458 |
+| TinyImageNet | 0.4009 / 0.5731 | 0.8904 / 0.9021 | 0.8644 / 0.8847 | -0.1722 | 0.3514 |
+| MNIST | 0.2360 / 0.3834 | 0.8987 / 0.8992 | 0.9613 / 0.8907 | -0.1474 | 0.3067 |
+| SVHN | 0.3394 / 0.8675 | 0.9024 / 0.9209 | 0.9700 / 0.9850 | -0.5281 | 0.5581 |
+| Textures | 0.5645 / 0.8282 | 0.8956 / 0.9146 | 0.9389 / 0.9598 | -0.2637 | 0.3304 |
+| Places365 | 0.4097 / 0.6043 | 0.9058 / 0.9098 | 0.9038 / 0.8981 | -0.1947 | 0.3498 |
+
+Primary ID Accuracy는 C `0.93344 +/- 0.00180`, D `0.94156 +/- 0.00330`으로
+평균 차이가 `-0.00812`다. 같은 조건에서 Raw MD C--D는 Near `-0.1743`, Far
+`-0.2835`다. 따라서 여기서 사용할 담백한 기술은 **Accuracy 차이는 작고 Raw MD
+변화는 훨씬 크다**이다. Accuracy가 완전히 같다는 전제나 NLL 하나로 전체 현상을
+재정의하지 않는다.
+
+Coupled branch에서 RMD-Raw 회복은 dataset별 `+0.3311--+0.6627`,
+L2-MD-Raw 회복은 `+0.3744--+0.7252`다. 특히 SVHN은 Raw MD C/D가
+`0.3394/0.8675`까지 갈라지지만 RMD와 L2-MD는 두 branch 모두 `0.90` 이상이다.
+이는 representation에 OOD 정보가 전부 사라진 현상보다는 **Raw-MD readout에
+특이적인 실패와 회복**이라는 기술과 일치한다. 다만 이것만으로 covariance
+concentration이 유일한 원인이라고 확정하지 않는다.
+
+Raw-MD Churn은 여섯 dataset 모두 `0.307--0.558`이며 Loss가 Gain보다 크다.
+즉 AUROC 하락은 일부 sample 하나의 단순 오차가 아니라 많은 ID--OOD pair의
+ordering 교환으로 나타난다. Primary endpoint geometry에서는 C--D effective rank
+`-5.7304`, top-10 trace share `+0.06734`, log feature norm `+0.15197`, log within
+trace `+0.20959`, CDNV `-0.04972`가 함께 관찰된다. NC0 `-1.84175`, NC2
+`+0.26690`, NC3 `-0.11337`의 paired 90% interval은 0을 지나지 않지만 NC1
+`+0.00430`은 0을 지난다. Geometry는 이처럼 축을 정해 방향과 formation을
+대조하며, 모든 지표를 넣은 회귀나 unique mediation으로 해석하지 않는다.
+
+재현 가능한 bundle은 다음 위치에 있다.
+
+`hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/c80194480ab557a68b2306fd0c25c5cef7c5533da83b283500375fb0ee9faa99/`
+
+Bundle에는 8개 Figure의 PDF/SVG/300-dpi PNG, 20개 CSV table, manifest,
+`SHA256SUMS`가 있다. Manifest SHA-256은 bundle suffix와 같은
+`c80194480ab557a68b2306fd0c25c5cef7c5533da83b283500375fb0ee9faa99`다.
+동일 입력/코드로 독립 재생성한 44개 Figure/Table 파일과 manifest는 byte-identical
+했다. 이 과정은 checkpoint, example, feature array, score array를 읽지 않은
+manifest-only post-result analysis다.
 
 ### 해석 금지선
 
