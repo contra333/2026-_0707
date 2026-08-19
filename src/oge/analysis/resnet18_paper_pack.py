@@ -1441,7 +1441,7 @@ def figure_r1(rows: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]
         plt.Line2D([], [], color=role_colors["D"], marker="o", markerfacecolor="white", label="D: AdamW"),
         plt.Line2D([], [], color=role_colors["C"], marker="s", markerfacecolor="white", label="C: Adam"),
     ]
-    figure.legend(handles=handles, loc="upper center", ncol=2, frameon=False)
+    figure.legend(handles=handles, loc="outside upper center", ncol=2, frameon=False)
     return _save_figure(figure, output_dir, "R1_paired_raw_md")
 
 
@@ -1505,7 +1505,7 @@ def figure_r2(
             plt.Line2D([], [], color=role_colors["D"], marker="o", markerfacecolor="white", label="D"),
             plt.Line2D([], [], color=role_colors["C"], marker="s", markerfacecolor="white", label="C"),
         ],
-        loc="upper center",
+        loc="outside upper center",
         ncol=2,
         frameon=False,
     )
@@ -1567,7 +1567,7 @@ def figure_r3(rows: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]
             plt.Line2D([], [], color=context_colors["large"], marker="o", linestyle="", label="Large LR"),
             plt.Line2D([], [], color=context_colors["small"], marker="s", linestyle="", label="Small LR"),
         ],
-        loc="upper center",
+        loc="outside upper center",
         ncol=2,
         frameon=False,
     )
@@ -1612,7 +1612,7 @@ def figure_r4(rows: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]
             plt.Line2D([], [], color=context_colors["large"], marker="o", linestyle="", label="Large LR"),
             plt.Line2D([], [], color=context_colors["small"], marker="s", linestyle="", label="Small LR"),
         ],
-        loc="upper center",
+        loc="outside upper center",
         ncol=2,
         frameon=False,
     )
@@ -1706,7 +1706,7 @@ def figure_r6(rows: Sequence[Mapping[str, Any]], output_dir: Path) -> list[Path]
             plt.Line2D([], [], color=region_colors["Near"], marker="o", linestyle="", label="Near"),
             plt.Line2D([], [], color=region_colors["Far"], marker="s", linestyle="", label="Far"),
         ],
-        loc="upper center",
+        loc="outside upper center",
         ncol=2,
         frameon=False,
     )
@@ -1832,7 +1832,7 @@ def figure_s2(
             plt.Line2D([], [], color=colors["blue"], marker="o", linestyle="", label="D"),
             plt.Line2D([], [], color=colors["orange"], marker="s", linestyle="", label="C"),
         ],
-        loc="upper center",
+        loc="outside upper center",
         ncol=2,
         frameon=False,
     )
