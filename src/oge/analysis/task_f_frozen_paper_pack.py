@@ -437,7 +437,13 @@ def formation_geometry_pairs(geometry_rows: Sequence[Mapping[str, Any]]) -> list
     return output
 
 
-def summarize_rows(rows: Sequence[Mapping[str, Any]], group_fields: Sequence[str], metrics: Sequence[str]) -> list[dict[str, Any]]:
+def summarize_rows(
+    rows: Sequence[Mapping[str, Any]],
+    group_fields: Sequence[str],
+    metrics: Sequence[str],
+    *,
+    paired: bool = False,
+) -> list[dict[str, Any]]:
     groups: dict[tuple[Any, ...], list[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
         groups[tuple(row[field] for field in group_fields)].append(row)
@@ -448,7 +454,14 @@ def summarize_rows(rows: Sequence[Mapping[str, Any]], group_fields: Sequence[str
             values = [float(row[metric]) for row in selected if row.get(metric) is not None]
             if not values:
                 continue
-            output.append({**base, "statistic": metric, **mean_sd_t90(values)})
+            summary = mean_sd_t90(values)
+            if len(values) > 1:
+                summary["interval_definition"] = (
+                    "two-sided paired 90% t interval across training seeds"
+                    if paired
+                    else "two-sided 90% t interval across training seeds"
+                )
+            output.append({**base, "statistic": metric, **summary})
     return output
 
 
@@ -923,7 +936,12 @@ def build_pack(
         "alpha_region_macro_summary.csv": summarize_rows(alpha_macro, ("region", "role", "alpha"), ("auroc", "fpr95")),
         "zero_reference_seed_rows.csv": zero,
         "context_heatmap_seed_rows.csv": heatmap,
-        "context_heatmap_summary.csv": summarize_rows(heatmap, ("cell", "dataset", "region"), ("delta_auroc", "delta_fpr95")),
+        "context_heatmap_summary.csv": summarize_rows(
+            heatmap,
+            ("cell", "dataset", "region"),
+            ("delta_auroc", "delta_fpr95"),
+            paired=True,
+        ),
         "recovery_absolute_seed_rows.csv": recovery,
         "recovery_absolute_summary.csv": summarize_rows(recovery, ("cell", "dataset", "region", "role", "readout"), ("auroc", "fpr95")),
         "recovery_gain_seed_rows.csv": recovery_gain,
@@ -931,14 +949,22 @@ def build_pack(
             recovery_gain,
             ("cell", "dataset", "region", "role", "readout"),
             ("delta_auroc_from_raw", "delta_fpr95_from_raw"),
+            paired=True,
         ),
         "churn_seed_rows.csv": churn,
-        "churn_summary.csv": summarize_rows(churn, ("cell", "dataset", "region"), ("gain", "loss", "delta_auroc", "churn")),
+        "churn_summary.csv": summarize_rows(
+            churn,
+            ("cell", "dataset", "region"),
+            ("gain", "loss", "delta_auroc", "churn"),
+            paired=True,
+        ),
         "geometry_endpoint_seed_rows.csv": endpoint_geometry,
         "id_endpoint_seed_rows.csv": id_endpoint,
         "id_endpoint_summary.csv": summarize_rows(id_endpoint, ("cell", "role"), ("accuracy",)),
         "geometry_paired_effect_seed_rows.csv": geometry_pairs,
-        "geometry_paired_effect_summary.csv": summarize_rows(geometry_pairs, ("cell", "metric"), ("effect",)),
+        "geometry_paired_effect_summary.csv": summarize_rows(
+            geometry_pairs, ("cell", "metric"), ("effect",), paired=True
+        ),
         "geometry_formation_seed_rows.csv": formation_geometry,
         "top10_trace_share_table.csv": summarize_rows(
             [row for row in endpoint_geometry], ("cell", "role"), ("top10_trace_share",)
@@ -975,7 +1001,10 @@ def build_pack(
         "schema_version": SCHEMA_VERSION,
         "scientific_boundary": "completed-artifact analysis only; no training, inference, detector refit, or protected-example access",
         "statistical_unit": "training seed",
-        "uncertainty": "sample SD in tables; two-sided paired 90% Student-t interval across seeds",
+        "uncertainty": (
+            "sample SD and two-sided 90% Student-t intervals across training seeds; "
+            "paired label is used only for within-seed contrasts"
+        ),
         "endpoint": "epoch 200 / last / penultimate",
         "primary_framing": "Raw MD failure and RMD/L2-MD recovery; decay coupling is the controlled intervention",
         "geometry_main": list(GEOMETRY_METRICS),

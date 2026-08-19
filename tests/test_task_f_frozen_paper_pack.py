@@ -9,6 +9,7 @@ from oge.analysis.task_f_frozen_paper_pack import (
     _paired_effect,
     alpha_region_macro_seed_rows,
     recovery_gain_seed_rows,
+    summarize_rows,
 )
 
 
@@ -93,3 +94,15 @@ def test_alpha_macro_is_seed_first(monkeypatch):
     far_d = next(row for row in output if row["role"] == "D" and row["region"] == "Far")
     assert near_d["auroc"] == pytest.approx(0.5)
     assert far_d["auroc"] == pytest.approx(0.6)
+
+
+def test_summary_labels_only_within_seed_contrasts_as_paired():
+    rows = [{"role": "C", "value": 0.4}, {"role": "C", "value": 0.6}]
+    absolute = summarize_rows(rows, ("role",), ("value",))
+    contrast = summarize_rows(rows, ("role",), ("value",), paired=True)
+    assert absolute[0]["interval_definition"] == (
+        "two-sided 90% t interval across training seeds"
+    )
+    assert contrast[0]["interval_definition"] == (
+        "two-sided paired 90% t interval across training seeds"
+    )
