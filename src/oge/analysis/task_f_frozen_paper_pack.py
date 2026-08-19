@@ -41,7 +41,6 @@ DATASET_LABELS = {
     "texture": "Textures",
     "places365": "Places365",
 }
-ROLE_LABELS = {"Z": "Zero", "D": "α=0", "M": "α=0.5", "C": "α=1"}
 ALPHA_BY_ROLE = {"D": 0.0, "M": 0.5, "C": 1.0}
 READOUTS = (
     ("Raw MD", "raw", "md"),
@@ -567,66 +566,81 @@ def figure_alpha(alpha: Sequence[Mapping[str, Any]], zero: Sequence[Mapping[str,
     import numpy as np
 
     colors = _style()
-    figure, axes = plt.subplots(2, 3, figsize=(7.2, 4.65), sharex=True, sharey=True, constrained_layout=True)
+    figure, axes = plt.subplots(
+        2,
+        3,
+        figsize=(7.2, 5.1),
+        sharex=True,
+        sharey=True,
+        constrained_layout=True,
+    )
     role_colors = {"D": colors["blue"], "M": colors["gold"], "C": colors["orange"]}
+    role_x = {"D": 0.0, "M": 1.0, "C": 2.0}
+    role_tick_labels = ["AdamW\nα=0", "Mixed\nα=0.5", "Adam\nα=1"]
     for panel, dataset in enumerate(DATASETS):
         axis = axes.flat[panel]
         selected = [row for row in alpha if row["dataset"] == dataset]
-        by_seed = defaultdict(list)
-        for row in selected:
-            by_seed[int(row["seed"])].append(row)
-        for seed, seed_rows in sorted(by_seed.items()):
-            seed_rows = sorted(seed_rows, key=lambda row: row["alpha"])
-            axis.plot(
-                [row["alpha"] for row in seed_rows],
-                [row["auroc"] for row in seed_rows],
-                color=colors["gray"],
-                linewidth=0.65,
-                alpha=0.42,
-                zorder=1,
-            )
         for role in ("D", "M", "C"):
             rows = [row for row in selected if row["role"] == role]
-            x = ALPHA_BY_ROLE[role]
-            jitter = np.linspace(-0.018, 0.018, len(rows))
+            x = role_x[role]
+            jitter = np.linspace(-0.065, 0.065, len(rows))
             axis.scatter(
                 [x + value for value in jitter],
                 [row["auroc"] for row in rows],
-                s=11,
+                s=13,
                 color=role_colors[role],
-                alpha=0.58,
+                alpha=0.55,
                 linewidths=0,
-                zorder=3,
+                zorder=2,
             )
-            _errorbar(axis, x, _summary(row["auroc"] for row in rows), role_colors[role])
+            axis.scatter(
+                [x],
+                [statistics.fmean(float(row["auroc"]) for row in rows)],
+                marker="D",
+                s=31,
+                color=role_colors[role],
+                edgecolors=colors["ink"],
+                linewidths=0.65,
+                zorder=4,
+            )
         zero_values = [row["auroc"] for row in zero if row["dataset"] == dataset]
         zero_stat = _summary(zero_values)
-        axis.axhline(zero_stat["mean"], color=colors["ink"], linestyle=(0, (3, 2)), linewidth=0.8)
-        axis.fill_between(
-            [-0.05, 1.05],
-            zero_stat["t90_low"],
-            zero_stat["t90_high"],
-            color=colors["light"],
-            alpha=0.22,
-            linewidth=0,
+        axis.axhline(
+            zero_stat["mean"],
+            color=colors["gray"],
+            linestyle=(0, (3, 2)),
+            linewidth=0.75,
             zorder=0,
         )
+        axis.annotate(
+            "No decay (WD=0)",
+            xy=(2.16, zero_stat["mean"]),
+            xytext=(0, 3),
+            textcoords="offset points",
+            ha="right",
+            va="bottom",
+            fontsize=6.1,
+            color=colors["gray"],
+        )
         axis.set_title(f"{chr(65+panel)}. {DATASET_LABELS[dataset]}", loc="left")
-        axis.set_xlim(-0.06, 1.06)
+        axis.set_xlim(-0.2, 2.2)
         axis.set_ylim(0.0, 1.0)
-        axis.set_xticks([0.0, 0.5, 1.0])
-        axis.set_xticklabels(["0", "0.5", "1"])
+        axis.set_xticks([0.0, 1.0, 2.0])
+        axis.set_xticklabels(role_tick_labels)
         axis.set_yticks(np.linspace(0, 1, 6))
         axis.grid(axis="y")
-    for axis in axes[-1, :]:
-        axis.set_xlabel("Decay-coupling coefficient α")
+        axis.tick_params(axis="x", labelbottom=True, labelsize=6.8, pad=2.5)
     for axis in axes[:, 0]:
         axis.set_ylabel("Raw MD AUROC")
-    handles = [
-        plt.Line2D([0], [0], marker="o", color=color, linestyle="none", label=ROLE_LABELS[role])
-        for role, color in role_colors.items()
-    ] + [plt.Line2D([0], [0], color=colors["ink"], linestyle=(0, (3, 2)), label="Zero decay ref.")]
-    figure.legend(handles=handles, ncol=4, frameon=False, loc="outside upper center")
+    figure.suptitle(
+        "Raw MD across decay-coupling allocation\n"
+        "WRN-28-10 · CIFAR-10 ID · LR=1e−3 · total WD=1e−4 · epoch 200 last · "
+        "penultimate · n=5 matched seeds · dots: seeds · diamonds: means",
+        x=0.012,
+        ha="left",
+        fontsize=9.2,
+        linespacing=1.4,
+    )
     return _save_figure(figure, output_dir, "figure1_alpha_path_raw_md")
 
 

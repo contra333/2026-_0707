@@ -42,7 +42,7 @@ provenance로 유지한다.
 
 | Figure | 이 그림으로 답할 질문 | Evidence |
 | --- | --- | --- |
-| Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | D, M, C를 잇는 six-dataset 2x3 small multiples; raw seed points와 mean +/- SD |
+| Figure 1 | Primary에서 coupling 강도에 따라 dataset별 Raw MD가 어떻게 움직이는가? | AdamW alpha=0, Mixed alpha=0.5, Adam alpha=1의 six-dataset 2x3 dot plots; raw seeds와 mean diamond |
 | Figure 2 | Raw-MD C--D가 LR/WD context와 dataset에 따라 어떻게 달라지는가? | dataset x four-Adam-context heatmap; seed-paired DeltaAUROC |
 | Figure 3 | Raw MD 실패 뒤 RMD/L2-MD가 어느 절대 수준까지 회복하는가? | C와 D 각각의 Raw MD/RMD/L2-MD 절대 AUROC와 seed variation |
 | Figure 4 | Raw-MD net change는 어떤 Gain/Loss 교환으로 만들어지는가? | dataset별 Gain, Loss, Churn; 같은 seed의 C--D pair transition |
