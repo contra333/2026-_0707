@@ -960,6 +960,17 @@ def build_pack(
     figure_paths += figure_formation(formation_macro, formation_geometry, figures_dir)
     figure_paths += figure_top10(geometry_pairs, formation_geometry, figures_dir)
 
+    declared_outputs = sorted(table_paths + figure_paths)
+    checksum_path = output_dir / "SHA256SUMS"
+    checksum_path.write_text(
+        "".join(
+            f"{sha256_file(path)}  {path.relative_to(output_dir)}\n"
+            for path in declared_outputs
+        ),
+        encoding="utf-8",
+    )
+    declared_outputs.append(checksum_path)
+
     manifest: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "scientific_boundary": "completed-artifact analysis only; no training, inference, detector refit, or protected-example access",
@@ -982,7 +993,7 @@ def build_pack(
         "coverage": {name: len(rows) for name, rows in table_sets.items()},
         "outputs": [],
     }
-    for path in sorted(table_paths + figure_paths):
+    for path in declared_outputs:
         manifest["outputs"].append(
             {
                 "path": str(path.relative_to(output_dir)),
