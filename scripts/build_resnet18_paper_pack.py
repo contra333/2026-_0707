@@ -56,7 +56,7 @@ def main() -> int:
                 {
                     "status": "PASS",
                     "host": result["host"],
-                    "runs": len(result["runs"]),
+                    "runs": len(result["rows"]),
                     "output": str(args.output.resolve()),
                     "output_identity_sha256": result["output_identity_sha256"],
                 },
