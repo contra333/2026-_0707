@@ -279,3 +279,25 @@ def test_id_fit_then_protected_pair_is_reconstructible(monkeypatch, tmp_path):
         assert row["delta_auroc"] == pytest.approx(row["gain"] - row["loss"])
         assert row["pair_order_churn"] == pytest.approx(row["gain"] + row["loss"])
 
+    recovered = production.recover_pair_artifact(
+        source_path=pair,
+        scoring_git_sha="f" * 40,
+        output_root=tmp_path / "recovered",
+    )
+    recovered_record = production.verify_pair_artifact(recovered)["record"]
+    assert recovered_record["schema_version"] == production.PAIR_RECOVERY_SCHEMA_VERSION
+    assert recovered_record["recovery"] == {
+        "reason": "issue_138_score_scale_tolerance_fix",
+        "source_output_identity_sha256": record["output_identity_sha256"],
+        "scoring_git_sha": "f" * 40,
+        "protected_checkpoint_inference_rerun": False,
+        "detector_refit": False,
+        "score_arrays_changed": False,
+    }
+    assert {
+        name: value["array_sha256"]
+        for name, value in recovered_record["score_arrays"].items()
+    } == {
+        name: value["array_sha256"]
+        for name, value in record["score_arrays"].items()
+    }

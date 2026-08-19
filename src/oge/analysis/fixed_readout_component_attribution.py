@@ -326,8 +326,22 @@ def paired_component_attribution(
     maximum_pair_reconstruction = 2.0 * max(
         score_reconstruction_0, score_reconstruction_1
     )
-    tolerance = scale_aware_tolerance(
+    auroc_tolerance = scale_aware_tolerance(
         np.asarray([auroc0, auroc1, exact_delta, rmd_auroc, marginal_auroc])
+    )
+    score_reconstruction_tolerance = scale_aware_tolerance(
+        id0,
+        id0_rmd,
+        id0_marginal,
+        ood0,
+        ood0_rmd,
+        ood0_marginal,
+        id1,
+        id1_rmd,
+        id1_marginal,
+        ood1,
+        ood1_rmd,
+        ood1_marginal,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -345,11 +359,12 @@ def paired_component_attribution(
         "max_abs_pair_margin_reconstruction_residual": float(
             maximum_pair_reconstruction
         ),
-        "tolerance": tolerance,
+        "tolerance": auroc_tolerance,
+        "score_reconstruction_tolerance": score_reconstruction_tolerance,
         "pass": (
-            abs((auroc1 - auroc0) - exact_delta) <= tolerance
-            and abs(shapley_residual) <= tolerance
-            and maximum_pair_reconstruction <= tolerance
+            abs((auroc1 - auroc0) - exact_delta) <= auroc_tolerance
+            and abs(shapley_residual) <= auroc_tolerance
+            and maximum_pair_reconstruction <= score_reconstruction_tolerance
             and transitions["pair_count"] == pair_count
         ),
     }

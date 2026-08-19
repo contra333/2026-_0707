@@ -15,6 +15,7 @@ from oge.evaluation.resnet18_replication_production import (
     evaluate_paired_endpoint,
     export_checkpoint_phase,
     fit_id_artifact,
+    recover_pair_artifact,
     validate_production_plan,
     validate_protected_authorization,
     verify_id_fit_artifact,
@@ -101,6 +102,11 @@ def _parser() -> argparse.ArgumentParser:
     collect.add_argument("--pair-artifact", type=Path, action="append", required=True)
     collect.add_argument("--output", type=Path, required=True)
 
+    recover = commands.add_parser("recover-pair")
+    recover.add_argument("--source", type=Path, required=True)
+    recover.add_argument("--output-root", type=Path, required=True)
+    recover.add_argument("--scoring-git-sha")
+
     verify = commands.add_parser("verify")
     verify.add_argument("--kind", choices=("plan", "authorization", "fit", "pair"), required=True)
     verify.add_argument("--path", type=Path, required=True)
@@ -146,6 +152,14 @@ def main() -> int:
             decoupled_protected=args.decoupled_protected,
             output_root=args.output_root, chunk_size=args.chunk_size,
         ))
+    elif args.command == "recover-pair":
+        print(
+            recover_pair_artifact(
+                source_path=args.source,
+                scoring_git_sha=args.scoring_git_sha or _git_sha(),
+                output_root=args.output_root,
+            )
+        )
     elif args.command == "collect":
         payload = collect_production_results(plan=_json(args.plan), pair_artifacts=args.pair_artifact)
         _write_new(args.output, payload)
@@ -167,4 +181,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

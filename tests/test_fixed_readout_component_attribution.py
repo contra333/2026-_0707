@@ -145,6 +145,34 @@ def test_paired_component_shapley_exactly_accounts_for_pair_transitions():
     ) == 4
 
 
+def test_component_reconstruction_uses_score_scale_not_auroc_scale():
+    # Float64 addition at this score magnitude can leave a residual above the
+    # AUROC-scale tolerance while remaining far below the score-scale bound.
+    branches = []
+    for shift in (0.0, 0.25):
+        branch = {"id": {}, "ood": {}}
+        for split, offset in (("id", 3.0), ("ood", -2.0)):
+            rmd = np.asarray(
+                [10_000_000.1234567 + shift + offset, 8_000_000.7654321]
+            )
+            marginal = np.asarray(
+                [-3_000_000.1111111, 2_000_000.2222222 + shift]
+            )
+            md = rmd + marginal
+            md[0] = np.nextafter(md[0], np.inf)
+            branch[split] = {"rmd": rmd, "marginal": marginal, "md": md}
+        branches.append(branch)
+
+    result = paired_component_attribution(*branches)
+
+    assert result["max_abs_pair_margin_reconstruction_residual"] > result["tolerance"]
+    assert (
+        result["max_abs_pair_margin_reconstruction_residual"]
+        <= result["score_reconstruction_tolerance"]
+    )
+    assert result["pass"] is True
+
+
 def test_randomized_shapley_oracle_matches_four_brute_force_aurocs():
     rng = np.random.default_rng(20260812)
     for _ in range(64):
