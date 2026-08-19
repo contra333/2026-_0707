@@ -73,6 +73,9 @@ AUTHORIZATION_SCHEMA_VERSION = (
 )
 FIT_SCHEMA_VERSION = "resnet18_cifar10_replication_id_fit_v3"
 PAIR_SCHEMA_VERSION = "resnet18_cifar10_replication_pair_scores_v3"
+PAIR_RECOVERY_SCHEMA_VERSION = (
+    "resnet18_cifar10_replication_pair_score_recovery_v1"
+)
 TERMINAL_SCHEMA_VERSION = "resnet18_cifar10_replication_terminal_v3"
 SOURCE_TRAINING_SHA = "e2f6845e88b22bc0783c5fda58186f9930083ef7"
 SOURCE_TRAINING_TERMINAL_SHA256 = (
@@ -824,11 +827,14 @@ def evaluate_paired_endpoint(
     return path
 
 
-def verify_pair_artifact(path: str | Path) -> dict[str, Any]:
+def _load_pair_artifact(
+    path: str | Path,
+) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     root = Path(path)
     record = json.loads((root / "record.json").read_text(encoding="utf-8"))
     if (
-        record.get("schema_version") != PAIR_SCHEMA_VERSION
+        record.get("schema_version")
+        not in {PAIR_SCHEMA_VERSION, PAIR_RECOVERY_SCHEMA_VERSION}
         or record.get("status") != "PASS"
         or record.get("research_evidence") is not True
         or record.get("protected_data_access") is not True
@@ -836,14 +842,21 @@ def verify_pair_artifact(path: str | Path) -> dict[str, Any]:
     ):
         raise ValueError("pair score artifact identity mismatch")
     _verify_checksums(root, {"record.json", "scores.npz"})
-    with np.load(root / "scores.npz", allow_pickle=False) as arrays:
-        if set(arrays.files) != set(record["score_arrays"]):
+    loaded: dict[str, np.ndarray] = {}
+    with np.load(root / "scores.npz", allow_pickle=False) as source:
+        if set(source.files) != set(record["score_arrays"]):
             raise ValueError("pair score array catalog mismatch")
-        for name in arrays.files:
-            value = np.asarray(arrays[name])
+        for name in source.files:
+            value = np.asarray(source[name])
             meta = record["score_arrays"][name]
             if list(value.shape) != meta["shape"] or _array_sha256(value) != meta["array_sha256"]:
                 raise ValueError("pair score array identity mismatch")
+            loaded[name] = value
+    return record, loaded
+
+
+def verify_pair_artifact(path: str | Path) -> dict[str, Any]:
+    record, _ = _load_pair_artifact(path)
     for split in OOD_SPLITS:
         for target in EVALUATION_TARGETS:
             row = record["datasets"][split][target]
@@ -855,6 +868,142 @@ def verify_pair_artifact(path: str | Path) -> dict[str, Any]:
         if not attribution["pass"]:
             raise ValueError("MD component attribution reconstruction failed")
     return {"record": record}
+
+
+def recover_pair_artifact(
+    *, source_path: str | Path, scoring_git_sha: str,
+    output_root: str | Path,
+) -> Path:
+    """Revalidate stored score arrays after the score-scale tolerance fix.
+
+    No checkpoint, feature cache, or protected dataset is opened here.  The
+    exact stored score arrays are retained byte-for-byte in the new artifact.
+    """
+
+    if not isinstance(scoring_git_sha, str) or len(scoring_git_sha) != 40:
+        raise ValueError("scoring_git_sha must be a full Git SHA")
+    source_record, stored_arrays = _load_pair_artifact(source_path)
+    coupled_scores = {
+        name.removeprefix("coupled__"): value
+        for name, value in stored_arrays.items()
+        if name.startswith("coupled__")
+    }
+    decoupled_scores = {
+        name.removeprefix("decoupled__"): value
+        for name, value in stored_arrays.items()
+        if name.startswith("decoupled__")
+    }
+    record = copy.deepcopy(source_record)
+    record["schema_version"] = PAIR_RECOVERY_SCHEMA_VERSION
+    for split in OOD_SPLITS:
+        for target in EVALUATION_TARGETS:
+            transform, detector = (
+                ("l2", "md") if target == "l2_md" else ("raw", target)
+            )
+            preserved_metrics = {
+                name: record["datasets"][split][target][name]
+                for name in (
+                    "coupled_auroc",
+                    "decoupled_auroc",
+                    "coupled_fpr95",
+                    "decoupled_fpr95",
+                )
+            }
+            comparison = compare_score_arrays(
+                left=coupled_scores,
+                right=decoupled_scores,
+                split=split,
+                transform=transform,
+                detector=detector,
+            )
+            record["datasets"][split][target] = {
+                **preserved_metrics,
+                **comparison,
+            }
+    for group, splits in (("near", NEAR_SPLITS), ("far", FAR_SPLITS)):
+        for target in EVALUATION_TARGETS:
+            rows = [record["datasets"][split][target] for split in splits]
+            record["macro"][group][target] = {
+                name: float(np.mean([float(row[name]) for row in rows]))
+                for name in (
+                    "coupled_auroc",
+                    "decoupled_auroc",
+                    "coupled_fpr95",
+                    "decoupled_fpr95",
+                    "gain",
+                    "loss",
+                    "pair_order_churn",
+                    "delta_auroc",
+                    "balance_residual",
+                )
+            }
+        attributions = [
+            record["datasets"][split]["md"]["component_attribution"]
+            for split in splits
+        ]
+        record["macro"][group]["md"]["phi_rmd"] = float(
+            np.mean(
+                [row["component_auroc_attribution"]["rmd"] for row in attributions]
+            )
+        )
+        record["macro"][group]["md"]["phi_marginal"] = float(
+            np.mean(
+                [
+                    row["component_auroc_attribution"]["marginal"]
+                    for row in attributions
+                ]
+            )
+        )
+    source_identity = source_record["output_identity_sha256"]
+    record["recovery"] = {
+        "reason": "issue_138_score_scale_tolerance_fix",
+        "source_output_identity_sha256": source_identity,
+        "scoring_git_sha": scoring_git_sha,
+        "protected_checkpoint_inference_rerun": False,
+        "detector_refit": False,
+        "score_arrays_changed": False,
+    }
+    identity = {
+        "schema_version": PAIR_RECOVERY_SCHEMA_VERSION,
+        "source_output_identity_sha256": source_identity,
+        "scoring_git_sha": scoring_git_sha,
+        "cell_id": record["cell_id"],
+        "training_seed": record["training_seed"],
+        "source_run_ids": record["source_run_ids"],
+        "source_checkpoint_sha256": record["source_checkpoint_sha256"],
+        "authorization_sha256": record["authorization_sha256"],
+    }
+    output_identity = canonical_sha256(identity)
+    record["output_identity_sha256"] = output_identity
+    record["score_arrays"] = {
+        name: {
+            "shape": list(value.shape),
+            "dtype": str(value.dtype),
+            "array_sha256": _array_sha256(value),
+        }
+        for name, value in sorted(stored_arrays.items())
+    }
+    temporary_npz = Path(output_root) / f".{output_identity}.{uuid.uuid4().hex}.npz"
+    temporary_npz.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        np.savez(temporary_npz, **stored_arrays)
+        destination = _write_atomic_directory(
+            Path(output_root) / output_identity,
+            files={
+                "record.json": canonical_json_bytes(record) + b"\n",
+                "scores.npz": temporary_npz.read_bytes(),
+            },
+        )
+    finally:
+        temporary_npz.unlink(missing_ok=True)
+    verified = verify_pair_artifact(destination)["record"]
+    if any(
+        verified["score_arrays"][name]["array_sha256"]
+        != source_record["score_arrays"][name]["array_sha256"]
+        for name in verified["score_arrays"]
+    ):
+        raise ValueError("pair recovery changed a stored score array")
+    return destination
 
 
 def collect_production_results(
