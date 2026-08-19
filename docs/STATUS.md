@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-08-18
+Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
 Plan B freeze documentation commit:
 `9c88a22357669b7210a53f78d7a43f36126fdcdc`
@@ -12,6 +12,14 @@ evaluation, bounded score recovery, central aggregation이 완료됐다. 14-cont
 classifier-insensitive geometry fast kill gate도 완료됐고 판정은 **FAIL**이다.
 14/14 context가 기술 검증을 통과했지만 `rho > 1`은 0/14였다. Candidate Main은
 종료하고, 현재 **Raw-MD pair-instability Plan B**를 논문 본체로 유지한다.
+
+Prospective ResNet-18/CIFAR-10 endpoint replication도 20/20 checkpoint의
+ID-only fitting과 승인된 six-OOD one-shot 평가까지 완료됐다. 기술 판정은 `PASS`,
+동결한 과학 판정은 **`PARTIAL`**이다. Raw-MD 방향, Churn, large-versus-small
+context, Marginal localization, small-cell ID guardrail은 재현됐지만 large-context
+Near에서 `abs(Delta RMD) < abs(Delta Raw MD)`가 실패했다. Card 13 Section 15.3에
+따라 architecture-general claim은 열리지 않으며 현재 ICLR main-paper promotion은
+중단한다. 새 LR/WD grid나 mechanism으로 구조하지 않는다.
 
 Current source of interpretation:
 
@@ -34,6 +42,21 @@ Current source of interpretation:
   `f618ffedbe94af49d69f1456dd6a324086ee0297b91dfb5c3b3b0e9e37cb1521`
 - Terminal status: `PASS`; 360 score contexts, 2,106 seed-pair records,
   594 paired aggregates.
+
+### ResNet-18 replication terminal
+
+- Evaluation source SHA: `9538b0d34acf153451183223a88b3f3d98d9d7d1`
+- Numerical recovery SHA: `9dd22cc62b434e0253e4fd6966c8c685a6edef64`
+- Central terminal identity:
+  `f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f`
+- Independent validation identity:
+  `5b58c3fa85a3c62542f181139a8e3e777941ab00e70acec52a817adbb3622656`
+- Technical status: `PASS`; 20 runs, 10 paired seed-contexts, six OOD datasets
+- Scientific verdict: `PARTIAL`; only `near_rmd_gap_smaller` failed
+- Verified bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_evaluation_20260819/f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f/`
+- Bundle `SHA256SUMS` SHA-256:
+  `a67e9bad5324b06df43d62153fe73aa4fa5f70e6b0c39d78b7fe6c8be51992c0`
 
 ## Completed analysis
 
@@ -160,91 +183,29 @@ coupling-harm language are prohibited.
    hash-addressed bundle above is remotely verified. All macros are formed
    within seed before Near/Far aggregation; the inferential unit remains the
    training seed.
-2. **ResNet-18/CIFAR-10 replication -- MAIN TRAINING 20/20 PASS; ID INFERENCE
-   APPROVAL PENDING.** PR #129 was merged at
-   `b5a4593c3d20e9f76af9b90642f363ee0bd982d3`. The ignored materialized packet
-   is at `artifacts/resnet18_cifar10_replication_v1/plan_b5a4593c/`; it contains
-   exactly 20 research configs, four seed-9000 execution-only pilot configs,
-   and a pending-only endpoint evaluation plan. Issue #130 executed the four
-   pilot arms on Curie's four idle A5000 GPUs at the exact code SHA. All four
-   completed two epochs with 20/20 planner coverage, four-arm identity,
-   checkpoint provenance, deferred ID test, and the `[B,10]` logits,
-   `[B,512]` feature, and `[10,512]` classifier contracts passing. Mean pilot
-   time was 28.25 seconds/epoch and peak incremental memory was 1,285 MiB;
-   the 20-run projection is 31.39 A5000 GPU-hours and 7.34 GiB checkpoint
-   storage with 10% reserve.
+2. **ResNet-18/CIFAR-10 replication -- ENDPOINT COMPLETE; `PARTIAL`.** The
+   strict deterministic v3 training completed 20/20 runs at
+   `e2f6845e88b22bc0783c5fda58186f9930083ef7`. After the owner's separate
+   endpoint authorization, PR #137's evaluator loaded all 20 epoch-200
+   checkpoints, exported ID-train/validation features, fitted branch-specific
+   Raw MD/RMD/Marginal/L2 readouts from ID-train only, computed ID-test
+   Accuracy/NLL/ECE, and then performed the frozen six-OOD one-shot evaluation.
+   All large features remain host-local.
 
-   The pilot is not terminally PASS. Resume mechanics, scheduler/RNG state,
-   and provenance passed, but two resumes from identical epoch-1 artifacts
-   diverged numerically because the frozen configuration has
-   `training.deterministic=false`: 102 model-state tensors differed and the
-   optimizer/best-validation states were not exact. The terminal status is
-   `BLOCKED_BY_NUMERICAL_RESTART_GATE`, terminal SHA-256 is
-   `0fd5eebec8322bd2ecc6a16611199d6293aff3b071465e1d668834a194d82f69`, and the
-   metadata-only bundle is
-   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_pilot_20260818/0fd5eebec8322bd2ecc6a16611199d6293aff3b071465e1d668834a194d82f69/`.
-   No main training or protected evaluation is authorized. The next action is
-   to resolve the frozen numerical-policy contradiction through a versioned
-   protocol/config change and a separately approved re-pilot, or stop the
-   replication.
+   Technical coverage passed 20 runs, 10 C--D seed pairs, two contexts, and all
+   six OOD datasets. Both contexts passed all three ID guardrails. Raw-MD C--D
+   was negative in Near/Far for both contexts; large-context Churn was
+   `0.3244/0.3617`, the small gaps were smaller, and Marginal accounting had
+   the adverse sign and exceeded 50% of the total. The one frozen failure was
+   large-context Near RMD attenuation: `abs(Delta RMD)=0.1426` versus
+   `abs(Delta Raw MD)=0.0356`. The resulting gate is `PARTIAL`.
 
-   The owner approved that bounded re-pilot on 2026-08-18. Issue #131 adds a
-   collision-free `resnet18_cifar10_replication_v2` contract with
-   `numerical_policy_id=strict_cuda_deterministic_v2` and forces
-   `training.deterministic=true`. It preserves the v1 pilot as a failed
-   execution record and does not change the scientific matrix or prospective
-   gate. The v2 pilot may run only after the implementation is merged; strict
-   CUDA operator failure or any exact-restart mismatch remains `BLOCKED`
-   without fallback. Main training and protected evaluation remain separately
-   unauthorized.
-
-   The merged v2 re-pilot at `5bc7e0c0e2d0bfc6b8be2fb3cd5fcb7ce98673ff`
-   then stopped in all four arms at the first backward call because strict
-   CuBLAS determinism additionally requires process-start
-   `CUBLAS_WORKSPACE_CONFIG=:4096:8`. It produced only four epoch-0 snapshots,
-   no completed epoch, and no research evidence. The failure terminal SHA-256
-   is `a1eb0c00e8c6abefa39d5740407e97bbb8c7d8f99338cd34a4be982d12f52efb`.
-   Issue #133 versions this prerequisite as
-   `strict_cuda_deterministic_cublas4096_v3`, sets it before the training
-   runtime import, validates and records it, and preserves the v1/v2 failures.
-   PR #134 merged that correction at
-   `e2f6845e88b22bc0783c5fda58186f9930083ef7`.
-
-   The approved v3 execution-only re-pilot then **PASSED** on Curie. All four
-   seed-9000 LR-by-role arms completed exactly two epochs with 20/20 planner
-   coverage, 4/4 pilot coverage, four-arm identity, checkpoint provenance,
-   deferred ID test, strict process-environment validation, and the ResNet
-   shape contracts passing. The representative `LR=1e-3` coupled arm was also
-   stopped after epoch 1 and resumed to epoch 2. Continuous and resumed
-   executions matched exactly for model, optimizer, scheduler, RNG,
-   best-validation, epoch/global-step history after excluding elapsed time,
-   paired-control provenance, and ResNet provenance. The terminal SHA-256 is
-   `21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30`;
-   the metadata-only bundle is
-   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_repilot_20260818/21544718a525c7c2dd8d9b328d2ada4113343f0dd75b556af796c9134dea9f30/`.
-   Mean pilot time was 28.86 seconds/epoch and peak incremental VRAM was
-   1,356--1,357 MiB. The measured projection is 32.07 A5000 GPU-hours, 3.21
-   hours in two 10-GPU waves, and 7.34 GiB checkpoint storage with 10% reserve.
-   This is infrastructure evidence only, not research evidence. That re-pilot
-   did not itself authorize main training or protected evaluation.
-
-   The owner subsequently approved the exact v3 20-run matrix in Issue #135
-   and explicitly authorized direct training. All 20 runs completed exactly
-   200 epochs at clean execution SHA
-   `e2f6845e88b22bc0783c5fda58186f9930083ef7`: Curie ran seeds 0/3 (8 runs),
-   Lise seed 2 (4 runs), and Precision Medicine seeds 1/4 (8 runs). Every run
-   exited zero and retained deferred ID test. Host-local validation passed
-   checkpoint structure/provenance/checksums, strict deterministic process and
-   GPU identity, 200-epoch/70,400-step coverage, same-LR sibling identity, and
-   four-arm cross-LR identity. The merged 20-run/five-seed terminal validation
-   SHA-256 is
-   `780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5`;
-   the remotely reverified metadata/config bundle is
-   `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_training_20260818/780dcf602a955c8936d3c901a2d473fe2c510145f5520886887b0a5dd52b99b5/`.
-   Large checkpoints remain on their execution hosts. This is a training-only
-   PASS, not the scientific `FULL` gate. Checkpoint inference, ID feature
-   export, ID-test guardrails, detector fitting, and protected OOD evaluation
-   have not run and remain approval-gated.
+   A false numerical stop in the old score verifier was corrected in PR #139
+   by separating score-scale and AUROC tolerances. Recovery reused only stored
+   score arrays, verified their SHA-256 identities, and performed no second
+   inference or refit. Independent reconstruction reproduced the terminal
+   verdict. The canonical terminal, validation identity, and shared bundle are
+   recorded above and in Card 13 Section 15.7.
 
 The WRN broad LR/WD grid, CIFAR-100, additional optimizers, and new mechanisms
 are not parallel rescue workstreams. After ResNet `FULL`, the default is to
@@ -252,12 +213,16 @@ stop training and write; after `PARTIAL` or `FAIL`, do not open a rescue grid.
 
 ## Not active
 
-- no new protected evaluation or checkpoint inference;
+- no further protected evaluation or checkpoint inference beyond the completed
+  authorized ResNet endpoint;
 - no reopened RtMD or replacement detector;
 - no `S_perp` causal attribution;
 - no causal LR conclusion from current Task F;
 - no claim that stronger WD monotonically amplifies coupling damage;
-- no architecture-general conclusion before replication.
+- no architecture-general conclusion after the replication gate returned
+  `PARTIAL`;
 - no classifier-insensitive-geometry main claim; the Section 14 gate failed;
 - no reverse affine rescue, small-singular subspace search, normalization rescue,
   projected OOD score, or trajectory expansion for this failed gate.
+- no ResNet rescue LR/WD grid, CIFAR-100 extension, replacement mechanism, or
+  architecture-general claim after the frozen `PARTIAL` verdict.

@@ -1,6 +1,6 @@
 # Task F result analysis
 
-Last updated: 2026-08-18
+Last updated: 2026-08-19
 Fast-kill analysis HEAD: `ecba28ef22fc4b8893119f5224880876ecbd76df`
 
 이 문서는 완료된 Task F를 논문 질문에 맞춰 해석하는 단일 기준이다. Card 13의
@@ -46,7 +46,7 @@ provenance로 유지한다.
 | Figure 2B | 거의 같은 AUROC 안에 얼마나 큰 Gain/Loss가 있는가? | Zero--AdamW와 AdamW--Adam Gain/Loss/Churn |
 | Figure 3 | 변화가 Raw MD, RMD, L2, Marginal 중 어디에 있는가? | signed `phi_RMD`, `phi_Marginal`, reconstructed total |
 | Figure 4 | 언제, 어느 depth에서 형성되는가? | actual epoch coordinates과 discrete depth axis |
-| Figure 5 | WRN pattern이 ResNet-18에서 재현되는가? | Card 13 Section 15 prospective gate |
+| Figure 5 | WRN pattern 중 무엇이 ResNet-18에서 재현되고 무엇이 깨졌는가? | Appendix architecture-boundary panel; Section 15 `PARTIAL` |
 
 기존 4-point `geometry_effect_concordance` scatter는 적은 context에서 regression을
 암시하므로 본문 그림으로 쓰지 않는다. Geometry, alignment, SGDM,
@@ -283,6 +283,48 @@ gradient뿐 아니라 first/second moment history와 denominator를 함께 바�
 이 이론은 motivation/appendix에만 두고 telemetry 및 cross-cell concordance를 넘어서
 인과 결론으로 사용하지 않는다.
 
+### 9.1 Prospective ResNet-18 replication: `PARTIAL`
+
+Card 13 Section 15에서 결과를 보기 전에 동결한 20-run
+ResNet-18/CIFAR-10 gate를 완료했다. 모든 checkpoint identity, ID-only fit,
+sample order, protected coverage, pair-accounting, numerical reconstruction이
+통과했으며, 독립 재계산도 같은 판정을 냈다. 아래 값은 WRN과 동일하게 seed 안에서
+dataset을 먼저 Near/Far 평균한 뒤 다섯 seed를 요약한 C--D다.
+
+| Context | Region | C Raw MD | D Raw MD | Delta Raw MD [90% interval] | Churn | Delta RMD | `phi_RMD` | `phi_Marginal` |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| large, LR 1e-3 | Near | 0.5137 | 0.5492 | -0.0356 [-0.0478, -0.0233] | 0.3244 | -0.1426 | +0.0211 | -0.0567 |
+|  | Far | 0.5005 | 0.6763 | -0.1758 [-0.1902, -0.1614] | 0.3617 | -0.1302 | +0.0090 | -0.1848 |
+| small, LR 3e-4 | Near | 0.6037 | 0.6167 | -0.0130 [-0.0232, -0.0027] | 0.2763 | -0.0015 | +0.0392 | -0.0522 |
+|  | Far | 0.6464 | 0.7437 | -0.0973 [-0.1287, -0.0660] | 0.2552 | +0.0075 | +0.0369 | -0.1342 |
+
+여섯 dataset의 Raw-MD C--D mean은 모두 음수였다.
+
+| Context | CIFAR-100 | TinyImageNet | MNIST | SVHN | Texture | Places365 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| large | -0.0314 | -0.0397 | -0.0116 | -0.4307 | -0.2088 | -0.0521 |
+| small | -0.0062 | -0.0198 | -0.0800 | -0.1888 | -0.0987 | -0.0219 |
+
+**재현된 부분:** large와 small의 Near/Far Raw-MD 방향, 최소 4/5 seed 방향,
+large Churn `>=0.10`, small absolute gap의 상대적 감소, Marginal의 adverse sign과
+50% 초과 accounting, small-cell Accuracy/NLL/ECE guardrail이 모두 통과했다.
+Small-cell absolute paired NLL mean은 margin `0.08`에 대해 `0.07799`로
+통과했으며 interval은 descriptive다.
+
+**깨진 부분:** large-context Near에서
+`abs(Delta RMD)=0.1426 > abs(Delta Raw MD)=0.0356`였다. 이 RMD 평균은 seed 2와
+3의 Near delta `-0.3532/-0.3500` 때문에 커졌고 나머지 세 seed는
+`-0.0016/-0.0063/-0.0021`이었다. 이는 계산 경계가 아니라 architecture/seed
+heterogeneity다. Far에서는 RMD gap `0.1302`가 Raw-MD gap `0.1758`보다 작아
+동결 조건을 통과했다.
+
+따라서 15개 expanded boolean check 중 `near_rmd_gap_smaller` 하나만 실패했고 과학 판정은
+**`PARTIAL`**이다. 이는 Raw-MD pair non-invariance 자체의 실패가 아니지만,
+“RMD attenuation까지 포함한 WRN의 complete pattern이 architecture 밖에서
+재현됐다”는 주장을 잠근다. 사전등록에 따라 architecture-general claim과 현재 ICLR
+main-paper promotion을 열지 않으며 LR/WD grid, CIFAR-100, 새 mechanism으로
+rescue하지 않는다. WRN result는 그 실험 범위 안의 결과로 남는다.
+
 ## 10. 동결된 본문 구조
 
 1. **Introduction:** aggregate equivalence는 pair-behavior equivalence가 아님.
@@ -293,8 +335,9 @@ gradient뿐 아니라 first/second moment history와 denominator를 함께 바�
    population, inferential unit.
 5. **Results:** controlled non-invariance, pair multiplicity, score
    localization, formation, context/negative boundaries.
-6. **Prospective ResNet Replication:** Card 13 Section 15의 20-run gate.
-7. **Discussion and Limitations:** ID Pareto, causal-LR 금지, single architecture.
+6. **ResNet Replication Boundary:** `PARTIAL` result와 RMD seed heterogeneity;
+   architecture-general claim이 열리지 않은 이유.
+7. **Discussion and Limitations:** ID Pareto, causal-LR 금지, WRN-scope claim.
 8. **Conclusion:** matched intervention에서 확립한 연결만 요약.
 
 ## 11. 실행 라우팅
@@ -310,9 +353,10 @@ SGDM, spectral applicability과 두 negative mechanism gate가 완료됐다.
 2. Card 13 Section 15의 ResNet-18/CIFAR-10 planner, provenance, endpoint ID
    artifact, pending evaluator, pilot와 approval packet을 PR #129로 병합했다.
 
-현재 다음 실행은 seed-9000 four-arm, two-epoch GPU pilot이며 명시적 owner
-승인 전에는 실행하지 않는다. Main 20-run training과 protected evaluation은
-각각 그 뒤의 별도 승인 gate다.
+ResNet v3 pilot, 20-run main training, ID export/fitting, ID-test guardrails,
+protected endpoint evaluation과 독립 검산까지 완료됐다. Technical status는
+`PASS`, frozen scientific verdict는 `PARTIAL`이다. Production evaluator는 PR
+#137, score-scale verifier correction은 PR #139에 병합됐다.
 
 WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
 기본값은 새 학습을 멈추고 논문을 완성하는 것이다. `PARTIAL` 또는
@@ -336,7 +380,7 @@ WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
 | S_perp uniquely mediates the effect | NOT ESTABLISHED | primary raw/L2 component theorem 30/30 NOT_APPLICABLE |
 | optimizer-side origin is established generally | NOT SUPPORTED | Plan B is a controlled decay-coupling case study |
 | classifier-insensitive carrier explains the result | REJECTED FOR THIS PAPER | frozen gate had `rho > 1` in 0/14 contexts |
-| architecture-general pattern | PROSPECTIVE | requires Card 13 Section 15 `FULL` |
+| architecture-general pattern | NOT UNLOCKED | prospective ResNet gate was `PARTIAL`; Near RMD attenuation failed |
 
 ## 13. Provenance
 
@@ -385,6 +429,32 @@ WRN broad LR/WD grid는 진행하지 않는다. ResNet `FULL` 이후에도
 The pack contains deterministic seed rows, summary intervals, Tables 1--3,
 Figures 1--4, and appendix geometry/negative-gate outputs. It performs no new
 checkpoint inference, detector fitting, or protected access.
+
+### ResNet-18 endpoint replication
+
+- evaluation source SHA: `9538b0d34acf153451183223a88b3f3d98d9d7d1`
+- score-verifier/recovery SHA: `9dd22cc62b434e0253e4fd6966c8c685a6edef64`
+- production plan SHA-256:
+  `3bc0348684702973a16d3b6f0c8fe84ee24a565b425e1149ff214d19af090df2`
+- protected authorization SHA-256:
+  `1c51e7cb81d0530659d99b2013c671244221baaa3d347e3ae1f64dbf542cf42d`
+- central terminal identity:
+  `f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f`
+- central terminal file SHA-256:
+  `f1a043a56adc54522550e14f2b8d4a26222488fdc9e51569ba9b99222431bab0`
+- independent validation identity:
+  `5b58c3fa85a3c62542f181139a8e3e777941ab00e70acec52a817adbb3622656`
+- independent validation file SHA-256:
+  `c1c587b623d05607fca3795e60c1c35fa3fd44ee9a09a681458dd9e65f276fe3`
+- bundle `SHA256SUMS` SHA-256:
+  `a67e9bad5324b06df43d62153fe73aa4fa5f70e6b0c39d78b7fe6c8be51992c0`
+- verified shared bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_evaluation_20260819/f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f/`
+
+The bundle contains terminal/validation JSON, the ten paired score records and
+score arrays, execution plans, authorization, recovery records, and portable
+checksums. Large checkpoints and exported features remain on the execution
+hosts. The numerical recovery did not rerun inference or detector fitting.
 
 Portable restore:
 

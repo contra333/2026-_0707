@@ -2275,3 +2275,78 @@ This is a terminal **training-only PASS**, not the Section 15.3 scientific
 `FULL` gate. Checkpoint inference, ID feature export, ID-test guardrails,
 branch-refitted detector fitting, and protected OOD evaluation remain
 unexecuted and require their applicable separate approval gates.
+
+### 15.7 Endpoint-evaluation execution record
+
+The owner explicitly authorized checkpoint inference, ID feature export,
+ID-test guardrails, branch-refitted Mahalanobis fitting, and the frozen
+protected OOD evaluation on 2026-08-19. PR #137 merged the bounded production
+evaluator at `9538b0d34acf153451183223a88b3f3d98d9d7d1`. It consumed only the 20
+validated epoch-200 `last.pt` checkpoints from Section 15.6 and kept all large
+feature arrays host-local.
+
+The ID-only stage passed 20/20 runs without protected access. Each branch
+exported `45,000 x 512` ID-train and `5,000 x 512` ID-validation penultimate
+features, verified common sample order, and refit its own class means,
+within-class covariance, global mean/covariance, and L2 variants from ID-train
+only. The subsequent authorized endpoint inference used exactly `id_test`,
+`cifar100`, `tin`, `mnist`, `svhn`, `texture`, and `places365`, with respective
+counts `10,000`, `9,000`, `7,793`, `70,000`, `26,032`, `5,640`, and `35,195`.
+All 20 protected exports completed once under authorization; no checkpoint
+selection, fitting, or tuning used OOD results.
+
+During pair-score verification, the previous shared component checker applied
+an AUROC-scale tolerance to the sample-level score identity
+`MD = RMD + Marginal`. Observed floating-point residuals of
+`1.16e-10--2.33e-10` therefore triggered a false numerical failure despite
+exactly preserved source scores. PR #139 corrected the verifier at
+`9dd22cc62b434e0253e4fd6966c8c685a6edef64` by separating AUROC and
+score-scale tolerances. Its bounded recovery read only the already stored
+score arrays, verified their SHA-256 identities, and reran neither checkpoint
+inference nor detector fitting. Focused tests passed 28/28 and the full CPU
+suite passed 478/478.
+
+Seed-first Near/Far results are:
+
+| Context | Region | Coupled Raw MD | Decoupled Raw MD | C--D | 90% paired interval | Churn | C--D RMD | `phi_RMD` | `phi_Marginal` |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| large, `LR=1e-3` | Near | 0.5137 | 0.5492 | -0.0356 | [-0.0478, -0.0233] | 0.3244 | -0.1426 | +0.0211 | -0.0567 |
+|  | Far | 0.5005 | 0.6763 | -0.1758 | [-0.1902, -0.1614] | 0.3617 | -0.1302 | +0.0090 | -0.1848 |
+| small, `LR=3e-4` | Near | 0.6037 | 0.6167 | -0.0130 | [-0.0232, -0.0027] | 0.2763 | -0.0015 | +0.0392 | -0.0522 |
+|  | Far | 0.6464 | 0.7437 | -0.0973 | [-0.1287, -0.0660] | 0.2552 | +0.0075 | +0.0369 | -0.1342 |
+
+Both cells passed the frozen Accuracy, NLL, and ECE guardrails. In the small
+cell, the absolute paired NLL mean was `0.07799` against the `0.08` margin;
+the paired interval is descriptive and does not replace the prespecified mean
+gate.
+
+Technical coverage and independent reconstruction passed. Fourteen of the
+fifteen expanded Section 15.3 boolean checks passed. The only failure was
+`near_rmd_gap_smaller`: in the large context,
+`abs(C-D RMD)=0.1426` exceeded `abs(C-D Raw MD)=0.0356` for Near OOD. The
+large-context Raw-MD sign and at-least-four-of-five seed direction passed in
+both regions, Churn exceeded `0.10`, the small-context Raw-MD gaps were
+smaller, Marginal accounting had the adverse sign and exceeded 50% of the
+absolute total, and the small-cell ID guardrails passed. The frozen scientific
+verdict is therefore **`PARTIAL`**, not `FULL`.
+
+This is an architecture boundary. Per Section 15.3 it does not unlock an
+architecture-general Plan B claim, stops the current ICLR main-paper
+promotion, and does not authorize a rescue LR/WD grid, CIFAR-100 extension,
+or replacement mechanism. The WRN observations remain valid within their
+recorded scope.
+
+Execution identities:
+
+- production plan SHA-256:
+  `3bc0348684702973a16d3b6f0c8fe84ee24a565b425e1149ff214d19af090df2`;
+- protected authorization SHA-256:
+  `1c51e7cb81d0530659d99b2013c671244221baaa3d347e3ae1f64dbf542cf42d`;
+- central terminal identity:
+  `f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f`;
+- independent validation identity:
+  `5b58c3fa85a3c62542f181139a8e3e777941ab00e70acec52a817adbb3622656`;
+- bundle `SHA256SUMS` SHA-256:
+  `a67e9bad5324b06df43d62153fe73aa4fa5f70e6b0c39d78b7fe6c8be51992c0`;
+- verified shared bundle:
+  `hf://buckets/contra333/ICLR_RUN/aggregate/resnet18_cifar10_replication_v3_evaluation_20260819/f0492271d31d13a1d8b4774303ba22485c701844e46bf37a2947743b5343721f/`.

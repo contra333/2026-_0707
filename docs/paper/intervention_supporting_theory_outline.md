@@ -6,6 +6,13 @@ execution rules remain governed by
 Numerical evidence and claim boundaries live in
 [`task_f_result_analysis.md`](task_f_result_analysis.md).
 
+Status as of 2026-08-19: the prospective ResNet-18/CIFAR-10 gate completed with
+technical `PASS` and scientific **`PARTIAL`**. The frozen gate therefore did
+not unlock architecture-general wording and stopped the current ICLR
+main-paper promotion. This outline preserves the WRN-scoped paper logic and
+records the architecture boundary; it is not a claim that the complete pattern
+replicated.
+
 ## Frozen paper identity
 
 The paper asks:
@@ -52,8 +59,10 @@ claim that one geometry metric uniquely mediates the effect.
 7. SGDM reversal, ID guardrail failures, non-monotone geometry concordance,
    `S_perp` inapplicability, and the failed classifier-insensitive gate delimit
    the claim.
-8. A prospectively frozen ResNet-18/CIFAR-10 study tests whether the complete
-   pattern replicates outside WRN-28-10.
+8. A prospectively frozen ResNet-18/CIFAR-10 study reproduced Raw-MD direction,
+   Churn, large-versus-small context, Marginal accounting, and ID guardrails,
+   but failed the large-context Near RMD-attenuation condition; the verdict is
+   `PARTIAL`.
 
 ## 1. Introduction
 
@@ -91,8 +100,8 @@ The five contributions are:
 2. cancellation-aware Gain/Loss/Churn evidence hidden by aggregate AUROC;
 3. predominantly Marginal score localization with RMD/L2 as diagnostic probes;
 4. matched epoch/depth evidence for formation during training; and
-5. explicit context and applicability boundaries, followed by a prospective
-   architecture replication.
+5. explicit context and applicability boundaries, including the prospective
+   architecture replication's `PARTIAL` outcome.
 
 ## 2. Related work and novelty boundary
 
@@ -227,7 +236,7 @@ monotone. Coupled spectral attribution is unavailable because the relevant fit
 is inapplicable. The `S_perp` and classifier-insensitive gates are reported as
 failed negative diagnostics, not replaced with a new mechanism.
 
-## 6. Prospective ResNet-18/CIFAR-10 replication
+## 6. ResNet-18/CIFAR-10 replication boundary
 
 Use the exact 20-run Card 13 Section 15 matrix:
 
@@ -235,12 +244,23 @@ Use the exact 20-run Card 13 Section 15 matrix:
 2 LR x 1 WD x 2 coupling roles x 5 common seeds = 20 runs.
 ```
 
-This study asks whether the large-versus-small context pattern, Raw-MD sign and
-Churn, RMD attenuation, Marginal localization, and small-context ID guardrails
-replicate under ResNet-18. It is endpoint-only and introduces no new mechanism
-metric. Report `FULL`, `PARTIAL`, `FAIL`, or technical `BLOCKED` exactly as
-defined in Card 13. Before `FULL`, all architecture-general language remains
-locked.
+This endpoint-only study asked whether the large-versus-small context pattern,
+Raw-MD sign and Churn, RMD attenuation, Marginal localization, and
+small-context ID guardrails replicate under ResNet-18. It introduced no new
+mechanism metric.
+
+Technical validation passed 20/20 runs. In the large context, Raw-MD C--D was
+`-0.0356/-0.1758` Near/Far with Churn `0.3244/0.3617`. The small context had
+smaller Raw-MD gaps `-0.0130/-0.0973`; Marginal accounting and small-cell ID
+guardrails passed. The frozen large-context Near RMD condition failed because
+`abs(Delta RMD)=0.1426` exceeded `abs(Delta Raw MD)=0.0356`; two of five seeds
+had large adverse Near RMD deltas while three were near zero. The resulting
+scientific verdict is `PARTIAL`.
+
+Present this result as an architecture/seed boundary, not as complete
+replication. It does not unlock architecture-general language, a rescue grid,
+or a replacement mechanism. Under the frozen contract it also stops the
+current ICLR main-paper promotion.
 
 ## 7. Discussion and limitations
 
@@ -257,7 +277,8 @@ Bound the conclusions:
 - RMD and L2 are prior methods used as probes.
 - Geometry concordance does not identify a unique carrier.
 - SGDM refutes a universal coupling law.
-- One architecture remains a limitation until the prospective gate passes.
+- The prospective ResNet gate was `PARTIAL`; WRN-scoped findings do not become
+  architecture-general claims.
 
 ## 8. Conclusion
 
@@ -282,7 +303,7 @@ optimizer recipes broadly.
 | Figure 2B | How do Gain and Loss hide behind net AUROC? | Main composite |
 | Figure 3 | Which readout and score component carries the movement? | Main |
 | Figure 4 | When and at what depth does it form? | Main |
-| Figure 5 | Which WRN predictions replicate in ResNet-18? | Main after gate |
+| Figure 5 | Which WRN predictions replicate or break in ResNet-18? | Appendix/boundary; no architecture-general claim |
 | Geometry and negative gates | Which explanations were diagnostic or rejected? | Appendix |
 
 Use individual seed dots plus paired means and 90% intervals. Every delta plot
