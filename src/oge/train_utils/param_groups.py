@@ -5,6 +5,7 @@ from __future__ import annotations
 from torch import nn
 
 DEFAULT_WEIGHT_DECAY_POLICY = "weights_only_no_bias_norm"
+ALL_PARAMETERS_WEIGHT_DECAY_POLICY = "all_parameters"
 _NORM_TYPES = (nn.modules.batchnorm._BatchNorm, nn.LayerNorm)
 _DECAY_TYPES = (nn.Conv1d, nn.Conv2d, nn.Conv3d, nn.Linear)
 
@@ -19,6 +20,13 @@ def make_weight_decay_param_groups(
     The default policy applies weight decay only to Conv/Linear weights and
     excludes all biases plus BatchNorm/LayerNorm parameters.
     """
+    if policy == ALL_PARAMETERS_WEIGHT_DECAY_POLICY:
+        return [
+            {
+                "params": [parameter for parameter in model.parameters() if parameter.requires_grad],
+                "weight_decay": float(weight_decay),
+            }
+        ]
     if policy != DEFAULT_WEIGHT_DECAY_POLICY:
         raise ValueError(f"Unsupported weight_decay_policy: {policy!r}")
 

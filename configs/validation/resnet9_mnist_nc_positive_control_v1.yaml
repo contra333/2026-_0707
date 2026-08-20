@@ -1,0 +1,52 @@
+schema_version: '1.0'
+protocol: resnet9_mnist_nc_positive_control_v1
+
+source:
+  paper_version: 'arXiv:2602.16642v3; ICLR 2026 published paper'
+  upstream_repository: jydzhao/neural_collapse_optimizer
+  upstream_commit: 7cab4a59bc28da6e356cee1e793ec67a694933b9
+  paper_figure: Figure 8
+
+model:
+  name: resnet9
+  num_classes: 10
+  in_channels: 1
+
+dataset:
+  name: mnist
+  train_count: 60000
+  test_count: 10000
+  resize: 32
+  mean: [0.1307]
+  std: [0.3081]
+  augmentation: none
+
+loss:
+  name: cross_entropy
+  label_smoothing: 0.0
+
+optimizer:
+  name: adam_coupled_decoupled
+  lr: 0.001
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1.0e-8
+  total_weight_decay: 0.0005
+  coupled_ratios: [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+  weight_decay_policy: all_parameters
+  decoupled_update_order: pre_adaptive_step_project_standard
+
+scheduler:
+  name: multistep
+  milestones: [66, 133]
+  gamma: 0.1
+  step_timing: end_of_epoch
+
+training:
+  max_epochs: 200
+  batch_size: 128
+  seeds: [3141]
+  num_workers: 0
+  pin_memory: true
+  precision: fp32
+  log_every: 13

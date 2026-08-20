@@ -2385,3 +2385,91 @@ pack is frozen to the clean-main regenerated manifest SHA-256
 `29de87077cedd732b1ffc9b5827664e4e7b96d1bc75442103021a1b7a3acbf0e` at
 `hf://buckets/contra333/ICLR_RUN/aggregate/task_f_frozen_paper_pack_20260819/29de87077cedd732b1ffc9b5827664e4e7b96d1bc75442103021a1b7a3acbf0e/`.
 Later WRN pack changes do not replace this input automatically.
+
+## 16. ResNet9/MNIST NC positive control (Issue #148)
+
+### 16.1 Purpose and claim boundary
+
+This is a separate validation-only positive control for the concern that the
+project training and geometry path lacks a recognizable literature anchor. It
+asks whether the project implementation recovers the **within-ResNet9**
+fixed-total-decay direction shown in Figure 8 of Zhao et al., not whether Adam,
+AdamW, or coupled decay universally produces more Neural Collapse. It does not
+modify the frozen WRN, ResNet-18, Task F, OOD, or paper adjudication artifacts.
+
+The external sources are arXiv `2602.16642v3`, the ICLR 2026 published paper,
+and `jydzhao/neural_collapse_optimizer` commit
+`7cab4a59bc28da6e356cee1e793ec67a694933b9`. The upstream committed entrypoint
+is incomplete, so this protocol reconstructs only the source-supported model,
+data recipe, optimizer intent, and raw metric convention. It must not be
+described as running the authors' repository unchanged.
+
+### 16.2 Frozen one-seed matrix
+
+The positive control uses the upstream ResNet9 computational graph with a
+512-dimensional penultimate feature, official MNIST train 60,000/test 10,000,
+resize to 32, normalization `(0.1307, 0.3081)`, no augmentation, unsmoothed
+cross entropy, batch 128, 200 epochs, Adam `beta=(0.9,0.999)`, `eps=1e-8`,
+initial LR `1e-3`, and end-of-epoch LR drops by 0.1 at epochs 66 and 133. Seed
+3141 is the sole frozen validation seed.
+
+Total weight decay is fixed at `5e-4`. The six arms use project
+`coupled_ratio = coupled_weight_decay / total_weight_decay` in
+`{0,.2,.4,.6,.8,1}`. Thus ratio 0 is the project AdamW endpoint and ratio 1 is
+the project Adam endpoint. All trainable parameters, including convolution and
+classifier biases and BatchNorm affine parameters, receive the selected decay,
+matching the non-ViT upstream scope rather than the main project's default
+`weights_only_no_bias_norm` policy. Sibling arms must have identical initial
+model-state and first-epoch sample-order digests.
+
+The project optimizer uses standard pre-adaptive-step decoupled shrinkage. The
+upstream custom mixed optimizer applies shrinkage after the adaptive update;
+therefore mixed-arm and ratio-0 values are a controlled semantic replication,
+not bitwise parity with the upstream custom class. This discrepancy is recorded
+instead of silently reproducing the nonstandard update order.
+
+Engineering-only differences are `num_workers=0`, a dedicated seeded training
+generator, deterministic non-shuffled geometry/test loaders, and project
+atomic artifacts. The paper used five runs; the one-seed result can validate a
+pipeline direction but cannot establish multi-seed stability.
+
+### 16.3 Measurement and decision rule
+
+Geometry is measured after completed epochs 1, 14, 27, ..., 196, and 200.
+Trajectory measurement stores upstream-compatible raw NC0 row-sum, raw NC2
+ETF, raw NC3 self-duality, their explicitly named scaled variants, NC2
+equinorm/equiangular, and classifier NC2W. Class means use the deterministic
+official MNIST train loader. Terminal-only full geometry adds NC1
+Moore--Penrose and NC4 classifier/NCC agreement; NC4 queries use official
+MNIST test only. No FashionMNIST or OOD data is accessed.
+
+The printed paper equations scale NC2 and NC3 inconsistently with its tables,
+figures, and repository implementation. Consequently, the positive-control
+comparison uses raw metrics and is directional only. Absolute values are not
+an exact-comparison target.
+
+The frozen endpoint decision is:
+
+- `PASS`: ratio 1 is smaller than ratio 0 for raw NC0, raw NC2 ETF, and raw
+  NC3, and their test-accuracy difference is at most 1 percentage point;
+- `PARTIAL`: exactly two of the three geometry directions agree and the run is
+  otherwise finite and protocol-complete;
+- `FAIL`: zero or one geometry direction agrees, or a required endpoint is
+  non-finite/degenerate; and
+- `BLOCKED`: execution identity, data membership, sibling initialization/order,
+  or artifact completeness fails.
+
+Monotonicity across all six ratios is descriptive, not a gate. Failure does
+not by itself prove a project-code bug because the project/update semantics,
+runtime, and one-seed scope differ; it triggers bounded architecture, optimizer,
+feature, and metric diagnosis before any new training is proposed.
+
+### 16.4 Execution gate
+
+Before the one-epoch single-arm smoke run, record a clean execution Git SHA,
+the approved Python/PyTorch/TorchVision runtime, an idle GPU with no compute
+process, expected wall time, GPU-hours, and storage. The six-arm run starts only
+after the smoke validates model shape, full data counts, checkpoint writing,
+terminal NC0--NC4 evaluation, and measured resource use. Large artifacts stay
+outside the Git checkout. Additional seeds, OOD evaluation, recipe rescue, or
+changes to the main study require a separate Issue and explicit approval.
