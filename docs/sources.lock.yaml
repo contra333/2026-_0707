@@ -514,10 +514,24 @@ sources:
   optimizer_neural_collapse_2026_paper:
     title: Optimizer choice matters for the emergence of Neural Collapse
     authors: Zhao, Cheng, Masarczyk, and Lucchi
-    stable_source: arXiv:2602.16642
+    stable_source: arXiv:2602.16642v3; ICLR 2026 published paper
     url: https://arxiv.org/abs/2602.16642
-    accessed: 2026-08-12
-    role: upstream optimizer and weight-decay-coupling theory for Neural Collapse plus fixed-total-decay coupled-ratio interpolation precedent; no OOD detection or Mahalanobis readout; not a temporal optimizer-switch experiment
+    accessed: 2026-08-20
+    role: upstream optimizer and weight-decay-coupling theory for Neural Collapse plus Figure 8 ResNet9/MNIST fixed-total-decay interpolation precedent; printed NC2/NC3 scaling conflicts with reported numeric magnitudes and raw upstream code, so raw values are required for directional positive-control comparison; no OOD detection or Mahalanobis readout; not a temporal optimizer-switch experiment
+  optimizer_neural_collapse_2026_repository:
+    repository: jydzhao/neural_collapse_optimizer
+    url: https://github.com/jydzhao/neural_collapse_optimizer
+    commit: 7cab4a59bc28da6e356cee1e793ec67a694933b9
+    files:
+      - resnet.py
+      - load_model.py
+      - load_data.py
+      - optimizer.py
+      - adamadamw.py
+      - compute_NCmetrics.py
+      - conf/config_ResNet_MNIST.yaml
+    accessed: 2026-08-20
+    role: pinned architecture, MNIST transform, optimizer-intent, raw NC metric, and Figure 8 configuration evidence; committed main entrypoint is incomplete and is not treated as an executable author artifact
   predictive_churn_good_models_paper:
     title: Predictive Churn with the Set of Good Models
     authors: Watson-Daniels, du Pin Calmon, D'Amour, Long, Parkes, and Ustun

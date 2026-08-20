@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from torch import nn
 
-from .resnet import ResNet18
+from .resnet import ResNet9, ResNet18
 from .toy_cnn import ToyCifarCNN
 from .wide_resnet import DEFAULT_INIT_POLICY, WideResNet
 
@@ -39,6 +39,15 @@ def make_model(config: dict) -> nn.Module:
         if "variant" not in config:
             raise ValueError("resnet18 requires explicit 'variant'")
         return ResNet18(num_classes=num_classes, variant=config["variant"])
+
+    if name == "resnet9":
+        _reject_research_feature_dim(config, name)
+        if "variant" in config:
+            raise ValueError("resnet9 is pinned by name and does not accept 'variant'")
+        return ResNet9(
+            num_classes=num_classes,
+            in_channels=int(config.get("in_channels", 1)),
+        )
 
     if name == "wrn28_10":
         _reject_research_feature_dim(config, name)

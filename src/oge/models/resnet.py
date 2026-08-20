@@ -125,3 +125,73 @@ class ResNet18(nn.Module):
         if return_features:
             return logits, features
         return logits
+
+
+class ResNet9(nn.Module):
+    """The 512-dimensional ResNet9 used by Zhao et al. for 32x32 inputs.
+
+    The computational graph follows ``jydzhao/neural_collapse_optimizer`` at
+    commit ``7cab4a59bc28da6e356cee1e793ec67a694933b9``.  In particular, the
+    convolutions retain PyTorch's default bias, the final residual convolution
+    uses the separately constructed 512-channel BatchNorm module, and no
+    project-specific initialization is applied.
+    """
+
+    feature_dim = 512
+
+    def __init__(self, num_classes: int = 10, *, in_channels: int = 1) -> None:
+        super().__init__()
+        if in_channels not in {1, 3}:
+            raise ValueError("ResNet9 in_channels must be 1 or 3")
+
+        self.num_classes = num_classes
+        self.in_channels = in_channels
+        self.last_residual_bn = nn.BatchNorm2d(512)
+
+        def conv_block(
+            input_channels: int,
+            output_channels: int,
+            *,
+            pool: bool = False,
+            batch_norm: nn.Module | None = None,
+        ) -> nn.Sequential:
+            layers: list[nn.Module] = [
+                nn.Conv2d(input_channels, output_channels, kernel_size=3, padding=1),
+                batch_norm if batch_norm is not None else nn.BatchNorm2d(output_channels),
+                nn.ReLU(inplace=True),
+            ]
+            if pool:
+                layers.append(nn.MaxPool2d(2))
+            return nn.Sequential(*layers)
+
+        self.conv1 = conv_block(in_channels, 64)
+        self.conv2 = conv_block(64, 128, pool=True)
+        self.res1 = nn.Sequential(conv_block(128, 128), conv_block(128, 128))
+        self.conv3 = conv_block(128, 256, pool=True)
+        self.conv4 = conv_block(256, 512, pool=True)
+        self.res2 = nn.Sequential(
+            conv_block(512, 512),
+            conv_block(512, 512, batch_norm=self.last_residual_bn),
+        )
+        self.feature_pool = nn.Sequential(nn.MaxPool2d(4), nn.Flatten())
+        self.classifier = nn.Linear(self.feature_dim, num_classes)
+
+    @property
+    def fc(self) -> nn.Linear:
+        """Pinned-upstream alias for the project's classifier endpoint."""
+        return self.classifier
+
+    def forward(
+        self, x: torch.Tensor, return_features: bool = False
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
+        out = self.conv1(x)
+        out = self.conv2(out)
+        out = self.res1(out) + out
+        out = self.conv3(out)
+        out = self.conv4(out)
+        out = self.res2(out) + out
+        features = self.feature_pool(out)
+        logits = self.classifier(features)
+        if return_features:
+            return logits, features
+        return logits

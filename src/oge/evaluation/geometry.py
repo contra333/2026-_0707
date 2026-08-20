@@ -191,42 +191,24 @@ def _equinorm_equiangular(rows: np.ndarray) -> tuple[float, float, np.ndarray, n
     return equinorm, equiangular, norms, cosine
 
 
-def neural_collapse_metrics(
-    statistics: GeometryStatistics,
+def neural_collapse_structure_metrics(
+    class_means: Any,
     classifier_weight: Any,
-    classifier_bias: Any | None = None,
-    *,
-    query_features: Any | None = None,
-    query_logits: Any | None = None,
-    query_labels: Any | None = None,
 ) -> dict[str, Any]:
+    """Compute the class-mean/weight-only NC0, NC2, NC2W, and NC3 family.
+
+    This is the lightweight trajectory path for validations that do not need a
+    within-class covariance. ``neural_collapse_metrics`` calls the same helper,
+    so trajectory and full endpoint measurements cannot silently diverge.
+    """
+    means = finite_float64(class_means, name="class_means", ndim=2)
     weight = finite_float64(classifier_weight, name="classifier_weight", ndim=2)
     class_count, feature_dim = weight.shape
-    if statistics.class_means.shape != (class_count, feature_dim):
+    if means.shape != (class_count, feature_dim):
         raise ValueError("classifier and class-mean shapes do not match")
+
+    centered = means - np.mean(means, axis=0)
     nc0_raw = float(np.linalg.norm(np.sum(weight, axis=0)))
-
-    between = statistics.between_covariance
-    eigenvalues, eigenvectors = np.linalg.eigh(between)
-    eigenvalues = np.asarray(eigenvalues, dtype=np.float64)
-    maximum = float(np.max(eigenvalues))
-    if maximum <= 0.0:
-        raise ValueError("NC1 between covariance has zero retained rank")
-    cutoff = 1.0e-15 * maximum
-    retained = eigenvalues > cutoff
-    if not np.any(retained):
-        raise ValueError("NC1 between covariance has zero retained rank")
-    pinv = (eigenvectors[:, retained] / eigenvalues[retained]) @ eigenvectors[:, retained].T
-    trace_components = np.einsum("ij,ji->i", statistics.within_covariance, pinv)
-    nc1 = float(np.trace(statistics.within_covariance @ pinv) / class_count)
-    between_trace = float(np.trace(between))
-    nc1_trace_quotient = (
-        None if between_trace <= EPSILON_NORM else float(np.trace(statistics.within_covariance) / between_trace)
-    )
-    singular = np.linalg.svd(statistics.centered_class_means, compute_uv=False)
-    nc1_svd = float(np.sum(singular[class_count - 1 :] ** 2) / np.sum(singular**2)) if np.sum(singular**2) else None
-
-    centered = statistics.centered_class_means
     nc2n, nc2a, class_norms, class_cosine = _equinorm_equiangular(centered)
     gram = centered @ centered.T
     gram_norm = float(np.linalg.norm(gram, ord="fro"))
@@ -238,29 +220,20 @@ def neural_collapse_metrics(
     nc2wn, nc2wa, weight_norms, weight_cosine = _equinorm_equiangular(weight)
     weight_gram = weight @ weight.T
     weight_gram_norm = float(np.linalg.norm(weight_gram, ord="fro"))
+    if weight_gram_norm <= EPSILON_NORM:
+        raise ValueError("NC2W classifier Gram norm is zero")
     nc2w = float(np.linalg.norm(weight_gram / weight_gram_norm - target, ord="fro"))
 
-    mean_matrix_t = centered
     weight_norm = float(np.linalg.norm(weight, ord="fro"))
-    mean_norm = float(np.linalg.norm(mean_matrix_t, ord="fro"))
+    mean_norm = float(np.linalg.norm(centered, ord="fro"))
     if min(weight_norm, mean_norm) <= EPSILON_NORM:
         raise ValueError("NC3 Frobenius norm is zero or near-zero")
-    nc3 = float(np.linalg.norm(weight / weight_norm - mean_matrix_t / mean_norm, ord="fro"))
-    result: dict[str, Any] = {
+    nc3 = float(np.linalg.norm(weight / weight_norm - centered / mean_norm, ord="fro"))
+
+    return {
         "nc0_row_sum_raw": MetricValue(nc0_raw).to_dict(),
         "nc0_eq12_per_dim": MetricValue(nc0_raw / feature_dim).to_dict(),
         "nc0_theory_squared": MetricValue(nc0_raw**2 / class_count).to_dict(),
-        "nc1_pinv": MetricValue(nc1).to_dict(),
-        "nc1_svd_diagnostic": MetricValue(nc1_svd).to_dict(),
-        "nc1_trace_quotient_diagnostic": MetricValue(nc1_trace_quotient).to_dict(),
-        "nc1_diagnostics": {
-            "between_eigenvalues": eigenvalues,
-            "cutoff": cutoff,
-            "retained_rank": int(np.count_nonzero(retained)),
-            "trace_components": trace_components,
-            "within_denominator": len(statistics.features),
-            "between_denominator": class_count,
-        },
         "nc2_equinorm": MetricValue(nc2n).to_dict(),
         "nc2_equiangular": MetricValue(nc2a).to_dict(),
         "nc2_etf_raw": MetricValue(nc2_etf).to_dict(),
@@ -282,6 +255,56 @@ def neural_collapse_metrics(
         "nc3_self_duality_raw": MetricValue(nc3).to_dict(),
         "nc3_eq10_scaled": MetricValue(nc3 / (class_count * feature_dim)).to_dict(),
     }
+
+
+def neural_collapse_metrics(
+    statistics: GeometryStatistics,
+    classifier_weight: Any,
+    classifier_bias: Any | None = None,
+    *,
+    query_features: Any | None = None,
+    query_logits: Any | None = None,
+    query_labels: Any | None = None,
+) -> dict[str, Any]:
+    weight = finite_float64(classifier_weight, name="classifier_weight", ndim=2)
+    class_count, feature_dim = weight.shape
+    if statistics.class_means.shape != (class_count, feature_dim):
+        raise ValueError("classifier and class-mean shapes do not match")
+    result = neural_collapse_structure_metrics(statistics.class_means, weight)
+
+    between = statistics.between_covariance
+    eigenvalues, eigenvectors = np.linalg.eigh(between)
+    eigenvalues = np.asarray(eigenvalues, dtype=np.float64)
+    maximum = float(np.max(eigenvalues))
+    if maximum <= 0.0:
+        raise ValueError("NC1 between covariance has zero retained rank")
+    cutoff = 1.0e-15 * maximum
+    retained = eigenvalues > cutoff
+    if not np.any(retained):
+        raise ValueError("NC1 between covariance has zero retained rank")
+    pinv = (eigenvectors[:, retained] / eigenvalues[retained]) @ eigenvectors[:, retained].T
+    trace_components = np.einsum("ij,ji->i", statistics.within_covariance, pinv)
+    nc1 = float(np.trace(statistics.within_covariance @ pinv) / class_count)
+    between_trace = float(np.trace(between))
+    nc1_trace_quotient = (
+        None if between_trace <= EPSILON_NORM else float(np.trace(statistics.within_covariance) / between_trace)
+    )
+    singular = np.linalg.svd(statistics.centered_class_means, compute_uv=False)
+    nc1_svd = float(np.sum(singular[class_count - 1 :] ** 2) / np.sum(singular**2)) if np.sum(singular**2) else None
+
+    result.update({
+        "nc1_pinv": MetricValue(nc1).to_dict(),
+        "nc1_svd_diagnostic": MetricValue(nc1_svd).to_dict(),
+        "nc1_trace_quotient_diagnostic": MetricValue(nc1_trace_quotient).to_dict(),
+        "nc1_diagnostics": {
+            "between_eigenvalues": eigenvalues,
+            "cutoff": cutoff,
+            "retained_rank": int(np.count_nonzero(retained)),
+            "trace_components": trace_components,
+            "within_denominator": len(statistics.features),
+            "between_denominator": class_count,
+        },
+    })
     if query_features is not None or query_logits is not None:
         if query_features is None or query_logits is None:
             raise ValueError("NC4 requires both query features and query logits")
